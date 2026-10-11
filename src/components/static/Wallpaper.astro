@@ -1,0 +1,23 @@
+---
+import '../../styles/wallpapers.css';
+import skyline from '../../assets/wallpapers/skyline.svg?raw';
+import islandMask from '../../assets/wallpapers/island-mask.svg?raw';
+import islandOutline from '../../assets/wallpapers/island-outline.svg?raw';
+
+// Data URLs keep the tiny island assets request-free. The larger contour mask
+// is referenced by CSS only while that wallpaper is selected.
+const svgUrl = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg.trim())}")`;
+const masks = `--wp-island-mask:${svgUrl(islandMask)};--wp-island-outline:${svgUrl(islandOutline)}`;
+---
+
+<div class="wallpaper os-chrome" aria-hidden="true" style={masks}>
+  <div class="wp-layer wp-sky"></div>
+  <div class="wp-layer wp-stars"></div>
+  <div class="wp-layer wp-sun"></div>
+  <div class="wp-layer wp-sea"></div>
+  <div class="wp-layer wp-skyline" set:html={skyline}></div>
+  <div class="wp-layer wp-rain"></div>
+  <div class="wp-layer wp-contours"></div>
+  <div class="wp-layer wp-island"></div>
+  <div class="wp-layer wp-grain"></div>
+</div>
