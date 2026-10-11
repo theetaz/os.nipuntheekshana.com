@@ -12,7 +12,6 @@ import { windowLink } from '../url/url';
 import { placeWindow } from './placement';
 import type { Point, Rect, SnapZone, WindowId, WMAction } from './types';
 import type { SoundName } from '../lib/sound';
-import * as mochi from '../mochi/api';
 import { FEATURES } from '../config';
 import { runDockCommand } from '../shell/DockItem';
 
@@ -228,7 +227,7 @@ export function runCommand(command: string, _source: CommandSource): void {
     return;
   }
   if (prefix === 'mochi' && ['pet', 'sleep', 'wake', 'wave', 'hide', 'show'].includes(value ?? '')) {
-    mochi[value as 'pet' | 'sleep' | 'wake' | 'wave' | 'hide' | 'show'](); return;
+    void import('../mochi/api').then(mochi => mochi[value as 'pet' | 'sleep' | 'wake' | 'wave' | 'hide' | 'show']()); return;
   }
   if (win && prefix === win.appId) registry(store).handlers.get(win.id)?.(command);
 }
