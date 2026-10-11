@@ -1,15 +1,19 @@
 .boot-screen { display: none; position: fixed; inset: 0; z-index: var(--z-boot); background: #F4F1EA; place-content: center; justify-items: center; pointer-events: none; }
 [data-theme="dark"] .boot-screen { background: #0E0D0B; }
 html[data-boot] .boot-screen { display: grid; animation: boot-exit 350ms 1300ms var(--ease-in) forwards; }
+html[data-boot] .boot-screen[data-boot-managed] { animation: none; pointer-events: auto; }
+html[data-boot][data-boot-exit] .boot-screen[data-boot-managed] { animation: boot-exit 350ms var(--ease-in) forwards; }
+html[data-boot][data-boot-exit="skip"] .boot-screen[data-boot-managed] { animation-duration: 200ms; }
 .boot-outline { stroke-dasharray: 1; stroke-dashoffset: 1; animation: boot-draw 700ms var(--ease-out) forwards; }
 .boot-fill { opacity: 0; animation: boot-fade 600ms 300ms forwards; }
 .boot-ring { animation: boot-ring 600ms 300ms var(--ease-out) forwards; }
-.boot-wordmark { margin: 24px 0 0; font: italic 500 40px/44px var(--font-display); opacity: 0; animation: boot-wordmark 400ms 600ms var(--ease-out) forwards; }
+.boot-wordmark { margin: 24px 0 0; font: italic 380 64px/64px var(--font-display); letter-spacing: -.025em; opacity: 0; animation: boot-wordmark 400ms 600ms var(--ease-out) forwards; }
 .boot-greeting { margin: 12px 0 24px; color: var(--os-ink-2); opacity: 0; animation: boot-fade 300ms 800ms forwards; }
 .boot-progress { width: 160px; height: 3px; border-radius: 2px; overflow: hidden; background: var(--os-line); }
 .boot-progress span { display: block; width: 100%; height: 100%; background: var(--os-accent); transform: scaleX(0); transform-origin: left; animation: boot-progress 900ms 200ms var(--ease-out) forwards; }
-html.os-ready .boot-progress span { animation: boot-progress 900ms 200ms var(--ease-out) forwards, boot-complete 200ms 1100ms forwards; }
-html[data-boot] :is(.desktop-widgets, .desktop-icons, .static-dock) { animation: boot-desktop 450ms 1300ms var(--ease-out) both; }
+html.os-ready .boot-progress span { animation: boot-progress 900ms 200ms var(--ease-out) forwards, boot-complete 200ms calc(1100ms - var(--boot-hydrated-at, 0ms)) forwards; }
+html[data-boot-exit] .boot-progress span { animation: none; transform: scaleX(1); }
+html[data-boot-exit] :is(.desktop-widgets, .desktop-icons, .static-dock) { animation: boot-desktop 450ms var(--ease-out) both; }
 @keyframes boot-draw { to { stroke-dashoffset: 0; } }
 @keyframes boot-fade { to { opacity: 1; } }
 @keyframes boot-wordmark { from { transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -20,11 +24,56 @@ html[data-boot] :is(.desktop-widgets, .desktop-icons, .static-dock) { animation:
 @keyframes boot-desktop { from { scale: .985; } to { scale: 1; } }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
   html[data-boot] .boot-screen { animation-duration: 300ms; animation-delay: 650ms; }
+  html[data-boot][data-boot-exit="normal"] .boot-screen[data-boot-managed] { animation-duration: 300ms; }
   .boot-outline { animation-duration: 500ms; }
   .boot-wordmark { animation-duration: 300ms; animation-delay: 300ms; }
   .boot-greeting { display: none; }
   .boot-progress { margin-top: 24px; }
-  html[data-boot] :is(.desktop-widgets, .static-dock) { animation-delay: 650ms; animation-duration: 300ms; }
+  html.os-ready .boot-progress span { animation: boot-progress 300ms 200ms var(--ease-out) forwards, boot-complete 150ms calc(500ms - var(--boot-hydrated-at, 0ms)) forwards; }
+  html[data-boot-exit] .boot-progress span { animation: none; transform: scaleX(1); }
+  html[data-boot-exit] :is(.desktop-widgets, .desktop-icons, .static-dock) { animation-duration: 300ms; }
 }
 @media (prefers-reduced-motion: reduce) { html:not([data-motion="full"])[data-boot] .boot-screen { display: none; } }
 html[data-motion="reduce"][data-boot] .boot-screen { display: none; }
+
+.power-screen { position: fixed; inset: 0; z-index: var(--z-boot); display: grid; place-items: center; overflow: hidden; padding: 24px; color-scheme: dark; }
+.power-screen:focus, .boot-screen:focus { outline: none; }
+.power-return { border: 0; border-radius: 6px; padding: 12px; background: transparent; color: #8F877B; font: 400 11px/16px var(--font-ui); cursor: pointer; }
+.power-return:focus-visible { outline: 2px solid #FFB070; outline-offset: 2px; }
+.screensaver { background: #0B0F14; color: #F3EFE8; }
+.screensaver-island { position: absolute; width: 41.66vh; height: 74vh; max-width: 80vw; left: 62%; top: 13%; background: radial-gradient(circle, #FFB070 1.4px, transparent 1.6px) 0 0 / 9px 9px; mask-size: contain; mask-repeat: no-repeat; opacity: .25; animation: night-mail-drift 20s var(--ease-in-out) infinite alternate; pointer-events: none; }
+.screensaver-clock { position: relative; text-align: center; }
+.screensaver-clock time { font: 380 64px/64px var(--font-display); letter-spacing: -.025em; font-variant-numeric: tabular-nums; }
+.screensaver-clock p { margin: 12px 0 0; color: #8F877B; font: 400 13px/20px var(--font-ui); }
+.screensaver > .power-return { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); }
+.screensaver-mochi { position: absolute; bottom: max(32px, env(safe-area-inset-bottom)); left: max(32px, env(safe-area-inset-left)); display: grid; justify-items: center; }
+.screensaver-mochi span { padding-left: 24px; color: #8F877B; font: 400 11px/16px var(--font-mono); letter-spacing: 4px; }
+.screensaver[data-exiting] { animation: night-mail-wake 300ms var(--ease-out) forwards; }
+.screensaver[data-paused] .screensaver-island { animation-play-state: paused; }
+.shutdown-screen { background: #000; color: #FFB070; animation: shutdown-fade 600ms var(--ease-in-out) both; }
+.shutdown-copy { text-align: center; animation: shutdown-fade 120ms 600ms both; }
+.shutdown-copy h1 { margin: 0 0 12px; font: 400 16px/26px var(--font-mono); text-wrap: balance; }
+.power-screen[data-reduced-motion] { animation-duration: 120ms; }
+.power-screen[data-reduced-motion] .screensaver-island { animation: none; }
+.shutdown-screen[data-reduced-motion] .shutdown-copy { animation: none; }
+@keyframes night-mail-drift { to { transform: translateX(12px); } }
+@keyframes night-mail-wake { to { opacity: 0; } }
+@keyframes shutdown-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 600px) {
+  .screensaver-island { left: 28%; }
+  .screensaver-mochi { bottom: 80px; left: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .screensaver-island { animation: none; }
+  html:not([data-motion="full"]) .power-screen { animation-duration: 120ms; }
+  html:not([data-motion="full"]) .shutdown-copy { animation: none; }
+}
+html[data-motion="reduce"] .screensaver-island { animation: none; }
+html[data-motion="reduce"] .power-screen { animation-duration: 120ms; }
+html[data-motion="reduce"] .shutdown-copy { animation: none; }
+@media (forced-colors: active) {
+  .power-screen { background: Canvas; color: CanvasText; }
+  .power-return, .screensaver-clock p, .screensaver-mochi span { color: CanvasText; }
+  .power-return:focus-visible { outline-color: Highlight; }
+  .screensaver-island, .screensaver-mochi { display: none; }
+}
