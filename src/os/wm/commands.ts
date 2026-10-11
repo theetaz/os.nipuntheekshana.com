@@ -175,6 +175,7 @@ export function runCommand(command: string, _source: CommandSource): void {
     case 'app.about': if (win) void alert({ title: `About ${APP_META[win.appId].name}`, body: APP_META[win.appId].description, primary: 'OK' }); return;
     case 'desktop.show': showDesktop(); return;
     case 'desktop.cleanUp': store.set(iconPositionsAtom, {}); return;
+    case 'desktop.wallpaper': openApp('settings', { query: { section: 'wallpaper' } }); return;
     case 'desktop.widgets': store.set(showWidgetsAtom, value => !value); return;
     case 'desktop.mochi': store.set(mochiPrefsAtom, value => ({ ...value, visible: !value.visible })); return;
     case 'os.spotlight': store.set(spotlightOpenAtom, true); return;
