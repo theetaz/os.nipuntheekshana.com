@@ -1,0 +1,7 @@
+---
+import { serializeInitialData } from '../../lib/initial-data';
+
+interface Props { key: string; data: unknown }
+const { key, data } = Astro.props;
+---
+<script is:inline type="application/json" id="os-initial-data" data-key={key} set:html={serializeInitialData(data)} />
