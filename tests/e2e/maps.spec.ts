@@ -70,6 +70,23 @@ test('SVG plays all five rounds and persists the best score across reloads', asy
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:pin:best') ?? '0') as number)).toBeGreaterThanOrEqual(best);
 });
 
+test('slow fonts keep the flat game usable before automatic 3D scene work', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/*.woff2', async route => { await held; await route.continue(); });
+  const scenes: string[] = []; page.on('request', request => { if (/\/island\.[^/]+\.js$/.test(new URL(request.url()).pathname)) scenes.push(request.url()); });
+  try {
+    await page.goto('/maps/play', { waitUntil: 'domcontentloaded' });
+    await expect(view(page)).toHaveAttribute('data-surface', 'svg');
+    await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loading');
+    const map = app(page).getByRole('group', { name: 'Pin the city map', exact: true });
+    await expect(map.locator('.maps-crosshair')).toBeVisible(); await map.focus(); await map.press('Enter');
+    await expect(app(page).locator('.maps-game').getByText(/ · (?:<1|\d+) km$/)).toBeVisible();
+    expect(scenes).toEqual([]);
+    release(); await expect(view(page)).toHaveAttribute('data-surface', 'webgl');
+    expect(scenes).toHaveLength(1);
+  } finally { release(); }
+});
+
 test('Save-Data keeps three.js deferred until explicit loading and preserves the current round', async ({ page }) => {
   await page.addInitScript(() => Object.defineProperty(navigator, 'connection', { configurable: true, value: { saveData: true, effectiveType: '4g' } }));
   const scenes: string[] = []; page.on('request', request => { if (/\/island\.[^/]+\.js/.test(request.url())) scenes.push(request.url()); });
