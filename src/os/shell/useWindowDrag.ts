@@ -1,6 +1,7 @@
 import { useEffect, type RefObject } from 'react';
 import { useStore } from 'jotai';
 import { desktopAtom, geometryAtom, snapPreviewAtom } from '../state/atoms';
+import { snapWindow } from '../wm/commands';
 import { APP_META } from '../registry/meta';
 import { clampMove, SNAP_DWELL_MS, zoneAt, zoneRect } from '../wm/geometry';
 import type { Point, SnapZone, WindowId } from '../wm/types';
@@ -61,7 +62,7 @@ export function useWindowDrag(windowId: WindowId, frame: RefObject<FrameControll
         const rect = { ...controller.rect }; const snap = store.get(snapPreviewAtom);
         cleanup();
         if (!started) return;
-        if (snap?.valid) store.set(desktopAtom, { type: 'SNAP', id: windowId, zone: snap.zone });
+        if (snap?.valid) snapWindow(windowId, snap.zone);
         else {
           // Restore state only on release; live unsnapping is local to the frame.
           if (restored) store.set(desktopAtom, { type: 'UNSNAP', id: windowId, pointer: start });

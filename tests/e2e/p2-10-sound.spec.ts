@@ -74,6 +74,30 @@ test.beforeEach(async ({ page }) => {
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
 });
 test.afterEach(async ({ page }) => { expect(errorsByPage.get(page)).toEqual([]); });
+test('menu opening ticks and both menu and pointer snapping thunk through the lazy synth', async ({ page }) => {
+  await page.addInitScript(installAudioStub, { enabled: true });
+  await page.goto('/'); await openApp(page, 'Projects');
+  const win = page.locator('[data-window-id="projects"]');
+  await expect(win).toBeVisible();
+  const bar = page.getByRole('menubar', { name: 'Application menus' });
+  await bar.getByRole('menuitem', { name: 'Window', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.soundProbe.starts)).toContain('square');
+  await page.getByRole('menuitem', { name: 'Snap left', exact: true }).click();
+  await expect(win).toHaveAttribute('data-mode', 'snapped');
+  await expect.poll(() => page.evaluate(() => window.soundProbe.parameters
+    .filter(item => item.name === 'frequency' && item.value === 180))).toHaveLength(1);
+  // Restore, then use the real title-bar controller and its edge dwell preview.
+  await win.locator('[data-window-titlebar]').dblclick();
+  await win.locator('[data-window-titlebar]').dblclick();
+  await win.evaluate(async el => { await Promise.all(el.getAnimations().map(animation => animation.finished)); });
+  const title = (await win.locator('[data-window-titlebar]').boundingBox())!;
+  await page.mouse.move(title.x + 160, title.y + 20); await page.mouse.down();
+  await page.mouse.move(1438, 400, { steps: 10 });
+  await expect(page.locator('[data-snap-preview]')).toBeVisible();
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => window.soundProbe.parameters
+    .filter(item => item.name === 'frequency' && item.value === 180))).toHaveLength(2);
+});
 test('muted by default: window launches never create an AudioContext or fetch the synth', async ({ page }) => {
   await page.addInitScript(installAudioStub, {});
   const requests: string[] = []; page.on('request', request => { if (/\/sound\..*\.js/.test(request.url())) requests.push(request.url()); });
