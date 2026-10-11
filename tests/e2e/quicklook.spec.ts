@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 
 const artifacts = resolve('.astro/p2-8-artifacts');
-test('deep-linked Quick Look works with Projects stub, pages images and query, wraps, and closes', async ({ page }) => {
+test('deep-linked Quick Look works with Projects, pages images and query, wraps, and closes', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/projects/salli?shot=1'); const dialog = page.getByRole('dialog', { name: 'Quick Look — Salli' });
   await expect(dialog).toBeVisible(); await expect(dialog.getByRole('status')).toHaveText('2 of 3');
@@ -69,4 +69,19 @@ test('mobile Quick Look fits the viewport with touch controls', async ({ page })
   await expect(dialog.getByRole('button', { name: 'Next image' })).toHaveCSS('width', '44px');
   mkdirSync(artifacts, { recursive: true }); await page.screenshot({ path: resolve(artifacts, 'quicklook-mobile-390x844.png') });
   await dialog.getByRole('button', { name: 'Close Quick Look' }).click(); await expect(page).toHaveURL(/\/projects\/salli$/);
+});
+
+// Projects query.shot drives the existing overlay and its focus containment.
+test('selecting a Projects tile and pressing Space opens its first capture', async ({ page }) => {
+  await page.goto('/projects');
+  await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
+  const win = page.locator('[data-window-id="projects"]');
+  await win.getByRole('option', { name: 'Salli', exact: true }).click();
+  await page.keyboard.press('Space');
+  const dialog = page.getByRole('dialog', { name: 'Quick Look — Salli' });
+  await expect(dialog.getByRole('status')).toHaveText('1 of 3');
+  await expect(page).toHaveURL(/\/projects\/salli\?shot=0$/);
+  await page.keyboard.press('Escape');
+  await win.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(win.getByRole('option', { name: 'Salli', exact: true })).toHaveAttribute('aria-selected', 'true');
 });

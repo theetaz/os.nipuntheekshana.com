@@ -48,14 +48,14 @@ test('every generated project and post has content and matching initial data', a
       await expect(page.locator('#static-window')).toHaveAttribute('data-route', slug);
       await expect(page.locator('#os-initial-data')).toHaveAttribute('data-key', `${section}:${slug}`);
       await expect(page.locator('h1')).toHaveCount(1);
-      await expect(page.locator('.static-document')).toContainText(/\S/);
+      await expect(page.locator('#static-window [data-scroll-root]')).toContainText(/\S/);
     }
   }
 });
 
 test('Salli includes the case study, canonical, and a working close link @smoke', async ({ page }) => {
   await page.goto('/projects/salli');
-  await expect(page.locator('.static-document')).toContainText('The intelligence comes to the phone.');
+  await expect(page.locator('#static-window [data-scroll-root]')).toContainText('The intelligence comes to the phone.');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://nipuntheekshana.com/work/salli');
   await page.getByRole('link', { name: 'Close (back to the desktop)' }).click();
   await expect(page).toHaveURL(/\/$/);

@@ -1,6 +1,7 @@
 ---
 import OsLayout from '../../layouts/OsLayout.astro';
-import StaticWindow from '../../components/static/StaticWindow.astro';
+import ProjectsStaticWindow from '../../os/apps/projects/views/ProjectsStaticWindow.astro';
+import { ProjectDetailView } from '../../os/apps/projects/views/ProjectDetailView';
 import InitialData from '../../components/static/InitialData.astro';
 import { getClientProjects, getClientWork } from '../../lib/client-data';
 import { seoFor } from '../../lib/seo';
@@ -13,11 +14,8 @@ const next = { slug: following.slug, title: following.title };
 const seo = seoFor({ path: `/projects/${project.slug}`, title: project.title, description: project.tagline, kind: 'project', project });
 ---
 <OsLayout seo={seo} initial={{ appId: 'projects', route: project.slug }}>
-  <StaticWindow app="projects" route={project.slug} title={`${project.title} — Projects`}>
-    <h1>{project.title}</h1><p class="lede">{project.tagline}</p><p>{project.description}</p>
-    {work && <><p>{work.lede}</p><p><strong>Role:</strong> {work.role}</p><div set:html={work.html} /></>}
-    <p>{project.repo && <a href={project.repo}>Source code</a>}{project.repo && project.live && ' · '}{project.live && <a href={project.live}>Visit project</a>}</p>
-    <p><a href="/projects">All projects</a> · <a href={`/projects/${next.slug}`}>Next: {next.title}</a></p>
-  </StaticWindow>
+  <ProjectsStaticWindow route={project.slug} title={`${project.title} — Projects`}>
+    <ProjectDetailView project={project} work={work} next={next} />
+  </ProjectsStaticWindow>
   <InitialData slot="after-main" key={`projects:${project.slug}`} data={{ project, work, next }} />
 </OsLayout>
