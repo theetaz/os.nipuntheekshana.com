@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { parseLocation, queryFor, serializeLocation, TERMINAL_COMMANDS, windowLink } from '../../src/os/url/url';
+import { parseLocation, queryFor, QUERY_SECTIONS, serializeLocation, TERMINAL_COMMANDS, windowLink } from '../../src/os/url/url';
+import { SECTIONS } from '../../src/os/apps/settings/settings';
 import { documentTitle, historyForAction, historyWrite, HOME_TITLE, subscribeHistory } from '../../src/os/url/history';
 import type { HistoryPort, HistoryStore, HistoryWindow } from '../../src/os/url/history';
 import { wmReducer } from '../../src/os/wm/reducer';
@@ -195,6 +196,22 @@ function harness(initialUrl: string, initialState = createDesktopState()) {
 }
 
 describe('injected history subscription', () => {
+  it('retains Settings section at startup and through history navigation', () => {
+    const adopted = wmReducer(createDesktopState(), { type: 'OPEN', appId: 'settings', adopted: true, history: 'none' });
+    const h = harness('/settings?section=wallpaper#keep', adopted);
+    const dispose = subscribeHistory(h.store, h.window, h.history);
+    expect(h.store.getState().windows.settings).toMatchObject({ adopted: true, query: { section: 'wallpaper' } });
+    expect(h.calls).toEqual([]);
+    h.store.dispatch({ type: 'SET_QUERY', id: 'settings', query: { section: 'sound' }, history: 'push' });
+    expect(h.calls).toEqual([{ method: 'push', data: h.history.state, url: '/settings?section=sound#keep' }]);
+    h.pop('/settings?section=wallpaper#keep');
+    expect(h.store.getState().windows.settings?.query).toEqual({ section: 'wallpaper' });
+    expect(h.calls).toHaveLength(1);
+    h.pop('/settings?section=sound#keep');
+    expect(h.store.getState().windows.settings?.query).toEqual({ section: 'sound' });
+    expect(h.calls).toHaveLength(1);
+    dispose();
+  });
   it('normalizes open/w/query after adoption, preserving hash and host history data', () => {
     const h = harness('/?open=projects/salli&w=terminal&shot=2&foo=x#simple');
     const dispose = subscribeHistory(h.store, h.window, h.history);
@@ -279,5 +296,27 @@ describe('injected history subscription', () => {
     h.pop('/now');
     expect(h.calls).toHaveLength(count);
     expect(h.store.getState().windows.terminal).toBeDefined();
+  });
+});
+
+describe('Settings section URL ownership', () => {
+  it('keeps the thin URL allowlist in sync with every Settings section', () => {
+    expect(QUERY_SECTIONS.settings).toEqual(SECTIONS.map(section => section.id));
+  });
+  it.each(SECTIONS)('round-trips and shares $id', ({ id: section }) => {
+    const path = `/settings?section=${section}`;
+    const state = stateFrom(path);
+    expect(state.windows.settings?.query).toEqual({ section });
+    expect(serializeLocation(state)).toBe(path);
+    expect(windowLink(state.windows.settings!)).toBe(`https://os.nipuntheekshana.com${path}`);
+    expect(parseLocation(url(`/?open=settings&section=${section}&section=invalid`)).focused?.query).toEqual({ section });
+  });
+  it.each(['', 'shortcuts', 'privacy', 'Wallpaper', 'wallpaper\n', 'wallpaper/about', '<script>'])('rejects invalid section %j', section => {
+    expect(queryFor('settings', { section })).toEqual({});
+  });
+  it('drops other query keys and keeps section ownership per app', () => {
+    expect(queryFor('settings', { section: 'wallpaper', shot: '0', cmd: 'help', unknown: 'x' })).toEqual({ section: 'wallpaper' });
+    expect(queryFor('readme', { section: 'wallpaper' })).toEqual({});
+    expect(queryFor('about', { section: 'wallpaper' })).toEqual({});
   });
 });

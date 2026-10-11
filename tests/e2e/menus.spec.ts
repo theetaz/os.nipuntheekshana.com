@@ -113,7 +113,7 @@ test('sound and appearance write preferences and Option-click opens Appearance s
   expect(await page.evaluate(() => localStorage.getItem('serendib:sound'))).toBe('true');
   const appearance = page.getByRole('button', { name: 'Appearance', exact: true });
   for (const theme of ['light', 'dark', 'auto']) { await appearance.click(); await expect.poll(() => page.evaluate(() => localStorage.getItem('serendib:theme'))).toBe(JSON.stringify(theme)); }
-  await appearance.click({ modifiers: ['Alt'] }); await expect(page).toHaveURL(/\/settings$/);
+  await appearance.click({ modifiers: ['Alt'] }); await expect(page).toHaveURL(/\/settings\?section=appearance$/);
   await page.goto(`${fixtureOrigin}/${fixtureRoute}`); await expect(page.getByTestId('app-command')).toBeVisible();
   await appearance.click({ modifiers: ['Alt'] }); await expect(page.getByTestId('focused-section')).toHaveText('appearance');
 });

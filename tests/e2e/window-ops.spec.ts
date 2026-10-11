@@ -173,7 +173,7 @@ test('keyboard move/resize commits on Return and rolls back on Escape', async ({
 test('Settings has disabled zoom, no resize handles and rejects keyboard resizing', async ({ page }) => {
   await openApp(page, 'Settings'); const win = page.locator('[data-window-id="settings"]'); await settled(win); const before = await box(win);
   await expect(win.locator('[data-resize-handle]')).toHaveCount(0);
-  const zoom = win.getByRole('button', { name: 'Zoom Settings' }); await expect(zoom).toHaveAttribute('aria-disabled', 'true');
+  const zoom = win.getByRole('button', { name: 'Zoom Appearance', exact: true }); await expect(zoom).toHaveAttribute('aria-disabled', 'true');
   await zoom.click({ force: true }); await rectIs(win, before);
   await page.evaluate(() => document.dispatchEvent(new CustomEvent('window:keyboardMove', { detail: { windowId: 'settings' } })));
   await page.keyboard.press('Alt+Shift+ArrowRight'); await page.keyboard.press('Alt+Shift+ArrowDown'); await page.keyboard.press('Enter'); await rectIs(win, before);
