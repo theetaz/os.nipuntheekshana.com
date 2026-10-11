@@ -1,0 +1,20 @@
+---
+import { getImage } from 'astro:assets';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import avatar from '../../assets/me/avatar.png';
+import { AppIconSymbols } from '../../os/icons/app-icons';
+
+interface Props {
+  /** An already optimised 128 px AVIF URL can be supplied by the layout. */
+  avatarUrl?: string;
+}
+
+const avatarUrl = Astro.props.avatarUrl ?? (await getImage({ src: avatar, width: 128, format: 'avif', quality: 55 })).src;
+const sprite = renderToStaticMarkup(createElement('svg', {
+  xmlns: 'http://www.w3.org/2000/svg', width: 0, height: 0,
+  style: { position: 'absolute' }, 'aria-hidden': true, focusable: false,
+}, createElement(AppIconSymbols, { avatarUrl })));
+---
+
+<Fragment set:html={sprite} />
