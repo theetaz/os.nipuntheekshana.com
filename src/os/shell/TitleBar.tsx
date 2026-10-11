@@ -25,7 +25,8 @@ export function TitleBar({ windowId, title, kind = 'standard', zoomable = true, 
     }}>
     <TrafficLights windowId={windowId} title={title} zoomable={zoomable} maximized={maximized} />
     {navigation && <div data-no-drag className="window-navigation">{navigation}</div>}
-    <span id={`window-title-${windowId}`} className={`window-title${kind === 'transparent' ? ' sr-only' : ''}`}>
+    <span id={`window-title-${windowId}`} className={`window-title${kind === 'transparent' ? ' sr-only' : ''}`}
+      aria-label={kind === 'terminal' ? `Terminal${windowId.includes('~') ? ` ${windowId.split('~')[1]}` : ''}` : undefined}>
       <span className={stillLoading ? 'sr-only' : undefined}>{title}</span>
       {stillLoading && <span className="window-loading-spinner" role="status" aria-label="Still loading…" title="Still loading…" />}
     </span>

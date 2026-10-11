@@ -4,14 +4,18 @@ import StaticWindow from '../components/static/StaticWindow.astro';
 import InitialData from '../components/static/InitialData.astro';
 import { APP_META } from '../os/registry/meta';
 import { seoFor } from '../lib/seo';
-
-
+import { TerminalStatic } from '../os/apps/terminal/views/TerminalStatic';
+import { loginText } from '../os/apps/terminal/commands/system';
+import { KERNEL } from '../os/apps/terminal/build-info';
+import { fontData } from 'astro:assets';
+import '../os/apps/terminal/terminal.css';
+const seed = { login: loginText(new Date()), kernel: KERNEL, fontUrl: fontData['--font-martian'][0]?.src[0]?.url };
 const seo = seoFor({ path: '/terminal', title: 'Terminal', description: APP_META.terminal.description, kind: 'app' });
 ---
 <OsLayout seo={seo} initial={{ appId: 'terminal', route: '' }}>
-  <StaticWindow app="terminal" route="" title="Terminal">
-    <h1>Terminal</h1><p class="lede">{APP_META.terminal.description}</p>
-    <p>The interactive shell needs JavaScript. You can explore the same content using these links:</p><ul><li><a href="/projects">ls projects</a></li><li><a href="/now">cat now.txt</a></li><li><a href="/about">whoami</a></li><li><a href="/messages">contact</a></li></ul>
+  <style is:inline set:html={`@font-face { font-family: 'Serendib Terminal'; src: url('${seed.fontUrl}'); font-weight: 100 800; font-stretch: 75% 112.5%; font-display: swap; }`} />
+  <StaticWindow app="terminal" route="" title="nipun — nsh — 80×24">
+    <TerminalStatic seed={seed} />
   </StaticWindow>
-  <InitialData slot="after-main" key="terminal" data={{}} />
+  <InitialData slot="after-main" key="terminal:index" data={seed} />
 </OsLayout>

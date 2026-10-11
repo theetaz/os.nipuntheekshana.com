@@ -66,7 +66,8 @@ export function appMenus(meta: AppMeta, menus: AppMenus = {}): readonly ShellMen
 export function windowItems(desktop: DesktopState): readonly MenuItemSpec[] {
   return desktop.order.flatMap(id => {
     const win = desktop.windows[id];
-    return !win || win.closing ? [] : [item(`${win.minimized ? '◇ ' : ''}${win.title}`, `window.focus:${id}`, undefined, 'checkbox')];
+    const title = win?.appId === 'terminal' ? `Terminal${id.includes('~') ? ` ${id.split('~')[1]}` : ''}` : win?.title;
+    return !win || win.closing ? [] : [item(`${win.minimized ? '◇ ' : ''}${title}`, `window.focus:${id}`, undefined, 'checkbox')];
   });
 }
 export interface MenuStateContext {
