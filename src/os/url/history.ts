@@ -79,7 +79,7 @@ export function subscribeHistory(store: HistoryStore, window: HistoryWindow, his
     } finally { syncing = false; }
   };
   const url = new URL(window.location.href);
-  if (['open', 'w', 'shot', 'cmd'].some((key) => url.searchParams.has(key))) sync();
+  if (['open', 'w', 'shot', 'cmd', 'section'].some((key) => url.searchParams.has(key))) sync();
   else window.document.title = documentTitle(store.getState(), options.homeTitle);
   const unsubscribe = store.subscribe(() => { if (!syncing) write(); });
   window.addEventListener('popstate', sync);

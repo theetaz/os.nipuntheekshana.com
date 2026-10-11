@@ -1,0 +1,22 @@
+.readme-scroll { position: relative; overflow: auto; overscroll-behavior: contain; background: var(--os-window); color: var(--os-ink); }
+#static-window[data-app="readme"] .static-document { padding: 0; max-width: none; }
+.readme-document { padding: 32px 36px; font: 400 15px/24px var(--font-ui); overflow-wrap: anywhere; }
+.readme-document h1 { margin: 0 0 16px; font: 450 32px/38px var(--font-display); letter-spacing: -.015em; }
+.readme-document h2 { margin: 28px 0 12px; font: 500 20px/26px var(--font-display); letter-spacing: -.005em; scroll-margin-top: 20px; }
+.readme-document p { margin: 0 0 16px; }
+.readme-document nav { display: flex; flex-wrap: wrap; gap: 4px 16px; font: 450 12px/16px var(--font-ui); }
+.readme-document a { color: var(--os-accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+.readme-document nav a { display: inline-flex; align-items: center; min-height: 24px; }
+.readme-document table { width: 100%; table-layout: fixed; border-collapse: collapse; font: 450 13px/18px var(--font-ui); }
+.readme-document th, .readme-document td { text-align: left; vertical-align: top; padding: 10px 0; border-bottom: 1px solid var(--os-line); }
+.readme-document th { font-weight: 600; }
+.readme-document th:first-child, .readme-document td:first-child { width: 132px; padding-right: 16px; }
+.readme-document kbd { white-space: nowrap; font: 400 12px/18px var(--font-mono); font-stretch: 87.5%; }
+.readme-document .readme-note { margin-top: 16px; font: 450 12px/18px var(--font-ui); color: var(--os-ink-2); }
+.readme-document ul { margin: 0 0 16px; padding-left: 20px; }
+.readme-document li { margin-bottom: 8px; }
+@container window (max-width: 440px) {
+  .readme-document { padding: 24px 20px; }
+  .readme-document th:first-child, .readme-document td:first-child { width: 120px; padding-right: 12px; }
+}
+@media (pointer: coarse) { .readme-document nav a { min-height: 44px; } }
