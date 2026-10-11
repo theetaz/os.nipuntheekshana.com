@@ -57,7 +57,8 @@
 .cv-page-footer { position: absolute; bottom: 24px; left: 56px; right: 56px; display: flex; justify-content: space-between; border-top: 1px solid #D8D2C6; padding-top: 8px; color: #5C554B; font: 400 9px/12px var(--font-mono); font-stretch: 87.5%; }
 .cv-empty { flex: 1; overflow: auto; padding: 24px; }
 html.no-js .cv-interactive { display: none; }
-html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="cv"] .cv-viewer { --cv-scale: min(1, calc((100cqw - 32px) / 794px)) !important; height: auto; }
+/* atan2 converts the length ratio to a number without typed CSS division. */
+html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="cv"] .cv-viewer { --cv-scale: min(1, tan(atan2(calc(100cqw - 32px), 794px))) !important; height: auto; }
 html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="cv"] .cv-body { display: block; }
 html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="cv"] .cv-thumbnails { display: none; }
 html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="cv"] .cv-scroll { overflow: visible; padding: 16px; }
@@ -67,7 +68,7 @@ html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="cv"
   .cv-download { gap: 4px; padding-inline: 10px; }
 }
 @container window (max-width: 600px) {
-  .cv-viewer { --cv-scale: calc((100cqw - 32px) / 794px) !important; }
+  .cv-viewer { --cv-scale: tan(atan2(calc(100cqw - 32px), 794px)) !important; }
   .cv-navigation, .cv-zoom, .cv-thumbnails { display: none; }
   .cv-viewer .cv-toolbar { min-height: 52px; flex-basis: 52px; padding-inline: 16px; }
   .cv-actions button, .cv-download { min-height: 44px !important; }

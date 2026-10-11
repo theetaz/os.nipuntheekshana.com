@@ -10,7 +10,7 @@ async function openCv(page: Page) {
   await page.goto('/cv');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
   await expect(viewer(page).getByRole('button', { name: 'Zoom in', exact: true })).toBeEnabled();
-  await page.evaluate(() => document.fonts.ready);
+  await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
   return viewer(page);
 }
 
@@ -73,6 +73,16 @@ test('thumbnails and scrolling update the page indicator', async ({ page }) => {
   await expect(win.getByRole('link', { name: 'Go to page 2' })).toHaveAttribute('aria-current', 'page');
   await win.locator('.cv-scroll').evaluate(el => { el.scrollTop = 0; });
   await expect(win.locator('.cv-page-indicator')).toHaveText('Page 1 of 2');
+});
+
+test('page tracking reflects a thumbnail jump reversed within the same frame', async ({ page }) => {
+  const win = await openCv(page);
+  await win.evaluate(element => {
+    (element.querySelector('.cv-thumbnails a[href$="page-2"]') as HTMLElement).click();
+    element.querySelector<HTMLElement>('.cv-scroll')!.scrollTop = 0;
+  });
+  await expect(win.locator('.cv-page-indicator')).toHaveText('Page 1 of 2');
+  await expect(win.getByRole('link', { name: 'Go to page 1' })).toHaveAttribute('aria-current', 'page');
 });
 
 test('View menu and keyboard shortcuts control the focused viewer', async ({ page }) => {
@@ -161,7 +171,7 @@ test('adoption preserves CV geometry, scroll, focus and zero layout shift', asyn
     await page.goto('/cv', { waitUntil: 'domcontentloaded' });
     const staticWin = page.locator('#static-window');
     await expect(viewer(page)).toHaveAttribute('data-adopting', '');
-    await page.evaluate(() => document.fonts.ready);
+    await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
     const before = await staticWin.boundingBox();
     const paperBefore = await staticWin.locator('.cv-page').first().boundingBox();
     await staticWin.locator('.cv-scroll').evaluate(el => { (el as HTMLElement).focus(); el.scrollTop = 123; });
@@ -212,7 +222,7 @@ for (const theme of ['light', 'dark'] as const) test(`phone viewer fits its cont
   await page.goto('/cv');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
   const win = viewer(page);
-  await page.evaluate(() => document.fonts.ready);
+  await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
   await expect(win.locator('.cv-thumbnails')).toBeHidden();
   await expect(win.locator('.cv-zoom')).toBeHidden();
   expect((await win.locator('.cv-page').first().boundingBox())!.width).toBeCloseTo(358, 0);
@@ -224,7 +234,7 @@ for (const theme of ['light', 'dark'] as const) test(`phone viewer fits its cont
 test.describe('static CV', () => {
   test.use({ javaScriptEnabled: false });
   test('all content and thumbnails work without JavaScript, including print PDF', async ({ page, browserName }) => {
-    await page.goto('/cv'); await page.evaluate(() => document.fonts.ready);
+    await page.goto('/cv'); await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
     const staticWin = page.locator('#static-window');
     await expect(staticWin.locator('.cv-page')).toHaveCount(2);
     await expect(staticWin.getByRole('button', { name: 'Zoom in', exact: true })).toBeHidden();
@@ -242,7 +252,7 @@ test.describe('static CV', () => {
   test('phone content fits the sheet and saves a 390×844 screenshot', async ({ page }) => {
     mkdirSync(artifacts, { recursive: true });
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/cv'); await page.evaluate(() => document.fonts.ready);
+    await page.goto('/cv'); await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
     const staticWin = page.locator('#static-window');
     await expect(staticWin.locator('.cv-thumbnails')).toBeHidden();
     const pageWidth = (await staticWin.locator('.cv-page').first().boundingBox())!.width;
@@ -252,7 +262,7 @@ test.describe('static CV', () => {
   });
   test('Simple view presents both pages in the document flow', async ({ page }) => {
     await page.goto('/cv#simple');
-    await page.evaluate(() => document.fonts.ready);
+    await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
     await expect(page.locator('.static-titlebar')).toBeHidden();
     await expect(page.locator('.cv-thumbnails')).toBeHidden();
     expect(await page.locator('.cv-scroll').evaluate(el => getComputedStyle(el).overflow)).toBe('visible');
