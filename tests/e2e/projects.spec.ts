@@ -11,6 +11,22 @@ async function index(page: Page) {
   return page.locator('[data-window-id="projects"]');
 }
 
+test('the first visible case-study screenshot is requested before app hydration', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/ProjectsApp.*.js', async route => { await held; await route.continue(); });
+  const firstImage = page.waitForResponse(response => /\/salli-home\.[^/]+\.avif$/.test(new URL(response.url()).pathname));
+  try {
+    await page.goto('/projects/salli', { waitUntil: 'domcontentloaded' });
+    expect((await firstImage).status()).toBe(200);
+    const staticImages = page.locator('#static-window .project-screens img');
+    await expect(staticImages.first()).toHaveAttribute('loading', 'eager');
+    await expect(staticImages.first()).toHaveAttribute('fetchpriority', 'high');
+    await expect(staticImages.nth(1)).toHaveAttribute('loading', 'lazy');
+    release(); await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
+    await expect(page.locator('[data-window-id="projects"] .project-screens img').first()).toHaveAttribute('fetchpriority', 'high');
+  } finally { release(); }
+});
+
 test('category anchors, scroll spy, incubating, featured, search and archive', async ({ page }) => {
   const win = await index(page);
   const folders = win.getByRole('navigation', { name: 'Project folders' });
