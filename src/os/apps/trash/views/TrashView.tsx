@@ -21,8 +21,9 @@ export function TrashView({ items, empty = false, note, onOpen, onCloseNote, onE
     <div className="kooda-toolbar" role="group" aria-label="Kooda actions" data-no-drag>
       <Button size={28} disabled={empty || !onEmpty} title={!onEmpty ? 'Available in the interactive desktop' : undefined}
         onClick={onEmpty}>Empty Kooda</Button>
+      {!onEmpty && <span className="sr-only">Empty Kooda requires JavaScript.</span>}
     </div>
-    <div className="kooda-scroll" ref={scrollRootRef as RefObject<HTMLDivElement | null>} data-scroll-root>
+    <div className="kooda-scroll" ref={scrollRootRef as RefObject<HTMLDivElement | null>} data-scroll-root={onOpen ? '' : undefined}>
       <h1 className="kooda-heading sr-only">Kooda</h1>
       <p className="kooda-subtitle">Kooda (<span lang="si">කූඩය</span>) — Sinhala for basket.</p>
       {empty ? <section className="kooda-empty" aria-label="Empty basket" role="status">

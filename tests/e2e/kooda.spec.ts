@@ -13,9 +13,11 @@ test('no-JS Kooda has real items and each note opens natively, including simple 
     const page = await context.newPage();
     await page.goto('/kooda');
     const win = page.locator('#static-window');
+    await expect(win.locator('[data-scroll-root]')).toHaveCount(1);
     await expect(win.getByRole('heading', { name: 'Kooda', exact: true })).toHaveCount(1);
     await expect(win.locator('.kooda-subtitle')).toHaveText('Kooda (කූඩය) — Sinhala for basket.');
     await expect(win.getByRole('button', { name: 'Empty Kooda', exact: true })).toBeDisabled();
+    await expect(win).toContainText('Empty Kooda requires JavaScript.');
     for (const item of items) {
       const note = win.locator('details').filter({ hasText: item.name });
       await note.locator('summary').click();
