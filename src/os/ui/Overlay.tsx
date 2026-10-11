@@ -25,9 +25,11 @@ export type Placement = 'top' | 'bottom' | 'right';
 /** Shared small WAAPI entrance/exit; no full Motion component bundle. */
 export function useOverlayPresence(open: boolean, panel: RefObject<HTMLElement | null>, duration = 0.12, host?: HTMLElement | null) {
   const [present, setPresent] = useState(open);
+  // Mount on the opening render so keyboard focus never trails the trigger.
+  const visible = open || present;
   useEffect(() => { if (open) setPresent(true); }, [open]);
   useEffect(() => {
-    if (!present || !panel.current) return;
+    if (!visible || !panel.current) return;
     const node = panel.current;
     const reduce = reducedMotion();
     if (reduce) node.style.transform = 'none';
@@ -47,8 +49,8 @@ export function useOverlayPresence(open: boolean, panel: RefObject<HTMLElement |
     const observer = new MutationObserver(stopSpatialMotion);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] });
     return () => { active = false; controls.stop(); observer.disconnect(); media.removeEventListener('change', stopSpatialMotion); };
-  }, [open, present, panel, duration, host]);
-  return present;
+  }, [open, visible, panel, duration, host]);
+  return visible;
 }
 export function useFloatingPanel(panel: RefObject<HTMLElement | null>, open: boolean,
   anchor?: Anchor, placement: Placement = 'bottom', point?: { x: number; y: number }, gap = 4, host?: HTMLElement | null) {

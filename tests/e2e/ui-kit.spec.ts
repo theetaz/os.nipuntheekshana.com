@@ -83,7 +83,9 @@ test('submenu flips inside the viewport; menu closes on blur and Tab', async ({ 
   expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
   expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
   await page.evaluate(() => window.dispatchEvent(new Event('blur'))); await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeHidden();
-  await trigger.click(); await page.keyboard.press('Tab'); await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeHidden();
+  for (let cycle = 0; cycle < 3; cycle++) {
+    await trigger.click(); await page.keyboard.press('Tab'); await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeHidden();
+  }
 });
 test('Tooltip shows immediately on focus, has a description, and dismisses with Escape', async ({ page }) => {
   await openFixture(page); const trigger = page.getByRole('button', { name: 'Tooltip trigger' }); await trigger.focus();
