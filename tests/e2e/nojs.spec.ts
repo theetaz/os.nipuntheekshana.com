@@ -6,7 +6,7 @@ const routes = [
   ['/projects', 'Projects'], ['/projects/salli', 'Salli — Projects'],
   ['/writing', 'Writing'], ['/writing/hello-world', 'Hello, world — again — Writing'],
   ['/writing/an-island-made-of-points', 'An island made of points — Writing'],
-  ['/about', 'About'], ['/cv', 'CV'], ['/now', 'Now'], ['/readme', 'Read me'],
+  ['/about', 'About'], ['/cv', 'CV'], ['/now', 'Now'], ['/readme', 'Read me.txt'],
   ['/terminal', 'Terminal'], ['/maps', 'Island'], ['/maps/play', 'Pin the city'],
   ['/activity', 'Activity'], ['/messages', 'Messages'], ['/settings', 'Settings'], ['/kooda', 'Kooda'],
 ] as const;

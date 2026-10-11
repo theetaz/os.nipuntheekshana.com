@@ -31,6 +31,8 @@ export function queryFor(appId: AppId, query: Readonly<Record<string, string>>):
     return { shot: query.shot };
   }
   if (appId === 'terminal' && TERMINAL_COMMANDS.some((cmd) => cmd === query.cmd)) return { cmd: query.cmd! };
+  if (appId === 'readme' && ['welcome', 'getting-around', 'shortcuts', 'plain-page', 'privacy', 'credits'].includes(query.section ?? ''))
+    return { section: query.section! };
   return {};
 }
 
@@ -53,7 +55,7 @@ export function parseLocation(url: URL, features: WMFeatures = {}): ParsedLocati
     others.push(item);
     if (others.length === 6) break;
   }
-  if (focused) focused.query = queryFor(focused.appId, Object.fromEntries(['shot', 'cmd']
+  if (focused) focused.query = queryFor(focused.appId, Object.fromEntries(['shot', 'cmd', 'section']
     .flatMap((key) => { const value = url.searchParams.get(key); return value === null ? [] : [[key, value]]; })));
   return { focused, others, unknownPath: url.pathname !== '/' && !pathTarget };
 }
