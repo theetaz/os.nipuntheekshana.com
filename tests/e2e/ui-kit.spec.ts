@@ -132,6 +132,7 @@ test('reduced motion suppresses spatial overlays and skeleton shimmer; axe passe
   await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeVisible();
   expect(await page.getByRole('menu', { name: 'Actions menu' }).evaluate(element => element.getAnimations().flatMap(animation => (animation.effect as KeyframeEffect).getKeyframes()).some(frame => 'transform' in frame))).toBe(false);
   expect(await page.locator('.os-skeleton-part').first().evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+  await expect(page.getByRole('menu', { name: 'Actions menu' })).toHaveCSS('opacity', '1');
   const result = await new AxeBuilder({ page }).analyze(); expect(result.violations).toEqual([]);
 });
 test('focus rings and overlay motion follow system preference and live Settings overrides', async ({ page }) => {
