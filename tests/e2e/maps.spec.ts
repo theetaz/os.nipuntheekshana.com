@@ -27,6 +27,9 @@ async function finishGame(page: Page) {
   const map = app(page).getByRole('group', { name: 'Pin the city map', exact: true });
   for (let round = 1; round <= 5; round++) {
     await expect(app(page).getByText(`Round ${round} / 5`, { exact: true })).toBeVisible();
+    // Round 1 is also rendered while the mode effect initializes the game.
+    // Wait for its actual guess phase before sending a one-shot keyboard input.
+    await expect(map.locator('.maps-crosshair')).toBeVisible();
     // Keyboard makes the default central crosshair a guess even if a card overlaps it.
     await map.focus(); await map.press('Enter');
     await expect(app(page).locator('.maps-game').getByText(/ · (?:<1|\d+) km$/)).toBeVisible();
