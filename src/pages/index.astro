@@ -1,17 +1,14 @@
 ---
-import '../styles/global.css';
+import OsLayout from '../layouts/OsLayout.astro';
+import { seoFor } from '../lib/seo';
+
+const seo = seoFor({
+  path: '/',
+  title: 'Nipun Theekshana',
+  description: 'The desktop of Nipun Theekshana, an engineer from Sri Lanka building open data infrastructure. Open the projects, read the writing, try the terminal.',
+  kind: 'home',
+});
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Serendib OS, the personal website of Nipun Theekshana." />
-    <title>Nipun Theekshana — Serendib OS</title>
-  </head>
-  <body>
-    <main>
-      <h1>Serendib OS</h1>
-    </main>
-  </body>
-</html>
+<OsLayout seo={seo} initial={null} home>
+  <h1>Serendib OS</h1>
+</OsLayout>

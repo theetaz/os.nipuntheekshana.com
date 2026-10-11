@@ -1,0 +1,92 @@
+import { writeFile } from 'node:fs/promises';
+import { test, expect } from '@playwright/test';
+
+test('layout emits crawlable metadata, two font preloads and ordered landmarks', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/');
+  await expect(page).toHaveTitle('Nipun Theekshana — Serendib OS');
+  await expect(page.locator('link[rel="preload"][as="font"]')).toHaveCount(2);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://os.nipuntheekshana.com');
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://os.nipuntheekshana.com/og.png');
+  const schemas = await page.locator('script[type="application/ld+json"]').allTextContents();
+  expect(schemas.map((value) => JSON.parse(value)['@type'])).toEqual(['WebSite', 'Person']);
+  expect(await page.locator('body > *').evaluateAll((elements) => elements.map((element) => element.id || element.textContent?.trim())))
+    .toEqual(['simple', 'Skip to content', 'Simple view', 'content']);
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip to content', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#content')).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test('disabling JavaScript preserves the server no-js state and content', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  try {
+    const page = await context.newPage();
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveClass('no-js');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(page.locator('html')).not.toHaveAttribute('data-boot');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Serendib OS');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'Simple view', exact: true })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/#simple$/);
+  } finally {
+    await context.close();
+  }
+});
+
+test('stored dark preference resolves before first paint on reload', async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== 'chromium', 'Chrome Performance trace uses CDP');
+  await page.goto('/');
+  await page.evaluate(() => {
+    localStorage.setItem('serendib:theme', '"dark"');
+    localStorage.setItem('serendib:booted', 'true');
+  });
+  await page.addInitScript(() => {
+    const observer = new MutationObserver(() => {
+      if (document.documentElement?.dataset.theme === 'dark') {
+        performance.mark('serendib-dark-resolved');
+        observer.disconnect();
+      }
+    });
+    observer.observe(document, { subtree: true, attributes: true, childList: true });
+  });
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Tracing.start', { categories: 'devtools.timeline,blink.user_timing,loading', transferMode: 'ReturnAsStream' });
+  try {
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await page.waitForFunction(() => performance.getEntriesByName('first-paint').length > 0);
+    const timing = await page.evaluate(() => ({
+      resolved: performance.getEntriesByName('serendib-dark-resolved')[0]?.startTime,
+      firstPaint: performance.getEntriesByName('first-paint')[0]?.startTime,
+      theme: document.documentElement.dataset.theme,
+    }));
+    expect(timing.resolved).toBeDefined();
+    expect(timing.firstPaint).toBeGreaterThanOrEqual(timing.resolved!);
+    expect(timing.theme).toBe('dark');
+
+    const complete = new Promise<{ stream?: string }>((resolve) => cdp.once('Tracing.tracingComplete', resolve));
+    await cdp.send('Tracing.end');
+    const { stream } = await complete;
+    expect(stream).toBeDefined();
+    let trace = '';
+    for (;;) {
+      const chunk = await cdp.send('IO.read', { handle: stream! });
+      trace += chunk.base64Encoded ? Buffer.from(chunk.data, 'base64').toString('utf8') : chunk.data;
+      if (chunk.eof) break;
+    }
+    await cdp.send('IO.close', { handle: stream! });
+    expect(JSON.parse(trace).traceEvents.some((event: { name: string }) => event.name === 'serendib-dark-resolved')).toBe(true);
+    const tracePath = testInfo.outputPath('dark-first-paint.json');
+    await writeFile(tracePath, trace);
+    await testInfo.attach('Chrome Performance trace', { path: tracePath, contentType: 'application/json' });
+    await testInfo.attach('first-paint timing', { body: JSON.stringify(timing), contentType: 'application/json' });
+  } finally {
+    await cdp.detach();
+  }
+});
