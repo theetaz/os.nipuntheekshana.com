@@ -4,14 +4,17 @@ import StaticWindow from '../components/static/StaticWindow.astro';
 import InitialData from '../components/static/InitialData.astro';
 import { APP_META } from '../os/registry/meta';
 import { seoFor } from '../lib/seo';
-import { socials } from '../data/profile';
+import { getClientProfile } from '../lib/client-data';
+import { initialTranscript } from '../os/apps/messages/script';
+import { MessagesView } from '../os/apps/messages/views/MessagesView';
 
 const seo = seoFor({ path: '/messages', title: 'Messages', description: APP_META.messages.description, kind: 'app' });
+const profile = { ...await getClientProfile(), messagesAt: Date.now() };
+const threads = { nipun: initialTranscript(profile, profile.messagesAt), mochi: [] };
 ---
 <OsLayout seo={seo} initial={{ appId: 'messages', route: '' }}>
   <StaticWindow app="messages" route="" title="Messages">
-    <h1>Messages</h1><p class="lede">{APP_META.messages.description}</p>
-    <p>For work, collaboration or a hello from across the ocean:</p><ul>{socials.map((social) => <li><a href={social.href}>{social.label} — {social.handle}</a></li>)}</ul><p>The scripted conversation needs JavaScript; email works directly.</p>
+    <MessagesView profile={profile} selected="nipun" threads={threads} />
   </StaticWindow>
-  <InitialData slot="after-main" key="messages" data={{}} />
+  <InitialData slot="after-main" key="messages:index" data={profile} />
 </OsLayout>
