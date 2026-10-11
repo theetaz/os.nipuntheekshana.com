@@ -113,7 +113,7 @@ describe('global shortcut data', () => {
   });
   it('contains every global command in the keyboard map with no duplicate chord', () => {
     expect(GLOBAL_SHORTCUTS.map(({ command }) => command)).toEqual([
-      'os.spotlight', 'os.spotlight', 'window.close', 'window.minimize', 'window.zoom', 'window.snapLeft', 'window.snapRight',
+      'os.spotlight', 'os.spotlight', 'os.spotlight', 'window.close', 'window.minimize', 'window.zoom', 'window.snapLeft', 'window.snapRight',
       'window.next', 'window.prev', 'app.quit', 'desktop.show', 'window.new', 'os.settings',
       'focus.menuBar', 'focus.desktop', 'focus.dock', 'focus.window', 'focus.next', 'focus.prev',
       'os.escape', 'os.contextMenu', 'os.contextMenu',
