@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://os.nipuntheekshana.com/sitemap-index.xml

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+.lighthouseci/
+playwright-report/
+test-results/
+.env*
+.DS_Store
+*.log
