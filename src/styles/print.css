@@ -1,0 +1,56 @@
+@page { size: A4; margin: 0; }
+
+@media print {
+  /* The route also prints without JavaScript or a preceding toolbar click. */
+  html:is([data-printing="cv"], :has(#static-window[data-app="cv"])) {
+    background: white !important;
+    color-scheme: light;
+  }
+  html:is([data-printing="cv"], :has(#static-window[data-app="cv"])) body *:not(.cv-pages):not(.cv-pages *):not(:has(.cv-pages)) {
+    display: none !important;
+  }
+  html:is([data-printing="cv"], :has(#static-window[data-app="cv"])) :is(body, body *:has(.cv-pages), .cv-pages) {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    contain: none !important;
+    container-type: normal !important;
+    box-shadow: none !important;
+    background: white !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  html:is([data-printing="cv"], :has(#static-window[data-app="cv"])) [hidden],
+  html:has([data-cv-print-target]) .cv-viewer:not([data-cv-print-target]),
+  html:has(.managed-window[data-app="cv"]:not([inert])) #static-window[data-app="cv"] {
+    display: none !important;
+  }
+  html:is([data-printing="cv"], :has(#static-window[data-app="cv"])) .cv-page {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 56px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: #1F1B16 !important;
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+    transform: none !important;
+    break-after: page;
+    break-inside: avoid;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  html:is([data-printing="cv"], :has(#static-window[data-app="cv"])) .cv-page:last-child { break-after: auto; }
+}
