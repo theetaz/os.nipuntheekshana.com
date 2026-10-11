@@ -120,3 +120,14 @@ test('the whole ticket and sticky are links', async ({ page }) => {
   await page.locator('.now-sticky').click({ position: { x: 120, y: 80 } });
   await expect(page).toHaveURL(/\/now$/);
 });
+
+test('compact home keeps the ticket clickable and Projects keeps its accessible heading', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: 'About me', exact: true })).toHaveAttribute('href', '/about');
+  await page.locator('.ticket').click({ position: { x: 20, y: 100 } });
+  await expect(page).toHaveURL(/\/about$/);
+  await page.goto('/projects');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Projects');
+  await expect(page.locator('h1')).toHaveCount(1);
+});
