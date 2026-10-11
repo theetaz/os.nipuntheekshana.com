@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from '@playwright/test';
 import { fixtureServer, type FixtureServer } from './fixture-server';
+// The primitive laboratory uses desktop geometry; app suites cover phone layouts.
+test.use({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false });
 // These acceptance routes stay in an isolated, temporary build.
 let routes: string[]; let origin: string; let server: FixtureServer;
 test.beforeAll(async ({}, info) => {
@@ -11,7 +13,7 @@ test.beforeAll(async ({}, info) => {
 import UiKit from '../../../tests/fixtures/ui-kit/UiKit';
 import '../../../src/styles/global.css';
 ---
-<!doctype html><html lang="en" data-motion="reduce"><head><meta charset="UTF-8" /><title>UI kit verification</title></head><body style="overflow:auto;height:auto">
+<!doctype html><html lang="en" data-motion="reduce"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>UI kit verification</title></head><body style="overflow:auto;height:auto">
 ${name.startsWith('p2-ui-hydrated') ? '<script is:inline type="application/json" id="os-initial-data" data-key="fixture">{"title":"Embedded data"}</script>' : ''}
 <UiKit ${name.startsWith('p2-ui-hydrated') ? 'interactive client:load' : ''} /></body></html>`]));
   server = await fixtureServer(`ui-${info.workerIndex}`, port, pages); origin = server.origin;

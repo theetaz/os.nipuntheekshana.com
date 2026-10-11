@@ -9,7 +9,7 @@ const viewer = (page: Page) => page.locator('.managed-window[data-app="cv"]');
 async function openCv(page: Page) {
   await page.goto('/cv');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
-  await expect(viewer(page).getByRole('button', { name: 'Zoom in', exact: true })).toBeEnabled();
+  await expect(viewer(page).getByRole('button', { name: 'Print', exact: true })).toBeEnabled();
   await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
   return viewer(page);
 }
@@ -200,6 +200,7 @@ test('CV loads its data when opened from the desktop and retries failed requests
 
 for (const theme of ['light', 'dark'] as const) test(`CV is accessible in ${theme} and saves a desktop screenshot @visual`, async ({ page }) => {
   mkdirSync(artifacts, { recursive: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
@@ -238,8 +239,15 @@ test.describe('static CV', () => {
     const staticWin = page.locator('#static-window');
     await expect(staticWin.locator('.cv-page')).toHaveCount(2);
     await expect(staticWin.getByRole('button', { name: 'Zoom in', exact: true })).toBeHidden();
-    await staticWin.getByRole('link', { name: 'Go to page 2' }).click();
-    expect(await staticWin.locator('.cv-scroll').evaluate(el => el.scrollTop)).toBeGreaterThan(1000);
+    const thumbnails = staticWin.getByRole('link', { name: 'Go to page 2' });
+    if (await thumbnails.isVisible()) {
+      await thumbnails.click();
+      expect(await staticWin.locator('.cv-scroll').evaluate(el => el.scrollTop)).toBeGreaterThan(1000);
+    } else {
+      await expect(staticWin.locator('.cv-thumbnails')).toBeHidden();
+      await staticWin.locator('.cv-page').last().scrollIntoViewIfNeeded();
+      await expect(staticWin.locator('.cv-page').last()).toBeInViewport();
+    }
     await page.emulateMedia({ media: 'print' });
     await expect(staticWin.locator('.cv-toolbar')).toBeHidden();
     await expect(staticWin.locator('.static-titlebar')).toBeHidden();
@@ -266,7 +274,7 @@ test.describe('static CV', () => {
     await expect(page.locator('.static-titlebar')).toBeHidden();
     await expect(page.locator('.cv-thumbnails')).toBeHidden();
     expect(await page.locator('.cv-scroll').evaluate(el => getComputedStyle(el).overflow)).toBe('visible');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1440);
-    expect(await page.locator('.cv-page').last().evaluate(el => el.getBoundingClientRect().bottom)).toBeGreaterThan(900);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(page.viewportSize()!.width);
+    expect(await page.locator('.cv-page').last().evaluate(el => el.getBoundingClientRect().bottom)).toBeGreaterThan(page.viewportSize()!.height);
   });
 });

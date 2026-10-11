@@ -47,7 +47,8 @@ test('WebGL arrives over the poster; controls, markers and five rounds work with
   await app(page).getByRole('button', { name: 'Play', exact: true }).click(); await expect(page).toHaveURL(/\/maps\/play$/);
   await expect(app(page).getByText('Round 1 / 5', { exact: true })).toBeVisible();
   const map = app(page).getByRole('group', { name: 'Pin the city map' });
-  await map.click({ position: { x: 440, y: 340 } });
+  const bounds = (await map.boundingBox())!;
+  await map.click({ position: { x: Math.min(440, bounds.width / 2), y: Math.min(340, bounds.height / 2) } });
   await expect(app(page).locator('.maps-game').getByText(/ · (?:<1|\d+) km$/)).toBeVisible();
   await expect(app(page).getByRole('button', { name: 'Next city', exact: true })).toBeFocused();
   await expect(app(page).locator('.maps-guess-line')).toHaveAttribute('x1', /\d/);

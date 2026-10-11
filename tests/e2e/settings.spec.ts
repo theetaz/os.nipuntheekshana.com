@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
   errors = []; page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
 });
-test.afterEach(() => expect(errors).toEqual([]));
+test.afterEach(({}, info) => { if (info.expectedStatus !== 'skipped') expect(errors).toEqual([]); });
 
 test('Dark applies live and persists before scripts load, without a theme flash', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' }); const win = await settings(page);

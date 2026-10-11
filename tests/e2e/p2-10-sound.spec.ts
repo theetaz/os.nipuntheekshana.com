@@ -73,7 +73,7 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
 });
-test.afterEach(async ({ page }) => { expect(errorsByPage.get(page)).toEqual([]); });
+test.afterEach(async ({ page }, info) => { if (info.expectedStatus !== 'skipped') expect(errorsByPage.get(page)).toEqual([]); });
 test('menu opening ticks and both menu and pointer snapping thunk through the lazy synth', async ({ page }) => {
   await page.addInitScript(installAudioStub, { enabled: true });
   await page.goto('/'); await openApp(page, 'Projects');

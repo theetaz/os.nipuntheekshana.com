@@ -8,6 +8,7 @@ const dock = (page: Page) => page.locator('.os-dock:visible');
 const link = (page: Page, name: string) => dock(page).getByRole('link', { name, exact: true });
 async function ready(page: Page) {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
+  test.fixme(await page.locator('html').getAttribute('data-mode') === 'mobile', 'P4-1: phone home Dock interactions replace desktop magnification, running windows and external Dock links.');
   await expect(page.locator('[data-shell="mobile"]')).toHaveCount(0);
   await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
 }
@@ -19,7 +20,7 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => consoleErrors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
 });
-test.afterEach(() => expect(consoleErrors).toEqual([]));
+test.afterEach(({}, info) => { if (info.expectedStatus !== 'skipped') expect(consoleErrors).toEqual([]); });
 
 test('resting dock exactly replaces the static dock with zero hydration CLS', async ({ page }) => {
   let release!: () => void; const hold = new Promise<void>(done => { release = done; });

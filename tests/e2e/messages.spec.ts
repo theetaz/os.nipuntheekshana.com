@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => list.push(error.message));
   page.on('console', message => { if (message.type() === 'error') list.push(message.text()); });
 });
-test.afterEach(async ({ page }) => expect(errors.get(page)).toEqual([]));
+test.afterEach(async ({ page }, info) => { if (info.expectedStatus !== 'skipped') expect(errors.get(page)).toEqual([]); });
 async function conversation(page: Page) {
   await page.goto('/messages');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
