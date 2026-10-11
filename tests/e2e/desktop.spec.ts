@@ -91,8 +91,13 @@ test('rubber band selects two touched icons and additive marquee retains another
   await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(3);
 });
 test('empty desktop clears selection and blurs a window without minimizing it', async ({ page }) => {
-  await desktop(page); await icon(page, 'Projects').dblclick(); await page.mouse.click(900, 780);
-  await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(0);
+  await desktop(page); await icon(page, 'Projects').dblclick();
+  await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
+  // The real Projects window occupies the old (900, 780) stub-era point.
+  const empty = { x: 1250, y: 700 };
+  expect(await page.evaluate(point => !!document.elementFromPoint(point.x, point.y)?.closest('.desktop-surface'), empty)).toBe(true);
+  await page.mouse.click(empty.x, empty.y);
+  await expect(page.locator('[data-desktop-icon][aria-selected="true"]')).toHaveCount(0);
   await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
   await expect(page.locator('[data-window-id="projects"]')).toHaveAttribute('data-focused', 'false');
 });

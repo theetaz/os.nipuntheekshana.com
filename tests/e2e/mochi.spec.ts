@@ -142,6 +142,8 @@ test('naps after 45 seconds, respects the nap preference, and starts asleep in C
 
 test('window opens turn curious eyes toward their centre and fast window scroll surprises Mochi', async ({ page }) => {
   await ready(page); await openApp(page, 'About'); await expect(root(page)).toHaveAttribute('data-mood', 'curious');
+  // Window creation precedes the lazy app; scroll its real root, not the skeleton.
+  await expect(page.locator('[data-window-id="about"]').getByRole('heading', { name: 'Nipun Theekshana', exact: true })).toBeVisible();
   expect(await page.locator('.mochi__eyes').evaluate(element => (element as SVGElement).style.transform)).toContain('translate(');
   await page.locator('[data-window-id="about"]').evaluate(element => {
     const scroll = element.querySelector<HTMLElement>('[data-scroll-root]')!;
