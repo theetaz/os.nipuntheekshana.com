@@ -11,8 +11,11 @@ test('layout emits crawlable metadata, two font preloads and ordered landmarks',
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://os.nipuntheekshana.com/og.png');
   const schemas = await page.locator('script[type="application/ld+json"]').allTextContents();
   expect(schemas.map((value) => JSON.parse(value)['@type'])).toEqual(['WebSite', 'Person']);
-  expect(await page.locator('body > *').evaluateAll((elements) => elements.map((element) => element.id || element.textContent?.trim())))
-    .toEqual(['simple', 'Skip to content', 'Simple view', 'content']);
+  const layers = await page.locator('body > *').evaluateAll((elements) => elements.map((element) => element.id || element.className?.toString() || element.tagName));
+  expect(layers.slice(0, 3)).toEqual(['simple', 'skip-link', 'skip-link']);
+  expect(layers.indexOf('wallpaper os-chrome')).toBeGreaterThan(2);
+  expect(layers.indexOf('content')).toBeGreaterThan(layers.indexOf('wallpaper os-chrome'));
+  await expect(page.locator('#app-projects')).toHaveCount(1);
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to content', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
@@ -26,12 +29,12 @@ test('disabling JavaScript preserves the server no-js state and content', async 
     const page = await context.newPage();
     await page.goto('/');
     await expect(page.locator('html')).toHaveClass('no-js');
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    expect(await page.locator('html').evaluate((element) => getComputedStyle(element).colorScheme)).toBe('light');
     await expect(page.locator('html')).not.toHaveAttribute('data-boot');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Serendib OS');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nipun Theekshana');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
-    await expect(page.getByRole('link', { name: 'Simple view', exact: true })).toBeFocused();
+    await expect(page.locator('.skip-link[href="#simple"]')).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/#simple$/);
   } finally {

@@ -1,0 +1,17 @@
+---
+import OsLayout from '../layouts/OsLayout.astro';
+import StaticWindow from '../components/static/StaticWindow.astro';
+import InitialData from '../components/static/InitialData.astro';
+import { APP_META } from '../os/registry/meta';
+import { seoFor } from '../lib/seo';
+import { socials } from '../data/profile';
+
+const seo = seoFor({ path: '/messages', title: 'Messages', description: APP_META.messages.description, kind: 'app' });
+---
+<OsLayout seo={seo} initial={{ appId: 'messages', route: '' }}>
+  <StaticWindow app="messages" route="" title="Messages">
+    <h1>Messages</h1><p class="lede">{APP_META.messages.description}</p>
+    <p>For work, collaboration or a hello from across the ocean:</p><ul>{socials.map((social) => <li><a href={social.href}>{social.label} — {social.handle}</a></li>)}</ul><p>The scripted conversation needs JavaScript; email works directly.</p>
+  </StaticWindow>
+  <InitialData slot="after-main" key="messages" data={{}} />
+</OsLayout>

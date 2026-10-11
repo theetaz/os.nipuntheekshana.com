@@ -1,0 +1,19 @@
+---
+import { APP_META } from '../../os/registry/meta';
+import type { AppId } from '../../os/types/apps';
+import '../../styles/static-window.css';
+interface Props { app: AppId; route?: string; query?: Record<string, string>; title?: string; adoptable?: boolean }
+const { app, route = '', query = {}, title = APP_META[app].name, adoptable = true } = Astro.props;
+const { width, height } = APP_META[app].window;
+---
+<section id={adoptable ? 'static-window' : 'static-alert'} class="static-window" data-app={adoptable ? app : undefined} data-route={route} data-query={JSON.stringify(query)} role="dialog" aria-modal="false" aria-labelledby="static-window-title" style={`--window-width:${width}px;--window-height:${height}px`}>
+  <header class="static-titlebar">
+    <div class="traffic-lights">
+      <a class="traffic-light close" data-traffic-light href="/" aria-label="Close (back to the desktop)"><span aria-hidden="true">×</span><span class="mobile-home" aria-hidden="true">Home</span></a>
+      <button class="traffic-light minimise js-only" data-traffic-light disabled aria-label="Minimise (available in the interactive desktop)"><span aria-hidden="true">−</span></button>
+      <button class="traffic-light zoom js-only" data-traffic-light disabled aria-label="Zoom (available in the interactive desktop)"><span aria-hidden="true">+</span></button>
+    </div>
+    <span id="static-window-title">{title}</span>
+  </header>
+  <div class="static-content" data-scroll-root tabindex="0"><div class="static-document"><slot /></div></div>
+</section>

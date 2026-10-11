@@ -1,0 +1,17 @@
+---
+import OsLayout from '../../layouts/OsLayout.astro';
+import StaticWindow from '../../components/static/StaticWindow.astro';
+import InitialData from '../../components/static/InitialData.astro';
+import { APP_META } from '../../os/registry/meta';
+import { seoFor } from '../../lib/seo';
+import { getClientPosts } from '../../lib/client-data';
+const posts = await getClientPosts();
+const seo = seoFor({ path: '/writing', title: 'Writing', description: APP_META.writing.description, kind: 'app' });
+---
+<OsLayout seo={seo} initial={{ appId: 'writing', route: '' }}>
+  <StaticWindow app="writing" route="" title="Writing">
+    <h1>Writing</h1><p class="lede">{APP_META.writing.description}</p>
+    <ul>{posts.map((post) => <li><a href={`/writing/${post.slug}`}>{post.title}</a><p>{post.description}</p><time datetime={post.date}>{post.date.slice(0, 10)}</time></li>)}</ul>
+  </StaticWindow>
+  <InitialData slot="after-main" key="writing" data={{ posts }} />
+</OsLayout>

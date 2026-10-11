@@ -1,0 +1,21 @@
+---
+import OsLayout from '../layouts/OsLayout.astro';
+import StaticWindow from '../components/static/StaticWindow.astro';
+import InitialData from '../components/static/InitialData.astro';
+import { seoFor } from '../lib/seo';
+const seo = seoFor({ path: '/404', title: 'Lost at sea', description: 'The page you wanted is not here, or it moved. Return to the desktop of Nipun Theekshana.', kind: 'page' });
+---
+<OsLayout seo={seo} initial={null}>
+  <StaticWindow app="about" title="Lost at sea" adoptable={false}>
+    <h1>Lost at sea</h1><p class="lede">You’ve drifted off the coast — <span id="ocean-coordinates">5.2140°N 79.1022°E</span> is open ocean. The page you wanted isn’t here, or it moved.</p>
+    <p><a href="/">Back to the desktop</a> · <a href="/projects">Explore projects</a></p>
+  </StaticWindow>
+  <Fragment slot="after-main"><InitialData key="404" data={{}} />
+<script is:inline>
+  (function () {
+    var point = document.getElementById('ocean-coordinates');
+    if (point) point.textContent = (4.5 + Math.random()).toFixed(4) + '°N ' + (78 + Math.random()).toFixed(4) + '°E';
+  })();
+</script>
+  </Fragment>
+</OsLayout>

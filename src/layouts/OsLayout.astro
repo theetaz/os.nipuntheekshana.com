@@ -1,6 +1,9 @@
 ---
 import { Font } from 'astro:assets';
 import SkipLinks from '../components/static/SkipLinks.astro';
+import IconSprite from '../components/static/IconSprite.astro';
+import Wallpaper from '../components/static/Wallpaper.astro';
+import SimpleChrome from '../components/static/SimpleChrome.astro';
 import { links } from '../data/profile';
 import type { Seo } from '../lib/seo';
 import '../styles/global.css';
@@ -19,7 +22,7 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
 ---
 
 <!doctype html>
-<html lang="en" class="no-js" data-theme="light" data-mode="desktop">
+<html lang="en" class="no-js" data-mode="desktop">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -77,9 +80,12 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
   <body>
     <span id="simple" aria-hidden="true"></span>
     <SkipLinks />
-    <slot name="wallpaper" />
-    <main id="content" tabindex="-1"><slot /></main>
-    <slot name="after-main" />
-    <!-- P2-3: mount the Desktop client:load island here with initial and home props. -->
+    <IconSprite />
+    <Wallpaper />
+    <SimpleChrome>
+      <main id="content" tabindex="-1"><slot /></main>
+      <!-- P2-3: mount the Desktop client:load island here with initial and home props. -->
+      <slot name="after-main" />
+    </SimpleChrome>
   </body>
 </html>

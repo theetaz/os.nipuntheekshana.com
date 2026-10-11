@@ -1,0 +1,15 @@
+---
+import type { ClientActivity } from '../../os/types/content';
+interface Props { activity: ClientActivity }
+const { activity } = Astro.props;
+const counts = activity.available ? activity.counts : [];
+const sorted = counts.filter((count) => count > 0).sort((a, b) => a - b);
+const percentile = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * .96))] ?? 1;
+const level = (count: number) => count <= 0 ? 0 : Math.min(5, Math.ceil(Math.min(1, Math.sqrt(count / percentile)) * 5));
+---
+{activity.available && <section class="activity-strip os-chrome" aria-label="GitHub activity">
+  <svg class="activity-heat" width="264" height="34" viewBox="0 0 264 34" aria-hidden="true">
+    {counts.slice(-371).map((count, i) => count >= 0 && <rect x={Math.floor(i / 7) * 5} y={(i % 7) * 5} width="4" height="4" rx=".8" class={`heat-${level(count)}`} />)}
+  </svg>
+  <p><strong>{activity.total.toLocaleString('en-US')} contributions</strong><a class="stretched-link" href="/activity">in the last year · Activity ›</a></p>
+</section>}

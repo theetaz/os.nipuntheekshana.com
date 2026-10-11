@@ -1,0 +1,13 @@
+---
+import { ISLAND_PATH, ISLAND_VIEWBOX } from '../../os/icons/island-glyph';
+import '../../styles/boot.css';
+---
+<div class="boot-screen os-chrome" aria-hidden="true">
+  <svg class="boot-island" width="64" height="112" viewBox={ISLAND_VIEWBOX}>
+    <defs><pattern id="boot-dots" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".7" fill="var(--os-accent)" /></pattern></defs>
+    <path class="boot-outline" d={ISLAND_PATH} pathLength="1" fill="none" stroke="var(--os-accent)" stroke-width="1.5" />
+    <path class="boot-fill" d={ISLAND_PATH} fill="url(#boot-dots)" /><circle class="boot-ring" cx="8" cy="80" r="0" fill="none" stroke="var(--os-accent)" />
+  </svg>
+  <p class="boot-wordmark">serendib</p><p class="boot-greeting"><span lang="si">ආයුබෝවන්</span> · <span lang="ta">வணக்கம்</span> · Welcome</p>
+  <div class="boot-progress"><span></span></div>
+</div>

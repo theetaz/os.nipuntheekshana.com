@@ -1,0 +1,17 @@
+---
+import OsLayout from '../layouts/OsLayout.astro';
+import StaticWindow from '../components/static/StaticWindow.astro';
+import InitialData from '../components/static/InitialData.astro';
+import { APP_META } from '../os/registry/meta';
+import { seoFor } from '../lib/seo';
+
+
+const seo = seoFor({ path: '/readme', title: 'Read me', description: APP_META.readme.description, kind: 'app' });
+---
+<OsLayout seo={seo} initial={{ appId: 'readme', route: '' }}>
+  <StaticWindow app="readme" route="" title="Read me">
+    <h1>Read me</h1><p class="lede">{APP_META.readme.description}</p>
+    <p>Welcome to Serendib, the desktop of Nipun Theekshana. Open an app from the dock or desktop to explore projects, writing and life in Sri Lanka.</p><p>Every page works without JavaScript. Close a window to return home, or choose <a href="#simple">Simple view</a> for a clean reading document. Use Tab to move between links and Enter to follow them.</p><ul><li><a href="/projects">Explore projects</a></li><li><a href="/writing">Read the writing</a></li><li><a href="/about">Meet Nipun</a></li><li><a href="/messages">Say hello</a></li></ul>
+  </StaticWindow>
+  <InitialData slot="after-main" key="readme" data={{}} />
+</OsLayout>

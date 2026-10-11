@@ -1,0 +1,40 @@
+---
+import { APP_META, DOCK_LINKS } from '../../os/registry/meta';
+import { pathFor } from '../../os/url/routes';
+import { ISLAND_PATH, ISLAND_VIEWBOX } from '../../os/icons/island-glyph';
+import '../../styles/simple-view.css';
+const apps = Object.values(APP_META).filter((app) => app.phase === 'v1');
+const desktopIcons = apps.filter((app) => app.desktopIcon).sort((a, b) => a.desktopIcon!.order - b.desktopIcon!.order);
+const dockApps = apps.filter((app) => app.dockOrder !== null && app.id !== 'trash').sort((a, b) => a.dockOrder! - b.dockOrder!);
+const pocketApps = apps.filter((app) => app.mobile.gridOrder !== null).sort((a, b) => a.mobile.gridOrder! - b.mobile.gridOrder!);
+---
+<header class="static-menubar os-chrome">
+  <a class="serendib-brand" href="/" aria-label="Serendib home"><svg width="13" height="22" viewBox={ISLAND_VIEWBOX} aria-hidden="true"><path d={ISLAND_PATH} fill="currentColor" /></svg><span>Serendib</span></a>
+  <nav aria-label="Menu bar"><a href="/projects">Projects</a><a href="/writing">Writing</a><a href="/about">About</a><a href="/cv">CV</a><a href="/now">Now</a></nav>
+  <a class="simple-entry" href="#simple">Simple view</a>
+</header>
+<header class="simple-header simple-only"><a class="simple-wordmark" href="/#simple">serendib</a><a href={Astro.url.pathname} data-simple-back>Back to the desktop</a></header>
+<slot />
+<nav class="desktop-icons os-chrome" aria-label="Desktop"><ul>{desktopIcons.map((app) => <li><a href={pathFor(app.id, app.desktopIcon!.route ?? '')}><svg width="56" height="56" viewBox="0 0 64 64" aria-hidden="true"><use href={`#${app.desktopIcon!.icon}`} /></svg><span>{app.desktopIcon!.label}</span></a></li>)}</ul></nav>
+<nav class="pocket-grid os-chrome" aria-label="Pocket apps"><ul>{pocketApps.map((app) => <li><a href={app.basePath}><svg width="60" height="60" viewBox="0 0 64 64" aria-hidden="true"><use href={`#${app.icon}`} /></svg><span>{app.name}</span></a></li>)}{DOCK_LINKS.map((link) => <li><a href={link.href}><svg width="60" height="60" viewBox="0 0 64 64" aria-hidden="true"><use href={`#${link.icon}`} /></svg><span>{link.label}</span></a></li>)}<li><a href="/maps/play"><svg width="60" height="60" viewBox="0 0 64 64" aria-hidden="true"><use href="#app-pin" /></svg><span>Pin the city</span></a></li></ul></nav>
+<nav class="static-dock os-chrome" aria-label="Dock"><ul>
+  {dockApps.map((app) => <li class:list={[{ 'desktop-only': app.mobile.dockOrder === null }]}><a href={app.basePath} aria-label={app.name}><svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true"><use href={`#${app.icon}`} /></svg></a></li>)}
+  <li class="dock-divider desktop-only" aria-hidden="true"></li>
+  {DOCK_LINKS.map((link) => <li class="desktop-only"><a href={link.href} aria-label={link.label}><svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true"><use href={`#${link.icon}`} /></svg></a></li>)}
+  <li class="dock-divider desktop-only" aria-hidden="true"></li><li class="desktop-only"><a href="/kooda" aria-label="Kooda"><svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true"><use href="#app-trash" /></svg></a></li>
+</ul></nav>
+<footer class="simple-footer simple-only"><nav aria-label="All sections"><a href="/#simple">Home</a>{apps.map((app) => <a href={`${app.basePath}#simple`}>{app.name}</a>)}<a href="/maps/play#simple">Pin the city</a></nav><p>Made in Colombo, Sri Lanka.</p></footer>
+
+<script is:inline>
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest && event.target.closest('a[href]');
+    if (link && link.getAttribute('href').endsWith('#simple') && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      try { localStorage.setItem('serendib:view', '"simple"'); } catch (e) {}
+      document.documentElement.dataset.view = 'simple';
+    }
+  });
+  document.querySelector('[data-simple-back]').addEventListener('click', function () {
+    try { localStorage.removeItem('serendib:view'); } catch (e) {}
+    delete document.documentElement.dataset.view;
+  });
+</script>

@@ -1,0 +1,17 @@
+---
+import OsLayout from '../layouts/OsLayout.astro';
+import StaticWindow from '../components/static/StaticWindow.astro';
+import InitialData from '../components/static/InitialData.astro';
+import { APP_META } from '../os/registry/meta';
+import { seoFor } from '../lib/seo';
+import { getClientProfile } from '../lib/client-data';
+const profile = await getClientProfile();
+const seo = seoFor({ path: '/cv', title: 'CV', description: APP_META.cv.description, kind: 'app' });
+---
+<OsLayout seo={seo} initial={{ appId: 'cv', route: '' }}>
+  <StaticWindow app="cv" route="" title="CV">
+    <h1>CV</h1><p class="lede">{APP_META.cv.description}</p>
+    <p>{profile.summary}</p><p><a href={profile.cv.href} download>Download CV ({profile.cv.sizeLabel})</a></p><h2>Experience</h2>{profile.experience.map((job) => <section><h3>{job.role} · {job.org}</h3><p>{job.period}</p><p>{job.summary}</p></section>)}<h2>Education</h2><p>{profile.education.degree} · {profile.education.school}</p>
+  </StaticWindow>
+  <InitialData slot="after-main" key="cv" data={{ profile }} />
+</OsLayout>

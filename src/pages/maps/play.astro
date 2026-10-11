@@ -1,0 +1,17 @@
+---
+import OsLayout from '../../layouts/OsLayout.astro';
+import StaticWindow from '../../components/static/StaticWindow.astro';
+import InitialData from '../../components/static/InitialData.astro';
+import { APP_META } from '../../os/registry/meta';
+import { seoFor } from '../../lib/seo';
+
+
+const seo = seoFor({ path: '/maps/play', title: 'Pin the city', description: APP_META.maps.description, kind: 'app' });
+---
+<OsLayout seo={seo} initial={{ appId: 'maps', route: 'play' }}>
+  <StaticWindow app="maps" route="play" title="Pin the city">
+    <h1>Pin the city</h1><p class="lede">{APP_META.maps.description}</p>
+    <p>The geography game needs JavaScript. Explore Sri Lanka while you wait: <a href="/maps">open Island</a> or <a href="/writing/an-island-made-of-points">read about its geography and point map</a>.</p>
+  </StaticWindow>
+  <InitialData slot="after-main" key="maps:play" data={{}} />
+</OsLayout>

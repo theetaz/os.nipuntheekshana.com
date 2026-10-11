@@ -1,0 +1,17 @@
+---
+import OsLayout from '../layouts/OsLayout.astro';
+import StaticWindow from '../components/static/StaticWindow.astro';
+import InitialData from '../components/static/InitialData.astro';
+import { APP_META } from '../os/registry/meta';
+import { seoFor } from '../lib/seo';
+import { getClientProfile } from '../lib/client-data';
+const profile = await getClientProfile();
+const seo = seoFor({ path: '/about', title: 'About', description: APP_META.about.description, kind: 'app' });
+---
+<OsLayout seo={seo} initial={{ appId: 'about', route: '' }}>
+  <StaticWindow app="about" route="" title="About">
+    <h1>About</h1><p class="lede">{profile.site.description}</p>
+    <p>{profile.summary}</p><h2>Principles</h2><ul>{profile.principles.map((principle) => <li><strong>{principle.title}</strong> — {principle.body}</li>)}</ul><p><a href="/cv">Experience and CV</a> · <a href="/messages">Get in touch</a></p>
+  </StaticWindow>
+  <InitialData slot="after-main" key="about" data={{ profile }} />
+</OsLayout>

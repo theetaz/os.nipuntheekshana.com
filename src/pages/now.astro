@@ -1,0 +1,17 @@
+---
+import OsLayout from '../layouts/OsLayout.astro';
+import StaticWindow from '../components/static/StaticWindow.astro';
+import InitialData from '../components/static/InitialData.astro';
+import { APP_META } from '../os/registry/meta';
+import { seoFor } from '../lib/seo';
+import { getClientProfile } from '../lib/client-data';
+const profile = await getClientProfile();
+const seo = seoFor({ path: '/now', title: 'Now', description: APP_META.now.description, kind: 'app' });
+---
+<OsLayout seo={seo} initial={{ appId: 'now', route: '' }}>
+  <StaticWindow app="now" route="" title="Now">
+    <h1>Now</h1><p class="lede">{APP_META.now.description}</p>
+    <p>Updated <time datetime={profile.now.updated}>{profile.now.updated}</time></p><ul>{profile.now.items.map((item) => <li>{item}</li>)}</ul>
+  </StaticWindow>
+  <InitialData slot="after-main" key="now" data={{ profile }} />
+</OsLayout>

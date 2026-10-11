@@ -1,0 +1,14 @@
+---
+import { site, summary, now, socials } from '../../data/profile';
+import type { ClientProject, ClientPostSummary } from '../../os/types/content';
+interface Props { projects: ClientProject[]; posts: ClientPostSummary[] }
+const { projects, posts } = Astro.props;
+---
+<section id="home-document" class="home-document simple-only" aria-label={`${site.name}'s home document`}>
+  <p class="lede">{site.description}</p><p>{summary}</p>
+  <h2>Current focus</h2><p>Updated <time datetime={now.updated}>{now.updated}</time></p><ul>{now.items.map((item) => <li>{item}</li>)}</ul>
+  <h2>Featured projects</h2><ul>{projects.filter((project) => project.featured).map((project) => <li><a href={`/projects/${project.slug}#simple`}>{project.title}</a> — {project.tagline}</li>)}</ul>
+  <h2>All projects</h2><ul>{projects.map((project) => <li><a href={`/projects/${project.slug}#simple`}>{project.title}</a> — {project.tagline}</li>)}</ul>
+  <h2>Writing</h2><ul>{posts.map((post) => <li><a href={`/writing/${post.slug}#simple`}>{post.title}</a> — {post.description}</li>)}</ul>
+  <h2>Contact</h2><ul>{socials.map((social) => <li><a href={social.href}>{social.label} — {social.handle}</a></li>)}</ul>
+</section>

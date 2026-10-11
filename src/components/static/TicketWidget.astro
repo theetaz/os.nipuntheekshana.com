@@ -1,0 +1,16 @@
+---
+import { site } from '../../data/profile';
+---
+<div class="ticket-wrap">
+  <article class="ticket" aria-labelledby="ticket-name">
+    <div class="ticket-stub" aria-hidden="true"><span class="stub-name">COLOMBO</span><span class="stub-serial">№ 002016</span></div>
+    <div class="ticket-main">
+      <p class="eyebrow mono-label">Sri Lanka · One way · Since {site.careerStart}</p>
+      <h1 id="ticket-name">{site.name}</h1>
+      <p class="ticket-native" lang="si">{site.nameSinhala}</p>
+      <dl class="ticket-route"><div><dt class="mono-label">From</dt><dd>{site.location}</dd></div><div><dt class="mono-label">To</dt><dd>Open data infrastructure</dd></div></dl>
+      <p class="ticket-role">{site.title}</p>
+      <a class="stretched-link ticket-cta mono-label" href="/about"><span>About me ›</span></a>
+    </div>
+  </article>
+</div>

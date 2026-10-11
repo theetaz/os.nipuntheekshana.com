@@ -1,0 +1,17 @@
+---
+import OsLayout from '../layouts/OsLayout.astro';
+import StaticWindow from '../components/static/StaticWindow.astro';
+import InitialData from '../components/static/InitialData.astro';
+import { APP_META } from '../os/registry/meta';
+import { seoFor } from '../lib/seo';
+
+
+const seo = seoFor({ path: '/terminal', title: 'Terminal', description: APP_META.terminal.description, kind: 'app' });
+---
+<OsLayout seo={seo} initial={{ appId: 'terminal', route: '' }}>
+  <StaticWindow app="terminal" route="" title="Terminal">
+    <h1>Terminal</h1><p class="lede">{APP_META.terminal.description}</p>
+    <p>The interactive shell needs JavaScript. You can explore the same content using these links:</p><ul><li><a href="/projects">ls projects</a></li><li><a href="/now">cat now.txt</a></li><li><a href="/about">whoami</a></li><li><a href="/messages">contact</a></li></ul>
+  </StaticWindow>
+  <InitialData slot="after-main" key="terminal" data={{}} />
+</OsLayout>

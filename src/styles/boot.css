@@ -1,0 +1,30 @@
+.boot-screen { display: none; position: fixed; inset: 0; z-index: var(--z-boot); background: #F4F1EA; place-content: center; justify-items: center; pointer-events: none; }
+[data-theme="dark"] .boot-screen { background: #0E0D0B; }
+html[data-boot] .boot-screen { display: grid; animation: boot-exit 350ms 1300ms var(--ease-in) forwards; }
+.boot-outline { stroke-dasharray: 1; stroke-dashoffset: 1; animation: boot-draw 700ms var(--ease-out) forwards; }
+.boot-fill { opacity: 0; animation: boot-fade 600ms 300ms forwards; }
+.boot-ring { animation: boot-ring 600ms 300ms var(--ease-out) forwards; }
+.boot-wordmark { margin: 24px 0 0; font: italic 500 40px/44px var(--font-display); opacity: 0; animation: boot-wordmark 400ms 600ms var(--ease-out) forwards; }
+.boot-greeting { margin: 12px 0 24px; color: var(--os-ink-2); opacity: 0; animation: boot-fade 300ms 800ms forwards; }
+.boot-progress { width: 160px; height: 3px; border-radius: 2px; overflow: hidden; background: var(--os-line); }
+.boot-progress span { display: block; width: 100%; height: 100%; background: var(--os-accent); transform: scaleX(0); transform-origin: left; animation: boot-progress 900ms 200ms var(--ease-out) forwards; }
+html.os-ready .boot-progress span { animation: boot-progress 900ms 200ms var(--ease-out) forwards, boot-complete 200ms 1100ms forwards; }
+html[data-boot] :is(.desktop-widgets, .desktop-icons, .static-dock) { animation: boot-desktop 450ms 1300ms var(--ease-out) both; }
+@keyframes boot-draw { to { stroke-dashoffset: 0; } }
+@keyframes boot-fade { to { opacity: 1; } }
+@keyframes boot-wordmark { from { transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes boot-ring { from { r: 0; opacity: .6; } to { r: 60; opacity: 0; } }
+@keyframes boot-progress { to { transform: scaleX(.8); } }
+@keyframes boot-complete { from { transform: scaleX(.8); } to { transform: scaleX(1); } }
+@keyframes boot-exit { to { opacity: 0; visibility: hidden; } }
+@keyframes boot-desktop { from { scale: .985; } to { scale: 1; } }
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  html[data-boot] .boot-screen { animation-duration: 300ms; animation-delay: 650ms; }
+  .boot-outline { animation-duration: 500ms; }
+  .boot-wordmark { animation-duration: 300ms; animation-delay: 300ms; }
+  .boot-greeting { display: none; }
+  .boot-progress { margin-top: 24px; }
+  html[data-boot] :is(.desktop-widgets, .static-dock) { animation-delay: 650ms; animation-duration: 300ms; }
+}
+@media (prefers-reduced-motion: reduce) { html:not([data-motion="full"])[data-boot] .boot-screen { display: none; } }
+html[data-motion="reduce"][data-boot] .boot-screen { display: none; }

@@ -1,0 +1,17 @@
+---
+import OsLayout from '../../layouts/OsLayout.astro';
+import StaticWindow from '../../components/static/StaticWindow.astro';
+import InitialData from '../../components/static/InitialData.astro';
+import { getClientPosts, getClientPost } from '../../lib/client-data';
+import { seoFor } from '../../lib/seo';
+export async function getStaticPaths() { return (await getClientPosts()).map((post) => ({ params: { slug: post.slug } })); }
+const post = (await getClientPost(Astro.params.slug!))!;
+const seo = seoFor({ path: `/writing/${post.slug}`, title: post.title, description: post.description, kind: 'post', post });
+---
+<OsLayout seo={seo} initial={{ appId: 'writing', route: post.slug }}>
+  <StaticWindow app="writing" route={post.slug} title={`${post.title} — Writing`}>
+    <h1>{post.title}</h1><p class="lede">{post.description}</p><p><time datetime={post.date}>{post.date.slice(0, 10)}</time> · {post.minutes} min read</p>
+    <div set:html={post.html} /><p><a href="/writing">All writing</a></p>
+  </StaticWindow>
+  <InitialData slot="after-main" key={`writing:${post.slug}`} data={{ post }} />
+</OsLayout>
