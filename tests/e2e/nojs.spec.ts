@@ -48,7 +48,7 @@ test('every generated project and post has content and matching initial data', a
       await expect(page.locator('#static-window')).toHaveAttribute('data-route', slug);
       await expect(page.locator('#os-initial-data')).toHaveAttribute('data-key', `${section}:${slug}`);
       await expect(page.locator('h1')).toHaveCount(1);
-      await expect(page.locator('.static-document')).toContainText(/\S/);
+      await expect(page.locator('.static-document, .writing-article')).toContainText(/\S/);
     }
   }
 });
