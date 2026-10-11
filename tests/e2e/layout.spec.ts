@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import { test, expect } from './fixtures';
 
-test('layout emits crawlable metadata, two font preloads and ordered landmarks', async ({ page }) => {
+test('layout emits crawlable metadata, two font preloads and ordered landmarks', async ({ page, browserName }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
@@ -16,14 +16,14 @@ test('layout emits crawlable metadata, two font preloads and ordered landmarks',
   expect(layers.indexOf('wallpaper os-chrome')).toBeGreaterThan(2);
   expect(layers.indexOf('content')).toBeGreaterThan(layers.indexOf('wallpaper os-chrome'));
   await expect(page.locator('#app-projects')).toHaveCount(1);
-  await page.keyboard.press('Tab');
+  await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
   await expect(page.getByRole('link', { name: 'Skip to content', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('#content')).toBeFocused();
   expect(errors).toEqual([]);
 });
 
-test('disabling JavaScript preserves the server no-js state and content', async ({ browser, baseURL }) => {
+test('disabling JavaScript preserves the server no-js state and content', async ({ browser, baseURL, browserName }) => {
   const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
   try {
     const page = await context.newPage();
@@ -32,8 +32,10 @@ test('disabling JavaScript preserves the server no-js state and content', async 
     expect(await page.locator('html').evaluate((element) => getComputedStyle(element).colorScheme)).toBe('light');
     await expect(page.locator('html')).not.toHaveAttribute('data-boot');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nipun Theekshana');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
+    // macOS WebKit uses Option-Tab to include links in sequential navigation.
+    const nextLink = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+    await page.keyboard.press(nextLink);
+    await page.keyboard.press(nextLink);
     await expect(page.locator('.skip-link[href="#simple"]')).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/#simple$/);
