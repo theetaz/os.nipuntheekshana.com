@@ -5,7 +5,7 @@ html.os-ready body > :is(.static-menubar, .static-dock, .desktop-icons, .pocket-
 .managed-window[hidden] { display: none; }
 html[data-view="simple"] .managed-window { display: none; }
 html.os-ready[data-mode="mobile"] .island-mobile :is(.static-dock, .pocket-grid) { display: block; }
-html.os-ready[data-mode="mobile"] body:not(:has(.static-window)) > .static-menubar { display: flex; visibility: hidden; pointer-events: none; }
+
 .island-mobile .static-menubar { position: fixed; }
 html[data-mode="mobile"]:has(.managed-window:not([hidden])) .desktop-widgets { display: none; }
 .island-mobile .traffic-light.close { width: 44px; height: 44px; }

@@ -5,6 +5,8 @@ import IconSprite from '../components/static/IconSprite.astro';
 import Wallpaper from '../components/static/Wallpaper.astro';
 import SimpleChrome from '../components/static/SimpleChrome.astro';
 import Desktop from '../os/Desktop';
+import { HomeScreen } from '../os/mobile/HomeScreen';
+import '../os/mobile/phone-home.css';
 import type { AppId } from '../os/types/apps';
 import { CODENAME, VERSION } from '../os/config';
 import { links, now } from '../data/profile';
@@ -89,6 +91,7 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
     <Wallpaper />
     <SimpleChrome>
       <main id="content" tabindex="-1"><slot /></main>
+      <div id="static-phone-home" class="os-chrome"><HomeScreen home={{ nowItems: now.items, nowUpdated: now.updated }} /></div>
       <Desktop client:load initial={initial} build={build} home={{ nowItems: now.items, nowUpdated: now.updated }} />
       <slot name="after-main" />
     </SimpleChrome>

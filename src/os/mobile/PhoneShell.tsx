@@ -1,11 +1,9 @@
 import { useAtomValue } from 'jotai';
-import { focusedIdAtom } from '../state/atoms';
+import { modeAtom } from '../state/atoms';
 import type { DesktopProps } from '../Desktop';
-import { HomeScreen } from './HomeScreen';
-import { AppSheet } from './AppSheet';
-import { Dock } from '../shell/Dock';
-import { MenuBar } from '../shell/MenuBar';
+import { deferredComponent } from '../lib/deferred-component';
+const phone = deferredComponent(() => import('./PhoneRuntime').then(module => module.PhoneRuntime));
+/** The static phone home paints first. No mobile implementation enters desktop B1. */
 export function PhoneShell(props: DesktopProps) {
-  const focused = useAtomValue(focusedIdAtom);
-  return focused ? <AppSheet windowId={focused} /> : <><MenuBar home={props.home} build={props.build} /><HomeScreen home={props.home} /><Dock mode="mobile" /></>;
+  return useAtomValue(modeAtom) === 'mobile' ? <phone.Component {...props} /> : null;
 }

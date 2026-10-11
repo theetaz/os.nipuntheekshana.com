@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAtom, useAtomValue, useStore } from 'jotai';
 import { AnimatePresence, m, useIsPresent } from 'motion/react';
-import { alertsAtom, desktopAtom, koodaEmptyAtom, recentAtom, reducedMotionAtom, resolvedThemeAtom, spotlightOpenAtom } from '../state/atoms';
+import { alertsAtom, desktopAtom, koodaEmptyAtom, modeAtom, recentAtom, reducedMotionAtom, resolvedThemeAtom, spotlightOpenAtom } from '../state/atoms';
 import { alert, announce, openApp, runCommand, toast } from '../wm/commands';
 import { useAppData } from '../lib/fetch-json';
 import { nextFocusIndex, trapTab } from '../lib/focus';
@@ -19,6 +19,7 @@ import './p2-8-overlays.css';
 function SpotlightPanel() {
   const store = useStore(); const [, setOpen] = useAtom(spotlightOpenAtom);
   const [recent, setRecent] = useAtom(recentAtom); const reduce = useAtomValue(reducedMotionAtom);
+  const mobile = useAtomValue(modeAtom) === 'mobile';
   const alerts = useAtomValue(alertsAtom); const host = useOverlayHost();
   const panel = useRef<HTMLDivElement>(null); const input = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState(''); const [active, setActive] = useState(0);
@@ -62,7 +63,7 @@ function SpotlightPanel() {
   const content = <m.div className="os-modal-layer os-spotlight-layer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}
     onPointerDown={event => { if (event.target === event.currentTarget) close(); }}>
     <m.div ref={panel} className="os-spotlight" role="dialog" aria-modal="true" aria-label="Spotlight search" tabIndex={-1} inert={!present || !!alerts.length}
-      initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+      initial={reduce || mobile ? { opacity: 0 } : { opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
       transition={reduce ? { duration: 0.1 } : springs.popover}
       onKeyDown={event => {
         event.stopPropagation(); trapTab(event, event.currentTarget);
