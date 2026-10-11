@@ -77,8 +77,14 @@ for (const [index, question] of questions.entries()) {
   });
 }
 
-test('free-text hello offers the exact email hand-off and copies its text', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+test('free-text hello offers the exact email hand-off and copies its text', async ({ page, context, browserName }) => {
+  if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  else await page.addInitScript(() => {
+    // Firefox and WebKit do not expose these automation permission names.
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
+      writeText: async (text: string) => { Object.assign(window, { copiedMessageText: text }); },
+    } });
+  });
   const win = await conversation(page);
   const composer = win.getByRole('textbox', { name: 'Write to Nipun' });
   await expect(win.getByRole('button', { name: 'Send message' })).toBeDisabled();
@@ -89,7 +95,9 @@ test('free-text hello offers the exact email hand-off and copies its text', asyn
   const params = new URLSearchParams((await email.getAttribute('href'))!.split('?')[1]);
   expect(params.get('body')).toBe('hello\n\n— sent from os.nipuntheekshana.com');
   await win.getByRole('button', { name: 'Copy text' }).click();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('hello');
+  const copied = browserName === 'chromium' ? await page.evaluate(() => navigator.clipboard.readText())
+    : await page.evaluate(() => (window as unknown as { copiedMessageText: string }).copiedMessageText);
+  expect(copied).toBe('hello');
   await expect(composer).toHaveValue('');
 });
 

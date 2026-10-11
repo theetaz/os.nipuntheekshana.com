@@ -14,6 +14,8 @@ async function start(page: Page) {
 async function command(win: Locator, source: string) {
   const input = win.locator('.terminal-input-wrap input');
   await expect(input).not.toHaveAttribute('readonly'); await input.fill(source); await input.press('Enter');
+  // Enter can return before React has committed the submitted command.
+  await expect(input).toHaveValue('');
   await expect(input).not.toHaveAttribute('readonly');
 }
 
