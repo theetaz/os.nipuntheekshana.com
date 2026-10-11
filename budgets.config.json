@@ -1,0 +1,26 @@
+{
+  "initialJsHome": 133120,
+  "initialJsRoute": 143360,
+  "motionFeatures": 24576,
+  "apps": {
+    "ProjectsApp": 28672,
+    "WritingApp": 14336,
+    "AboutApp": 12288,
+    "CvApp": 12288,
+    "TerminalApp": 18432,
+    "MapsApp": 22528,
+    "ActivityApp": 16384,
+    "MessagesApp": 12288,
+    "NowApp": 4096,
+    "SettingsApp": 12288,
+    "TrashApp": 6144,
+    "ReadmeApp": 4096,
+    "island": 153600
+  },
+  "cssPerPage": 30720,
+  "preloadFonts": { "count": 2, "bytes": 71680 },
+  "htmlHome": 40960,
+  "htmlRouteMax": 92160,
+  "jsonMax": 20480,
+  "imageWarn": { "coverAvif640": 71680, "screenAvif1600": 225280 }
+}
