@@ -4,14 +4,17 @@ import StaticWindow from '../components/static/StaticWindow.astro';
 import InitialData from '../components/static/InitialData.astro';
 import { APP_META } from '../os/registry/meta';
 import { seoFor } from '../lib/seo';
+import { links } from '../data/profile';
+import { CODENAME, VERSION } from '../os/config';
+import { SettingsStatic } from '../os/apps/settings/views/SettingsStatic';
 
-
+const data = { build: { version: VERSION, codename: CODENAME, sha: import.meta.env.PUBLIC_BUILD_SHA ?? 'local',
+  date: new Date().toISOString() }, source: links.source };
 const seo = seoFor({ path: '/settings', title: 'Settings', description: APP_META.settings.description, kind: 'app' });
 ---
 <OsLayout seo={seo} initial={{ appId: 'settings', route: '' }}>
   <StaticWindow app="settings" route="" title="Settings">
-    <h1>Settings</h1><p class="lede">{APP_META.settings.description}</p>
-    <p>Settings need JavaScript to save appearance, wallpaper and accessibility preferences on this device.</p><p><a href="#simple">Open Simple view</a> for a clean reading layout. It works without JavaScript.</p>
+    <SettingsStatic data={data} />
   </StaticWindow>
-  <InitialData slot="after-main" key="settings" data={{}} />
+  <InitialData slot="after-main" key="settings:index" data={data} />
 </OsLayout>
