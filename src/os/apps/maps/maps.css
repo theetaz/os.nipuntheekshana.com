@@ -1,0 +1,110 @@
+/* Island uses the window's named container in desktop windows and Pocket sheets. */
+.maps-view { position: relative; height: 100%; min-height: 440px; overflow: hidden; isolation: isolate; background: var(--os-window); color: var(--os-ink); }
+.maps-stage, .maps-poster, .maps-stage > canvas, .island-labels, .maps-game-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+.maps-stage { outline-offset: -4px; touch-action: none; cursor: grab; }
+.maps-view[data-playing="true"] .maps-stage { cursor: crosshair; }
+.maps-stage > canvas { pointer-events: none; animation: maps-canvas-in 400ms ease both; }
+.maps-poster { color: var(--os-accent); transition: opacity 400ms ease; }
+.maps-view[data-surface="webgl"] .maps-poster { opacity: 0; }
+.maps-poster[data-coastline="false"] [data-map-coast], .maps-poster[data-graticule="false"] [data-map-grid] { display: none; }
+.maps-glass { background: var(--glass-bg); border: 1px solid var(--os-line-strong); border-radius: var(--r-card); backdrop-filter: blur(16px); box-shadow: var(--shadow-card); }
+.maps-toolbar { position: absolute; top: 8px; left: 112px; right: 16px; display: flex; align-items: start; justify-content: center; z-index: 3; pointer-events: none; gap: 16px; }
+.maps-toolbar button, .maps-toolbar fieldset { pointer-events: auto; }
+.maps-modes { display: flex; padding: 2px; border-radius: var(--r-pill); gap: 2px; }
+.maps-view button { font: 450 13px/18px var(--font-ui); cursor: pointer; }
+.maps-view button:disabled { cursor: default; opacity: .6; }
+.maps-modes button { padding: 4px 16px; min-height: 28px; border-radius: var(--r-pill); }
+.maps-modes button[aria-pressed="true"] { background: var(--os-accent-soft); color: var(--os-accent-ink); }
+.maps-tools { position: absolute; right: 0; display: flex; gap: 8px; }
+.maps-tools > button, .maps-tools > div > button { padding: 6px 10px; min-height: 32px; }
+.maps-layers { position: absolute; right: 80px; top: 40px; width: 172px; padding: 8px; }
+.maps-layers label { display: flex; align-items: center; gap: 8px; padding: 6px; font: 450 13px/18px var(--font-ui); }
+.maps-layers input { accent-color: var(--os-accent); }
+.maps-info { position: absolute; top: 56px; left: 16px; width: 248px; padding: 16px; z-index: 2; }
+.maps-info h1, .maps-static-card h1 { font: 500 20px/26px var(--font-display); margin: 0 0 6px; }
+.maps-info p { font: 450 12px/16px var(--font-ui); margin: 0 0 6px; color: var(--os-ink-2); }
+.maps-info button { color: var(--os-accent-ink); text-align: left; padding: 4px 0; }
+.maps-view a, .maps-static a { color: var(--os-accent-ink); text-underline-offset: 3px; }
+.maps-readout { position: absolute; left: 16px; bottom: 16px; max-width: calc(100% - 260px); padding: 8px 12px; font: 400 11px/18px var(--font-mono); font-stretch: 87.5%; z-index: 2; }
+.maps-legend { position: absolute; right: 16px; bottom: 16px; width: 220px; padding: 12px; font: 450 12px/16px var(--font-ui); z-index: 2; }
+.maps-legend p { margin: 0 0 6px; }
+.maps-game { position: absolute; top: 56px; right: 16px; width: 300px; padding: 16px; z-index: 2; }
+.maps-game header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.maps-game header button { width: 28px; height: 28px; font-size: 20px; border-radius: 8px; }
+.maps-eyebrow { font: 500 10.5px/14px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.maps-game-round { display: flex; justify-content: space-between; font: 400 11px/18px var(--font-mono); font-variant-numeric: tabular-nums; }
+.maps-game h2 { font: 450 32px/38px var(--font-display); letter-spacing: -.015em; margin: 20px 0 6px; }
+.maps-game p { font: 450 13px/18px var(--font-ui); margin: 12px 0; }
+.maps-game .maps-city-si { font: 500 20px/26px var(--font-sinhala); margin: 0 0 20px; }
+.maps-game .maps-game-keys { font-size: 11px; line-height: 16px; color: var(--os-ink-2); }
+.maps-primary { background: var(--os-accent); color: var(--os-on-accent); padding: 8px 16px; min-height: 36px; border-radius: var(--r-pill); }
+.maps-secondary { border: 1px solid var(--os-line-strong); padding: 8px 12px; border-radius: var(--r-pill); margin-left: 8px; min-height: 36px; }
+.maps-game-overlay, .island-labels { pointer-events: none; z-index: 1; }
+.maps-game-overlay { overflow: visible; }
+.maps-guess-line { stroke: var(--os-ink); stroke-dasharray: 5 5; stroke-width: 1.5; }
+.maps-guess-dot { fill: var(--os-window); stroke: var(--os-ink); stroke-width: 2; }
+.maps-truth-dot { fill: var(--os-accent); stroke: var(--os-window); stroke-width: 2; }
+.maps-game-overlay text { fill: var(--os-ink); stroke: var(--os-window); stroke-width: 4px; paint-order: stroke; font: 500 12px var(--font-ui); }
+.island-label { position: absolute; top: 0; left: 0; padding: 2px 6px; border-radius: 4px; color: var(--os-ink); background: var(--os-window); font: 450 11px/16px var(--font-ui); white-space: nowrap; }
+.island-labels[hidden] { display: none; }
+.maps-crosshair { position: absolute; font: 400 32px/1 var(--font-mono); transform: translate(-50%, -50%); color: var(--os-ink); text-shadow: 0 1px var(--os-window); pointer-events: none; z-index: 1; }
+.maps-fallback { position: absolute; left: 16px; bottom: 72px; max-width: 320px; padding: 10px 12px; font: 450 12px/16px var(--font-ui); z-index: 2; }
+.maps-fallback p { margin: 0; }
+.maps-fallback button { margin-top: 8px; padding: 6px 10px; border: 1px solid var(--os-line-strong); border-radius: var(--r-pill); }
+.maps-svg-pulse { transform-box: fill-box; transform-origin: center; animation: maps-pulse 1.4s ease-out; }
+@keyframes maps-pulse { from { opacity: .9; transform: scale(1); } to { opacity: 0; transform: scale(12); } }
+@keyframes maps-canvas-in { from { opacity: 0; } to { opacity: 1; } }
+/* The transparent shell title bar reserves its traffic-light/drag area. */
+.managed-window[data-app="maps"] .window-titlebar { right: auto; width: 104px; }
+.static-window[data-app="maps"] .static-titlebar { position: absolute; top: 0; left: 0; height: 40px; width: 104px; background: transparent; border: 0; z-index: 4; padding: 0; }
+.static-window[data-app="maps"] .static-titlebar > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.static-window[data-app="maps"] .static-document { height: 100%; padding: 0; max-width: none; font: 450 13px/18px var(--font-ui); }
+.maps-static { height: 100%; }
+.maps-static-stage { position: relative; height: 100%; min-height: 440px; }
+.maps-static-card { position: absolute; top: 56px; left: 16px; width: 248px; padding: 16px; font: 450 12px/18px var(--font-ui); }
+.maps-static-card p { margin: 8px 0; }
+.maps-static-copy { padding: 32px; max-width: 80ch; margin: auto; font: 400 15px/24px var(--font-ui); }
+.maps-places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; list-style: none; padding: 0 !important; }
+.maps-places li { display: flex; flex-direction: column; }
+.maps-coordinate { font: 400 11px/18px var(--font-mono); color: var(--os-ink-2); }
+@container window (max-width: 700px) {
+  .maps-toolbar { justify-content: start; gap: 8px; }
+  .maps-modes button { padding: 4px 10px; }
+  .maps-tools { gap: 4px; }
+  .maps-info { width: 208px; }
+  .maps-readout { max-width: calc(100% - 32px); bottom: 16px; }
+  .maps-legend { width: 180px; bottom: 66px; }
+  .maps-fallback { max-width: 260px; bottom: 106px; }
+  .maps-game { width: 248px; padding: 12px; }
+  .maps-game h2 { font-size: 28px; line-height: 34px; }
+}
+@container window (max-width: 480px) {
+  .maps-view { height: 100%; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+  .maps-view::after { content: ""; display: block; height: 820px; pointer-events: none; }
+  .maps-stage { top: 76px; height: 420px; }
+  .maps-toolbar { left: 80px; right: 12px; top: 8px; justify-content: start; }
+  .maps-tools { top: 48px; left: 0; right: auto; }
+  .maps-toolbar button, .maps-game button, .maps-info button { min-height: 44px; }
+  .maps-info { top: 510px; left: 12px; width: 208px; padding: 12px; }
+  .maps-game { top: 510px; right: 12px; left: 12px; width: auto; }
+  .maps-game h2 { margin-top: 10px; }
+  .maps-game .maps-city-si { margin-bottom: 8px; }
+  .maps-game .maps-game-keys { margin: 8px 0; }
+  .maps-legend { top: 510px; left: 232px; right: 12px; bottom: auto; width: auto; padding: 8px; }
+  .maps-view[data-playing="true"] .maps-legend { display: none; }
+  .maps-readout { bottom: auto; top: 474px; left: 12px; padding: 4px 8px; font-size: 9px; }
+  .maps-fallback { top: 400px; bottom: auto; left: 12px; max-width: calc(100% - 24px); font-size: 11px; }
+  .maps-static-stage { min-height: 740px; }
+  .maps-static-stage .maps-poster { top: 76px; height: 420px; }
+  .maps-static-card { top: 510px; left: 12px; }
+  .maps-static-copy { padding: 20px; }
+  .maps-places { grid-template-columns: 1fr; }
+  .static-window[data-app="maps"] .static-titlebar { height: 52px; width: 80px; }
+}
+html[data-motion="reduce"] :is(.maps-poster, .maps-stage > canvas, .maps-svg-pulse) { animation: none; transition: none; }
+@media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) :is(.maps-poster, .maps-stage > canvas, .maps-svg-pulse) { animation: none; transition: none; } }
+html[data-transparency="reduce"] .maps-glass { background: var(--os-window); backdrop-filter: none; }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) { .maps-glass { background: var(--os-window); backdrop-filter: none; } }
+@media (forced-colors: active) { .maps-glass { background: Canvas; color: CanvasText; border-color: CanvasText; } .maps-poster { color: CanvasText; } }
+.island-live-wallpaper > canvas { width: 100%; height: 100%; }
+html:has(.island-live-wallpaper[data-live-ready="true"]) .wp-island { visibility: hidden; }
