@@ -1,0 +1,25 @@
+---
+import Wallpaper from '../../src/components/static/Wallpaper.astro';
+---
+<!doctype html>
+<html lang="en" class="no-js" data-theme="light" data-wallpaper="galle-face">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Isolated wallpaper visual and performance fixture." />
+    <title>Serendib wallpaper fixture</title>
+    <script is:inline>
+      const params = new URLSearchParams(location.search);
+      const html = document.documentElement;
+      html.dataset.theme = params.get('theme') || 'light';
+      html.dataset.wallpaper = params.get('wallpaper') || 'galle-face';
+      if (params.has('motion')) html.dataset.motion = params.get('motion');
+      html.classList.replace('no-js', 'js');
+    </script>
+    <style is:global>
+      html, body { margin: 0; min-height: 100%; }
+      :root { --z-wallpaper: 0; }
+    </style>
+  </head>
+  <body><Wallpaper /></body>
+</html>
