@@ -35,17 +35,33 @@ export function isolateModal(panel: HTMLElement, focus: () => void): () => void 
   }
   const modal: Modal = { panel, focus, previous: document.activeElement instanceof HTMLElement ? document.activeElement : null };
   session.stack.push(modal); session.cover(); focus();
+  // WebKit applies inert changes at its next rendering update. Focus after that
+  // update, including when AnimatePresence revives an exiting modal.
+  const focusFrame = requestAnimationFrame(() => {
+    if (session.stack.at(-1) === modal && !panel.contains(document.activeElement)) focus();
+  });
   return () => {
+    cancelAnimationFrame(focusFrame);
     const top = session.stack.at(-1) === modal;
     session.stack.splice(session.stack.indexOf(modal), 1); session.cover();
     if (!top) return;
     const next = session.stack.at(-1);
-    if (next) { next.focus(); return; }
+    if (next) {
+      next.focus();
+      requestAnimationFrame(() => { if (session.stack.at(-1) === next && !next.panel.contains(document.activeElement)) next.focus(); });
+      return;
+    }
     const previous = modal.previous;
     const usable = previous?.isConnected && !previous.matches('body, html') && !previous.closest('[inert], [hidden]')
       && previous.getClientRects().length && getComputedStyle(previous).visibility !== 'hidden';
-    const target = usable ? previous : document.querySelector<HTMLElement>('[role="menubar"] [role="menuitem"][tabindex="0"]')
-      ?? focusableWithin(document.body)[0];
-    target?.focus({ preventScroll: true });
+    const available = focusableWithin(document.body);
+    const target = usable ? previous : available.find(element => element.matches('[role="menubar"] [role="menuitem"][tabindex="0"]'))
+      ?? available[0];
+    const restore = () => {
+      const active = document.activeElement;
+      if (!session.stack.length && (!active || active === document.body || panel.contains(active))
+        && target?.isConnected && !target.closest('[inert], [hidden]')) target.focus({ preventScroll: true });
+    };
+    restore(); requestAnimationFrame(restore);
   };
 }
