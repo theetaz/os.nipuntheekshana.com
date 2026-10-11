@@ -5,8 +5,10 @@ import type { MochiState } from '../../src/os/mochi/api';
 import { createScriptEngine, emailHref, FREE_TEXT_REPLY, GREETING, initialTranscript, matchIntent,
   MAX_INPUT, mochiAnswer, QUESTIONS, replyDelay, scriptedAnswer, type Intent } from '../../src/os/apps/messages/script';
 import { appendMessages, MAX_MESSAGES, parseSession, type ConversationSession } from '../../src/os/apps/messages/session';
-import { createMochiPort } from '../../src/os/apps/messages/mochi';
-import type { MochiPrefs } from '../../src/os/state/prefs';
+import { api } from '../../src/os/mochi/api';
+import { createOsStore, registerStore } from '../../src/os/state/store';
+import { mochiPrefsAtom } from '../../src/os/state/prefs';
+import { brainAtom } from '../../src/os/mochi/brain';
 
 const profile: ClientProfile = { ...sourceProfile, hobbies: [...sourceProfile.hobbies], chapters: [], cv: { ...sourceProfile.cv, sizeLabel: 'PDF' },
   avatar: { src: '/avatar.png', width: 40, height: 40, avif: '', webp: '', alt: 'Nipun' } };
@@ -170,18 +172,18 @@ describe('reply timing', () => {
   });
 });
 
-describe('shared Mochi preferences', () => {
-  it.each([false, true])('increments once with a live API: %s', live => {
-    let prefs: MochiPrefs = { pets: 2, visible: false, naps: true, pos: null };
-    const api = { pet: vi.fn(() => { if (live) prefs = { ...prefs, pets: prefs.pets + 1 }; }), give: vi.fn(),
-      getState: () => ({ pets: 0, mood: 'happy' as const, visible: true }) };
-    const set = vi.fn((update: (value: MochiPrefs) => MochiPrefs) => { prefs = update(prefs); });
-    const port = createMochiPort(api, { get: () => prefs, set });
-    port.pet();
-    expect(api.pet).toHaveBeenCalledOnce(); expect(prefs.pets).toBe(3);
-    expect(set).toHaveBeenCalledTimes(live ? 0 : 1);
-    expect(port.getState()).toEqual({ pets: 3, mood: 'happy', visible: false });
-    port.give('tea'); expect(api.give).toHaveBeenCalledExactlyOnceWith('tea');
+describe('live Messages to Mochi integration', () => {
+  it('pets once through the real API and tea updates the desktop brain', async () => {
+    const store = createOsStore(); const release = registerStore(store);
+    store.set(mochiPrefsAtom, { pets: 2, visible: true, naps: true, pos: null });
+    try {
+      const reply = await createScriptEngine().reply({ thread: 'mochi', text: 'Pet', history: [] }, { profile, now: () => date, mochi: api });
+      expect(store.get(mochiPrefsAtom).pets).toBe(3);
+      expect(reply.text).toContain('3 pets so far');
+      await createScriptEngine().reply({ thread: 'mochi', text: 'Give tea', history: [] }, { profile, now: () => date, mochi: api });
+      expect(store.get(brainAtom)).toMatchObject({ mood: 'happy', bubble: 'Ceylon tea. My favourite.' });
+      expect(store.get(mochiPrefsAtom).pets).toBe(3);
+    } finally { release(); }
   });
 });
 

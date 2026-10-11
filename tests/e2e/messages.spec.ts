@@ -125,10 +125,16 @@ test('Mochi pet count reaches the shared Settings preference and persists once',
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:mochi')!).pets)).toBe(1);
   await win.getByRole('button', { name: 'How are you?', exact: true }).click();
   await expect(win.locator('.messages-bubble--assistant').last()).toContainText("I've had 1 pet");
+  await expect(page.locator('[data-mochi][data-variant="desktop"]')).toBeVisible();
   await win.getByRole('button', { name: 'Give tea', exact: true }).click();
+  await expect(page.locator('[data-mochi][data-variant="desktop"]')).toHaveAttribute('data-mood', 'happy');
+  await expect(page.locator('[data-mochi-bubble]')).toHaveText('Ceylon tea. My favourite.');
   await expect(win.locator('.messages-bubble--assistant').last()).toContainText('Tea received');
   await openApp(page, 'Settings');
-  await expect(page.locator('[data-window-id="settings"]')).toBeVisible();
+  const settings = page.locator('[data-window-id="settings"]');
+  await expect(settings).toBeVisible();
+  await settings.getByRole('button', { name: 'Mochi', exact: true }).click();
+  await expect(settings.locator('.settings-pets')).toHaveText('Pets so far: 1');
 });
 
 test('session history and drafts survive reload and new messages keep unique IDs', async ({ page }) => {
