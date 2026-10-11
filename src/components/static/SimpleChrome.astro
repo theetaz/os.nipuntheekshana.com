@@ -26,15 +26,12 @@ const pocketApps = apps.filter((app) => app.mobile.gridOrder !== null).sort((a, 
 <footer class="simple-footer simple-only"><nav aria-label="All sections"><a href="/#simple">Home</a>{apps.map((app) => <a href={`${app.basePath}#simple`}>{app.name}</a>)}<a href="/maps/play#simple">Pin the city</a></nav><p>Made in Colombo, Sri Lanka.</p></footer>
 
 <script is:inline>
+  // Queue early clicks until the island can reset the persisted preference through its atom.
   document.addEventListener('click', function (event) {
-    var link = event.target.closest && event.target.closest('a[href]');
-    if (link && link.getAttribute('href').endsWith('#simple') && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
-      try { localStorage.setItem('serendib:view', '"simple"'); } catch (e) {}
-      document.documentElement.dataset.view = 'simple';
+    var link = event.target.closest && event.target.closest('[data-simple-back]');
+    if (link && !document.documentElement.classList.contains('os-ready') && !event.defaultPrevented && event.button === 0 &&
+        !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault(); document.documentElement.dataset.viewRequest = 'desktop';
     }
-  });
-  document.querySelector('[data-simple-back]').addEventListener('click', function () {
-    try { localStorage.removeItem('serendib:view'); } catch (e) {}
-    delete document.documentElement.dataset.view;
   });
 </script>

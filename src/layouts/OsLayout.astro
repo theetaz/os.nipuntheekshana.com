@@ -4,17 +4,22 @@ import SkipLinks from '../components/static/SkipLinks.astro';
 import IconSprite from '../components/static/IconSprite.astro';
 import Wallpaper from '../components/static/Wallpaper.astro';
 import SimpleChrome from '../components/static/SimpleChrome.astro';
-import { links } from '../data/profile';
+import Desktop from '../os/Desktop';
+import type { AppId } from '../os/types/apps';
+import { CODENAME, VERSION } from '../os/config';
+import { links, now } from '../data/profile';
 import type { Seo } from '../lib/seo';
 import '../styles/global.css';
+import '../styles/static-window.css';
 
 interface Props {
   seo: Seo;
-  initial: { appId: string; route: string } | null;
+  initial: { appId: AppId; route: string } | null;
   home?: boolean;
 }
 
-const { seo } = Astro.props;
+const { seo, initial } = Astro.props;
+const build = { version: VERSION, codename: CODENAME, sha: import.meta.env.PUBLIC_BUILD_SHA ?? 'local', date: new Date().toISOString() };
 const ogImage = new URL(seo.ogImage ?? '/og.png', Astro.site ?? 'https://os.nipuntheekshana.com');
 const ogType = seo.jsonLd?.some((entry) => '@type' in entry && entry['@type'] === 'BlogPosting') ? 'article' : 'website';
 // Escape HTML delimiters so content cannot terminate a JSON-LD script element.
@@ -84,7 +89,7 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
     <Wallpaper />
     <SimpleChrome>
       <main id="content" tabindex="-1"><slot /></main>
-      <!-- P2-3: mount the Desktop client:load island here with initial and home props. -->
+      <Desktop client:load initial={initial} build={build} home={{ nowItems: now.items, nowUpdated: now.updated }} />
       <slot name="after-main" />
     </SimpleChrome>
   </body>

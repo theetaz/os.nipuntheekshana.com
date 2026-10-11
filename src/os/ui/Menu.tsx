@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useId, useRef, useState, type HTMLAttributes } from 'react';
+import { forwardRef, useEffect, useLayoutEffect, useImperativeHandle, useId, useRef, useState, type HTMLAttributes } from 'react';
 import { createPortal } from 'react-dom';
 import type { MenuItemSpec } from '../types/apps';
 import { nextFocusIndex } from '../lib/focus';
@@ -36,7 +36,7 @@ const MenuLevel = forwardRef<HTMLDivElement, LevelProps>(function RenderMenuLeve
   const position = useFloatingPanel(panel, present, anchorRef, nested ? 'right' : 'bottom', point, nested ? 0 : 4, host);
   const callback = useRef({ onClose, onCommand }); callback.current = { onClose, onCommand };
   useEffect(() => { setMac(isMac()); return () => { clearTimeout(hoverTimer.current); clearTimeout(activationTimer.current); }; }, []);
-  useEffect(() => {
+  useLayoutEffect(() => {
     typeahead.current = { text: '', at: 0 };
     if (!open) { clearTimeout(hoverTimer.current); setSubmenu(-1); setActive(-1); return; }
     if (present && autoFocus) {

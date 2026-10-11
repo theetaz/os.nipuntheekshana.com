@@ -63,7 +63,8 @@ test('route pages do not log errors and reduced motion skips the boot @smoke', a
 
 test('stored Simple view can return to the desktop', async ({ page }) => {
   await page.goto('/');
-  await page.locator('.simple-entry').click();
+  await expect(page.locator('html')).toHaveClass(/os-ready/);
+  await page.locator('[data-shell="desktop"] .simple-entry').click();
   expect(await page.evaluate(() => localStorage.getItem('serendib:view'))).toBe('"simple"');
   await page.reload();
   await expect(page.locator('#home-document')).toBeVisible();
