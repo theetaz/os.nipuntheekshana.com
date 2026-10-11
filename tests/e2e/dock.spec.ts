@@ -286,7 +286,9 @@ test('tooltips show on focus, dismiss on Escape, and right-click and Shift+F10 u
     Object.assign(window, { dockContextEvents: [] });
     document.addEventListener('contextmenu', event => (window as unknown as { dockContextEvents: boolean[] }).dockContextEvents.push(event.defaultPrevented));
   });
-  await projects.click({ button: 'right' }); await projects.focus(); await page.keyboard.press('Shift+F10');
+  await projects.click({ button: 'right' }); await expect(page.getByRole('menu')).toBeVisible();
+  await page.keyboard.press('Escape'); await expect(page.getByRole('menu')).toBeHidden(); await expect(projects).toBeFocused();
+  await page.keyboard.press('Shift+F10');
   expect(await page.evaluate(() => (window as unknown as { dockContextEvents: boolean[] }).dockContextEvents)).toEqual([true, true]);
 });
 
