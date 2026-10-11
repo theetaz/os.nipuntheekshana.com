@@ -153,8 +153,9 @@ test('light and dark accents pass axe with active chips and overlay roles', asyn
   for (const theme of ['light', 'dark']) {
     for (const accent of ['thambili', 'lagoon', 'lotus', 'tea']) {
       await page.evaluate(({ theme, accent }) => { document.documentElement.dataset.theme = theme; document.documentElement.dataset.accent = accent; }, { theme, accent });
+      await expect(page.getByRole('menu', { name: 'Actions menu' })).toHaveCSS('opacity', '1');
       const result = await new AxeBuilder({ page }).analyze();
-      expect(result.violations.map(violation => ({ id: violation.id, nodes: violation.nodes.map(node => node.failureSummary) })), `${theme}/${accent}`).toEqual([]);
+      expect(result.violations.map(violation => ({ id: violation.id, nodes: violation.nodes.map(node => ({ target: node.target, html: node.html, summary: node.failureSummary })) })), `${theme}/${accent}`).toEqual([]);
     }
   }
 });

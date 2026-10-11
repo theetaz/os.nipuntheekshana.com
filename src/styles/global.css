@@ -169,7 +169,7 @@
   --palette-night: #121110;
   --palette-bone: #F3EFE8;
   --palette-bone-2: #BAB2A6;
-  --palette-bone-3: #8F877B;
+  --palette-bone-3: #938B7F;
   --palette-thambili: #E8722A;
   --palette-thambili-ink: #B0500E;
   --palette-thambili-bright: #FF9A4D;
@@ -215,7 +215,7 @@
   --term-user: #6FDCCD;
   --term-host: #FFB070;
   --term-path: #D9C8A9;
-  --term-dim: #8F877B;
+  --term-dim: #938B7F;
   --term-err: #FF7A6E;
   --term-ok: #9BE37F;
   --term-link: #8AB8FF;
@@ -351,7 +351,7 @@
   color-scheme: dark;
   --os-ink: #F3EFE8;
   --os-ink-2: #BAB2A6;
-  --os-ink-3: #8F877B;
+  --os-ink-3: #938B7F;
   --os-ink-inverse: #1C1A17;
   --os-window: #1C1A17;
   --os-titlebar: #22201C;
@@ -471,7 +471,7 @@ html[data-theme="dark"][data-accent="tea"] {
     color-scheme: dark;
     --os-ink: #F3EFE8;
     --os-ink-2: #BAB2A6;
-    --os-ink-3: #8F877B;
+    --os-ink-3: #938B7F;
     --os-ink-inverse: #1C1A17;
     --os-window: #1C1A17;
     --os-titlebar: #22201C;
