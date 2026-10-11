@@ -1,53 +1,245 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAtomValue, useStore } from 'jotai';
-import { desktopAtom, focusedIdAtom, releaseWindowAtom, updateAvailableAtom, windowAtom } from '../state/atoms';
+import { announceAtom, appLoadAtom, desktopAtom, focusedIdAtom, geometryAtom, reducedMotionAtom, releaseWindowAtom, updateAvailableAtom, windowAtom } from '../state/atoms';
+import { APP_META } from '../registry/meta';
 import { loadApp } from '../registry/loader';
 import type { AppModule, AppProps } from '../registry/apps';
 import { readInitialData } from '../lib/initial-data';
+import { focusableWithin, trapTab } from '../lib/focus';
 import { closeWindow, focusWindow, navigateWindow } from '../wm/commands';
-import type { WindowId } from '../wm/types';
+import { clampMove, clampSize } from '../wm/geometry';
+import type { Rect, WindowId } from '../wm/types';
+import { matchRoute, pathFor } from '../url/routes';
+import type { AppId } from '../types/apps';
+import { ErrorState } from '../ui/ErrorState';
+import { Button } from '../ui/Button';
 import { completeAdoption } from './Adoption';
 import { TitleBar } from './TitleBar';
 import { AppErrorBoundary } from './AppErrorBoundary';
+import { ResizeHandles } from './ResizeHandles';
+import { skeletons } from './skeletons';
+import { createFrameController, sameRect, type FrameController } from './frame-controller';
+import { useWindowDrag } from './useWindowDrag';
+import { useWindowResize } from './useWindowResize';
+import { getDockAnchor } from './dock-anchors';
 
-export function Window({ windowId, mode = 'desktop', zIndex = 30 }: { windowId: WindowId; mode?: 'desktop' | 'mobile'; zIndex?: number }) {
+const launchers = new WeakMap<Document, Map<AppId, WeakRef<HTMLElement>>>();
+/** Capture the source before the link interceptor opens a window (including Safari clicks). */
+export function trackWindowLaunches(document: Document): () => void {
+  const click = (event: MouseEvent) => {
+    const source = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href]') : null;
+    if (!source || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const url = new URL((source as HTMLAnchorElement).href, document.location.href);
+    if (url.origin !== document.location.origin || url.hash === '#simple') return;
+    const route = matchRoute(url.pathname);
+    if (!route) return;
+    let sources = launchers.get(document);
+    if (!sources) { sources = new Map(); launchers.set(document, sources); }
+    sources.set(route.appId, new WeakRef(source));
+  };
+  document.addEventListener('click', click, true);
+  return () => document.removeEventListener('click', click, true);
+}
+
+function focusContent(el: HTMLElement) {
+  const heading = el.querySelector<HTMLElement>('.window-content h1, .window-content h2');
+  if (heading) heading.tabIndex = -1;
+  const target = el.querySelector<HTMLElement>('[data-autofocus]')
+    ?? focusableWithin(el).find(item => !item.closest('.window-traffic-lights')) ?? heading ?? el;
+  target.focus({ preventScroll: true });
+}
+
+export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: WindowId; mode?: 'desktop' | 'mobile'; zIndex?: number }) {
   const store = useStore(); const win = useAtomValue(windowAtom(windowId)); const focusedId = useAtomValue(focusedIdAtom);
   const updated = useAtomValue(updateAvailableAtom);
   const [module, setModule] = useState<AppModule | null>(null); const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0); const [contentReady, setContentReady] = useState(false);
-  const scrollRootRef = useRef<HTMLElement | null>(null);
-  const appId = win?.appId;
+  const [stillLoading, setStillLoading] = useState(false); const [keyboardMove, setKeyboardMove] = useState(false);
+  const scrollRootRef = useRef<HTMLElement | null>(null); const element = useRef<HTMLElement | null>(null);
+  const frame = useRef<FrameController | null>(null); const transitionSeq = useRef<number | null>(null);
+  const readyCalled = useRef(false); const previousFocus = useRef(false); const previousReady = useRef(false);
+  const launcher = useRef<WeakRef<HTMLElement> | null>(null);
+  const keyboard = useRef<{ original: Rect; resized: boolean; returnFocus: HTMLElement | null } | null>(null);
+  const appId = win?.appId; const focused = focusedId === windowId;
   useEffect(() => () => releaseWindowAtom(windowId), [windowId]);
   useEffect(() => {
     if (!appId) return;
-    let active = true; setError(false);
-    void loadApp(appId, store).then(value => { if (active) setModule(value); }, () => { if (active) setError(true); });
-    return () => { active = false; };
+    let active = true; setError(false); setStillLoading(false);
+    const timer = setTimeout(() => { if (active) setStillLoading(true); }, 3000);
+    void loadApp(appId, store).then(value => {
+      clearTimeout(timer); if (active) {
+        // Vite resolves a prevented preloadError without a module. It is still a load failure.
+        if (value?.default) setModule(value);
+        else { setError(true); store.set(appLoadAtom, prev => ({ ...prev, [appId]: 'error' })); }
+        setStillLoading(false);
+      }
+    }, () => {
+      clearTimeout(timer); if (active) { setError(true); setStillLoading(false); }
+    });
+    return () => { active = false; clearTimeout(timer); };
   }, [appId, store, attempt]);
-  useEffect(() => { if (win?.closing) store.set(desktopAtom, { type: 'FINISH_CLOSE', id: windowId }); }, [store, windowId, win?.closing]);
-  const ready = useCallback(() => { completeAdoption(store, windowId, scrollRootRef.current); setContentReady(true); }, [store, windowId]);
+  const ready = useCallback(() => {
+    if (readyCalled.current) return;
+    readyCalled.current = true;
+    if (scrollRootRef.current) scrollRootRef.current.tabIndex = -1;
+    const current = store.get(desktopAtom).windows[windowId];
+    if (element.current) element.current.inert = !!(current?.minimized || current?.closing);
+    completeAdoption(store, windowId, scrollRootRef.current);
+    setContentReady(true);
+  }, [store, windowId]);
+  const retry = useCallback(() => {
+    readyCalled.current = false;
+    if (!store.get(desktopAtom).windows[windowId]?.adopted) setContentReady(false);
+    setAttempt(value => value + 1);
+  }, [store, windowId]);
+  const announce = useCallback((text: string) => store.set(announceAtom, prev => ({ text, politeness: 'polite', seq: prev.seq + 1 })), [store]);
+  const returnToDesktop = useCallback(() => {
+    if (store.get(desktopAtom).focusedId) return;
+    const source = launcher.current?.deref();
+    const fallback = element.current?.ownerDocument.querySelector<HTMLElement>('[data-shell="desktop"] [aria-label="Desktop"] a, [data-shell] [aria-label="Dock"] a');
+    if (source?.isConnected && !source.closest('[hidden], [inert]')) source.focus({ preventScroll: true });
+    else fallback?.focus({ preventScroll: true });
+  }, [store]);
+
+  useLayoutEffect(() => {
+    const el = element.current; const current = store.get(desktopAtom).windows[windowId];
+    if (!el || !current) return;
+    const active = el.ownerDocument.activeElement;
+    launcher.current = launchers.get(el.ownerDocument)?.get(current.appId) ?? null;
+    if (!launcher.current && active instanceof HTMLElement && active !== el.ownerDocument.body && !active.closest('[data-window-id]')) launcher.current = new WeakRef(active);
+    const rect = mode === 'mobile' ? { x: 0, y: 0, w: innerWidth, h: innerHeight } : current.rect;
+    frame.current = createFrameController(el, rect, () => store.get(reducedMotionAtom));
+    transitionSeq.current = null;
+    return () => { frame.current?.destroy(); frame.current = null; };
+  }, [mode, store, windowId]);
+
+  useLayoutEffect(() => {
+    const controller = frame.current;
+    if (!win || !controller) return;
+    const el = controller.el;
+    if (keyboard.current && (!focused || win.minimized || win.closing)) {
+      const original = keyboard.current.original;
+      keyboard.current = null; delete el.dataset.keyboardMove; setKeyboardMove(false);
+      controller.set(original);
+    }
+    const rect = mode === 'mobile' ? { x: 0, y: 0, w: innerWidth, h: innerHeight } : win.rect;
+    if (transitionSeq.current === win.transition.seq) {
+      if (!el.hasAttribute('data-dragging') && !el.hasAttribute('data-resizing') && !keyboard.current && !sameRect(rect, controller.rect)) controller.set(rect);
+      return;
+    }
+    transitionSeq.current = win.transition.seq;
+    el.hidden = false;
+    el.dataset.transition = win.transition.kind;
+    const seq = win.transition.seq; const kind = win.transition.kind;
+    if (kind !== 'none') {
+      const suffix = kind === 'open' ? 'opened' : kind === 'close' ? 'closed' : kind === 'minimize' ? 'minimised'
+        : kind === 'restore' || kind === 'unsnap' || (kind === 'zoom' && win.mode === 'normal') ? 'restored'
+          : win.mode === 'maximized' ? 'maximised' : `snapped ${win.snap?.replace('-', ' ') ?? ''}`;
+      announce(`${win.title} ${suffix}`);
+    }
+    void controller.animate(kind, rect, { origin: win.transition.origin, dockTarget: getDockAnchor(win.appId) }).then(() => {
+      const current = store.get(desktopAtom).windows[windowId];
+      if (frame.current !== controller || !current || current.transition.seq !== seq) return;
+      delete el.dataset.transition;
+      if (current.minimized) { el.hidden = true; returnToDesktop(); }
+      if (kind === 'close' && current.closing) {
+        returnToDesktop(); store.set(desktopAtom, { type: 'FINISH_CLOSE', id: windowId });
+      }
+    });
+  }, [announce, focused, mode, returnToDesktop, store, win, windowId]);
+
+  useWindowDrag(windowId, frame, mode === 'desktop');
+  useWindowResize(windowId, frame, mode === 'desktop');
+
+  useLayoutEffect(() => {
+    const el = element.current;
+    if (focused && win && !win.closing && !win.minimized && el && (contentReady || error)
+      && (!previousFocus.current || !previousReady.current) && !(win.adopted && !previousReady.current)) focusContent(el);
+    previousFocus.current = focused; previousReady.current = contentReady || error;
+  }, [contentReady, error, focused, win]);
+
+  const finishKeyboard = useCallback((commit: boolean) => {
+    const interaction = keyboard.current; const controller = frame.current;
+    if (!interaction || !controller) return;
+    keyboard.current = null; delete controller.el.dataset.keyboardMove; setKeyboardMove(false);
+    if (commit) {
+      const current = store.get(desktopAtom).windows[windowId]; const rect = controller.rect;
+      if (interaction.resized || current?.mode !== 'normal') store.set(desktopAtom, { type: 'RESIZE', id: windowId, rect });
+      else store.set(desktopAtom, { type: 'MOVE', id: windowId, x: rect.x, y: rect.y });
+      const win = store.get(desktopAtom).windows[windowId];
+      if (win) store.set(geometryAtom, prev => ({ ...prev, [win.appId]: win.restoreRect }));
+    } else controller.set(interaction.original);
+    if (interaction.returnFocus?.isConnected && controller.el.contains(interaction.returnFocus)) interaction.returnFocus.focus({ preventScroll: true });
+    else focusContent(controller.el);
+  }, [store, windowId]);
+  useEffect(() => {
+    if (mode !== 'desktop') return;
+    const start = (event: Event) => {
+      if ((event as CustomEvent<{ windowId: WindowId }>).detail?.windowId !== windowId || keyboard.current) return;
+      const current = store.get(desktopAtom).windows[windowId]; const controller = frame.current;
+      if (!current || current.minimized || current.closing || !controller || controller.el.hasAttribute('data-dragging') || controller.el.hasAttribute('data-resizing')) return;
+      controller.stop(); controller.set(current.rect);
+      keyboard.current = { original: { ...controller.rect }, resized: false, returnFocus: document.activeElement instanceof HTMLElement ? document.activeElement : null };
+      controller.el.dataset.keyboardMove = ''; setKeyboardMove(true);
+      controller.el.querySelector<HTMLElement>('[data-window-titlebar]')?.focus({ preventScroll: true });
+      announce('Arrows move. Shift moves eight times further. Option or Alt plus arrows resize. Return to finish. Escape to cancel.');
+    };
+    document.addEventListener('window:keyboardMove', start);
+    return () => { document.removeEventListener('window:keyboardMove', start); keyboard.current = null; };
+  }, [announce, mode, store, windowId]);
+
   if (!win) return null;
-  const App = module?.default;
-  const props: AppProps = { windowId, appId: win.appId, route: win.route, query: win.query, mode, focused: focusedId === windowId,
+  const meta = APP_META[win.appId]; const App = module?.default; const Skeleton = skeletons[meta.skeleton];
+  const adopting = win.adopted && !contentReady;
+  const simpleHref = `${pathFor(win.appId, win.route)}#simple`;
+  const props: AppProps = { windowId, appId: win.appId, route: win.route, query: win.query, mode, focused,
     initialData: win.adopted ? readInitialData(`${win.appId}:${win.route || 'index'}`)
       ?? (win.route === '' ? readInitialData(win.appId) : null) : null,
     navigate: (route, opts) => navigateWindow(windowId, route, opts),
     setQuery: (query, opts) => store.set(desktopAtom, { type: 'SET_QUERY', id: windowId, query, history: opts?.replace === false ? 'push' : 'replace' }),
     setTitle: title => store.set(desktopAtom, { type: 'SET_TITLE', id: windowId, title }), ready,
     close: () => { void closeWindow(windowId); }, scrollRootRef };
-  const rect = win.rect;
-  return <section className="managed-window static-window" role="dialog" aria-modal="false" aria-labelledby={`window-title-${windowId}`}
-    data-window-id={windowId} data-app={win.appId} data-adopting={win.adopted && !contentReady ? '' : undefined}
-    hidden={win.minimized || win.closing} tabIndex={-1} onPointerDownCapture={() => focusWindow(windowId)}
-    style={{ position: mode === 'mobile' ? 'fixed' : 'absolute', zIndex, ...(mode === 'mobile' ? { inset: 0, width: '100%', height: '100dvh' }
-      : { left: rect.x, top: rect.y, width: rect.w, height: rect.h }),
-      ...(win.adopted && !contentReady ? { opacity: 0, pointerEvents: 'none' } : {}) }}>
-    <TitleBar windowId={windowId} title={win.title} />
-    {error ? <div className="static-document"><h1>{updated ? 'Serendib was updated while you were here.' : "This app didn't load."}</h1>
-      <p>{updated ? 'Reload to get the new version. Your windows will reopen.' : 'Check your connection and try again.'}</p>
-      <button onClick={() => updated ? location.reload() : setAttempt(value => value + 1)}>{updated ? 'Reload' : 'Try again'}</button>
-      <a href={`${location.pathname}#simple`}>Open simple view</a></div>
-      : App ? <AppErrorBoundary key={attempt} onRetry={() => setAttempt(value => value + 1)}><App {...props} /></AppErrorBoundary>
-      : <div className="static-document" role="status">Loading…</div>}
+  return <section ref={element} className="managed-window" role="dialog" aria-modal="false" aria-labelledby={`window-title-${windowId}`}
+    aria-describedby={`window-hint-${windowId}`} data-window-id={windowId} data-app={win.appId} data-focused={focused}
+    data-mode={win.mode} data-shell-mode={mode} data-theme={win.appId === 'terminal' ? 'dark' : undefined}
+    data-adopting={adopting ? '' : undefined} inert={win.minimized || win.closing || adopting} tabIndex={-1}
+    onPointerDownCapture={() => { if (!win.closing && !win.minimized) focusWindow(windowId); }}
+    onFocusCapture={() => { if (!focused && !adopting) focusWindow(windowId); }}
+    onKeyDownCapture={event => {
+      const interaction = keyboard.current; const controller = frame.current;
+      if (interaction && controller) {
+        if (event.code === 'Enter' || event.code === 'Escape') {
+          event.preventDefault(); event.stopPropagation(); finishKeyboard(event.code === 'Enter'); return;
+        }
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.code)) {
+          event.preventDefault(); event.stopPropagation();
+          const step = event.shiftKey ? 64 : 8;
+          const dx = event.code === 'ArrowLeft' ? -step : event.code === 'ArrowRight' ? step : 0;
+          const dy = event.code === 'ArrowUp' ? -step : event.code === 'ArrowDown' ? step : 0;
+          const rect = controller.rect; const viewport = store.get(desktopAtom).viewport;
+          if (event.altKey) {
+            if (meta.window.resizable) { controller.set(clampSize({ ...rect, w: rect.w + dx, h: rect.h + dy }, meta.window, viewport)); interaction.resized = true; }
+          } else controller.set(clampMove({ ...rect, x: rect.x + dx, y: rect.y + dy }, viewport));
+          return;
+        }
+      }
+    }} onKeyDown={event => {
+      // App widgets and portalled overlays own their keyboard interaction first.
+      if (!event.defaultPrevented && event.currentTarget.contains(event.target as Node)) trapTab(event, event.currentTarget);
+    }} style={{ zIndex }}>
+    <span id={`window-hint-${windowId}`} className="sr-only">Window. Tab moves within it. Option or Alt plus backtick switches windows.</span>
+    <TitleBar windowId={windowId} title={win.title} kind={meta.window.titleBar} zoomable={meta.window.zoomable}
+      maximized={win.mode === 'maximized'} keyboardMove={keyboardMove} stillLoading={stillLoading && !App && !error} />
+    <div className="window-content" data-titlebar={meta.window.titleBar}>
+      {error ? <ErrorState className="window-error" role="alert" simpleHref={simpleHref}
+        title={updated ? 'Serendib was updated while you were here.' : undefined}
+        body={updated ? 'Reload to get the new version. Your windows will reopen.' : undefined}
+        onRetry={updated ? undefined : retry}
+        action={updated ? <div className="flex items-center gap-3"><Button variant="primary" onClick={() => location.reload()}>Reload</Button><a href={simpleHref}>Open simple view</a></div> : undefined} />
+        : App ? <AppErrorBoundary key={attempt} simpleHref={simpleHref} onRetry={retry}
+          onError={() => { if (!win.adopted) setContentReady(true); }}><App {...props} /></AppErrorBoundary>
+          : <Skeleton />}
+    </div>
+    {mode === 'desktop' && meta.window.resizable && <ResizeHandles />}
   </section>;
 }
