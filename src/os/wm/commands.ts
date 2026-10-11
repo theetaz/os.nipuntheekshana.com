@@ -5,7 +5,7 @@ import { loadApp } from '../registry/loader';
 import { getStore, type OsStore } from '../state/store';
 import { accentAtom, alertsAtom, announceAtom, bootPhaseAtom, contextMenuAtom, desktopAtom, geometryAtom,
   iconPositionsAtom, menuStateAtom, mochiPrefsAtom, openMenuAtom, overlayAtom, quickLookAtom, showWidgetsAtom,
-  soundAtom, spotlightOpenAtom, themePrefAtom, toastsAtom, viewAtom, wallpaperAtom, WALLPAPERS,
+  reducedMotionAtom, soundAtom, spotlightOpenAtom, themePrefAtom, toastsAtom, viewAtom, wallpaperAtom, WALLPAPERS,
   type AlertSpec, type AppMenuState, type Toast } from '../state/atoms';
 import type { AppId, MenuItemSpec } from '../types/apps';
 import { windowLink } from '../url/url';
@@ -150,7 +150,13 @@ async function power(action: 'restart' | 'shutdown'): Promise<void> {
   const store = getStore();
   if (await alert({ title: action === 'restart' ? 'Restart Serendib?' : 'Shut down Serendib?',
     body: 'Open windows will close.', primary: action === 'restart' ? 'Restart' : 'Shut down' }) !== 'primary') return;
-  for (const id of store.get(desktopAtom).order) if (!await closeWindow(id)) return;
+  const windows = [...store.get(desktopAtom).order].reverse();
+  for (const [index, id] of windows.entries()) {
+    if (!await closeWindow(id)) return;
+    if (action === 'shutdown' && !store.get(reducedMotionAtom)) {
+      await new Promise<void>(resolve => setTimeout(resolve, index === windows.length - 1 ? 140 : 60));
+    }
+  }
   store.set(desktopAtom, { type: 'CLOSE_ALL' });
   if (action === 'restart') store.set(bootPhaseAtom, 'running');
   else store.set(overlayAtom, 'shutdown');
