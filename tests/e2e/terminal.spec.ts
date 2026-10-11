@@ -55,6 +55,24 @@ test('open projects/salli and output links open the matching window; exit closes
   await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
 });
 
+test('a loading app owns focus and cannot raise itself after returning to Terminal', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/data/work/salli.json', async route => { await held; await route.continue(); });
+  try {
+    const win = await start(page); const input = win.getByRole('textbox', { name: 'Terminal command' });
+    await command(win, 'open projects/salli');
+    const projects = page.locator('[data-window-id="projects"]');
+    await expect(projects).toBeFocused();
+    await input.focus(); await expect(win).toHaveAttribute('data-focused', 'true');
+    release(); await expect(projects.getByRole('heading', { name: 'Salli', exact: true })).toBeVisible();
+    await expect(projects.getByRole('definition').filter({ hasText: '99.52%' })).toBeVisible();
+    await expect(win).toHaveAttribute('data-focused', 'true'); await expect(input).toBeFocused();
+    await command(win, 'writing');
+    await output(win).getByRole('link', { name: 'an-island-made-of-points', exact: true }).click();
+    await expect(page.locator('[data-window-id="writing"]')).toHaveAttribute('data-focused', 'true');
+  } finally { release(); }
+});
+
 test('?cmd=neofetch runs once, removes cmd with replace and rejects arbitrary command links', async ({ page }) => {
   await page.goto('/terminal?cmd=neofetch'); const win = terminal(page);
   await expect(output(win)).toContainText('Kernel'); await expect(page).toHaveURL(/\/terminal$/);

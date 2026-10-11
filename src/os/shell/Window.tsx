@@ -137,10 +137,15 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
 
   useLayoutEffect(() => {
     const el = element.current;
-    if (focused && win && !win.closing && !win.minimized && el && (contentReady || error)
-      && (!previousFocus.current || !previousReady.current) && !(win.adopted && !previousReady.current)) focusContent(el);
+    if (focused && store.get(desktopAtom).focusedId === windowId && win && !win.closing && !win.minimized && el
+      && (!previousFocus.current || !previousReady.current) && !(win.adopted && !previousReady.current)) {
+      // A loading frame must own focus too. Otherwise the old app's active input
+      // cannot emit a new focus event when the user returns to it before ready.
+      if (contentReady || error) focusContent(el);
+      else if (!previousFocus.current) el.focus({ preventScroll: true });
+    }
     previousFocus.current = focused; previousReady.current = contentReady || error;
-  }, [attempt, contentReady, error, focused, win]);
+  }, [attempt, contentReady, error, focused, store, win, windowId]);
 
   const finishKeyboard = useCallback((commit: boolean) => {
     const interaction = keyboard.current; const controller = frame.current;
@@ -188,7 +193,7 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
     data-mode={win.mode} data-shell-mode={mode} data-theme={win.appId === 'terminal' ? 'dark' : undefined}
     data-adopting={adopting ? '' : undefined} inert={win.minimized || win.closing || adopting} tabIndex={-1}
     onPointerDownCapture={() => { if (!win.closing && !win.minimized) focusWindow(windowId); }}
-    onFocusCapture={() => { if (!focused && !adopting) focusWindow(windowId); }}
+    onFocusCapture={() => { if (store.get(desktopAtom).focusedId !== windowId && !adopting) focusWindow(windowId); }}
     onKeyDownCapture={event => {
       const interaction = keyboard.current; const controller = frame.current;
       if (interaction && controller) {

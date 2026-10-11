@@ -36,7 +36,7 @@ export function pendingPhoneCapability(info: TestInfo): string | undefined {
     'terminal.spec.ts': [
       [/^keyboard shortcuts, text-size limits, menu commands/, menus],
       [/^OS preferences, screensaver and duplicate sessions/, sheets],
-      [/^open projects\/salli and output links/, 'P4-2: implement the phone app switcher to return to Terminal after opening another app.'],
+      [/^(open projects\/salli and output links|a loading app owns focus)/, 'P4-2: implement the phone app switcher to return to Terminal after opening another app.'],
     ],
     'kooda.spec.ts': [[/^File menu owns Empty Kooda/, menus], [/^Empty Kooda confirms, cancels, updates dock/, home]],
     'maps.spec.ts': [[/^live wallpaper is lazy/, home], [/^minimisation and hidden documents/, sheets], [/^layers and menus work/, menus]],
