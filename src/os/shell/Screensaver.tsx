@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAtomValue, useStore } from 'jotai';
-import { alertsAtom, bootPhaseAtom, contextMenuAtom, openMenuAtom, overlayAtom, reducedMotionAtom,
-  spotlightOpenAtom, viewAtom } from '../state/atoms';
+import { overlayAtom, reducedMotionAtom } from '../state/atoms';
 import islandMask from '../../assets/wallpapers/island-mask.svg?raw';
 import { formatColombo } from '../lib/colombo-time';
 import { usePowerOverlay } from './BootController';
 
-export const SCREENSAVER_IDLE_MS = 5 * 60 * 1000;
+// Sleep is only ever started by the user (Island menu or Terminal); never automatic in v1.
 const nightMailMask = `url("data:image/svg+xml,${encodeURIComponent(islandMask.trim())}")`;
 
 export function Screensaver() {
@@ -19,40 +18,6 @@ export function Screensaver() {
   const wakeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const active = mounted && overlay === 'screensaver';
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let remaining = SCREENSAVER_IDLE_MS; let deadline = performance.now() + remaining;
-    const allowed = () => !document.hidden && store.get(viewAtom) !== 'simple'
-      && store.get(overlayAtom) === 'none' && store.get(bootPhaseAtom) === 'off'
-      && !store.get(alertsAtom).length && !store.get(openMenuAtom) && !store.get(contextMenuAtom)
-      && !store.get(spotlightOpenAtom);
-    const schedule = () => {
-      if (!allowed() || timer !== undefined) return;
-      timer = setTimeout(() => {
-        timer = undefined;
-        if (!allowed()) return;
-        remaining = Math.max(0, deadline - performance.now());
-        if (remaining) schedule(); else store.set(overlayAtom, 'screensaver');
-      }, Math.max(0, deadline - performance.now()));
-    };
-    const reset = () => { remaining = SCREENSAVER_IDLE_MS; deadline = performance.now() + remaining; schedule(); };
-    const changed = () => { clearTimeout(timer); timer = undefined; reset(); };
-    const visibility = () => {
-      if (document.hidden) { remaining = Math.max(0, deadline - performance.now()); clearTimeout(timer); timer = undefined; }
-      else { deadline = performance.now() + remaining; schedule(); }
-    };
-    const events = ['keydown', 'pointerdown', 'pointermove', 'wheel', 'scroll', 'input'] as const;
-    for (const event of events) document.addEventListener(event, reset, { capture: true, passive: true });
-    document.addEventListener('visibilitychange', visibility);
-    const cleanups = [overlayAtom, bootPhaseAtom, viewAtom, alertsAtom, openMenuAtom, contextMenuAtom, spotlightOpenAtom]
-      .map(value => store.sub(value, changed));
-    schedule();
-    return () => {
-      clearTimeout(timer); cleanups.forEach(cleanup => cleanup());
-      for (const event of events) document.removeEventListener(event, reset, true);
-      document.removeEventListener('visibilitychange', visibility);
-    };
-  }, [store]);
   useEffect(() => {
     if (!active) { clearTimeout(wakeTimer.current); wakeTimer.current = undefined; setExiting(false); return; }
     let timer: ReturnType<typeof setTimeout> | undefined;

@@ -249,14 +249,9 @@ import '../../../src/styles/static-window.css';
     await page.keyboard.press('Escape'); await expect(page.locator('.shutdown-screen')).toHaveCount(0);
     await expect(page.locator('.boot-screen')).toHaveCount(0); await expect(page.locator('#fixture-desktop')).not.toHaveAttribute('inert');
   });
-  test('idle resets on input, pauses while hidden, and stays disabled in Simple view', async ({ page }) => {
-    await page.clock.install(); await openFixture(page); await page.clock.fastForward(240_000);
-    await page.mouse.move(100, 100); await page.clock.fastForward(240_000); await expect(page.locator('.screensaver')).toHaveCount(0);
-    await setHidden(page, true); await page.clock.fastForward(600_000); await expect(page.locator('.screensaver')).toHaveCount(0);
-    await setHidden(page, false); await page.clock.fastForward(61_000); await expect(page.locator('.screensaver')).toBeVisible();
-    await page.keyboard.press('Escape'); await page.clock.runFor(300); await expect(page.locator('.screensaver')).toHaveCount(0);
-    await page.evaluate(() => (window as unknown as { powerFixture: { setView(value: string): void } }).powerFixture.setView('simple'));
-    await page.clock.fastForward(600_000); await expect(page.locator('.screensaver')).toHaveCount(0);
+  test('never sleeps automatically, even after a long idle period', async ({ page }) => {
+    await page.clock.install(); await openFixture(page); await page.clock.fastForward(3_600_000);
+    await expect(page.locator('.screensaver')).toHaveCount(0);
   });
   test('hidden screensaver pauses drift and its clock, then catches up on visibility', async ({ page }) => {
     await openFixture(page); await page.clock.install({ time: new Date('2026-10-11T17:41:00Z') }); await command(page, 'Sleep');
