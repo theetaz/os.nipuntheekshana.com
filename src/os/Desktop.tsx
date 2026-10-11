@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Provider, useAtomValue, useStore } from 'jotai';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Provider, useAtomValue, useSetAtom, useStore } from 'jotai';
 import { RESET } from 'jotai/utils';
 import { LazyMotion, MotionConfig } from 'motion/react';
 import type { AppId } from './types/apps';
 import { createOsStore, historyStore, registerStore } from './state/store';
 import { desktopAtom, modeAtom, motionPrefAtom, onlineAtom, systemDarkAtom, systemReducedMotionAtom,
-  systemReducedTransparencyAtom, updateAvailableAtom, viewAtom } from './state/atoms';
+  systemReducedTransparencyAtom, updateAvailableAtom, viewAtom, spotlightOpenAtom, contextMenuAtom, alertsAtom, toastsAtom, recentAtom } from './state/atoms';
 import { subscribePreferences } from './state/prefs';
 import { subscribeHistory } from './url/history';
 import { interceptLinks } from './url/links';
@@ -14,12 +14,7 @@ import { subscribeHotkeys } from './shell/Hotkeys';
 import { ModeSwitch, MODE_QUERY } from './shell/ModeSwitch';
 import { DesktopShell } from './shell/DesktopShell';
 import { PhoneShell } from './mobile/PhoneShell';
-import { Spotlight } from './shell/Spotlight';
-import { QuickLook } from './shell/QuickLook';
 import { MenuHost } from './shell/MenuHost';
-import { ContextMenuHost } from './shell/ContextMenuHost';
-import { Alerts } from './shell/Alerts';
-import { Toasts } from './shell/Toasts';
 import { LiveRegion } from './shell/LiveRegion';
 import { BootController } from './shell/BootController';
 import { Screensaver } from './shell/Screensaver';
@@ -34,6 +29,36 @@ export interface DesktopProps {
   home: { nowItems: string[]; nowUpdated: string };
 }
 const loadMotionFeatures = () => import('./lib/motion-features').then(module => module.default);
+const Spotlight = lazy(() => import('./shell/Spotlight').then(module => ({ default: module.Spotlight })));
+const QuickLook = lazy(() => import('./shell/QuickLook').then(module => ({ default: module.QuickLook })));
+const ContextMenuHost = lazy(() => import('./shell/ContextMenuHost').then(module => ({ default: module.ContextMenuHost })));
+const Alerts = lazy(() => import('./shell/Alerts').then(module => ({ default: module.Alerts })));
+const Toasts = lazy(() => import('./shell/Toasts').then(module => ({ default: module.Toasts })));
+function SystemOverlays() {
+  const spotlight = useAtomValue(spotlightOpenAtom); const context = useAtomValue(contextMenuAtom);
+  const alerts = useAtomValue(alertsAtom); const toasts = useAtomValue(toastsAtom); const desktop = useAtomValue(desktopAtom);
+  const win = desktop.focusedId ? desktop.windows[desktop.focusedId] : undefined;
+  const setRecent = useSetAtom(recentAtom);
+  useEffect(() => {
+    if (!win || win.closing || win.minimized) return;
+    const id = win.appId === 'projects' && win.route ? `project:${win.route}`
+      : win.appId === 'writing' && win.route ? `post:${win.route}`
+        : win.appId === 'maps' && win.route === 'play' ? 'action:play' : `app:${win.appId}`;
+    setRecent(previous => previous[0] === id ? previous : [id, ...previous.filter(value => value !== id)].slice(0, 5));
+  }, [win?.id, win?.route, win?.createdSeq, win?.minimized, win?.closing, setRecent]);
+  const quicklook = win?.appId === 'projects' && /^\d+$/.test(win.query.shot ?? '');
+  const [loaded, setLoaded] = useState([false, false, false, false, false]);
+  useEffect(() => {
+    const requested = [spotlight, quicklook, !!context, !!alerts.length, !!toasts.length];
+    setLoaded(previous => requested.some((value, i) => value && !previous[i]) ? previous.map((value, i) => value || requested[i]!) : previous);
+  }, [spotlight, quicklook, context, alerts.length, toasts.length]);
+  // Keep activated hosts mounted so they can finish exit animations and restore focus.
+  return <><Suspense fallback={null}>{(spotlight || loaded[0]) && <Spotlight />}</Suspense>
+    <Suspense fallback={null}>{(quicklook || loaded[1]) && <QuickLook />}</Suspense>
+    <Suspense fallback={null}>{(context || loaded[2]) && <ContextMenuHost />}</Suspense>
+    <Suspense fallback={null}>{(alerts.length > 0 || loaded[3]) && <Alerts />}</Suspense>
+    <Suspense fallback={null}>{(toasts.length > 0 || loaded[4]) && <Toasts />}</Suspense></>;
+}
 function ClientBootstrap() {
   const store = useStore();
   useEffect(() => {
@@ -98,7 +123,7 @@ function ClientBootstrap() {
 function Shells(props: DesktopProps) {
   const view = useAtomValue(viewAtom);
   return view === 'simple' ? null : <><ModeSwitch desktop={<DesktopShell {...props} />} mobile={<PhoneShell {...props} />} />
-    <Spotlight /><QuickLook /><MenuHost /><ContextMenuHost /><Alerts /><Toasts /><LiveRegion /><BootController /><Screensaver /><ShutDown /></>;
+    <SystemOverlays /><MenuHost /><LiveRegion /><BootController /><Screensaver /><ShutDown /></>;
 }
 function MotionPreferences({ children }: { children: React.ReactNode }) {
   const motion = useAtomValue(motionPrefAtom);

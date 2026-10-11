@@ -66,6 +66,7 @@ export interface GlobalShortcut { command: string; shortcut: Shortcut; allowInEd
 /** Roving arrows/type-ahead and Projects Space belong to the focused region/app, not the global dispatcher. */
 export const GLOBAL_SHORTCUTS: readonly GlobalShortcut[] = [
   { command: 'os.spotlight', shortcut: { code: 'KeyK', mod: true }, allowInEditable: true },
+  { command: 'os.spotlight', shortcut: { code: 'Space', alt: true }, allowInEditable: false },
   { command: 'os.spotlight', shortcut: { code: 'Slash' }, allowInEditable: false },
   { command: 'window.close', shortcut: { code: 'KeyW', alt: true }, allowInEditable: false },
   { command: 'window.minimize', shortcut: { code: 'KeyM', alt: true }, allowInEditable: false },
