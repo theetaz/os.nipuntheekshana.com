@@ -11,7 +11,7 @@ import type { AppId, MenuItemSpec } from '../types/apps';
 import { windowLink } from '../url/url';
 import { placeWindow } from './placement';
 import type { Point, Rect, SnapZone, WindowId, WMAction } from './types';
-import { playSound } from '../lib/sound';
+import type { SoundName } from '../lib/sound';
 import * as mochi from '../mochi/api';
 import { FEATURES } from '../config';
 
@@ -29,6 +29,10 @@ function registry(store: OsStore): Registrations {
   return entry;
 }
 const dispatch = (action: WMAction) => getStore().set(desktopAtom, action);
+// Keep the synthesiser outside the initial shell bundle and the muted path.
+function playSound(name: SoundName): void {
+  if (getStore().get(soundAtom)) void import('../lib/sound').then(sound => sound.playSound(name)).catch(() => {});
+}
 export function openApp(appId: AppId, opts: { route?: string; query?: Record<string, string>; origin?: Point; newInstance?: boolean } = {}): void {
   const store = getStore();
   const before = store.get(desktopAtom);
@@ -185,7 +189,7 @@ export function runCommand(command: string, _source: CommandSource): void {
     case 'os.sleep': store.set(overlayAtom, 'screensaver'); return;
     case 'os.restart': void power('restart'); return;
     case 'os.shutdown': void power('shutdown'); return;
-    case 'os.sound': store.set(soundAtom, value => !value); return;
+    case 'os.sound': store.set(soundAtom, value => !value); playSound('tick'); return;
     case 'os.escape':
       if (store.get(alertsAtom).length) { const spec = store.get(alertsAtom).at(-1)!; resolveAlert(spec.id!, 'cancel'); }
       else if (store.get(contextMenuAtom)) store.set(contextMenuAtom, null);
