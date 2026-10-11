@@ -4,14 +4,13 @@ import StaticWindow from '../components/static/StaticWindow.astro';
 import InitialData from '../components/static/InitialData.astro';
 import { APP_META } from '../os/registry/meta';
 import { seoFor } from '../lib/seo';
-
-
+import { items, TRASH_DATA_KEY } from '../os/apps/trash/items';
+import { TrashView } from '../os/apps/trash/views/TrashView';
 const seo = seoFor({ path: '/kooda', title: 'Kooda', description: APP_META.trash.description, kind: 'app' });
 ---
 <OsLayout seo={seo} initial={{ appId: 'trash', route: '' }}>
   <StaticWindow app="trash" route="" title="Kooda">
-    <h1>Kooda</h1><p class="lede">{APP_META.trash.description}</p>
-    <p>Kooda means basket. The interactive basket needs JavaScript.</p><p><a href="/projects">Explore the projects that made it.</a></p>
+    <TrashView items={items} />
   </StaticWindow>
-  <InitialData slot="after-main" key="trash" data={{}} />
+  <InitialData slot="after-main" key={TRASH_DATA_KEY} data={{ items }} />
 </OsLayout>

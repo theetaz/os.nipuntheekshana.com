@@ -1,0 +1,47 @@
+/* The app owns its toolbar; the shell keeps its window geometry and chrome. */
+.managed-window[data-app="trash"] .window-content { overflow: visible; contain: layout style; }
+.static-window[data-app="trash"] .static-titlebar { min-height: 52px; place-items: center start; padding-left: 108px; }
+.static-window[data-app="trash"] .static-document { max-width: none; padding: 0; margin: 0; font: 450 13px/18px var(--font-ui); }
+.static-window[data-app="trash"] .static-content { position: static; }
+.kooda-view { display: flex; flex: 1; flex-direction: column; min-height: 0; color: var(--os-ink); }
+.kooda-toolbar { position: absolute; top: -40px; right: 14px; display: flex; align-items: center; z-index: 1; }
+.static-window[data-app="trash"] .kooda-toolbar { top: 12px; }
+.kooda-scroll { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.static-window[data-app="trash"] .kooda-scroll { overflow: visible; }
+.kooda-subtitle { padding: 16px 20px 0; color: var(--os-ink-2); font: 450 13px/18px var(--font-ui); }
+.static-window[data-app="trash"] .kooda-subtitle { margin: 0; }
+.kooda-grid { display: grid; grid-template-columns: repeat(auto-fill, 112px); gap: 8px 16px; padding: 16px 20px; margin: 0; list-style: none; }
+.static-window[data-app="trash"] .kooda-grid { padding: 16px 20px; margin: 0; }
+.static-window[data-app="trash"] .kooda-grid li { margin: 0; }
+.kooda-tile { display: flex; flex-direction: column; align-items: center; justify-content: start; width: 112px; min-height: 116px; gap: 8px; padding: 6px 0; border: 0; border-radius: 10px; background: transparent; color: var(--os-ink); cursor: pointer; list-style: none; text-align: center; }
+.kooda-tile::-webkit-details-marker { display: none; }
+.kooda-tile:hover, .kooda-static-note[open] > summary { background: var(--os-hover); }
+.kooda-tile > svg { filter: var(--shadow-icon); }
+.kooda-tile > span { max-width: 112px; padding: 0 4px; overflow-wrap: anywhere; font: 500 12px/16px var(--font-ui); }
+.kooda-tile:focus-visible > span { border-radius: var(--r-control); background: var(--os-selection); color: var(--os-selection-ink); }
+.kooda-static-note > p { font: 400 13px/20px var(--font-ui); color: var(--os-ink-2); padding: 12px; background: var(--os-raised); border: 1px solid var(--os-line-strong); border-radius: var(--r-card); }
+.kooda-empty { min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; }
+.kooda-empty h2 { margin: 0; font: 500 20px/26px var(--font-display); }
+.kooda-note-layer { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 24px; background: var(--os-scrim); border-radius: 0 0 var(--r-window) var(--r-window); }
+.kooda-note-card { width: min(360px, 100%); max-height: 100%; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px; background: var(--os-raised); border: 1px solid var(--os-line-strong); border-radius: var(--r-window); box-shadow: var(--shadow-menu); text-align: center; }
+.kooda-note-card h2 { font: 600 13px/18px var(--font-ui); overflow-wrap: anywhere; }
+.kooda-note-card p { font: 400 15px/24px var(--font-ui); color: var(--os-ink-2); }
+html:is([data-view="simple"], :has(#simple:target)) .kooda-toolbar { display: none; }
+html:is([data-view="simple"], :has(#simple:target)) .kooda-heading { position: static; width: auto; height: auto; padding: 0 20px; margin: 0 0 16px; overflow: visible; clip: auto; white-space: normal; }
+@container window (max-width: 440px) {
+  .kooda-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 16px 12px; }
+  .static-window[data-app="trash"] .kooda-grid { padding: 16px 12px; }
+  .kooda-tile { width: 100%; min-height: 124px; }
+  .kooda-subtitle { padding: 16px 12px 0; }
+  .kooda-toolbar button, .kooda-note-card button { min-height: 44px !important; }
+  .kooda-toolbar { top: -48px; right: 12px; }
+  .static-window[data-app="trash"] .kooda-toolbar { top: 4px; }
+  .kooda-note-layer { padding: 16px; }
+}
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  .static-window[data-app="trash"] .static-titlebar { padding-left: 80px; }
+}
+@media (forced-colors: active) {
+  .kooda-tile, .kooda-note-card { border: 1px solid CanvasText; }
+  .kooda-tile > svg { filter: none; }
+}
