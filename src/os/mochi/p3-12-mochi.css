@@ -1,0 +1,66 @@
+/* Character and mood CSS ported from nipuntheekshana.com/src/components/Mochi.astro @ 3b4f92d. */
+.mochi { position: fixed; top: 0; left: 0; z-index: var(--z-mochi); width: 64px; height: 64px; touch-action: none; }
+.mochi[hidden] { display: none; }
+.mochi[data-dragging], .mochi[data-physics="fling"], .mochi[data-physics="return"] { z-index: calc(var(--z-menubar) + 1); }
+.mochi__body { position: relative; display: block; width: 64px; height: 64px; padding: 0; border: 0; background: transparent; cursor: grab; -webkit-tap-highlight-color: transparent; }
+.mochi[data-dragging] .mochi__body { cursor: grabbing; }
+.mochi__body:focus-visible { outline: 2px solid var(--os-accent); outline-offset: 4px; border-radius: 16px; }
+.mochi__motion { display: block; width: 100%; height: 100%; transform-origin: 50% 90%; }
+.mochi svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.mochi__shadow { fill: rgb(0 0 0 / .35); }
+[data-theme="light"] .mochi__shadow { fill: rgb(0 0 0 / .14); }
+.mochi__squish { transform-origin: 50px 90px; transform-box: view-box; animation: mochi-breathe 3.2s ease-in-out infinite; }
+@keyframes mochi-breathe { 50% { transform: scale(1.03, .97); } }
+.mochi__blob, .mochi__arm { fill: #f6ecdc; stroke: rgb(0 0 0 / .08); stroke-width: 1; }
+[data-theme="light"] :is(.mochi__blob, .mochi__arm) { stroke: rgb(60 40 20 / .28); stroke-width: 1.5; }
+.mochi__shine { fill: #fff; opacity: .7; }
+.mochi__eyes { transition: transform .25s var(--ease-out); }
+.mochi__eye { fill: #2b2118; transform-box: fill-box; transform-origin: center; animation: mochi-blink 5s infinite; }
+@keyframes mochi-blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+.mochi__eye-closed, .mochi__eye-happy, .mochi__eye-dizzy { display: none; fill: none; stroke: #2b2118; stroke-width: 2.6; stroke-linecap: round; }
+.mochi__eye-dizzy { stroke-width: 1.25; }
+.mochi__cheek { fill: #ff9fa6; opacity: .55; }
+.mochi__mouth { display: none; fill: none; stroke: #2b2118; stroke-width: 2.4; stroke-linecap: round; }
+.mochi__mouth--o, .mochi__mouth--open { fill: #7a3b33; stroke: none; }
+.mochi[data-mood="idle"] .mochi__mouth--smile, .mochi[data-mood="sleep"] .mochi__mouth--smile,
+.mochi[data-mood="curious"] .mochi__mouth--smile, .mochi[data-mood="wave"] .mochi__mouth--smile { display: block; }
+.mochi[data-mood="sleep"] .mochi__eye, .mochi[data-mood="happy"] .mochi__eye, .mochi[data-mood="dizzy"] .mochi__eye { display: none; }
+.mochi[data-mood="sleep"] .mochi__eye-closed, .mochi[data-mood="happy"] .mochi__eye-happy, .mochi[data-mood="dizzy"] .mochi__eye-dizzy { display: block; }
+.mochi[data-mood="happy"] .mochi__mouth--open, .mochi[data-mood="surprised"] .mochi__mouth--o, .mochi[data-mood="dizzy"] .mochi__mouth--o { display: block; }
+.mochi[data-mood="happy"] .mochi__cheek { opacity: .9; }
+.mochi[data-mood="surprised"] .mochi__eye { transform: scale(1.25); animation: none; }
+.mochi[data-mood="dizzy"] .mochi__squish { animation: mochi-dizzy .9s ease-in-out; }
+@keyframes mochi-dizzy { 20%, 60% { transform: rotate(6deg); } 40%, 80% { transform: rotate(-6deg); } }
+.mochi__arm { display: none; transform-origin: 84px 60px; }
+.mochi__umbrella { display: none; }
+.mochi[data-item="umbrella"] .mochi__umbrella { display: block; }
+.mochi[data-mood="wave"] .mochi__arm { display: block; animation: mochi-wave .4s ease-in-out 3; }
+@keyframes mochi-wave { 50% { transform: rotate(35deg); } }
+.mochi__zzz { position: absolute; right: 4px; top: 4px; display: none; font: 11px/16px var(--font-mono); color: var(--os-ink-2); pointer-events: none; }
+.mochi[data-mood="sleep"] .mochi__zzz { display: block; }
+.mochi__zzz i { position: absolute; font-style: normal; opacity: 0; animation: mochi-z 3s infinite; }
+.mochi__zzz i:nth-child(2) { animation-delay: 1s; font-size: 13px; }
+.mochi__zzz i:nth-child(3) { animation-delay: 2s; font-size: 15px; }
+@keyframes mochi-z { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(12px, -22px); } }
+.mochi__bubble { position: absolute; left: calc(100% + 10px); bottom: 55%; width: max-content; max-width: min(220px, calc(100vw - 90px)); padding: 9px 12px; border-radius: 14px 14px 14px 4px; border: 1px solid var(--os-line-strong); background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: var(--shadow-menu); color: var(--os-ink); font: 400 13px/17px var(--font-ui); pointer-events: none; overflow-wrap: anywhere; }
+.mochi__bubble[hidden] { display: none; }
+.mochi[data-bubble-side="left"] .mochi__bubble { left: auto; right: calc(100% + 10px); border-radius: 14px 14px 4px 14px; }
+.mochi__hearts { pointer-events: none; }
+.mochi-heart { position: absolute; top: 16px; color: #FF6B81; font: normal 18px/1 var(--font-ui); animation: mochi-heart 1.1s var(--ease-out) forwards; }
+@keyframes mochi-heart { 0% { opacity: 0; transform: translateY(0) scale(.5); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(-56px) scale(1.15); } }
+.mochi[data-paused="true"] * { animation-play-state: paused !important; }
+.mochi[data-paused="true"] .mochi__eyes { transition: none; }
+.mochi[data-reduced-motion="true"] *, html[data-motion="reduce"] .mochi * { animation: none !important; transition: none !important; }
+.mochi[data-reduced-motion="true"] .mochi__zzz i { opacity: 1; }
+.mochi[data-reduced-motion="true"] .mochi__zzz i:nth-child(2) { transform: translate(9px, -9px); }
+.mochi[data-reduced-motion="true"] .mochi__zzz i:nth-child(3) { transform: translate(18px, -18px); }
+.mochi[data-variant="widget"] { position: relative; inset: auto; width: 100%; height: 100%; min-height: 150px; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 16px; border: 1px solid var(--os-line); border-radius: 20px; background: var(--glass-bg); touch-action: pan-y; }
+.mochi[data-variant="widget"][hidden] { display: none; }
+.mochi[data-variant="widget"] .mochi__body { width: 80px; height: 80px; cursor: pointer; }
+.mochi[data-variant="widget"] .mochi__bubble { z-index: 1; left: 8px; right: 8px; top: 8px; bottom: auto; max-width: calc(100% - 16px); margin: auto; }
+.mochi__widget-label { color: var(--os-ink); font: 500 12px/16px var(--font-ui); }
+html[data-transparency="reduce"] .mochi__bubble { background: var(--os-window); backdrop-filter: none; }
+@media (prefers-reduced-transparency: reduce) { .mochi__bubble { background: var(--os-window); backdrop-filter: none; } }
+@media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) .mochi * { animation: none !important; transition: none !important; } }
+@media (forced-colors: active) { .mochi__bubble, .mochi[data-variant="widget"] { color: CanvasText; background: Canvas; border-color: CanvasText; } .mochi__blob { fill: Canvas; stroke: CanvasText; } .mochi__eye { fill: CanvasText; } }
+@media print { .mochi { display: none !important; } }
