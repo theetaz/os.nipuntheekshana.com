@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page, Locator } from '@playwright/test';
 import type { ClientActivity } from '../../src/os/types/content';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openApp, openMenu, closeApp } from './fixtures';
 
 const counts = Array.from({ length: 371 }, (_, index) => index === 0 || index === 370 ? -1 : index % 5 === 0 ? 0 : (index * 7) % 42);
 const activity: Extract<ClientActivity, { available: true }> = {
@@ -101,7 +101,7 @@ test('Calendar flattens the scene; keyboard days, fly-in and orbit remain usable
 
 test('View menu controls the focused Activity window', async ({ page }) => {
   await openFixture(page);
-  await page.getByRole('menubar', { name: 'Application menus' }).getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await page.getByRole('menuitemradio', { name: 'Calendar', exact: true }).click();
   await expect(app(page).getByRole('button', { name: 'Calendar', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });
@@ -153,7 +153,7 @@ test('terrain uses layout pixels when initialized during a scale, then survives 
     await check();
     await stage(page).evaluate(node => { node.style.transform = ''; });
     await check();
-    await app(page).getByRole('button', { name: 'Zoom Activity', exact: true }).click();
+    if(await page.locator('html').getAttribute('data-mode')==='mobile')await page.setViewportSize({width:412,height:915});else await app(page).getByRole('button',{name:'Zoom Activity',exact:true}).click();
     await frames(page, 12); await check();
     await page.evaluate(() => {
       Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 2 });
@@ -249,7 +249,7 @@ test('rendering pauses on minimise and tab hide, resumes on restore, and close d
     oldActivityStage: root.querySelector('[data-terrain-stage]'), oldActivityLive: root.querySelector('[data-terrain-live]'),
     oldActivityCanvas: root.querySelector('canvas'), oldActivityRoot: root.querySelector('[data-terrain]'),
   }));
-  await app(page).getByRole('button', { name: 'Close Activity', exact: true }).click(); await expect(app(page)).toHaveCount(0);
+  await closeApp(page, 'Activity'); await expect(app(page)).toHaveCount(0);
   const before = await page.evaluate(() => {
     const old = window as unknown as { oldActivityLive: HTMLElement; oldActivityStage: HTMLElement; oldActivityCanvas: HTMLCanvasElement; oldActivityRoot: HTMLElement; activityDraws(canvas: HTMLCanvasElement): number };
     const result = { text: old.oldActivityLive.textContent, draws: old.activityDraws(old.oldActivityCanvas), ready: old.oldActivityRoot.classList.contains('is-ready') };

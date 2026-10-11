@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openApp, openMenu, closeApp } from './fixtures';
 // Headless Chromium needs an explicit software-GPU opt-in on this shared Mac.
 test.use({ launchOptions: { args: ['--enable-unsafe-swiftshader'] } });
 const app = (page: Page) => page.locator('[data-window-id="maps"]');
@@ -136,7 +136,7 @@ test('minimisation and hidden documents pause frames; closing disposes every GPU
   await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: false }); document.dispatchEvent(new Event('visibilitychange')); });
   await expect.poll(() => stage.getAttribute('data-frames')).not.toBe(hidden);
   expect(await page.evaluate(() => (window as unknown as { mapsGpu: { buffers: Set<unknown> } }).mapsGpu.buffers.size)).toBeGreaterThan(0);
-  await app(page).getByRole('button', { name: 'Close Island', exact: true }).click(); await expect(app(page)).toHaveCount(0);
+  await closeApp(page, 'Island'); await expect(app(page)).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => { const gpu = (window as unknown as { mapsGpu: { buffers: Set<unknown>; programs: Set<unknown> } }).mapsGpu; return gpu.buffers.size + gpu.programs.size; })).toBe(0);
 });
 
@@ -161,7 +161,7 @@ test('layers and menus work with keyboard; exploration and game have no axe viol
   await app(page).getByRole('button', { name: 'Layers ▾' }).click(); await app(page).getByRole('checkbox', { name: 'Town labels', exact: true }).uncheck();
   await expect(app(page).locator('.island-labels')).toBeHidden(); await page.keyboard.press('Escape');
   await expect(app(page).getByRole('checkbox', { name: 'Town labels', exact: true })).toHaveCount(0);
-  await page.getByRole('menubar').getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await page.getByRole('menuitemcheckbox', { name: 'Town labels', exact: true }).click(); await expect(app(page).locator('.island-labels')).toBeVisible();
   expect((await new AxeBuilder({ page }).include('[data-window-id="maps"]').analyze()).violations).toEqual([]);
   await app(page).getByRole('button', { name: 'Play', exact: true }).click();

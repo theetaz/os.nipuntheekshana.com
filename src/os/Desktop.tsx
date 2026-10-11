@@ -24,6 +24,11 @@ import { loadMotionFeatures, preloadMotionFeatures } from './lib/motion-loader';
 import { FEATURES } from './config';
 import { subscribeEggs } from './eggs/konami';
 
+if (typeof document !== 'undefined' && document.documentElement.dataset.mode === 'mobile') {
+  void import('./mobile/PhoneRuntime').then(module => module.preloadPhone()).catch(() => {});
+  if (location.pathname !== '/') void import('./mobile/AppSheet').catch(() => {});
+}
+
 export interface DesktopProps {
   initial: { appId: AppId; route: string } | null;
   build: { version: string; codename: string; sha: string; date: string };
@@ -80,7 +85,7 @@ function preloadShellIntent(document: Document): () => void {
     if (target?.closest('[role="menubar"]')) { void deferred.menus.preload().catch(() => {}); return; }
     if (target?.closest('.mb-clock, [aria-controls="now-popover"], [aria-label="What Nipun\'s up to"]')) void deferred.statusPopovers.preload().catch(() => {});
     if (target?.closest('[aria-label="Spotlight"]')) void deferred.spotlight.preload().catch(() => {});
-    if (target?.closest('a[href^="/"]')) void deferred.windows.preload().catch(() => {});
+    if (document.documentElement.dataset.mode !== 'mobile' && target?.closest('a[href^="/"]')) void deferred.windows.preload().catch(() => {});
     if (target?.closest('[data-dock-item], [role="option"]')) void deferred.contextMenus.preload().catch(() => {});
   };
   document.addEventListener('pointerover', intent); document.addEventListener('focusin', intent);
@@ -147,12 +152,13 @@ function ClientBootstrap() {
     let historyCleanup: (() => void) | undefined;
     const syncHistory = () => {
       historyCleanup?.(); historyCleanup = undefined;
-      if (store.get(viewAtom) !== 'simple') historyCleanup = subscribeHistory(historyStore(store), window, history,
+      if (store.get(viewAtom) !== 'simple' && store.get(modeAtom) === 'desktop') historyCleanup = subscribeHistory(historyStore(store), window, history,
         { features: FEATURES.postcards ? { postcards: true } : {} });
     };
     syncHistory();
     const unsubscribeView = store.sub(viewAtom, syncHistory);
-    cleanups.push(() => { unsubscribeView(); historyCleanup?.(); });
+    const unsubscribeMode = store.sub(modeAtom, syncHistory);
+    cleanups.push(() => { unsubscribeView(); unsubscribeMode(); historyCleanup?.(); });
     cleanups.push(interceptLinks(document, window));
     cleanups.push(subscribeHotkeys(document, isMac() ? 'mac' : /Windows/.test(navigator.userAgent) ? 'windows' : 'linux'));
     const preloadError = (event: Event) => { event.preventDefault(); store.set(updateAvailableAtom, true); };

@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openApp, openMenu, closeApp } from './fixtures';
 
 const questions = ['What are you building?', "What's Prabhava Labs?", 'Can we work together?', "What's your stack?", 'Where are you based?', 'How do I reach you?'];
 const managed = (page: Page) => page.locator('[data-window-id="messages"]');
@@ -133,9 +133,15 @@ test('Mochi pet count reaches the shared Settings preference and persists once',
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:mochi')!).pets)).toBe(1);
   await win.getByRole('button', { name: 'How are you?', exact: true }).click();
   await expect(win.locator('.messages-bubble--assistant').last()).toContainText("I've had 1 pet");
-  await expect(page.locator('[data-mochi][data-variant="desktop"]')).toBeVisible();
+  if(await page.locator('html').getAttribute('data-mode')==='desktop')await expect(page.locator('[data-mochi][data-variant="desktop"]')).toBeVisible();
+  else {
+    // Mount the home companion before checking its reaction from another app.
+    await closeApp(page,'Messages');await expect(win).toBeHidden();
+    await expect(page.locator('[data-shell="mobile"] [data-mochi-body]')).toBeVisible();
+    await openApp(page,'Messages');await win.getByRole('button',{name:'Mochi conversation'}).click();
+  }
   await win.getByRole('button', { name: 'Give tea', exact: true }).click();
-  await expect(page.locator('[data-mochi][data-variant="desktop"]')).toHaveAttribute('data-mood', 'happy');
+  await expect(page.locator('[data-mochi]')).toHaveAttribute('data-mood', 'happy');
   await expect(page.locator('[data-mochi-bubble]')).toHaveText('Ceylon tea. My favourite.');
   await expect(win.locator('.messages-bubble--assistant').last()).toContainText('Tea received');
   await openApp(page, 'Settings');
@@ -166,14 +172,14 @@ test('closing guards drafts in either thread and cancellation preserves text', a
   const win = await conversation(page);
   await win.getByRole('textbox', { name: 'Write to Nipun' }).fill('keep this draft');
   await win.getByRole('button', { name: 'Mochi conversation' }).click();
-  await win.getByRole('button', { name: 'Close Messages', exact: true }).click();
+  await closeApp(page, 'Messages');
   const sheet = page.getByRole('alertdialog', { name: 'Discard your message?' });
   await expect(sheet).toBeVisible();
   await sheet.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(sheet).toHaveCount(0);
   await win.getByRole('button', { name: 'Nipun conversation' }).click();
   await expect(win.getByRole('textbox', { name: 'Write to Nipun' })).toHaveValue('keep this draft');
-  await win.getByRole('button', { name: 'Close Messages', exact: true }).click();
+  await closeApp(page, 'Messages');
   await sheet.getByRole('button', { name: 'Discard', exact: true }).click();
   await expect(win).toHaveCount(0);
   await openApp(page, 'Messages');
@@ -182,15 +188,14 @@ test('closing guards drafts in either thread and cancellation preserves text', a
 
 test('registered app menus switch conversations, focus composer and send', async ({ page }) => {
   const win = await conversation(page);
-  const bar = page.locator('[data-shell="desktop"]').getByRole('menubar');
-  await bar.getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await page.getByRole('menuitemradio', { name: 'Mochi conversation' }).click();
   await expect(win.getByRole('heading', { name: 'Mochi · desk buddy' })).toBeVisible();
-  await bar.getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await page.getByRole('menuitem', { name: 'Focus composer', exact: true }).click();
   const composer = win.getByRole('textbox', { name: 'Write to Mochi' });
   await expect(composer).toBeFocused(); await composer.fill('Pet');
-  await bar.getByRole('menuitem', { name: 'File', exact: true }).click();
+  await openMenu(page, 'File');
   await page.getByRole('menuitem', { name: 'Send message', exact: true }).click();
   await expect(win.locator('.messages-bubble--assistant').last()).toContainText('1 pet so far');
 });

@@ -1,10 +1,10 @@
 import { focusableWithin } from './focus';
 
-type Modal = { panel: HTMLElement; focus(): void; previous: HTMLElement | null };
+type Modal = { panel: HTMLElement; focus(): void; previous: HTMLElement | null; portals?: string };
 const sessions = new WeakMap<Document, { stack: Modal[]; cover(): void }>();
 
 /** Only the top modal owns focus and inert state, including during overlapping exits. */
-export function isolateModal(panel: HTMLElement, focus: () => void): () => void {
+export function isolateModal(panel: HTMLElement, focus: () => void, portals?: string): () => void {
   const document = panel.ownerDocument;
   let session = sessions.get(document);
   if (!session) {
@@ -15,7 +15,7 @@ export function isolateModal(panel: HTMLElement, focus: () => void): () => void 
       let current = stack.at(-1)?.panel;
       while (current?.parentElement) {
         for (const sibling of current.parentElement.children) {
-          if (sibling instanceof HTMLElement && sibling !== current && !sibling.matches('script, style, link')) next.add(sibling);
+          if (sibling instanceof HTMLElement && sibling !== current && !sibling.matches('script, style, link') && !(stack.at(-1)?.portals && sibling.matches(stack.at(-1)!.portals!))) next.add(sibling);
         }
         if (current.parentElement === document.body) break;
         current = current.parentElement;
@@ -25,7 +25,7 @@ export function isolateModal(panel: HTMLElement, focus: () => void): () => void 
     };
     const contain = (event: FocusEvent) => {
       const top = stack.at(-1);
-      if (top && event.target instanceof Node && !top.panel.contains(event.target)) top.focus();
+      if (top && event.target instanceof Node && !top.panel.contains(event.target) && !(event.target instanceof Element && top.portals && event.target.closest(top.portals))) top.focus();
     };
     const observer = new MutationObserver(cover);
     observer.observe(document.body, { childList: true, subtree: true });
@@ -33,7 +33,7 @@ export function isolateModal(panel: HTMLElement, focus: () => void): () => void 
     session = { stack, cover }; sessions.set(document, session);
     // The listeners are document-scoped; a navigation releases the whole session.
   }
-  const modal: Modal = { panel, focus, previous: document.activeElement instanceof HTMLElement ? document.activeElement : null };
+  const modal: Modal = { panel, focus, previous: document.activeElement instanceof HTMLElement ? document.activeElement : null, portals };
   session.stack.push(modal); session.cover(); focus();
   // WebKit applies inert changes at its next rendering update. Focus after that
   // update, including when AnimatePresence revives an exiting modal.
@@ -47,7 +47,8 @@ export function isolateModal(panel: HTMLElement, focus: () => void): () => void 
     if (!top) return;
     const next = session.stack.at(-1);
     if (next) {
-      next.focus();
+      if(modal.previous?.isConnected && next.panel.contains(modal.previous) && !modal.previous.closest('[inert], [hidden]')) modal.previous.focus({preventScroll:true});
+      else next.focus();
       requestAnimationFrame(() => { if (session.stack.at(-1) === next && !next.panel.contains(document.activeElement)) next.focus(); });
       return;
     }
@@ -56,7 +57,7 @@ export function isolateModal(panel: HTMLElement, focus: () => void): () => void 
       && previous.getClientRects().length && getComputedStyle(previous).visibility !== 'hidden';
     const available = focusableWithin(document.body);
     const target = usable ? previous : available.find(element => element.matches('[role="menubar"] [role="menuitem"][tabindex="0"]'))
-      ?? available[0];
+      ?? available.find(element => !element.matches('.skip-link')) ?? available[0];
     const restore = () => {
       const active = document.activeElement;
       if (!session.stack.length && (!active || active === document.body || panel.contains(active))

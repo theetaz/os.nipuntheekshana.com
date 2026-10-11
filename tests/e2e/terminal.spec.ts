@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page, Locator } from '@playwright/test';
-import { test, expect } from './fixtures';
+import { test, expect, openMenu, openApp } from './fixtures';
 
 const terminal = (page: Page, id = 'terminal') => page.locator(`[data-window-id="${id}"]`);
 const output = (win: Locator) => win.locator('.terminal-output > [aria-live="off"]');
@@ -74,10 +74,13 @@ test('completion cannot replace a later select-all selection on the next frame',
 test('open projects/salli and output links open the matching window; exit closes this instance', async ({ page }) => {
   const win = await start(page);
   await command(win, 'open projects/salli'); await expect(page.locator('[data-window-id="projects"]')).toBeVisible(); await expect(page).toHaveURL(/\/projects\/salli/);
+  if(await page.locator('html').getAttribute('data-mode')==='mobile')await openApp(page,'Terminal');
   await win.getByRole('textbox', { name: 'Terminal command' }).focus(); await command(win, 'writing');
   const link = output(win).getByRole('link', { name: 'an-island-made-of-points', exact: true }); await link.click();
   await expect(page.locator('[data-window-id="writing"]')).toBeVisible();
+  if(await page.locator('html').getAttribute('data-mode')==='mobile')await openApp(page,'Terminal');
   const input = win.getByRole('textbox', { name: 'Terminal command' }); await input.focus(); await input.fill('exit'); await input.press('Enter'); await expect(win).toHaveCount(0);
+  if(await page.locator('html').getAttribute('data-mode')==='mobile')await openApp(page,'Projects');
   await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
 });
 
@@ -89,9 +92,12 @@ test('a loading app owns focus and cannot raise itself after returning to Termin
     await command(win, 'open projects/salli');
     const projects = page.locator('[data-window-id="projects"]');
     await expect(projects).toBeFocused();
+    const phone=await page.locator('html').getAttribute('data-mode')==='mobile';
+    if(phone)await openApp(page,'Terminal');
     await input.focus(); await expect(win).toHaveAttribute('data-focused', 'true');
-    release(); await expect(projects.getByRole('heading', { name: 'Salli', exact: true })).toBeVisible();
-    await expect(projects.getByRole('definition').filter({ hasText: '99.52%' })).toBeVisible();
+    release();
+    if(phone){await expect(projects.getByRole('heading', { name: 'Salli', exact: true, includeHidden:true })).toBeAttached();await expect(projects.getByRole('definition',{includeHidden:true}).filter({ hasText: '99.52%' })).toBeAttached();}
+    else{await expect(projects.getByRole('heading', { name: 'Salli', exact: true })).toBeVisible();await expect(projects.getByRole('definition').filter({ hasText: '99.52%' })).toBeVisible();}
     await expect(win).toHaveAttribute('data-focused', 'true'); await expect(input).toBeFocused();
     await command(win, 'writing');
     await output(win).getByRole('link', { name: 'an-island-made-of-points', exact: true }).click();
@@ -130,7 +136,7 @@ test('keyboard shortcuts, text-size limits, menu commands, and focus escape via 
   await input.press('Control+KeyE'); expect(await input.evaluate(el => (el as HTMLInputElement).selectionStart)).toBe(6);
   await input.press('Control+KeyC'); await expect(input).toHaveValue(''); await expect(output(win)).toContainText('^C');
   for (let i = 0; i < 8; i++) await input.press('Alt+Equal'); await expect(win.locator('.terminal-body')).toHaveCSS('font-size', '17px');
-  await page.getByRole('menubar').getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await expect(page.getByRole('menuitem', { name: 'Bigger text', exact: true })).toHaveAttribute('aria-disabled', 'true');
   await page.getByRole('menuitem', { name: 'Smaller text', exact: true }).click(); await expect(win.locator('.terminal-body')).toHaveCSS('font-size', '16px');
   await input.focus(); await input.press('Control+KeyL'); await expect(output(win)).toHaveText('');

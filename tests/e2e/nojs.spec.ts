@@ -14,7 +14,7 @@ const routes = [
 test('home has one visible h1 and working desktop and dock links @smoke', async ({ page, request }) => {
   expect((await page.goto('/'))?.status()).toBe(200);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nipun Theekshana');
-  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.locator('h1:visible')).toHaveCount(1);
   await expect(page.locator('.wallpaper')).toHaveCount(1);
   await expect(page.locator('#app-projects')).toHaveCount(1);
   await expect(page.locator('#os-initial-data')).toHaveCount(1);
@@ -31,8 +31,8 @@ for (const [path, title] of routes) {
   test(`${path} has crawlable content and adoption markup @smoke`, async ({ page }) => {
     expect((await page.goto(path))?.status()).toBe(200);
     await expect(page.getByRole('dialog', { name: title, exact: true })).toBeVisible();
-    await expect(page.locator('h1')).toHaveCount(1);
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.locator('h1:visible')).toHaveCount(1);
+    await expect(page.locator('h1:visible')).toBeVisible();
     await expect(page.locator('#static-window')).toHaveAttribute('data-query', '{}');
     await expect(page.locator('#static-window [data-scroll-root]')).toBeVisible();
     await expect(page.locator('#os-initial-data')).toHaveCount(1);
@@ -47,7 +47,7 @@ test('every generated project and post has content and matching initial data', a
       expect((await page.goto(path))?.status()).toBe(200);
       await expect(page.locator('#static-window')).toHaveAttribute('data-route', slug);
       await expect(page.locator('#os-initial-data')).toHaveAttribute('data-key', `${section}:${slug}`);
-      await expect(page.locator('h1')).toHaveCount(1);
+      await expect(page.locator('h1:visible')).toHaveCount(1);
       await expect(page.locator('#static-window [data-scroll-root]')).toContainText(/\S/);
     }
   }
@@ -57,8 +57,8 @@ test('Salli includes the case study, canonical, and a working close link @smoke'
   await page.goto('/projects/salli');
   await expect(page.locator('#static-window [data-scroll-root]')).toContainText('The intelligence comes to the phone.');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://nipuntheekshana.com/work/salli');
-  await page.getByRole('link', { name: 'Close (back to the desktop)' }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await (await page.locator('.sheet-header').isVisible()?page.locator('.sheet-header a'):page.getByRole('link',{name:'Close (back to the desktop)'})).click();
+  await expect(page).toHaveURL(await page.locator('.sheet-header').count() && await page.locator('html').evaluate(()=>matchMedia('(max-width:1023px)').matches)?/\/projects$/:/\/$/);
 });
 
 test('Simple view is a reading document without JavaScript @smoke', async ({ page }) => {
@@ -85,7 +85,7 @@ test('phone home and route content fit the viewport @smoke', async ({ page }) =>
   await page.goto('/projects/salli');
   const bounds = await page.locator('#static-window').boundingBox();
   expect(bounds).toEqual({ x: 0, y: 0, width: 390, height: 844 });
-  await expect(page.getByRole('link', { name: 'Close (back to the desktop)' })).toHaveText(/Home/);
+  await expect(page.locator('.sheet-header a')).toHaveText('‹ Projects');
 });
 
 test('unavailable controls are explained and utility pages are noindex', async ({ page }) => {
@@ -114,10 +114,10 @@ test('no-JavaScript dark theme follows system appearance', async ({ page }) => {
 
 test('the whole ticket and sticky are links', async ({ page }) => {
   await page.goto('/');
-  await page.locator('.ticket').click({ position: { x: 20, y: 100 } });
+  await page.locator('.ticket:visible, .phone-ticket:visible').click({ position: { x: 20, y: 100 } });
   await expect(page).toHaveURL(/\/about$/);
   await page.goto('/');
-  await page.locator('.now-sticky').click({ position: { x: 120, y: 80 } });
+  await page.locator('.now-sticky:visible, .phone-now:visible').click({ position: { x: 120, y: 80 } });
   await expect(page).toHaveURL(/\/now$/);
 });
 
@@ -125,9 +125,9 @@ test('compact home keeps the ticket clickable and Projects keeps its accessible 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await expect(page.getByRole('link', { name: 'About me', exact: true })).toHaveAttribute('href', '/about');
-  await page.locator('.ticket').click({ position: { x: 20, y: 100 } });
+  await page.locator('.ticket:visible, .phone-ticket:visible').click({ position: { x: 20, y: 100 } });
   await expect(page).toHaveURL(/\/about$/);
   await page.goto('/projects');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Projects');
-  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.locator('h1:visible')).toHaveCount(1);
 });

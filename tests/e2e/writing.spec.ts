@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openApp, openMenu } from './fixtures';
 
 const island = 'an-island-made-of-points';
 const win = (page: Page) => page.locator('[data-window-id="writing"]');
@@ -14,7 +14,7 @@ async function writing(page: Page, route = '') {
   return win(page);
 }
 async function viewMenu(page: Page) {
-  await page.getByRole('menubar', { name: 'Application menus' }).getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   return page.getByRole('menu', { name: 'View', exact: true });
 }
 
@@ -74,10 +74,14 @@ test('View commands, shortcuts and checked/disabled state target Writing', async
   await viewMenu(page); await expect(page.getByRole('menuitem', { name: 'Bigger text', exact: true })).toHaveAttribute('aria-disabled', 'true');
   const folders = page.getByRole('menuitemcheckbox', { name: 'Show folders' });
   await expect(folders).toHaveAttribute('aria-checked', 'true'); await folders.click();
+  await expect(page.getByRole('menu',{name:'View',exact:true})).toBeHidden();
   await expect(app.getByRole('navigation', { name: 'Writing folders' })).toBeHidden();
-  await expect(app.getByRole('combobox', { name: 'Writing folder' })).toBeVisible();
+  const phone=await page.locator('html').getAttribute('data-mode')==='mobile';
+  if(phone)await expect(app.getByRole('combobox', { name: 'Writing folder' })).toBeHidden();
+  else await expect(app.getByRole('combobox', { name: 'Writing folder' })).toBeVisible();
   await viewMenu(page); await expect(folders).toHaveAttribute('aria-checked', 'false'); await folders.click();
-  await expect(app.getByRole('navigation', { name: 'Writing folders' })).toBeVisible();
+  if(phone)await expect(app.getByRole('navigation', { name: 'Writing folders' })).toBeHidden();
+  else await expect(app.getByRole('navigation', { name: 'Writing folders' })).toBeVisible();
   await app.locator('.writing-reader').focus(); await page.keyboard.press('Alt+Minus');
   await expect(app.locator('.prose')).toHaveCSS('font-size', '17px');
   await page.keyboard.press('Alt+Equal'); await expect(app.locator('.prose')).toHaveCSS('font-size', '19px');
@@ -110,7 +114,7 @@ test('reader links open app windows, external links keep a new-tab target and Co
   await expect(app.getByRole('link', { name: 'Open on nipuntheekshana.com ↗' })).toHaveAttribute('target', '_blank');
   await app.locator('.prose').getByRole('link', { name: 'work page', exact: true }).click();
   await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
-  await expect(page).toHaveURL(/\/projects\?w=writing:hello-world$/);
+  await expect(page).toHaveURL(await page.locator('html').getAttribute('data-mode')==='mobile'?/\/projects$/:/\/projects\?w=writing:hello-world$/);
   await openApp(page, 'Writing');
   await page.evaluate(() => { Object.assign(window, { openedWritingLink: null }); window.open = (url) => { Object.assign(window, { openedWritingLink: String(url) }); return null; }; });
   await app.locator('.prose').getByRole('link', { name: 'Prabhava Labs', exact: true }).click();
@@ -220,7 +224,7 @@ test.describe('crawlable static articles', () => {
   for (const route of ['', 'hello-world', island]) {
     test(`${route || 'index'} has full no-JS content, metadata and simple view`, async ({ page, browser }) => {
       await page.goto(`/writing${route ? `/${route}` : ''}`);
-      await expect(page.locator('h1')).toHaveCount(1); await expect(page.locator('h1')).toBeVisible();
+      await expect(page.locator('h1:visible')).toHaveCount(1); await expect(page.locator('h1:visible')).toBeVisible();
       await expect(page.locator('#os-initial-data')).toHaveAttribute('data-key', `writing:${route || 'index'}`);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://nipuntheekshana.com/writing${route ? `/${route}` : ''}`);
       await expect(page.getByRole('button', { name: 'Bigger text' })).toHaveCount(0);
@@ -249,7 +253,7 @@ test.describe('crawlable static articles', () => {
         });
       } finally { await auditContext.close().catch(() => {}); }
       await page.goto(`/writing${route ? `/${route}` : ''}#simple`);
-      await expect(page.locator('h1')).toBeVisible();
+      await expect(page.locator('h1:visible')).toBeVisible();
       await expect(page.locator('.writing-toolbar')).toBeHidden();
       if (route) await expect(page.locator('.writing-reader')).toHaveCSS('overflow-y', 'visible');
       if (!route) {

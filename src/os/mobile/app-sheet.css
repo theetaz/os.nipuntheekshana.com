@@ -1,0 +1,26 @@
+.sheet-header { display:none; }
+@media (max-width:1023px), (pointer:coarse) and (max-width:1179px) {
+  .static-window > .static-titlebar { display:none !important; }
+  .window-layer[hidden] { display:none; }
+  .sheet-header { position:relative; z-index:3; display:flex; flex:0 0 calc(52px + env(safe-area-inset-top)); height:calc(52px + env(safe-area-inset-top)); min-height:calc(52px + env(safe-area-inset-top)); padding:env(safe-area-inset-top) max(8px,env(safe-area-inset-right)) 0 max(8px,env(safe-area-inset-left)); align-items:center; justify-content:space-between; gap:4px; background:var(--os-titlebar); border-bottom:1px solid var(--os-line); color:var(--os-ink); touch-action:none; user-select:none; }
+  html:not([data-view="simple"]):not(:has(#simple:target)) :is(.static-window[data-app], .managed-window[data-sheet][data-app]) :is(.projects-toolbar, .writing-toolbar, .kooda-toolbar) { position:relative; inset:auto; flex:0 0 52px; width:100%; height:52px; padding:0 12px; }
+  :is(.static-window[data-app], .managed-window[data-sheet]) :is(.projects-toolbar, .writing-toolbar, .kooda-toolbar) :is(button,a,input) { min-height:44px; }
+  :is(.static-window[data-app], .managed-window[data-sheet]) :is(.projects-toolbar, .writing-toolbar) button { min-width:44px; }
+  /* Detail navigation and sharing are supplied by the sheet header. */
+  :is(.static-window[data-app="projects"], .managed-window[data-sheet][data-app="projects"]) .project-detail > .projects-toolbar { display:none; }
+  .managed-window[data-sheet][data-app] .sheet-header .sheet-title { position:static; width:auto; height:auto; clip-path:none; max-width:none; }
+  .sheet-back { display:flex; align-items:center; min-height:44px; min-width:64px; max-width:112px; flex-shrink:0; padding:0 8px; color:color-mix(in srgb,var(--os-accent-ink) 80%,var(--os-ink)); text-decoration:none; font:500 13px/18px var(--font-ui); white-space:nowrap; }
+  .sheet-title { min-width:0; flex:1; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:600 13px/18px var(--font-ui); }
+  .sheet-actions { display:flex; min-width:88px; justify-content:flex-end; }
+  .sheet-actions button { display:grid; place-items:center; min-width:44px; height:44px; background:none; border:0; border-radius:8px; color:color-mix(in srgb,var(--os-accent-ink) 80%,var(--os-ink)); }
+  .managed-window[data-sheet] { overflow:hidden; border-radius:0; box-shadow:none; touch-action:pan-y; }
+  /* A resting opaque sheet need not paint the home beneath it. Keep the home
+     available for FLIP, swipes and their return animations. */
+  body:has(.window-layer:not([hidden]) > [data-sheet][data-focused="true"]:not([data-transition="open"]):not([data-transition="close"]):not([data-dragging]):not([data-sheet-animating])) #static-phone-home { display:none; }
+  .managed-window[data-sheet] .window-content { border-radius:0; padding-bottom:env(safe-area-inset-bottom); }
+  .managed-window[data-sheet][data-app="maps"] .maps-modes button[aria-pressed="true"] { color:var(--os-ink); }
+  html[data-mode="mobile"] .os-sheet-layer { inset:0 !important; width:100% !important; height:var(--sheet-viewport-height,100dvh) !important; }
+  html[data-mode="mobile"] .os-alert-sheet { margin-top:calc(52px + env(safe-area-inset-top)); }
+}
+
+html:is([data-view="simple"],:has(#simple:target)) .sheet-header { display:none; }

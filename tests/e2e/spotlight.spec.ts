@@ -45,13 +45,15 @@ test('Spotlight fetches lazily, ranks Salli first, supports arrows and Enter, an
 
 test('no-results copy, combobox semantics, Tab containment, Escape, and focus return', async ({ page }) => {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  const trigger = page.locator('[data-shell="desktop"] .simple-entry'); await trigger.focus();
+  const trigger = await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] a[aria-label="Spotlight"]'):page.locator('[data-shell="desktop"] .simple-entry'); await trigger.focus();
   const { dialog, input } = await openSpotlight(page); await input.fill('zzzz');
   await expect(dialog.getByText('Nothing for "zzzz". Try "map", "Go" or "Sinhala".')).toBeVisible();
   await expect(input).toHaveAttribute('aria-expanded', 'true'); await expect(input).toHaveAttribute('aria-autocomplete', 'list');
   await expect(input).not.toHaveAttribute('aria-activedescendant');
   await input.press('Tab'); await expect(dialog.getByRole('button', { name: 'Clear search' })).toBeFocused();
-  await page.keyboard.press('Tab'); await expect(input).toBeFocused();
+  await page.keyboard.press('Tab');
+  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await expect(dialog.getByRole('button',{name:'Close Spotlight'})).toBeFocused();await page.keyboard.press('Tab');}
+  await expect(input).toBeFocused();
   await input.press('Escape'); await expect(dialog).toBeHidden(); await expect(trigger).toBeFocused();
 });
 

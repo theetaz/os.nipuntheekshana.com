@@ -2,7 +2,7 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { test as nativeDateTest, type Page } from '@playwright/test';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openApp, openMenu } from './fixtures';
 import { fixtureServer, type FixtureServer } from './fixture-server';
 
 let fixtureRoute: string; let fixtureOrigin: string; let server: FixtureServer;
@@ -19,7 +19,7 @@ test.afterAll(async () => { await server?.stop(); });
 const bar = (page: Page) => page.getByRole('menubar', { name: 'Application menus' });
 async function hydrated(page: Page, route = '/') { await page.goto(route); await expect(page.locator('html')).toHaveClass(/os-ready/); }
 async function menu(page: Page, name: string) {
-  await bar(page).getByRole('menuitem', { name, exact: true }).click();
+  await openMenu(page, name);
   const panel = page.getByRole('menu', { name, exact: true });
   await expect(panel).toBeVisible(); return panel;
 }
@@ -165,6 +165,7 @@ test.describe('visitor clock in Colombo', () => {
 });
 nativeDateTest('minute ticks align to the next minute and catch up after visibility resumes', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-10-11T17:41:00Z') }); await hydrated(page);
+  nativeDateTest.skip(await page.locator('html').getAttribute('data-mode')==='mobile','The clock popover is desktop-only.');
   await page.clock.pauseAt(new Date('2026-10-11T17:41:37.250Z'));
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
   const clock = page.locator('.mb-clock'); const before = await clock.textContent();

@@ -1,4 +1,5 @@
 ---
+import { SheetHeader } from '../../../mobile/SheetHeader';
 import { APP_META } from '../../../registry/meta';
 import '../../../../styles/static-window.css';
 interface Props { route?: string; title?: string }
@@ -6,6 +7,7 @@ const { route = '', title = 'Projects' } = Astro.props;
 const { width, height } = APP_META.projects.window;
 ---
 <section id="static-window" class="static-window projects-static-window" data-app="projects" data-route={route} data-query="{}" role="dialog" aria-modal="false" aria-labelledby="static-window-title" style={`--window-width:${width}px;--window-height:${height}px`}>
+  <SheetHeader appId={"projects"} route={route} title={title} />
   <header class="static-titlebar">
     <div class="traffic-lights">
       <a class="traffic-light close" data-traffic-light href="/" aria-label="Close (back to the desktop)"><span aria-hidden="true">×</span><span class="mobile-home" aria-hidden="true">Home</span></a>

@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openMenu, openApp } from './fixtures';
 import type { Page } from '@playwright/test';
 const artifacts = resolve('.astro/p2-3-artifacts');
 async function hydrated(page: Page) { await expect(page.locator('html')).toHaveClass(/os-ready/); }
@@ -81,14 +81,14 @@ test('failed adoption leaves static content usable and Simple view remains a rea
   await expect(page.locator('[data-window-id]')).toHaveCount(0);
   await expect(page.locator('#static-window')).toBeVisible();
   await expect(page).toHaveURL(/\/projects\/salli$/);
-  await page.locator('[data-shell="desktop"] .simple-entry').click();
+  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await openMenu(page,'Help');await page.getByRole('menuitem',{name:'Simple view',exact:true}).last().click();}else await page.locator('[data-shell="desktop"] .simple-entry').click();
   await expect(page.locator('#static-window')).toBeVisible();
   expect(await page.locator('#static-window').evaluate(element => getComputedStyle(element).position)).toBe('static');
 });
 
 test('adopted routes can enter Simple view and return without hiding their static reading content', async ({ page }) => {
   await page.goto('/projects/salli'); await hydrated(page); await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
-  await page.locator('[data-shell="desktop"] .simple-entry').click();
+  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await openMenu(page,'Help');await page.getByRole('menuitem',{name:'Simple view',exact:true}).last().click();}else await page.locator('[data-shell="desktop"] .simple-entry').click();
   await expect(page.locator('#static-window')).toBeVisible(); await expect(page.locator('[data-shell]')).toHaveCount(0);
   await page.getByRole('link', { name: 'Back to the desktop', exact: true }).click();
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');

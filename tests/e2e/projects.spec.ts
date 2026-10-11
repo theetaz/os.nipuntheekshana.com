@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
-import { test, expect } from './fixtures';
+import { test, expect, openMenu } from './fixtures';
 import type { Page } from '@playwright/test';
 
 const artifacts = resolve('.astro/p3-1-artifacts');
@@ -125,10 +125,12 @@ test('context menu routes project actions; View menus drive checked state and st
   const win = await index(page); await win.getByRole('option', { name: 'Salli', exact: true }).click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Quick Look', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Quick Look — Salli' }).getByRole('status')).toHaveText('1 of 3');
-  await page.keyboard.press('Escape'); await win.getByRole('button', { name: 'Back', exact: true }).click();
-  const menu = page.getByRole('menubar'); await menu.getByRole('menuitem', { name: 'View', exact: true }).click();
+  await page.keyboard.press('Escape');
+  if(await page.locator('html').getAttribute('data-mode')==='mobile')await win.getByRole('link',{name:'Back to Projects',exact:true}).click();
+  else await win.getByRole('button', { name: 'Back', exact: true }).click();
+  await openMenu(page, 'View');
   await page.getByRole('menuitemradio', { name: 'as List', exact: true }).click(); await expect(win.locator('.projects-list')).toBeVisible();
-  await menu.getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await expect(page.getByRole('menuitemradio', { name: 'as List', exact: true })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('menuitemcheckbox', { name: 'Show status bar' }).click(); await expect(win.locator('.projects-statusbar')).toHaveCount(0);
 });

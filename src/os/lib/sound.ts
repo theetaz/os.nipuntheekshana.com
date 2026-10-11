@@ -31,15 +31,17 @@ const lastPlayed: Partial<Record<SoundName, number>> = {};
 function resume(): Promise<void> {
   return resuming ??= context!.resume().finally(() => { resuming = undefined; });
 }
-function gesture(event: Event): void {
+/** A lazy phone shell may forward the original trusted event after this module loads. */
+export function captureSoundGesture(event: Event, resumeAudio = true): void {
   if (!event.isTrusted) return;
   gestured = true;
   try {
-    if (context?.state === 'suspended' && getStore().get(soundAtom)) void resume().catch(() => {});
+    // A deferred relay records activation; the live listener owns context resumption.
+    if (resumeAudio && context?.state === 'suspended' && getStore().get(soundAtom)) void resume().catch(() => {});
   } catch { /* Audio and the registered store may be unavailable. */ }
 }
 if (typeof document !== 'undefined') {
-  for (const event of ['pointerdown', 'keydown', 'touchend']) document.addEventListener(event, gesture, { capture: true, passive: true });
+  for (const event of ['pointerdown', 'keydown', 'touchend']) document.addEventListener(event, captureSoundGesture, { capture: true, passive: true });
 }
 
 function noiseSource(audio: AudioContext): AudioBufferSourceNode {

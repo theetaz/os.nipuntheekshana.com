@@ -3,11 +3,11 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { GLOBAL_SHORTCUTS, formatShortcut } from '../../src/os/lib/hotkeys-match';
-import { test, expect } from './fixtures';
+import { test, expect, openMenu } from './fixtures';
 
 const managed = (page: Page, app: string) => page.locator(`.managed-window[data-app="${app}"]`);
 async function openShortcuts(page: Page, waitForContent = true) {
-  await page.getByRole('menubar', { name: 'Application menus' }).getByRole('menuitem', { name: 'Help', exact: true }).click();
+  await openMenu(page, 'Help');
   await page.getByRole('menu', { name: 'Help', exact: true }).getByRole('menuitem', { name: 'Keyboard shortcuts', exact: true }).click();
   if (waitForContent) await expect(managed(page, 'readme').getByRole('table', { name: 'Keyboard shortcuts' })).toBeVisible();
 }
@@ -48,12 +48,12 @@ for (const width of [1440, 390]) {
 test('Now opens from Go with the five items, date and paper surface', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  await page.getByRole('menubar', { name: 'Application menus' }).getByRole('menuitem', { name: 'Go', exact: true }).click();
+  await openMenu(page, 'Go');
   await page.getByRole('menu', { name: 'Go', exact: true }).getByRole('menuitem', { name: 'Now', exact: true }).click();
   const window = managed(page, 'now');
   await expect(window.getByRole('listitem')).toHaveCount(5);
   await expect(window.locator('footer')).toContainText('Updated 28 September 2026 · Colombo');
-  await expect(window.getByRole('button', { name: 'Zoom Now' })).toHaveAttribute('aria-disabled', 'true');
+  if(await page.locator('html').getAttribute('data-mode')==='desktop') await expect(window.getByRole('button', { name: 'Zoom Now' })).toHaveAttribute('aria-disabled', 'true');
   expect(await window.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(255, 233, 168)');
   expect(errors).toEqual([]);
 });
@@ -79,7 +79,7 @@ test('section links, View commands, repeated Help and history scroll within the 
   await openShortcuts(page); await atSection(page, 'shortcuts', 'Help after Privacy');
   await window.locator('[data-scroll-root]').evaluate(el => { el.scrollTop = 0; });
   await openShortcuts(page); await atSection(page, 'shortcuts', 'Repeated Help');
-  await page.getByRole('menubar', { name: 'Application menus' }).getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await page.getByRole('menu', { name: 'View', exact: true }).getByRole('menuitem', { name: 'Keyboard shortcuts' }).click();
   await atSection(page, 'shortcuts', 'View command');
   await page.goBack(); await expect(window.locator('#privacy')).toBeFocused();
@@ -117,7 +117,7 @@ for (const app of ['now', 'readme'] as const) {
     await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
     if (app === 'readme') await openShortcuts(page, false);
     else {
-      await page.getByRole('menubar', { name: 'Application menus' }).getByRole('menuitem', { name: 'Go', exact: true }).click();
+      await openMenu(page, 'Go');
       await page.getByRole('menu', { name: 'Go', exact: true }).getByRole('menuitem', { name: 'Now', exact: true }).click();
     }
     const window = managed(page, app);

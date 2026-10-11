@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openApp, openMenu } from './fixtures';
 
 const app = (page: Page) => page.locator('[data-window-id="about"]');
 const artifacts = resolve('.astro/p3-3-artifacts');
@@ -76,14 +76,13 @@ test('sidebar and arrow keys select all five views with roving focus', async ({ 
 test('per-window View and File menus route commands and track the selected section', async ({ page }) => {
   await page.goto('/about');
   await expect(app(page).getByRole('tab', { name: 'Overview', exact: true })).toBeVisible();
-  const menubar = page.getByRole('menubar', { name: 'Application menus' });
-  await menubar.getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await page.getByRole('menuitemradio', { name: 'Life', exact: true }).click();
   await expect(app(page).getByRole('heading', { name: 'Life', exact: true })).toBeVisible();
-  await menubar.getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await expect(page.getByRole('menuitemradio', { name: 'Life', exact: true })).toHaveAttribute('aria-checked', 'true');
   await page.keyboard.press('Escape');
-  await menubar.getByRole('menuitem', { name: 'File', exact: true }).click();
+  await openMenu(page, 'File');
   await page.getByRole('menuitem', { name: 'Read the CV', exact: true }).click();
   await expect(page.locator('[data-window-id="cv"]')).toBeVisible();
 });

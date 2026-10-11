@@ -2,7 +2,7 @@ import { mkdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openApp, openMenu } from './fixtures';
 
 const artifacts = resolve('.astro/p3-4-artifacts');
 const viewer = (page: Page) => page.locator('.managed-window[data-app="cv"]');
@@ -87,7 +87,7 @@ test('page tracking reflects a thumbnail jump reversed within the same frame', a
 
 test('View menu and keyboard shortcuts control the focused viewer', async ({ page }) => {
   const win = await openCv(page);
-  await page.getByRole('menubar').getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await page.getByRole('menuitem', { name: 'Zoom in', exact: false }).click();
   await expect(win.getByLabel('Zoom level')).toHaveText('125%');
   await win.locator('.cv-scroll').focus();
@@ -97,7 +97,7 @@ test('View menu and keyboard shortcuts control the focused viewer', async ({ pag
   await expect(win.getByLabel('Zoom level')).toHaveText('125%');
   await page.keyboard.press('Alt+Digit0');
   await expect(win.getByLabel('Zoom level')).toHaveText('100%');
-  await page.getByRole('menubar').getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await expect(page.getByRole('menuitemcheckbox', { name: 'Show thumbnails' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('menuitemcheckbox', { name: 'Show thumbnails' }).click();
   await expect(win.getByRole('button', { name: 'Show thumbnails', exact: true })).toHaveAttribute('aria-pressed', 'false');

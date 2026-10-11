@@ -1,4 +1,5 @@
 ---
+import { SheetHeader } from '../os/mobile/SheetHeader';
 import OsLayout from '../layouts/OsLayout.astro';
 import InitialData from '../components/static/InitialData.astro';
 import { CvDocument } from '../os/apps/cv/views/CvDocument';
@@ -12,6 +13,7 @@ const seo = seoFor({ path: '/cv', title: 'CV', description: APP_META.cv.descript
 ---
 <OsLayout seo={seo} initial={{ appId: 'cv', route: '' }}>
   <section id="static-window" class="static-window" data-app="cv" data-route="" data-query="{}" role="dialog" aria-modal="false" aria-label="CV" style={`--window-width:${width}px;--window-height:${height}px`}>
+    <SheetHeader appId="cv" route="" title="CV" />
     <header class="static-titlebar">
       <div class="traffic-lights">
         <a class="traffic-light close" data-traffic-light href="/" aria-label="Close (back to the desktop)"><span aria-hidden="true">×</span><span class="mobile-home" aria-hidden="true">Home</span></a>

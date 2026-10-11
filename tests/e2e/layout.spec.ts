@@ -19,7 +19,7 @@ test('layout emits crawlable metadata, two font preloads and ordered landmarks',
   await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
   await expect(page.getByRole('link', { name: 'Skip to content', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(page.locator('#content')).toBeFocused();
+  await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('#phone-content'):page.locator('#content')).toBeFocused();
   expect(errors).toEqual([]);
 });
 

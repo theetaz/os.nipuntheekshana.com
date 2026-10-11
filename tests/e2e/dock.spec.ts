@@ -8,7 +8,7 @@ const dock = (page: Page) => page.locator('.os-dock:visible');
 const link = (page: Page, name: string) => dock(page).getByRole('link', { name, exact: true });
 async function ready(page: Page) {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  test.fixme(await page.locator('html').getAttribute('data-mode') === 'mobile', 'P4-1: phone home Dock interactions replace desktop magnification, running windows and external Dock links.');
+  test.skip(await page.locator('html').getAttribute('data-mode') === 'mobile', 'Desktop Dock magnification and window controls are desktop-only.');
   await expect(page.locator('[data-shell="mobile"]')).toHaveCount(0);
   await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
 }
@@ -309,9 +309,9 @@ test('captures light, dark and mobile docks and checks dock accessibility @visua
     for (const theme of ['light', 'dark'] as const) {
       await page.emulateMedia({ colorScheme: theme }); await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
       await page.mouse.move(0, 0); await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
-      const result = await new AxeBuilder({ page }).include('.os-dock').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+      const result = await new AxeBuilder({ page }).include(viewport.width===390?'.phone-dock':'.os-dock').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
       expect(result.violations).toEqual([]);
-      if (viewport.width === 390) await expect(dock(page).locator('[data-dock-item]')).toHaveCount(4);
+      if (viewport.width === 390) await expect(page.locator('[data-shell="mobile"] .phone-dock [data-phone-icon]')).toHaveCount(4);
       await page.screenshot({ path: resolve(artifacts, `${theme}-${viewport.width}x${viewport.height}.png`) });
     }
   }

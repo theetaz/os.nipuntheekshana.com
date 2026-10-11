@@ -26,7 +26,7 @@ test('adoption never steals focus outside the static window', async ({ page }) =
   await page.route('**/ProjectsApp.*.js', async route => { await hold; await route.continue(); });
   try {
     await page.goto('/projects/salli', { waitUntil: 'domcontentloaded' }); await expect(page.locator('[data-adopting]')).toHaveCount(1);
-    const simple = page.locator('[data-shell="desktop"] .simple-entry'); await simple.focus(); release();
+    const simple = await page.locator('html').getAttribute('data-mode')==='mobile' ? page.locator('[data-phone-skip]') : page.locator('[data-shell="desktop"] .simple-entry'); await simple.focus(); release();
     await expect(page.locator('#static-window')).toHaveAttribute('hidden', ''); await expect(simple).toBeFocused();
   } finally { release(); }
 });

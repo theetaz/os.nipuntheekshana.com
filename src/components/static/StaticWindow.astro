@@ -1,4 +1,5 @@
 ---
+import { SheetHeader } from '../../os/mobile/SheetHeader';
 import { APP_META } from '../../os/registry/meta';
 import type { AppId } from '../../os/types/apps';
 import '../../styles/static-window.css';
@@ -7,6 +8,7 @@ const { app, route = '', query = {}, title = APP_META[app].name, adoptable = tru
 const { width, height } = APP_META[app].window;
 ---
 <section id={adoptable ? 'static-window' : 'static-alert'} class="static-window" data-app={adoptable ? app : undefined} data-theme={app === 'terminal' ? 'dark' : undefined} data-route={route} data-query={JSON.stringify(query)} role="dialog" aria-modal="false" aria-labelledby="static-window-title" style={`--window-width:${width}px;--window-height:${height}px`}>
+  <SheetHeader appId={app} route={route} title={title} />
   <header class="static-titlebar">
     <div class="traffic-lights">
       <a class="traffic-light close" data-traffic-light href="/" aria-label="Close (back to the desktop)"><span aria-hidden="true">×</span><span class="mobile-home" aria-hidden="true">Home</span></a>

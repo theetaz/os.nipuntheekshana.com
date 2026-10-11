@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { test, expect } from './fixtures';
+import { test, expect, openMenu, openApp, closeApp } from './fixtures';
 
 const app = (page: Page) => page.locator('[data-window-id="settings"]');
 async function settings(page: Page) {
@@ -153,7 +153,7 @@ test('desktop context query selects Wallpaper, menu state follows selection and 
   await expect(app(page).locator('[id="window-title-settings"]')).toHaveText('Wallpaper');
   await expect(app(page).locator('[data-resize-handle]')).toHaveCount(0); await expect(app(page).locator('[data-transition]')).toHaveCount(0);
   await section(page, 'Appearance');
-  await page.getByRole('menubar').getByRole('menuitem', { name: 'View', exact: true }).click();
+  await openMenu(page, 'View');
   await expect(page.getByRole('menuitemradio', { name: 'Appearance', exact: true })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('menuitemradio', { name: 'Sound', exact: true }).click(); await expect(app(page).getByRole('region', { name: 'Sound' })).toBeVisible();
   const before = await app(page).boundingBox();
@@ -174,8 +174,9 @@ test('Developer is gated by the atom and exposes developer tools', async ({ page
 test('simple view keeps real Settings content and keyboard help opens Read me', async ({ page }) => {
   await settings(page); await section(page, 'Accessibility'); await app(page).getByRole('link', { name: 'Keyboard shortcuts' }).click();
   await expect(page.locator('[data-window-id="readme"]')).toBeVisible();
-  await page.locator('[data-window-id="readme"]').getByRole('button', { name: 'Close Read me' }).click();
+  await closeApp(page,'Read me.txt');
   await expect(page.locator('[data-window-id="readme"]')).toHaveCount(0);
+  if(await page.locator('html').getAttribute('data-mode')==='mobile')await openApp(page,'Settings');
   await app(page).getByRole('button', { name: 'Switch to simple view' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-view', 'simple'); expect(await stored(page, 'view')).toBe('"simple"');
   await expect(page.locator('#static-window')).toBeVisible(); await expect(page.getByText('Made in Colombo by Nipun Theekshana.')).toBeVisible();

@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
-import { test, expect } from './fixtures';
+import { test, expect, openMenu, closeApp } from './fixtures';
 import { items } from '../../src/os/apps/trash/items';
 
 const managed = '[data-window-id="trash"]';
@@ -80,7 +80,7 @@ test('Empty Kooda confirms, cancels, updates dock, survives reopen, and resets o
   await expect(win.getByRole('heading', { name: 'Kooda is empty.' })).toBeVisible();
   await expect(empty).toBeDisabled();
   await expect(dockIcon).toHaveAttribute('href', '#app-trash');
-  await win.getByRole('button', { name: 'Close Kooda', exact: true }).click();
+  await closeApp(page, 'Kooda');
   await expect(win).toHaveCount(0);
   await page.locator('[data-shell="desktop"] [data-dock-app="trash"]').click();
   await expect(win.getByRole('heading', { name: 'Kooda is empty.' })).toBeVisible();
@@ -93,17 +93,16 @@ test('Empty Kooda confirms, cancels, updates dock, survives reopen, and resets o
 test('File menu owns Empty Kooda state and dock emptying updates the open app', async ({ page }) => {
   await page.goto('/kooda');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
-  await page.getByRole('menubar').getByRole('menuitem', { name: 'File', exact: true }).click();
+  await openMenu(page, 'File');
   await page.getByRole('menuitem', { name: 'Empty Kooda…', exact: true }).click();
   await expect(page.getByRole('alertdialog')).toBeVisible();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(page.getByRole('alertdialog')).toHaveCount(0);
-  await page.locator('[data-shell="desktop"] [data-dock-app="trash"]').click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Empty Kooda', exact: true }).click();
+  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await openMenu(page,'File');await page.getByRole('menuitem',{name:'Empty Kooda…',exact:true}).click();}else{await page.locator('[data-shell="desktop"] [data-dock-app="trash"]').click({button:'right'});await page.getByRole('menuitem',{name:'Empty Kooda',exact:true}).click();}
   await page.getByRole('button', { name: 'Empty', exact: true }).click();
   await expect(page.locator(managed).getByRole('heading', { name: 'Kooda is empty.' })).toBeVisible();
   await expect(page.getByRole('alertdialog')).toHaveCount(0);
-  await page.getByRole('menubar').getByRole('menuitem', { name: 'File', exact: true }).click();
+  await openMenu(page, 'File');
   await expect(page.getByRole('menuitem', { name: 'Empty Kooda…', exact: true })).toHaveAttribute('aria-disabled', 'true');
 });
 
@@ -197,8 +196,8 @@ test('desktop and phone content are responsive and produce light/dark artifacts 
       expect(await win.locator('.kooda-scroll').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
       const toolbar = await win.getByRole('button', { name: 'Empty Kooda', exact: true }).boundingBox();
       const titlebar = await win.locator('[data-window-titlebar]').boundingBox();
-      expect(toolbar!.y).toBeGreaterThanOrEqual(titlebar!.y);
-      expect(toolbar!.y + toolbar!.height).toBeLessThanOrEqual(titlebar!.y + titlebar!.height);
+      expect(toolbar!.y).toBeGreaterThanOrEqual(mode==='phone'?titlebar!.y+titlebar!.height:titlebar!.y);
+      if(mode==='desktop')expect(toolbar!.y+toolbar!.height).toBeLessThanOrEqual(titlebar!.y+titlebar!.height);
       if (mode === 'phone') expect(toolbar!.height).toBeGreaterThanOrEqual(44);
       await page.screenshot({ path: resolve(artifactDir, `${mode}-${theme}.png`) });
       await win.getByRole('button', { name: items[0]!.name }).click();

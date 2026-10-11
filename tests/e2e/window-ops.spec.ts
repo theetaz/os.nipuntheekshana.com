@@ -155,14 +155,14 @@ test('focus raises windows, close finishes its animation before removal and rest
 });
 
 test('Tab wraps both ways between the first and last controls', async ({ page }) => {
-  const win = await projects(page); const close = win.getByRole('button', { name: 'Close Projects' }); const last = win.getByRole('option', { selected: true });
+  const win = await projects(page); const close = await page.locator('html').getAttribute('data-mode')==='mobile'?win.getByRole('link',{name:'Home',exact:true}):win.getByRole('button', { name: 'Close Projects' }); const last = win.getByRole('option', { selected: true });
   await close.focus(); await page.keyboard.press('Shift+Tab'); await expect(last).toBeFocused();
   await page.keyboard.press('Tab'); await expect(close).toBeFocused();
   await page.keyboard.press('Escape'); await expect(win).toBeVisible();
 });
 
 test('window containment lets an app widget handle Tab first', async ({ page }) => {
-  const win = await projects(page); const zoom = win.getByRole('button', { name: 'Zoom Projects' });
+  const win = await projects(page); const zoom = await page.locator('html').getAttribute('data-mode')==='mobile'?win.getByRole('button',{name:'App commands'}):win.getByRole('button', { name: 'Zoom Projects' });
   await zoom.evaluate(el => el.addEventListener('keydown', event => {
     if ((event as KeyboardEvent).key === 'Tab') event.preventDefault();
   }));

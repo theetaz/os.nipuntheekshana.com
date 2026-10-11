@@ -108,7 +108,8 @@ const MenuLevel = forwardRef<HTMLDivElement, LevelProps>(function RenderMenuLeve
         aria-controls={item.kind === 'submenu' && submenu === index ? `${id}-submenu` : undefined}
         submenu={item.kind === 'submenu'} aria-expanded={item.kind === 'submenu' ? submenu === index : undefined}
         onFocus={event => { if (event.target === event.currentTarget) setActive(index); }}
-        onPointerEnter={() => {
+        onPointerEnter={event => {
+          if (event.pointerType !== 'mouse' || !matchMedia('(pointer:fine)').matches) return;
           if (!enabled.includes(index)) return;
           clearTimeout(hoverTimer.current); setActive(index);
           if (item.kind === 'submenu') hoverTimer.current = setTimeout(() => openSubmenu(index, false), 120);

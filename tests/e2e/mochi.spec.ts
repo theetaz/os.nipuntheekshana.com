@@ -144,7 +144,7 @@ test('window opens turn curious eyes toward their centre and fast window scroll 
   await ready(page); await openApp(page, 'About'); await expect(root(page)).toHaveAttribute('data-mood', 'curious');
   // Window creation precedes the lazy app; scroll its real root, not the skeleton.
   await expect(page.locator('[data-window-id="about"]').getByRole('heading', { name: 'Nipun Theekshana', exact: true })).toBeVisible();
-  expect(await page.locator('.mochi__eyes').evaluate(element => (element as SVGElement).style.transform)).toContain('translate(');
+  expect(await root(page).locator('.mochi__eyes').evaluate(element => (element as SVGElement).style.transform)).toContain('translate(');
   await page.locator('[data-window-id="about"]').evaluate(element => {
     const scroll = element.querySelector<HTMLElement>('[data-scroll-root]')!;
     const content = document.createElement('div'); content.style.height = '5000px'; scroll.append(content); scroll.scrollTop = 1200;

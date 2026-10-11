@@ -9,7 +9,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const artifacts = resolve(root, '.astro/p2-7-artifacts');
 async function desktop(page: Page) {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  test.fixme(await page.locator('html').getAttribute('data-mode') === 'mobile', 'P4-1: the phone home launcher replaces desktop icon selection, drag and marquee controls.');
+  test.skip(await page.locator('html').getAttribute('data-mode') === 'mobile', 'Desktop icon selection, drag and marquee are desktop-only.');
   await expect(page.getByRole('listbox', { name: 'Desktop', exact: true })).toBeVisible();
 }
 const icon = (page: Page, name: string) => page.getByRole('option', { name, exact: true });

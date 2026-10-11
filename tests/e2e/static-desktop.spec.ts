@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
-import { test, expect } from './fixtures';
+import { test, expect, openMenu } from './fixtures';
 
 const artifacts = resolve('.astro/p1-7-artifacts');
 
@@ -63,12 +63,12 @@ test('route pages do not log errors and reduced motion skips the boot @smoke', a
 test('stored Simple view can return to the desktop', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('html')).toHaveClass(/os-ready/);
-  await page.locator('[data-shell="desktop"] .simple-entry').click();
-  expect(await page.evaluate(() => localStorage.getItem('serendib:view'))).toBe('"simple"');
+  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await openMenu(page,'Help');await page.getByRole('menuitem',{name:'Simple view',exact:true}).last().click();}else await page.locator('[data-shell="desktop"] .simple-entry').click();
+  await expect.poll(()=>page.evaluate(() => localStorage.getItem('serendib:view'))).toBe('"simple"');
   await page.reload();
   await expect(page.locator('#home-document')).toBeVisible();
   await page.getByRole('link', { name: 'Back to the desktop', exact: true }).click();
-  await expect(page.locator('.ticket')).toBeVisible();
+  await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] .phone-ticket'):page.locator('.ticket')).toBeVisible();
   await expect(page.locator('#home-document')).toBeHidden();
   expect(await page.evaluate(() => localStorage.getItem('serendib:view'))).toBeNull();
 });

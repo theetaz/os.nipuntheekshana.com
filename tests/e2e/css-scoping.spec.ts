@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { APPS } from '../../src/os/registry/apps';
-import { test, expect, openApp } from './fixtures';
+import { test, expect, openApp, openMenu } from './fixtures';
 
 interface Chunk { modules: string[]; imports: string[]; css: string[] }
 const { chunks } = JSON.parse(readFileSync(resolve('dist/.css-scope.json'), 'utf8')) as { chunks: Record<string, Chunk> };
@@ -60,7 +60,8 @@ for (const app of Object.values(APPS).filter(app => app.phase === 'v1')) {
         await page.route(url => css.includes(url.pathname), async route => { await hold; await route.continue(); });
       }
       const requested = css.length ? page.waitForRequest(request => css.includes(new URL(request.url()).pathname)) : null;
-      if (app.dockOrder !== null) await openApp(page, app.name);
+      if(await page.locator('html').getAttribute('data-mode')==='mobile') {if(app.id==='readme'){await openMenu(page,'Help');await page.getByRole('menuitem',{name:'Read me',exact:true}).click();}else await openApp(page,app.name);}
+      else if (app.dockOrder !== null) await openApp(page, app.name);
       else if (app.desktopIcon) await page.getByRole('option', { name: app.desktopIcon.label, exact: true }).dblclick();
       else await page.locator('.now-sticky a').click({ force: true });
       if (requested) {

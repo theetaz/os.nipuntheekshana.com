@@ -102,8 +102,10 @@ describe('built CSS respects static pages and lazy app chunks', () => {
 
   it('defers window and overlay sheets while retaining static-window chrome', () => {
     const home = pageSheets(resolve(dist, 'index.html'));
-    for (const chunk of Object.values(chunks).filter(chunk => chunk.modules.includes('src/os/shell/WindowLayer.tsx')
-      || chunk.modules.includes('src/os/shell/Spotlight.tsx'))) {
+    const deferred = ['src/os/shell/p2-4-window-system.css', 'src/os/shell/Spotlight.tsx'];
+    for (const module of deferred) {
+      const chunk = Object.values(chunks).find(chunk => chunk.modules.includes(module))!;
+      expect(chunk, module).toBeDefined();
       expect(chunk.css.length).toBeGreaterThan(0);
       chunk.css.forEach(file => expect(home.has(cssHash(file)), file).toBe(false));
     }

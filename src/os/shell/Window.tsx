@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject, type ReactNode } from 'react';
 import { useAtomValue, useStore } from 'jotai';
 import { announceAtom, appLoadAtom, desktopAtom, focusedIdAtom, geometryAtom, reducedMotionAtom, releaseWindowAtom, updateAvailableAtom, windowAtom } from '../state/atoms';
 import { APP_META } from '../registry/meta';
@@ -8,7 +8,7 @@ import { readInitialData } from '../lib/initial-data';
 import { focusableWithin, trapTab } from '../lib/focus';
 import { closeWindow, focusWindow, navigateWindow } from '../wm/commands';
 import { clampMove, clampSize } from '../wm/geometry';
-import type { Rect, WindowId } from '../wm/types';
+import type { Rect, WindowId, WindowState } from '../wm/types';
 import { pathFor } from '../url/routes';
 import { ErrorState } from '../ui/ErrorState';
 import { Button } from '../ui/Button';
@@ -24,23 +24,29 @@ import { getDockAnchor } from './dock-anchors';
 
 import { launchers } from './window-launchers';
 
+function phoneRect(): Rect {
+  const viewport=window.visualViewport;
+  return {x:viewport?.offsetLeft??0,y:viewport?.offsetTop??0,w:viewport?.width??innerWidth,h:viewport?.height??innerHeight};
+}
+
 function focusContent(el: HTMLElement) {
   const heading = el.querySelector<HTMLElement>('.window-content h1, .window-content h2');
   if (heading) heading.tabIndex = -1;
   const controls = focusableWithin(el);
   const target = controls.find(item => item.matches('[data-autofocus]'))
+    ?? (el.hasAttribute('data-sheet') ? controls.find(item => item.closest('.window-content')) : undefined)
     ?? controls.find(item => !item.closest('.window-traffic-lights')) ?? heading ?? el;
   target.focus({ preventScroll: true });
 }
 
-export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: WindowId; mode?: 'desktop' | 'mobile'; zIndex?: number }) {
+export function Window({ windowId, mode = 'desktop', zIndex = 2, elementRef, frameRef, controllerFactory = createFrameController, header }: { windowId: WindowId; mode?: 'desktop' | 'mobile'; zIndex?: number; elementRef?: RefObject<HTMLElement | null>; frameRef?: RefObject<FrameController | null>; controllerFactory?: typeof createFrameController; header?: (win: WindowState, loading: boolean) => ReactNode }) {
   const store = useStore(); const win = useAtomValue(windowAtom(windowId)); const focusedId = useAtomValue(focusedIdAtom);
   const updated = useAtomValue(updateAvailableAtom);
   const [module, setModule] = useState<AppModule | null>(null); const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0); const [contentReady, setContentReady] = useState(false);
   const [stillLoading, setStillLoading] = useState(false); const [keyboardMove, setKeyboardMove] = useState(false);
-  const scrollRootRef = useRef<HTMLElement | null>(null); const element = useRef<HTMLElement | null>(null);
-  const frame = useRef<FrameController | null>(null); const transitionSeq = useRef<number | null>(null);
+  const scrollRootRef = useRef<HTMLElement | null>(null); const internalElement = useRef<HTMLElement | null>(null); const element = elementRef ?? internalElement;
+  const internalFrame = useRef<FrameController | null>(null); const frame = frameRef ?? internalFrame; const transitionSeq = useRef<number | null>(null);
   const readyCalled = useRef(false); const previousFocus = useRef(false); const previousReady = useRef(false);
   const launcher = useRef<WeakRef<HTMLElement> | null>(null);
   const keyboard = useRef<{ original: Rect; resized: boolean; returnFocus: HTMLElement | null } | null>(null);
@@ -80,7 +86,7 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
   const returnToDesktop = useCallback(() => {
     if (store.get(desktopAtom).focusedId) return;
     const source = launcher.current?.deref();
-    const fallback = element.current?.ownerDocument.querySelector<HTMLElement>('[data-shell="desktop"] [aria-label="Desktop"] a, [data-shell] [aria-label="Dock"] a');
+    const fallback = element.current?.ownerDocument.querySelector<HTMLElement>('[data-shell="desktop"] [aria-label="Desktop"] a, [data-shell] [aria-label="Dock"] a, [data-shell="mobile"] [data-phone-icon]');
     if (source?.isConnected && !source.closest('[hidden], [inert]')) source.focus({ preventScroll: true });
     else fallback?.focus({ preventScroll: true });
   }, [store]);
@@ -91,11 +97,11 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
     const active = el.ownerDocument.activeElement;
     launcher.current = launchers.get(el.ownerDocument)?.get(current.appId) ?? null;
     if (!launcher.current && active instanceof HTMLElement && active !== el.ownerDocument.body && !active.closest('[data-window-id]')) launcher.current = new WeakRef(active);
-    const rect = mode === 'mobile' ? { x: 0, y: 0, w: innerWidth, h: innerHeight } : current.rect;
-    frame.current = createFrameController(el, rect, () => store.get(reducedMotionAtom));
+    const rect = mode === 'mobile' ? phoneRect() : current.rect;
+    frame.current = controllerFactory(el, rect, () => store.get(reducedMotionAtom));
     transitionSeq.current = null;
     return () => { frame.current?.destroy(); frame.current = null; };
-  }, [mode, store, windowId]);
+  }, [controllerFactory, mode, store, windowId]);
 
   useLayoutEffect(() => {
     const controller = frame.current;
@@ -106,7 +112,7 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
       keyboard.current = null; delete el.dataset.keyboardMove; setKeyboardMove(false);
       controller.set(original);
     }
-    const rect = mode === 'mobile' ? { x: 0, y: 0, w: innerWidth, h: innerHeight } : win.rect;
+    const rect = mode === 'mobile' ? phoneRect() : win.rect;
     if (transitionSeq.current === win.transition.seq) {
       if (!el.hasAttribute('data-dragging') && !el.hasAttribute('data-resizing') && !keyboard.current && !sameRect(rect, controller.rect)) controller.set(rect);
       return;
@@ -188,9 +194,9 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
     setQuery: (query, opts) => store.set(desktopAtom, { type: 'SET_QUERY', id: windowId, query, history: opts?.replace === false ? 'push' : 'replace' }),
     setTitle: title => store.set(desktopAtom, { type: 'SET_TITLE', id: windowId, title }), ready,
     close: () => { void closeWindow(windowId); }, scrollRootRef };
-  return <section ref={element} className="managed-window" role="dialog" aria-modal="false" aria-labelledby={`window-title-${windowId}`}
+  return <section ref={element} className="managed-window" role="dialog" aria-modal={mode === 'mobile'} aria-labelledby={`window-title-${windowId}`}
     aria-describedby={`window-hint-${windowId}`} data-window-id={windowId} data-app={win.appId} data-focused={focused}
-    data-mode={win.mode} data-shell-mode={mode} data-theme={win.appId === 'terminal' ? 'dark' : undefined}
+    data-sheet={mode === 'mobile' ? '' : undefined} data-mode={win.mode} data-shell-mode={mode} data-theme={win.appId === 'terminal' ? 'dark' : undefined}
     data-adopting={adopting ? '' : undefined} inert={win.minimized || win.closing || adopting} tabIndex={-1}
     onPointerDownCapture={() => { if (!win.closing && !win.minimized) focusWindow(windowId); }}
     onFocusCapture={() => { if (store.get(desktopAtom).focusedId !== windowId && !adopting) focusWindow(windowId); }}
@@ -217,8 +223,8 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
       if (!event.defaultPrevented && event.currentTarget.contains(event.target as Node)) trapTab(event, event.currentTarget);
     }} style={{ zIndex }}>
     <span id={`window-hint-${windowId}`} className="sr-only">Window. Tab moves within it. Option or Alt plus backtick switches windows.</span>
-    <TitleBar windowId={windowId} title={win.title} kind={meta.window.titleBar} zoomable={meta.window.zoomable}
-      maximized={win.mode === 'maximized'} keyboardMove={keyboardMove} stillLoading={stillLoading && !App && !error} />
+    {header ? header(win, stillLoading && !App && !error) : <TitleBar windowId={windowId} title={win.title} kind={meta.window.titleBar} zoomable={meta.window.zoomable}
+      maximized={win.mode === 'maximized'} keyboardMove={keyboardMove} stillLoading={stillLoading && !App && !error} />}
     <div className="window-content" data-titlebar={meta.window.titleBar}>
       {error ? <ErrorState className="window-error" role="alert" simpleHref={simpleHref}
         title={updated ? 'Serendib was updated while you were here.' : undefined}
