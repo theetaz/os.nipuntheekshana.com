@@ -1,0 +1,100 @@
+.static-document:has(> .activity-view), .static-document.activity-document {
+  max-width: none;
+  padding: 0;
+  font: 450 13px/18px var(--font-ui);
+}
+.activity-view { color: var(--os-ink); min-width: 0; }
+/* Match the static mobile header during adoption until the Pocket sheet owns it. */
+.managed-window[data-app="activity"][data-shell-mode="mobile"] .window-titlebar {
+  flex-basis: calc(52px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  border-radius: 0;
+}
+.activity-view p { margin: 0; }
+.activity-view a { color: var(--os-accent-ink); text-underline-offset: 3px; }
+.activity-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--os-line);
+  background: var(--os-titlebar);
+}
+.activity-segmented { display: flex; gap: 2px; padding: 2px; border-radius: var(--r-control); background: var(--os-sunken); }
+.activity-segmented button { min-height: 28px; padding: 3px 12px; border-radius: var(--r-menu-item); color: var(--os-ink-2); cursor: pointer; }
+.activity-segmented button[aria-pressed="true"] { background: var(--os-raised); color: var(--os-ink); box-shadow: var(--shadow-card); }
+.activity-segmented button:disabled { cursor: default; }
+html.no-js .activity-segmented { visibility: hidden; }
+.activity-body { padding: 16px; }
+.activity-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 0 0 12px; }
+.activity-stat { display: flex; flex-direction: column-reverse; align-items: flex-start; justify-content: flex-end; gap: 4px; padding: 12px 14px; border: 1px solid var(--os-line); border-radius: 12px; background: var(--os-raised); }
+.activity-stat dt { color: var(--os-ink-2); font: 450 12px/16px var(--font-ui); }
+.activity-stat dd { margin: 0; font: 500 24px/30px var(--font-display); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.activity-terrain-stage { position: relative; height: 304px; border-radius: 12px; }
+.activity-terrain-stage canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; cursor: grab; touch-action: pan-y; -webkit-tap-highlight-color: transparent; }
+.activity-view.is-ready canvas { opacity: 1; }
+.activity-view[data-view="top"] canvas { cursor: default; }
+.activity-view.is-dragging canvas { cursor: grabbing; }
+.activity-calendar-fallback { display: grid; align-items: center; height: 100%; overflow-x: auto; padding: 8px; }
+.activity-view.is-ready .activity-calendar-fallback { visibility: hidden; }
+.activity-calendar { display: block; width: 100%; min-width: 560px; max-height: 200px; }
+.activity-calendar text { fill: var(--os-ink-2); font: 450 9px var(--font-ui); }
+.activity-heat-0 { fill: var(--os-sunken); background: var(--os-sunken); }
+.activity-heat-1 { fill: color-mix(in srgb, var(--os-accent) 22%, var(--os-raised)); background: color-mix(in srgb, var(--os-accent) 22%, var(--os-raised)); }
+.activity-heat-2 { fill: color-mix(in srgb, var(--os-accent) 40%, var(--os-raised)); background: color-mix(in srgb, var(--os-accent) 40%, var(--os-raised)); }
+.activity-heat-3 { fill: color-mix(in srgb, var(--os-accent) 60%, var(--os-raised)); background: color-mix(in srgb, var(--os-accent) 60%, var(--os-raised)); }
+.activity-heat-4 { fill: color-mix(in srgb, var(--os-accent) 80%, var(--os-raised)); background: color-mix(in srgb, var(--os-accent) 80%, var(--os-raised)); }
+.activity-heat-5 { fill: var(--os-accent); background: var(--os-accent); }
+.activity-day-focused { stroke: var(--os-focus); stroke-width: 2; }
+.activity-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; color: var(--os-ink-2); font: 450 12px/16px var(--font-ui); }
+.activity-hint-placeholder { visibility: hidden; }
+.activity-legend { display: flex; align-items: center; gap: 4px; }
+.activity-legend i { display: block; width: 12px; height: 9px; border-radius: 2px; }
+.activity-legend span:first-child { margin-right: 4px; }
+.activity-legend span:last-child { margin-left: 4px; }
+.activity-body .activity-summary { margin-top: 12px; color: var(--os-ink-2); font: 450 12px/18px var(--font-ui); }
+.activity-body .activity-source { margin-top: 4px; color: var(--os-ink-2); font: 450 12px/18px var(--font-ui); }
+.activity-fallback-note { position: absolute; bottom: 8px; left: 8px; right: 8px; font: 450 12px/16px var(--font-ui); color: var(--os-ink-2); }
+.activity-view.is-ready .activity-fallback-note { visibility: hidden; }
+.activity-terrain-tip { position: absolute; top: 0; left: 0; z-index: 2; width: 216px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--os-line-strong); background: color-mix(in srgb, var(--os-raised) 92%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-card); pointer-events: none; opacity: 0; transition: opacity 120ms var(--ease-out); }
+.activity-terrain-tip[hidden] { display: none; }
+.activity-terrain-tip.is-shown { opacity: 1; }
+.activity-tip-head { display: flex; justify-content: space-between; gap: 8px; font: 500 12px/16px var(--font-ui); }
+.activity-tip-head span + span { color: var(--os-ink-2); font-weight: 450; }
+.activity-terrain-tip .activity-tip-count { margin-top: 6px; color: var(--os-ink-2); }
+.activity-tip-count strong { font: 500 24px/30px var(--font-display); color: var(--os-ink); font-variant-numeric: tabular-nums; }
+.activity-tip-bars { display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 3px; height: 28px; margin-top: 10px; }
+.activity-tip-bars i { display: block; border-radius: 2px; background: var(--os-sunken); }
+.activity-tip-bars i.is-on { background: var(--os-accent); }
+.activity-terrain-tip .activity-tip-week { display: flex; justify-content: space-between; margin-top: 8px; color: var(--os-ink-2); font: 450 12px/16px var(--font-ui); }
+.activity-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 320px; padding: 32px; text-align: center; }
+.activity-empty p { max-width: 46ch; font: 400 15px/24px var(--font-ui); }
+.activity-loading, .activity-data-error { padding: 32px; }
+.activity-data-error { color: var(--os-danger); }
+.activity-data-error button { margin-top: 12px; padding: 6px 12px; border: 1px solid var(--os-line-strong); border-radius: var(--r-control); color: var(--os-ink); background: var(--os-raised); }
+@container window (max-width: 560px) {
+  .activity-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .activity-terrain-stage { height: 340px; }
+  .activity-stat dd { font-size: 22px; }
+}
+@container window (max-width: 360px) {
+  .activity-body { padding: 12px; }
+  .activity-toolbar { padding-inline: 12px; gap: 8px; }
+  .activity-segmented button { padding-inline: 8px; }
+  .activity-stat { padding: 10px; }
+}
+html[data-transparency="reduce"] .activity-terrain-tip { background: var(--os-raised); backdrop-filter: none; -webkit-backdrop-filter: none; }
+@media (prefers-reduced-transparency: reduce) {
+  .activity-terrain-tip { background: var(--os-raised); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+html[data-motion="reduce"] .activity-terrain-tip { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .activity-terrain-tip { transition: none; }
+}
+@media (forced-colors: active) {
+  .activity-calendar rect { stroke: CanvasText; fill: Canvas; }
+  .activity-calendar .activity-heat-5, .activity-calendar .activity-heat-4 { fill: Highlight; }
+  .activity-calendar .activity-day-focused { stroke: Highlight; stroke-width: 3; }
+}

@@ -5,14 +5,13 @@ import InitialData from '../components/static/InitialData.astro';
 import { APP_META } from '../os/registry/meta';
 import { seoFor } from '../lib/seo';
 import { getClientActivity } from '../lib/client-data';
-import { links } from '../data/profile';
+import { ActivityView } from '../os/apps/activity/views/ActivityView';
 const activity = await getClientActivity();
 const seo = seoFor({ path: '/activity', title: 'Activity', description: APP_META.activity.description, kind: 'app' });
 ---
 <OsLayout seo={seo} initial={{ appId: 'activity', route: '' }}>
   <StaticWindow app="activity" route="" title="Activity">
-    <h1>Activity</h1><p class="lede">{APP_META.activity.description}</p>
-    {activity.available ? <><p>{activity.total.toLocaleString('en-US')} contributions in the last year, across {activity.activeDays} active days.</p><p>Longest streak: {activity.longestStreak} days. Current streak: {activity.currentStreak} days.</p></> : <p>The contribution calendar is unavailable right now.</p>}<p><a href={links.github}>View Nipun’s activity on GitHub</a></p>
+    <ActivityView activity={activity} />
   </StaticWindow>
-  <InitialData slot="after-main" key="activity" data={{ activity }} />
+  <InitialData slot="after-main" key="activity:index" data={activity} />
 </OsLayout>
