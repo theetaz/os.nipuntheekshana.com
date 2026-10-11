@@ -121,6 +121,16 @@ test('print media hides chrome, restores actual size and generates two A4 PDF pa
   expect(visibleText).not.toContain('Back to the desktop');
   await expect(page.locator('.cv-page:visible')).toHaveCount(2);
   expect((await win.locator('.cv-page').first().boundingBox())!.width).toBeCloseTo(210 * 96 / 25.4, 0);
+  // Two compact rows: LinkedIn aligns with location and stays inside the paper.
+  const contact = await win.locator('.cv-page .cv-contact').evaluate(root => {
+    const row = root.getBoundingClientRect();
+    return { height: row.height, children: Array.from(root.children).map(child => {
+      const rect = child.getBoundingClientRect(); return { top: rect.top, bottom: rect.bottom, right: rect.right, rowRight: row.right };
+    }) };
+  });
+  expect(contact.height).toBeLessThanOrEqual(38);
+  expect(contact.children[3]!.top).toBe(contact.children[4]!.top);
+  for (const child of contact.children) expect(child.right).toBeLessThanOrEqual(child.rowRight + 1);
   const path = resolve(artifacts, 'cv-a4.pdf');
   const pdf = await page.pdf({ path, preferCSSPageSize: true, printBackground: true });
   const structure = pdf.toString('latin1');

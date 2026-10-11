@@ -78,3 +78,5 @@ html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="cv"
   .cv-thumbnails a[aria-current="page"] .cv-thumbnail-preview { outline-color: Highlight; }
   .cv-download { border: 1px solid ButtonText; }
 }
+
+@media print { .cv-contact { row-gap: 6px; } }
