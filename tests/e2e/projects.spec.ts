@@ -37,6 +37,20 @@ test('category anchors, scroll spy, incubating, featured, search and archive', a
   await expect(win.locator('.projects-archive a')).toHaveCount(0);
 });
 
+test('category navigation waits for icon groups after switching from Gallery', async ({ page }) => {
+  const win = await index(page);
+  const folders = win.getByRole('navigation', { name: 'Project folders' });
+  await win.getByRole('radio', { name: 'Gallery', exact: true }).click();
+  await folders.getByRole('link', { name: 'Hardware' }).click();
+  await expect(win.locator('.projects-icons')).toBeVisible();
+  await expect(folders.getByRole('link', { name: 'Hardware' })).toHaveAttribute('aria-current', 'location');
+  await folders.getByRole('link', { name: 'Data & geo' }).click();
+  await expect.poll(() => win.locator('[data-scroll-root]').evaluate(el => el.scrollTop)).toBe(0);
+  await win.locator('[data-scroll-root]').evaluate(el => { el.scrollTop = el.scrollHeight; });
+  await folders.getByRole('link', { name: 'Data & geo' }).click();
+  await expect.poll(() => win.locator('[data-scroll-root]').evaluate(el => el.scrollTop)).toBe(0);
+});
+
 test('List sorts by Year; Gallery inspector provides links and opens the selected project', async ({ page }) => {
   const win = await index(page);
   await win.getByRole('radio', { name: 'List', exact: true }).click();

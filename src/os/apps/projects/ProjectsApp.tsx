@@ -93,8 +93,8 @@ export default function ProjectsApp(props: AppProps) {
   const chooseCategory = (value: Category) => {
     pendingCategory.current = value; setFolder('all'); setSearch(''); setView('icons'); setActiveCategory(value);
     // A second click still scrolls when React state already has the requested values.
-    const target = scrollRootRef.current?.querySelector<HTMLElement>(`[data-category="${value}"]`);
-    if (folder === 'all' && !search && target && scrollRootRef.current) {
+    const target = scrollRootRef.current?.querySelector<HTMLElement>(`.projects-category[data-category="${value}"]`);
+    if (folder === 'all' && view === 'icons' && !search && target && scrollRootRef.current) {
       scrollRootRef.current.scrollTop += target.getBoundingClientRect().top - scrollRootRef.current.getBoundingClientRect().top;
       categoryScroll.current = { top: scrollRootRef.current.scrollTop, category: value };
       pendingCategory.current = null;
