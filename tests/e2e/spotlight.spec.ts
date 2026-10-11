@@ -79,7 +79,8 @@ test('indexed actions toggle theme, open Wallpaper settings, resolve Empty Kooda
   let result = await search(page, 'Toggle dark appearance'); await result.input.press('Enter');
   await expect(page.locator('html')).toHaveAttribute('data-theme', original === 'dark' ? 'light' : 'dark');
   result = await search(page, 'Change wallpaper'); await result.input.press('Enter');
-  await expect(page).toHaveURL(/\/settings$/);
+  await expect(page).toHaveURL(/\/settings\?section=wallpaper$/);
+  await expect(page.locator('[data-window-id="settings"]').getByRole('region', { name: 'Wallpaper', exact: true })).toBeVisible();
   result = await search(page, 'Empty Kooda'); await result.input.press('Enter');
   const alert = page.getByRole('alertdialog', { name: 'Empty Kooda?' }); await expect(alert).toBeVisible();
   await alert.getByRole('button', { name: 'Empty Kooda', exact: true }).click(); await expect(alert).toBeHidden();

@@ -6,6 +6,11 @@ import { matchRoute, pathFor } from './routes';
 export interface Target { appId: AppId; route: string; query: Record<string, string> }
 export interface ParsedLocation { focused: Target | null; others: Target[]; unknownPath: boolean }
 export const TERMINAL_COMMANDS = ['neofetch', 'help', 'projects', 'now', 'whoami', 'ls', 'date', 'contact'] as const;
+// Thin URL metadata: importing app implementations here would pull them into B1.
+export const QUERY_SECTIONS: Partial<Record<AppId, readonly string[]>> = {
+  readme: ['welcome', 'getting-around', 'shortcuts', 'plain-page', 'privacy', 'credits'],
+  settings: ['appearance', 'wallpaper', 'accessibility', 'sound', 'mochi', 'desktop', 'about', 'developer'],
+};
 
 function enabled(appId: AppId, features: WMFeatures): boolean {
   return APP_META[appId].phase === 'v1' || (appId === 'guestbook' && features.postcards === true);
@@ -31,7 +36,7 @@ export function queryFor(appId: AppId, query: Readonly<Record<string, string>>):
     return { shot: query.shot };
   }
   if (appId === 'terminal' && TERMINAL_COMMANDS.some((cmd) => cmd === query.cmd)) return { cmd: query.cmd! };
-  if (appId === 'readme' && ['welcome', 'getting-around', 'shortcuts', 'plain-page', 'privacy', 'credits'].includes(query.section ?? ''))
+  if (QUERY_SECTIONS[appId]?.includes(query.section ?? ''))
     return { section: query.section! };
   return {};
 }
