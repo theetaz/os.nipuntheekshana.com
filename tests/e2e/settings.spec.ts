@@ -162,11 +162,11 @@ test('desktop context query selects Wallpaper, menu state follows selection and 
   expect(await app(page).boundingBox()).toEqual(before);
 });
 
-test('Developer is gated by the atom and contains a clear placeholder', async ({ page }) => {
+test('Developer is gated by the atom and exposes developer tools', async ({ page }) => {
   await settings(page); const nav = app(page).getByRole('navigation', { name: 'Settings sections' });
   await expect(nav.getByRole('button', { name: 'Developer' })).toHaveCount(0);
   await page.evaluate(() => window.dispatchEvent(new StorageEvent('storage', { key: 'serendib:dev', newValue: 'true', storageArea: localStorage })));
-  await section(page, 'Developer'); await expect(app(page).getByText('Developer tools are coming in the next update.')).toBeVisible();
+  await section(page, 'Developer'); await expect(app(page).getByRole('switch', { name: 'Show FPS meter' })).toBeVisible();
   await page.evaluate(() => window.dispatchEvent(new StorageEvent('storage', { key: 'serendib:dev', newValue: 'false', storageArea: localStorage })));
   await expect(nav.getByRole('button', { name: 'Developer' })).toHaveCount(0); await expect(app(page).getByRole('region', { name: 'Appearance' })).toBeVisible();
 });

@@ -22,6 +22,7 @@ import { canPrefetch, prefetchApp } from './registry/loader';
 import { isMac } from './lib/platform';
 import { loadMotionFeatures, preloadMotionFeatures } from './lib/motion-loader';
 import { FEATURES } from './config';
+import { subscribeEggs } from './eggs/konami';
 
 export interface DesktopProps {
   initial: { appId: AppId; route: string } | null;
@@ -134,6 +135,7 @@ function ClientBootstrap() {
     store.set(desktopAtom, { type: 'VIEWPORT', viewport: { w: innerWidth, h: innerHeight } });
     window.addEventListener('resize', resize); cleanups.push(() => { cancelAnimationFrame(frame); window.removeEventListener('resize', resize); });
     cleanups.push(subscribePreferences(store, document.documentElement));
+    cleanups.push(subscribeEggs(store));
     if (document.documentElement.dataset.viewRequest === 'desktop') {
       delete document.documentElement.dataset.viewRequest;
       if (location.hash) location.replace('#');
