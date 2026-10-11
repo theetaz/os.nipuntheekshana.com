@@ -134,9 +134,20 @@ test('focus raises windows, close finishes its animation before removal and rest
   // A control in an unfocused window activates on its first click.
   await projectsWindow.getByRole('button', { name: 'Zoom Projects' }).click(); await settled(projectsWindow);
   await expect(projectsWindow).toHaveAttribute('data-focused', 'true');
+  await projectsWindow.evaluate(el => {
+    const observer = new MutationObserver(() => {
+      if (el.getAttribute('data-transition') !== 'close') return;
+      Object.assign(window, { closeObservation: { connected: el.isConnected, animations: el.getAnimations().length } });
+      observer.disconnect();
+    });
+    observer.observe(el, { attributes: true, attributeFilter: ['data-transition'] });
+  });
   await page.keyboard.press('Alt+KeyW');
-  await expect(projectsWindow).toHaveAttribute('data-transition', 'close');
-  expect(await projectsWindow.evaluate(el => el.isConnected && el.getAnimations().length > 0)).toBe(true);
+  // Observe the short transition in-browser, before the automation round trip.
+  await expect.poll(() => page.evaluate(() => {
+    const observed = (window as unknown as { closeObservation?: { connected: boolean; animations: number } }).closeObservation;
+    return !!observed?.connected && observed.animations > 0;
+  })).toBe(true);
   await expect(projectsWindow).toHaveCount(0);
   await expect(terminal).toHaveAttribute('data-focused', 'true'); expect(await terminal.evaluate(el => el.contains(document.activeElement))).toBe(true);
   await page.keyboard.press('Alt+KeyW'); await expect(terminal).toHaveCount(0);
