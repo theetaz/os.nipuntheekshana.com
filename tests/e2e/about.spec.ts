@@ -13,7 +13,8 @@ test.beforeEach(async ({ page }) => {
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   Object.assign(page, { aboutErrors: errors });
 });
-test.afterEach(async ({ page }) => {
+test.afterEach(async ({ page }, info) => {
+  if (info.expectedStatus === 'skipped') return;
   expect((page as Page & { aboutErrors: string[] }).aboutErrors).toEqual([]);
 });
 

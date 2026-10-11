@@ -9,8 +9,8 @@ const viewer = (page: Page) => page.locator('.managed-window[data-app="cv"]');
 async function openCv(page: Page) {
   await page.goto('/cv');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
-  await expect(viewer(page).getByRole('button', { name: 'Zoom in', exact: true })).toBeEnabled();
-  await page.evaluate(() => document.fonts.ready);
+  await expect(viewer(page).getByRole('button', { name: 'Print', exact: true })).toBeEnabled();
+  await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
   return viewer(page);
 }
 
@@ -75,6 +75,16 @@ test('thumbnails and scrolling update the page indicator', async ({ page }) => {
   await expect(win.locator('.cv-page-indicator')).toHaveText('Page 1 of 2');
 });
 
+test('page tracking reflects a thumbnail jump reversed within the same frame', async ({ page }) => {
+  const win = await openCv(page);
+  await win.evaluate(element => {
+    (element.querySelector('.cv-thumbnails a[href$="page-2"]') as HTMLElement).click();
+    element.querySelector<HTMLElement>('.cv-scroll')!.scrollTop = 0;
+  });
+  await expect(win.locator('.cv-page-indicator')).toHaveText('Page 1 of 2');
+  await expect(win.getByRole('link', { name: 'Go to page 1' })).toHaveAttribute('aria-current', 'page');
+});
+
 test('View menu and keyboard shortcuts control the focused viewer', async ({ page }) => {
   const win = await openCv(page);
   await page.getByRole('menubar').getByRole('menuitem', { name: 'View', exact: true }).click();
@@ -121,6 +131,16 @@ test('print media hides chrome, restores actual size and generates two A4 PDF pa
   expect(visibleText).not.toContain('Back to the desktop');
   await expect(page.locator('.cv-page:visible')).toHaveCount(2);
   expect((await win.locator('.cv-page').first().boundingBox())!.width).toBeCloseTo(210 * 96 / 25.4, 0);
+  // Two compact rows: LinkedIn aligns with location and stays inside the paper.
+  const contact = await win.locator('.cv-page .cv-contact').evaluate(root => {
+    const row = root.getBoundingClientRect();
+    return { height: row.height, children: Array.from(root.children).map(child => {
+      const rect = child.getBoundingClientRect(); return { top: rect.top, bottom: rect.bottom, right: rect.right, rowRight: row.right };
+    }) };
+  });
+  expect(contact.height).toBeLessThanOrEqual(38);
+  expect(contact.children[3]!.top).toBe(contact.children[4]!.top);
+  for (const child of contact.children) expect(child.right).toBeLessThanOrEqual(child.rowRight + 1);
   const path = resolve(artifacts, 'cv-a4.pdf');
   const pdf = await page.pdf({ path, preferCSSPageSize: true, printBackground: true });
   const structure = pdf.toString('latin1');
@@ -151,7 +171,7 @@ test('adoption preserves CV geometry, scroll, focus and zero layout shift', asyn
     await page.goto('/cv', { waitUntil: 'domcontentloaded' });
     const staticWin = page.locator('#static-window');
     await expect(viewer(page)).toHaveAttribute('data-adopting', '');
-    await page.evaluate(() => document.fonts.ready);
+    await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
     const before = await staticWin.boundingBox();
     const paperBefore = await staticWin.locator('.cv-page').first().boundingBox();
     await staticWin.locator('.cv-scroll').evaluate(el => { (el as HTMLElement).focus(); el.scrollTop = 123; });
@@ -180,6 +200,7 @@ test('CV loads its data when opened from the desktop and retries failed requests
 
 for (const theme of ['light', 'dark'] as const) test(`CV is accessible in ${theme} and saves a desktop screenshot @visual`, async ({ page }) => {
   mkdirSync(artifacts, { recursive: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
@@ -202,7 +223,7 @@ for (const theme of ['light', 'dark'] as const) test(`phone viewer fits its cont
   await page.goto('/cv');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
   const win = viewer(page);
-  await page.evaluate(() => document.fonts.ready);
+  await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
   await expect(win.locator('.cv-thumbnails')).toBeHidden();
   await expect(win.locator('.cv-zoom')).toBeHidden();
   expect((await win.locator('.cv-page').first().boundingBox())!.width).toBeCloseTo(358, 0);
@@ -214,12 +235,19 @@ for (const theme of ['light', 'dark'] as const) test(`phone viewer fits its cont
 test.describe('static CV', () => {
   test.use({ javaScriptEnabled: false });
   test('all content and thumbnails work without JavaScript, including print PDF', async ({ page, browserName }) => {
-    await page.goto('/cv'); await page.evaluate(() => document.fonts.ready);
+    await page.goto('/cv'); await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
     const staticWin = page.locator('#static-window');
     await expect(staticWin.locator('.cv-page')).toHaveCount(2);
     await expect(staticWin.getByRole('button', { name: 'Zoom in', exact: true })).toBeHidden();
-    await staticWin.getByRole('link', { name: 'Go to page 2' }).click();
-    expect(await staticWin.locator('.cv-scroll').evaluate(el => el.scrollTop)).toBeGreaterThan(1000);
+    const thumbnails = staticWin.getByRole('link', { name: 'Go to page 2' });
+    if (await thumbnails.isVisible()) {
+      await thumbnails.click();
+      expect(await staticWin.locator('.cv-scroll').evaluate(el => el.scrollTop)).toBeGreaterThan(1000);
+    } else {
+      await expect(staticWin.locator('.cv-thumbnails')).toBeHidden();
+      await staticWin.locator('.cv-page').last().scrollIntoViewIfNeeded();
+      await expect(staticWin.locator('.cv-page').last()).toBeInViewport();
+    }
     await page.emulateMedia({ media: 'print' });
     await expect(staticWin.locator('.cv-toolbar')).toBeHidden();
     await expect(staticWin.locator('.static-titlebar')).toBeHidden();
@@ -232,7 +260,7 @@ test.describe('static CV', () => {
   test('phone content fits the sheet and saves a 390×844 screenshot', async ({ page }) => {
     mkdirSync(artifacts, { recursive: true });
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/cv'); await page.evaluate(() => document.fonts.ready);
+    await page.goto('/cv'); await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
     const staticWin = page.locator('#static-window');
     await expect(staticWin.locator('.cv-thumbnails')).toBeHidden();
     const pageWidth = (await staticWin.locator('.cv-page').first().boundingBox())!.width;
@@ -242,11 +270,11 @@ test.describe('static CV', () => {
   });
   test('Simple view presents both pages in the document flow', async ({ page }) => {
     await page.goto('/cv#simple');
-    await page.evaluate(() => document.fonts.ready);
+    await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
     await expect(page.locator('.static-titlebar')).toBeHidden();
     await expect(page.locator('.cv-thumbnails')).toBeHidden();
     expect(await page.locator('.cv-scroll').evaluate(el => getComputedStyle(el).overflow)).toBe('visible');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1440);
-    expect(await page.locator('.cv-page').last().evaluate(el => el.getBoundingClientRect().bottom)).toBeGreaterThan(900);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(page.viewportSize()!.width);
+    expect(await page.locator('.cv-page').last().evaluate(el => el.getBoundingClientRect().bottom)).toBeGreaterThan(page.viewportSize()!.height);
   });
 });

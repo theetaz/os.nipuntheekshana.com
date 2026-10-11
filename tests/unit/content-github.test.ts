@@ -23,19 +23,19 @@ describe('build-time GitHub content', () => {
   });
 
   it('rebuilds the contribution grid from dated cells and tooltip counts', async () => {
-    const html = `
-      <td class="ContributionCalendar-day" id="contribution-day-component-1-0" data-date="2026-10-05"></td>
-      <td class="ContributionCalendar-day" id="contribution-day-component-2-0" data-date="2026-10-06"></td>
-      <td class="ContributionCalendar-day" id="contribution-day-component-0-1" data-date="2026-10-11"></td>
-      <tool-tip for="contribution-day-component-1-0">1,234 contributions on October 5.</tool-tip>
-      <tool-tip for="contribution-day-component-2-0">1 contribution on October 6.</tool-tip>
-      <tool-tip for="contribution-day-component-0-1">No contributions on October 11.</tool-tip>`;
+    const firstDay = Date.parse('2025-10-12T00:00:00Z');
+    const html = Array.from({ length: 365 }, (_, index) => {
+      const id = `contribution-day-component-${index % 7}-${Math.floor(index / 7)}`;
+      const date = new Date(firstDay + index * 86_400_000).toISOString().slice(0, 10);
+      const count = index === 0 ? '1,234 contributions' : index === 1 ? '1 contribution' : 'No contributions';
+      return `<td class="ContributionCalendar-day" id="${id}" data-date="${date}"></td><tool-tip for="${id}">${count} on ${date}.</tool-tip>`;
+    }).join('');
     const fetcher = vi.fn().mockResolvedValue(new Response(html));
     vi.stubGlobal('fetch', fetcher);
     const { getContributions } = await import('../../src/lib/github');
     expect(await getContributions()).toEqual({
-      start: '2026-10-04', weeks: 2, total: 1235,
-      counts: [-1, 1234, 1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1],
+      start: '2025-10-12', weeks: 53, total: 1235,
+      counts: [1234, 1, ...Array(363).fill(0), ...Array(6).fill(-1)],
     });
     await getContributions();
     expect(fetcher).toHaveBeenCalledTimes(1);

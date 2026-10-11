@@ -94,13 +94,23 @@ export function MapsView({ play, active, reduced, initialData, best, onBest, onM
   }, [active, reduced]);
   useEffect(() => {
     if (!active || !island || (!load && savesData())) return;
-    let idle = 0; let timer: ReturnType<typeof setTimeout> | undefined;
+    let idle = 0; let frame = 0; let cancelled = false; let painted = !!load; let timer: ReturnType<typeof setTimeout> | undefined;
     const run = () => { void upgradeRef.current?.(load > 0); };
-    if ('requestIdleCallback' in window) idle = window.requestIdleCallback(run, { timeout: 300 });
-    else timer = setTimeout(run, 0);
-    const visible = () => { if (!document.hidden) run(); };
+    const schedule = () => {
+      if (cancelled || !painted) return;
+      if ('requestIdleCallback' in window) idle = window.requestIdleCallback(run, { timeout: 300 });
+      else timer = setTimeout(run, 0);
+    };
+    // The flat island is already usable. Keep automatic shader/scene work after
+    // the text's first complete paint; an explicit Load 3D remains immediate.
+    if (load) run();
+    else void document.fonts.ready.then(() => {
+      if (cancelled) return;
+      frame = requestAnimationFrame(() => { frame = requestAnimationFrame(() => { painted = true; schedule(); }); });
+    });
+    const visible = () => { if (!document.hidden) schedule(); };
     document.addEventListener('visibilitychange', visible);
-    return () => { if (idle) window.cancelIdleCallback(idle); clearTimeout(timer); document.removeEventListener('visibilitychange', visible); };
+    return () => { cancelled = true; cancelAnimationFrame(frame); if (idle) window.cancelIdleCallback(idle); clearTimeout(timer); document.removeEventListener('visibilitychange', visible); };
   }, [island, load, active]);
   useEffect(() => { surfaceRef.current?.setLayers(layers); surfaceRef.current?.setLabels(!play && layers.labels); }, [layers, play, surfaceRef]);
   useEffect(() => {

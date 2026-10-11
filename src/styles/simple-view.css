@@ -79,7 +79,7 @@
   .ticket-wrap:hover { transform: none; }
   .ticket { display: block; }
   .ticket-main { padding: 16px; }
-  .ticket-stub, .ticket-route, .ticket-cta { display: none; }
+  .ticket-stub, .ticket-route, .ticket-cta > span { display: none; }
   .ticket h1 { margin-top: 8px; font-size: 28px; line-height: 28px; letter-spacing: -.03em; }
   .ticket-role { margin-top: 8px; }
   .now-sticky { margin: 0 0 0 4px; width: min(100%, 358px); height: 196px; transform: rotate(1deg); }

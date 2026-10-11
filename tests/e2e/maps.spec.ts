@@ -14,6 +14,15 @@ async function ready(page: Page, path = '/maps') {
 async function frames(page: Page, count = 6) {
   await page.evaluate(async value => { for (let i = 0; i < value; i++) await new Promise<void>(done => requestAnimationFrame(() => done())); }, count);
 }
+async function expectThirtyFps(stage: ReturnType<typeof app>) {
+  const sample = await stage.evaluate(async el => {
+    const before = Number((el as HTMLElement).dataset.frames); const start = performance.now();
+    for (let i = 0; i < 60; i++) await new Promise<void>(done => requestAnimationFrame(() => done()));
+    return { frames: Number((el as HTMLElement).dataset.frames) - before, duration: performance.now() - start };
+  });
+  expect(sample.frames).toBeGreaterThan(0);
+  expect(sample.frames).toBeLessThanOrEqual(Math.ceil(sample.duration / (1000 / 30)) + 2);
+}
 async function disableWebGL(page: Page) {
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
@@ -27,6 +36,9 @@ async function finishGame(page: Page) {
   const map = app(page).getByRole('group', { name: 'Pin the city map', exact: true });
   for (let round = 1; round <= 5; round++) {
     await expect(app(page).getByText(`Round ${round} / 5`, { exact: true })).toBeVisible();
+    // Round 1 is also rendered while the mode effect initializes the game.
+    // Wait for its actual guess phase before sending a one-shot keyboard input.
+    await expect(map.locator('.maps-crosshair')).toBeVisible();
     // Keyboard makes the default central crosshair a guess even if a card overlaps it.
     await map.focus(); await map.press('Enter');
     await expect(app(page).locator('.maps-game').getByText(/ · (?:<1|\d+) km$/)).toBeVisible();
@@ -47,7 +59,8 @@ test('WebGL arrives over the poster; controls, markers and five rounds work with
   await app(page).getByRole('button', { name: 'Play', exact: true }).click(); await expect(page).toHaveURL(/\/maps\/play$/);
   await expect(app(page).getByText('Round 1 / 5', { exact: true })).toBeVisible();
   const map = app(page).getByRole('group', { name: 'Pin the city map' });
-  await map.click({ position: { x: 440, y: 340 } });
+  const bounds = (await map.boundingBox())!;
+  await map.click({ position: { x: Math.min(440, bounds.width / 2), y: Math.min(340, bounds.height / 2) } });
   await expect(app(page).locator('.maps-game').getByText(/ · (?:<1|\d+) km$/)).toBeVisible();
   await expect(app(page).getByRole('button', { name: 'Next city', exact: true })).toBeFocused();
   await expect(app(page).locator('.maps-guess-line')).toHaveAttribute('x1', /\d/);
@@ -66,6 +79,23 @@ test('SVG plays all five rounds and persists the best score across reloads', asy
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:pin:best') ?? '0') as number)).toBeGreaterThanOrEqual(best);
 });
 
+test('slow fonts keep the flat game usable before automatic 3D scene work', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/*.woff2', async route => { await held; await route.continue(); });
+  const scenes: string[] = []; page.on('request', request => { if (/\/island\.[^/]+\.js$/.test(new URL(request.url()).pathname)) scenes.push(request.url()); });
+  try {
+    await page.goto('/maps/play', { waitUntil: 'domcontentloaded' });
+    await expect(view(page)).toHaveAttribute('data-surface', 'svg');
+    await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loading');
+    const map = app(page).getByRole('group', { name: 'Pin the city map', exact: true });
+    await expect(map.locator('.maps-crosshair')).toBeVisible(); await map.focus(); await map.press('Enter');
+    await expect(app(page).locator('.maps-game').getByText(/ · (?:<1|\d+) km$/)).toBeVisible();
+    expect(scenes).toEqual([]);
+    release(); await expect(view(page)).toHaveAttribute('data-surface', 'webgl');
+    expect(scenes).toHaveLength(1);
+  } finally { release(); }
+});
+
 test('Save-Data keeps three.js deferred until explicit loading and preserves the current round', async ({ page }) => {
   await page.addInitScript(() => Object.defineProperty(navigator, 'connection', { configurable: true, value: { saveData: true, effectiveType: '4g' } }));
   const scenes: string[] = []; page.on('request', request => { if (/\/island\.[^/]+\.js/.test(request.url())) scenes.push(request.url()); });
@@ -76,6 +106,12 @@ test('Save-Data keeps three.js deferred until explicit loading and preserves the
   const city = await app(page).locator('.maps-game h2').textContent();
   await app(page).getByRole('button', { name: 'Load 3D (≈135 KB)' }).click(); await expect(view(page)).toHaveAttribute('data-surface', 'webgl');
   await expect(app(page).getByText('Round 2 / 5', { exact: true })).toBeVisible(); await expect(app(page).locator('.maps-game h2')).toHaveText(city!); expect(scenes).toHaveLength(1);
+});
+
+test('small map canvases cap continuous rendering at 30 fps', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 }); await ready(page);
+  await expect(view(page)).toHaveAttribute('data-surface', 'webgl');
+  await expectThirtyFps(app(page).locator('.maps-stage'));
 });
 
 test('minimisation and hidden documents pause frames; closing disposes every GPU buffer and program', async ({ page }) => {
@@ -145,6 +181,13 @@ test('live wallpaper is lazy, renders behind the desktop and returns to the stat
   await page.addInitScript(() => localStorage.setItem('serendib:wallpaper', '"island-live"'));
   await page.goto('/'); const wallpaper = page.locator('.island-live-wallpaper');
   await expect(wallpaper.locator('canvas')).toBeVisible(); await expect(wallpaper).toHaveAttribute('data-live-ready', 'true');
+  await expectThirtyFps(wallpaper);
+  await openApp(page, 'Terminal'); const terminal = page.locator('[data-window-id="terminal"]');
+  await terminal.getByRole('button', { name: /^Zoom / }).click(); await expect(terminal).toHaveAttribute('data-mode', 'maximized');
+  await frames(page); const paused = await wallpaper.getAttribute('data-frames'); await frames(page);
+  expect(await wallpaper.getAttribute('data-frames')).toBe(paused);
+  await terminal.getByRole('button', { name: /^Zoom / }).click();
+  await expect.poll(() => wallpaper.getAttribute('data-frames')).not.toBe(paused);
   await wallpaper.locator('canvas').evaluate(el => el.dispatchEvent(new Event('webglcontextlost', { cancelable: true })));
   await expect(wallpaper.locator('canvas')).toHaveCount(0); await expect(wallpaper).not.toHaveAttribute('data-live-ready'); await expect(page.locator('.wp-island')).toBeVisible();
 });

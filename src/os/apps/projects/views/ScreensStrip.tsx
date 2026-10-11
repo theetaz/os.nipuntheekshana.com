@@ -8,7 +8,8 @@ export function ScreensStrip({ project, onPreview }: { project: ClientProject; o
     {project.screens.map((screen, index) => {
       const label = `Open screen ${index + 1} of ${project.screens.length}: ${screen.label}`;
       const content = <DeviceFrame kind={screen.kind} bar={screen.bar ?? project.brand?.address ?? project.brand?.domain} className="project-screen-frame" data-kind={screen.kind}>
-        <Img image={screen} sizes={screen.kind === 'phone' ? `${Math.round(260 * screen.width / screen.height)}px` : '320px'}
+        <Img image={screen} loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : undefined}
+          sizes={screen.kind === 'phone' ? `${Math.round(260 * screen.width / screen.height)}px` : '320px'}
           style={screen.trimBottom && screen.kind === 'phone' ? { height: `${252 / (1 - screen.trimBottom)}px`, marginBottom: `${-252 * screen.trimBottom / (1 - screen.trimBottom)}px` } : undefined} />
       </DeviceFrame>;
       return <figure key={screen.src}>

@@ -26,7 +26,7 @@ export async function fixtureServer(name: string, port: number, pages: Record<st
     await writeFile(resolve(directory, 'config.mjs'), `import base from '../../astro.config.mjs';
 export default { ...base, srcDir: '${relative}/', cacheDir: '${relative}/cache/', outDir: '${relative}/dist/' };`);
     await new Promise<void>((done, reject) => {
-      const build = spawn('npm', ['run', 'build', '--', '--config', `${relative}/config.mjs`], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+      const build = spawn('npm', ['run', 'build', '--', '--config', `${relative}/config.mjs`], { cwd: root, env: { ...process.env, SERENDIB_ACTIVITY_SOURCE: 'snapshot' }, stdio: ['ignore', 'pipe', 'pipe'] });
       build.stdout.on('data', record); build.stderr.on('data', record);
       build.once('error', reject); build.once('exit', code => code === 0 ? done() : reject(new Error(`Fixture build failed: ${output}`)));
     });

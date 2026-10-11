@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { test, expect } from './fixtures';
 
@@ -10,6 +11,16 @@ const cases = [
   { name: 'Spotlight', trigger: '[aria-label="Spotlight"]', chunk: 'Spotlight', result: '[role="combobox"][aria-label="Search projects, writing, apps"]', event: 'click' },
   { name: 'context menu', trigger: '[data-desktop-icon="projects"]', chunk: 'ContextMenuHost', result: '[role="menu"][aria-label="desktop:projects context menu"]', event: 'contextmenu' },
 ] as const;
+const chunks = (JSON.parse(readFileSync('dist/.css-scope.json', 'utf8')) as { chunks: Record<string, { imports: string[]; css: string[] }> }).chunks;
+function preloadAssets(feature: string) {
+  const entries = [feature, 'motion-features'].map(name => Object.keys(chunks).find(file => new RegExp(`/${name}\\.[^/]+\\.js$`).test(file))!);
+  const styles = new Set<string>(); const seen = new Set<string>(); const queue = [...entries];
+  while (queue.length) {
+    const file = queue.pop()!; if (seen.has(file)) continue; seen.add(file);
+    chunks[file]?.css.forEach(css => styles.add(`/${css}`)); queue.push(...(chunks[file]?.imports ?? []));
+  }
+  return { entries: entries.map(file => `/${file}`), styles: [...styles] };
+}
 
 for (const feature of cases) test(`first ${feature.name} interaction paints within 100 ms after intent preload @perf`, async ({ page }, info) => {
   test.skip(info.project.name.startsWith('mobile'), 'Desktop intent targets.');
@@ -17,7 +28,11 @@ for (const feature of cases) test(`first ${feature.name} interaction paints with
   const trigger = page.locator(feature.trigger); await expect(trigger).toBeVisible();
   const downloaded = page.waitForEvent('requestfinished', { predicate: request => new RegExp(`/${feature.chunk}\\.[^/]+\\.js`).test(request.url()) });
   await trigger.focus(); await downloaded;
-  // Let the browser evaluate the downloaded module, then use the next paint as the proxy.
+  // The real preload awaits both the feature and motion, including their CSS.
+  // One feature's requestfinished event does not mean that preload is ready.
+  const assets = preloadAssets(feature.chunk);
+  await page.evaluate(async entries => { await Promise.all(entries.map(entry => import(entry))); }, assets.entries);
+  await expect.poll(() => page.evaluate(styles => styles.every(path => [...document.styleSheets].some(sheet => sheet.href && new URL(sheet.href).pathname === path)), assets.styles)).toBe(true);
   await page.evaluate(() => new Promise(done => requestAnimationFrame(done)));
   const latency = await page.evaluate(async ({ trigger, result, event }) => {
     const start = performance.now();

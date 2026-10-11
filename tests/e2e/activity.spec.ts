@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
-import type { Page } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 import type { ClientActivity } from '../../src/os/types/content';
 import { test, expect, openApp } from './fixtures';
 
@@ -39,6 +39,25 @@ async function instrumentTerrain(page: Page) {
 }
 const drawCount = (page: Page) => app(page).locator('canvas').evaluate(canvas =>
   (window as unknown as { activityDraws(canvas: HTMLCanvasElement): number }).activityDraws(canvas as HTMLCanvasElement));
+
+async function paintedPoint(canvas: Locator) {
+  return canvas.evaluate(node => {
+    const canvas = node as HTMLCanvasElement;
+    const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
+    const rect = canvas.getBoundingClientRect();
+    const painted = (x: number, y: number) => {
+      const i = (y * canvas.width + x) * 4;
+      return pixels[i + 3]! === 255 && pixels[i]! > pixels[i + 1]! * 1.3 && pixels[i + 1]! > pixels[i + 2]! * 1.3;
+    };
+    for (let y = 20; y < canvas.height - 20; y += 4) for (let x = 20; x < canvas.width - 20; x += 4) {
+      // Select the interior of a face, away from its painted anti-aliasing seam.
+      if ([-2, 0, 2].every(dy => [-2, 0, 2].every(dx => painted(x + dx, y + dy)))) {
+        return { x: rect.left + x / canvas.width * rect.width, y: rect.top + y / canvas.height * rect.height };
+      }
+    }
+    throw new Error('No contribution column was painted.');
+  });
+}
 
 test('stat tiles match the built activity endpoint', async ({ page }) => {
   const scenes: string[] = [];
@@ -95,22 +114,7 @@ test('hover lifts a day, shows its tooltip, and clicking flies the camera in', a
     const current = await drawCount(page); const settled = current > 0 && current === previous; previous = current; return settled;
   }).toBe(true);
   const canvas = app(page).locator('canvas');
-  const point = await canvas.evaluate(node => {
-    const canvas = node as HTMLCanvasElement;
-    const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
-    const rect = canvas.getBoundingClientRect();
-    const painted = (x: number, y: number) => {
-      const i = (y * canvas.width + x) * 4;
-      return pixels[i + 3]! === 255 && pixels[i]! > pixels[i + 1]! * 1.3 && pixels[i + 1]! > pixels[i + 2]! * 1.3;
-    };
-    for (let y = 20; y < canvas.height - 20; y += 4) for (let x = 20; x < canvas.width - 20; x += 4) {
-      // Select the interior of a face, away from its painted anti-aliasing seam.
-      if ([-2, 0, 2].every(dy => [-2, 0, 2].every(dx => painted(x + dx, y + dy)))) {
-        return { x: rect.left + x / canvas.width * rect.width, y: rect.top + y / canvas.height * rect.height };
-      }
-    }
-    throw new Error('No contribution column was painted.');
-  });
+  const point = await paintedPoint(canvas);
   const resting = await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
   await page.mouse.move(point.x, point.y);
   await expect(app(page).locator('[data-terrain-tip]')).toHaveClass(/is-shown/);
@@ -118,6 +122,45 @@ test('hover lifts a day, shows its tooltip, and clicking flies the camera in', a
   await expect.poll(() => canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL())).not.toBe(resting);
   await page.mouse.click(point.x, point.y);
   await expect.poll(() => drawCount(page)).toBeGreaterThan(previous);
+});
+
+test('terrain uses layout pixels when initialized during a scale, then survives resize and DPR changes', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  let release!: () => void; const hold = new Promise<void>(done => { release = done; });
+  await page.route('**/terrain.*.js', async route => { await hold; await route.continue(); });
+  try {
+    await openFixture(page);
+    await stage(page).evaluate(node => { node.style.transform = 'scale(0.86)'; node.style.transformOrigin = '0 0'; });
+    release();
+    await expect(app(page).locator('[data-terrain]')).toHaveClass(/is-ready/);
+    const canvas = app(page).locator('canvas');
+    const check = async () => {
+      await expect.poll(() => canvas.evaluate(node => {
+        const canvas = node as HTMLCanvasElement;
+        return { width: canvas.width, height: canvas.height,
+          expectedWidth: Math.round(canvas.clientWidth * Math.min(2, devicePixelRatio)),
+          expectedHeight: Math.round(canvas.clientHeight * Math.min(2, devicePixelRatio)) };
+      })).toMatchObject(await canvas.evaluate(node => ({
+        width: Math.round(node.clientWidth * Math.min(2, devicePixelRatio)),
+        height: Math.round(node.clientHeight * Math.min(2, devicePixelRatio)),
+      })));
+      await frames(page);
+      const point = await paintedPoint(canvas);
+      await page.mouse.move(point.x, point.y);
+      await expect(app(page).locator('[data-terrain-tip]')).toHaveClass(/is-shown/);
+      await page.mouse.move(0, 0); await frames(page);
+    };
+    await check();
+    await stage(page).evaluate(node => { node.style.transform = ''; });
+    await check();
+    await app(page).getByRole('button', { name: 'Zoom Activity', exact: true }).click();
+    await frames(page, 12); await check();
+    await page.evaluate(() => {
+      Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 2 });
+      window.dispatchEvent(new Event('resize'));
+    });
+    await check();
+  } finally { release(); }
 });
 
 test('unavailable data renders the specified empty state and link', async ({ page }) => {

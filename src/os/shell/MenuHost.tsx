@@ -1,10 +1,10 @@
-import { useRef, type KeyboardEvent } from 'react';
+import { useEffect, useRef, type KeyboardEvent } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { desktopAtom, menuStateAtom, mochiPrefsAtom, openMenuAtom, showWidgetsAtom, themePrefAtom, wallpaperAtom } from '../state/atoms';
 import { APP_META } from '../registry/meta';
 import { appMenus, desktopMenus, islandMenu, getItemState, windowItems, type ShellMenu } from '../registry/menus';
 import { VERSION } from '../config';
-import { alert, focusWindow, openApp, runCommand } from '../wm/commands';
+import { alert, focusWindow, openApp, playSound, runCommand } from '../wm/commands';
 import { Menu } from '../ui/Menu';
 
 import { hostsAtom, type MenuHostSpec } from './menu-host-state';
@@ -34,6 +34,7 @@ export function MenuHost() {
     : outline.id === 'more' ? definitions.filter(menu => !spec?.menus.some(visible => visible.id === menu.id))
       .map(menu => ({ kind: 'submenu' as const, label: menu.label, items: menu.items }))
     : definitions.find(menu => menu.id === outline.id)?.items ?? outline.items };
+  useEffect(() => { if (current) playSound('tick'); }, [current?.id]);
   const last = useRef<{ menu: ShellMenu; spec: MenuHostSpec } | null>(null);
   if (current && spec) last.current = { menu: current, spec };
   const shown = current && spec ? { menu: current, spec } : last.current;

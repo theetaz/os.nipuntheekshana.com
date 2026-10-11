@@ -140,6 +140,8 @@ export function mountIsland({ stage, island, labels, framing = 'centered', reduc
   const cleanups: (() => void)[] = [];
   const renderer = new WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'low-power' });
   const small = stage.clientWidth < 700;
+  const frameInterval = small || framing === 'wallpaper' ? 1000 / 30 : 0;
+  let lastFrame = performance.now();
   const pixelRatio = Math.min(devicePixelRatio || 1, small ? 1.5 : 2);
   renderer.setPixelRatio(pixelRatio); renderer.setClearColor(0x000000, 0);
   renderer.domElement.setAttribute('aria-hidden', 'true');
@@ -223,6 +225,8 @@ export function mountIsland({ stage, island, labels, framing = 'centered', reduc
   }
   function loop(now: number) {
     frame = 0; if (!canRender()) return;
+    if (!reduced && frameInterval && now - lastFrame < frameInterval) { frame = requestAnimationFrame(loop); return; }
+    if (frameInterval) lastFrame = now - (now - lastFrame) % frameInterval;
     elapsed += Math.min(0.05, (now - last) / 1000); introElapsed += Math.min(1, (now - last) / 1000); last = now;
     uniforms.uTime.value = reduced ? 0 : elapsed; uniforms.uIntro.value = reduced ? 1 : Math.min(1, introElapsed / 2.6);
     render();

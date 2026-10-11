@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => list.push(error.message));
   page.on('console', message => { if (message.type() === 'error') list.push(message.text()); });
 });
-test.afterEach(async ({ page }) => expect(errors.get(page)).toEqual([]));
+test.afterEach(async ({ page }, info) => { if (info.expectedStatus !== 'skipped') expect(errors.get(page)).toEqual([]); });
 async function conversation(page: Page) {
   await page.goto('/messages');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
@@ -77,8 +77,14 @@ for (const [index, question] of questions.entries()) {
   });
 }
 
-test('free-text hello offers the exact email hand-off and copies its text', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+test('free-text hello offers the exact email hand-off and copies its text', async ({ page, context, browserName }) => {
+  if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  else await page.addInitScript(() => {
+    // Firefox and WebKit do not expose these automation permission names.
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
+      writeText: async (text: string) => { Object.assign(window, { copiedMessageText: text }); },
+    } });
+  });
   const win = await conversation(page);
   const composer = win.getByRole('textbox', { name: 'Write to Nipun' });
   await expect(win.getByRole('button', { name: 'Send message' })).toBeDisabled();
@@ -89,7 +95,9 @@ test('free-text hello offers the exact email hand-off and copies its text', asyn
   const params = new URLSearchParams((await email.getAttribute('href'))!.split('?')[1]);
   expect(params.get('body')).toBe('hello\n\n— sent from os.nipuntheekshana.com');
   await win.getByRole('button', { name: 'Copy text' }).click();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('hello');
+  const copied = browserName === 'chromium' ? await page.evaluate(() => navigator.clipboard.readText())
+    : await page.evaluate(() => (window as unknown as { copiedMessageText: string }).copiedMessageText);
+  expect(copied).toBe('hello');
   await expect(composer).toHaveValue('');
 });
 
@@ -125,10 +133,16 @@ test('Mochi pet count reaches the shared Settings preference and persists once',
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:mochi')!).pets)).toBe(1);
   await win.getByRole('button', { name: 'How are you?', exact: true }).click();
   await expect(win.locator('.messages-bubble--assistant').last()).toContainText("I've had 1 pet");
+  await expect(page.locator('[data-mochi][data-variant="desktop"]')).toBeVisible();
   await win.getByRole('button', { name: 'Give tea', exact: true }).click();
+  await expect(page.locator('[data-mochi][data-variant="desktop"]')).toHaveAttribute('data-mood', 'happy');
+  await expect(page.locator('[data-mochi-bubble]')).toHaveText('Ceylon tea. My favourite.');
   await expect(win.locator('.messages-bubble--assistant').last()).toContainText('Tea received');
   await openApp(page, 'Settings');
-  await expect(page.locator('[data-window-id="settings"]')).toBeVisible();
+  const settings = page.locator('[data-window-id="settings"]');
+  await expect(settings).toBeVisible();
+  await settings.getByRole('button', { name: 'Mochi', exact: true }).click();
+  await expect(settings.locator('.settings-pets')).toHaveText('Pets so far: 1');
 });
 
 test('session history and drafts survive reload and new messages keep unique IDs', async ({ page }) => {

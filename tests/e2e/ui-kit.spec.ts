@@ -1,6 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from '@playwright/test';
 import { fixtureServer, type FixtureServer } from './fixture-server';
+// The primitive laboratory uses desktop geometry; app suites cover phone layouts.
+test.use({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false });
 // These acceptance routes stay in an isolated, temporary build.
 let routes: string[]; let origin: string; let server: FixtureServer;
 test.beforeAll(async ({}, info) => {
@@ -11,7 +13,7 @@ test.beforeAll(async ({}, info) => {
 import UiKit from '../../../tests/fixtures/ui-kit/UiKit';
 import '../../../src/styles/global.css';
 ---
-<!doctype html><html lang="en" data-motion="reduce"><head><meta charset="UTF-8" /><title>UI kit verification</title></head><body style="overflow:auto;height:auto">
+<!doctype html><html lang="en" data-motion="reduce"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>UI kit verification</title></head><body style="overflow:auto;height:auto">
 ${name.startsWith('p2-ui-hydrated') ? '<script is:inline type="application/json" id="os-initial-data" data-key="fixture">{"title":"Embedded data"}</script>' : ''}
 <UiKit ${name.startsWith('p2-ui-hydrated') ? 'interactive client:load' : ''} /></body></html>`]));
   server = await fixtureServer(`ui-${info.workerIndex}`, port, pages); origin = server.origin;
@@ -81,7 +83,9 @@ test('submenu flips inside the viewport; menu closes on blur and Tab', async ({ 
   expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
   expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
   await page.evaluate(() => window.dispatchEvent(new Event('blur'))); await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeHidden();
-  await trigger.click(); await page.keyboard.press('Tab'); await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeHidden();
+  for (let cycle = 0; cycle < 3; cycle++) {
+    await trigger.click(); await page.keyboard.press('Tab'); await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeHidden();
+  }
 });
 test('Tooltip shows immediately on focus, has a description, and dismisses with Escape', async ({ page }) => {
   await openFixture(page); const trigger = page.getByRole('button', { name: 'Tooltip trigger' }); await trigger.focus();
@@ -128,6 +132,7 @@ test('reduced motion suppresses spatial overlays and skeleton shimmer; axe passe
   await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeVisible();
   expect(await page.getByRole('menu', { name: 'Actions menu' }).evaluate(element => element.getAnimations().flatMap(animation => (animation.effect as KeyframeEffect).getKeyframes()).some(frame => 'transform' in frame))).toBe(false);
   expect(await page.locator('.os-skeleton-part').first().evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+  await expect(page.getByRole('menu', { name: 'Actions menu' })).toHaveCSS('opacity', '1');
   const result = await new AxeBuilder({ page }).analyze(); expect(result.violations).toEqual([]);
 });
 test('focus rings and overlay motion follow system preference and live Settings overrides', async ({ page }) => {
@@ -153,8 +158,9 @@ test('light and dark accents pass axe with active chips and overlay roles', asyn
   for (const theme of ['light', 'dark']) {
     for (const accent of ['thambili', 'lagoon', 'lotus', 'tea']) {
       await page.evaluate(({ theme, accent }) => { document.documentElement.dataset.theme = theme; document.documentElement.dataset.accent = accent; }, { theme, accent });
+      await expect(page.getByRole('menu', { name: 'Actions menu' })).toHaveCSS('opacity', '1');
       const result = await new AxeBuilder({ page }).analyze();
-      expect(result.violations.map(violation => ({ id: violation.id, nodes: violation.nodes.map(node => node.failureSummary) })), `${theme}/${accent}`).toEqual([]);
+      expect(result.violations.map(violation => ({ id: violation.id, nodes: violation.nodes.map(node => ({ target: node.target, html: node.html, summary: node.failureSummary })) })), `${theme}/${accent}`).toEqual([]);
     }
   }
 });

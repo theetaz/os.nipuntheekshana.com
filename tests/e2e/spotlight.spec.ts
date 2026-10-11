@@ -8,8 +8,10 @@ import { test, expect } from './fixtures';
 const artifacts = resolve('.astro/p2-8-artifacts');
 async function openSpotlight(page: Page) {
   await expect(page.locator('html')).toHaveClass(/os-ready/);
-  await page.keyboard.press('ControlOrMeta+k');
+  const mac = await page.evaluate(() => /Mac|iPhone|iPad|iPod/i.test((navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform));
+  await page.keyboard.press(mac ? 'Meta+k' : 'Control+k');
   const dialog = page.getByRole('dialog', { name: 'Spotlight search' }); await expect(dialog).toBeVisible();
+  await expect(dialog).not.toHaveAttribute('inert');
   const input = dialog.getByRole('combobox'); await expect(input).toBeFocused(); return { dialog, input };
 }
 async function search(page: Page, query: string) {
@@ -51,6 +53,20 @@ test('no-results copy, combobox semantics, Tab containment, Escape, and focus re
   await input.press('Tab'); await expect(dialog.getByRole('button', { name: 'Clear search' })).toBeFocused();
   await page.keyboard.press('Tab'); await expect(input).toBeFocused();
   await input.press('Escape'); await expect(dialog).toBeHidden(); await expect(trigger).toBeFocused();
+});
+
+test('reopening Spotlight during its exit focuses the revived input', async ({ page }) => {
+  await page.goto('/');
+  for (let cycle = 0; cycle < 3; cycle++) {
+    const { input } = await search(page, 'Toggle dark appearance');
+    const theme = await page.locator('html').getAttribute('data-theme');
+    await input.press('Enter');
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', theme!);
+    const reopened = await openSpotlight(page);
+    await expect(reopened.input).toBeFocused();
+    await reopened.input.press('Escape');
+    await expect(page.getByRole('dialog', { name: 'Spotlight search' })).toBeHidden();
+  }
 });
 
 test('Recent includes a project opened outside Spotlight and survives a reload', async ({ page }) => {
@@ -111,6 +127,8 @@ test('mobile Spotlight fills the viewport and closes with its touch control', as
 });
 
 test.describe('overlay API interactions', () => {
+  // This fixture exercises desktop APIs; separate tests exercise phone overlays.
+  test.use({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false });
   let server: FixtureServer; let route: string; let origin: string;
   test.beforeAll(async ({}, info) => {
     route = `p2-8-overlays-${info.workerIndex}`;

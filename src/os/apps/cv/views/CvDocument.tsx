@@ -62,14 +62,25 @@ export const CvDocument = forwardRef<CvViewerHandle, Props>(function CvDocument(
   useEffect(() => {
     const element = scroll.current;
     if (!interactive || !element) return;
-    const visible = new Map<Element, number>();
-    const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) visible.set(entry.target, entry.intersectionRect.height);
-      const page = [...visible].sort((a, b) => b[1] - a[1])[0]?.[0];
-      if (page && (visible.get(page) ?? 0) > 0) setCurrentPage(page.id.endsWith('-2') ? 2 : 1);
-    }, { root: element, threshold: Array.from({ length: 21 }, (_, i) => i / 20) });
-    element.querySelectorAll('.cv-page').forEach(page => observer.observe(page));
-    return () => observer.disconnect();
+    const pages = [...element.querySelectorAll<HTMLElement>('.cv-page')];
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const viewport = element.getBoundingClientRect();
+      const visible = pages.map(page => {
+        const rect = page.getBoundingClientRect();
+        return { page, height: Math.max(0, Math.min(rect.bottom, viewport.bottom) - Math.max(rect.top, viewport.top)) };
+      }).sort((a, b) => b.height - a.height)[0];
+      if (visible && visible.height > 0) setCurrentPage(visible.page.id.endsWith('-2') ? 2 : 1);
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    // A thumbnail jump and its reversal can happen between observer samples.
+    // Read both pages on the actual scroll frame instead of caching thresholds.
+    element.addEventListener('scroll', schedule, { passive: true });
+    const resize = new ResizeObserver(schedule);
+    resize.observe(element);
+    schedule();
+    return () => { cancelAnimationFrame(frame); element.removeEventListener('scroll', schedule); resize.disconnect(); };
   }, [interactive, zoom]);
   useEffect(() => {
     if (!interactive) return;

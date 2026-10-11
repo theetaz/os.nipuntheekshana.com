@@ -8,6 +8,7 @@ const dock = (page: Page) => page.locator('.os-dock:visible');
 const link = (page: Page, name: string) => dock(page).getByRole('link', { name, exact: true });
 async function ready(page: Page) {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
+  test.fixme(await page.locator('html').getAttribute('data-mode') === 'mobile', 'P4-1: phone home Dock interactions replace desktop magnification, running windows and external Dock links.');
   await expect(page.locator('[data-shell="mobile"]')).toHaveCount(0);
   await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
 }
@@ -19,7 +20,27 @@ test.beforeEach(async ({ page }) => {
   page.on('pageerror', error => consoleErrors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
 });
-test.afterEach(() => expect(consoleErrors).toEqual([]));
+test.afterEach(({}, info) => { if (info.expectedStatus !== 'skipped') expect(consoleErrors).toEqual([]); });
+
+test('the first revealed Dock retains pointer intent while its controller loads', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/dock-magnification.*.js', async route => { await held; await route.continue(); });
+  await page.addInitScript(() => {
+    const observer = new MutationObserver(() => {
+      const nav = document.querySelector<HTMLElement>('.os-dock'); const icon = nav?.querySelector<HTMLElement>('[data-dock-app="projects"]');
+      if (!nav || !icon || !document.documentElement.classList.contains('os-ready')) return;
+      observer.disconnect(); const rect = icon.getBoundingClientRect();
+      nav.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse', clientX: rect.x + rect.width / 2, clientY: rect.y + rect.height / 2 }));
+      Object.assign(window, { earlyDockHover: true });
+    });
+    observer.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+  });
+  try {
+    await ready(page); await expect.poll(() => page.evaluate(() => (window as unknown as { earlyDockHover?: boolean }).earlyDockHover)).toBe(true);
+    expect(await width(page, 'Projects')).toBe(48); release();
+    await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
+  } finally { release(); }
+});
 
 test('resting dock exactly replaces the static dock with zero hydration CLS', async ({ page }) => {
   let release!: () => void; const hold = new Promise<void>(done => { release = done; });
@@ -265,7 +286,9 @@ test('tooltips show on focus, dismiss on Escape, and right-click and Shift+F10 u
     Object.assign(window, { dockContextEvents: [] });
     document.addEventListener('contextmenu', event => (window as unknown as { dockContextEvents: boolean[] }).dockContextEvents.push(event.defaultPrevented));
   });
-  await projects.click({ button: 'right' }); await projects.focus(); await page.keyboard.press('Shift+F10');
+  await projects.click({ button: 'right' }); await expect(page.getByRole('menu')).toBeVisible();
+  await page.keyboard.press('Escape'); await expect(page.getByRole('menu')).toBeHidden(); await expect(projects).toBeFocused();
+  await page.keyboard.press('Shift+F10');
   expect(await page.evaluate(() => (window as unknown as { dockContextEvents: boolean[] }).dockContextEvents)).toEqual([true, true]);
 });
 

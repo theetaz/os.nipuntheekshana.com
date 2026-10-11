@@ -14,6 +14,8 @@ async function start(page: Page) {
 async function command(win: Locator, source: string) {
   const input = win.locator('.terminal-input-wrap input');
   await expect(input).not.toHaveAttribute('readonly'); await input.fill(source); await input.press('Enter');
+  // Enter can return before React has committed the submitted command.
+  await expect(input).toHaveValue('');
   await expect(input).not.toHaveAttribute('readonly');
 }
 
@@ -23,7 +25,8 @@ test('help, hidden files, && navigation, 18 content files, cat and unknown comma
   await command(win, 'help'); await expect(output(win)).toContainText('Explore: ls, cd, pwd, cat, open');
   await command(win, 'ls -a'); await expect(output(win)).toContainText('.secrets');
   await command(win, 'cd projects && ls');
-  const files = await output(win).innerText(); expect(files.match(/[a-z0-9-]+\.md/g)).toHaveLength(19); // about.md plus 18 projects
+  // Offscreen scrollback uses content-visibility; Firefox omits it from innerText.
+  const files = (await output(win).textContent())!; expect(files.match(/[a-z0-9-]+\.md/g)).toHaveLength(19); // about.md plus 18 projects
   await command(win, 'cd ~ && cat now.txt'); await expect(output(win)).toContainText('Updated');
   await command(win, 'no-such-command'); await expect(output(win)).toContainText('nsh: command not found: no-such-command. Try help.');
   await expect(win.locator('.term-err').last()).toHaveText('no-such-command'); expect(errors).toEqual([]);
@@ -42,6 +45,32 @@ test('Tab completion, double Tab candidates, history draft and persistent recall
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:terminal:history')!))).toEqual(['neofetch ', 'echo persisted']);
 });
 
+test('completion cannot replace a later select-all selection on the next frame', async ({ page }) => {
+  const win = await start(page); const input = win.getByRole('textbox', { name: 'Terminal command' });
+  await command(win, 'cat now.txt'); await expect(output(win)).toContainText('Updated');
+  await page.evaluate(() => {
+    const request = window.requestAnimationFrame; const cancel = window.cancelAnimationFrame;
+    const queued = new Map<number, FrameRequestCallback>(); let id = 0;
+    window.requestAnimationFrame = callback => { queued.set(++id, callback); return id; };
+    window.cancelAnimationFrame = handle => { queued.delete(handle); };
+    Object.assign(window, { releaseTerminalFrames: () => {
+      window.requestAnimationFrame = request; window.cancelAnimationFrame = cancel;
+      const callbacks = [...queued.values()]; queued.clear(); callbacks.forEach(callback => callback(performance.now()));
+    } });
+  });
+  try {
+    await input.fill('cat no'); await input.press('Tab'); await expect(input).toHaveValue('cat now.txt ');
+    await expect(input).not.toHaveAttribute('readonly');
+    await input.evaluate(element => {
+      (element as HTMLInputElement).select();
+      (window as unknown as { releaseTerminalFrames(): void }).releaseTerminalFrames();
+    });
+    await page.keyboard.insertText('c'); await expect(input).toHaveValue('c');
+    await input.press('Tab'); await expect(input).not.toHaveAttribute('readonly'); await input.press('Tab');
+    await expect(output(win)).toContainText('cat  cd  clear  contact  cv');
+  } finally { await page.evaluate(() => (window as unknown as { releaseTerminalFrames(): void }).releaseTerminalFrames()); }
+});
+
 test('open projects/salli and output links open the matching window; exit closes this instance', async ({ page }) => {
   const win = await start(page);
   await command(win, 'open projects/salli'); await expect(page.locator('[data-window-id="projects"]')).toBeVisible(); await expect(page).toHaveURL(/\/projects\/salli/);
@@ -50,6 +79,24 @@ test('open projects/salli and output links open the matching window; exit closes
   await expect(page.locator('[data-window-id="writing"]')).toBeVisible();
   const input = win.getByRole('textbox', { name: 'Terminal command' }); await input.focus(); await input.fill('exit'); await input.press('Enter'); await expect(win).toHaveCount(0);
   await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
+});
+
+test('a loading app owns focus and cannot raise itself after returning to Terminal', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/data/work/salli.json', async route => { await held; await route.continue(); });
+  try {
+    const win = await start(page); const input = win.getByRole('textbox', { name: 'Terminal command' });
+    await command(win, 'open projects/salli');
+    const projects = page.locator('[data-window-id="projects"]');
+    await expect(projects).toBeFocused();
+    await input.focus(); await expect(win).toHaveAttribute('data-focused', 'true');
+    release(); await expect(projects.getByRole('heading', { name: 'Salli', exact: true })).toBeVisible();
+    await expect(projects.getByRole('definition').filter({ hasText: '99.52%' })).toBeVisible();
+    await expect(win).toHaveAttribute('data-focused', 'true'); await expect(input).toBeFocused();
+    await command(win, 'writing');
+    await output(win).getByRole('link', { name: 'an-island-made-of-points', exact: true }).click();
+    await expect(page.locator('[data-window-id="writing"]')).toHaveAttribute('data-focused', 'true');
+  } finally { release(); }
 });
 
 test('?cmd=neofetch runs once, removes cmd with replace and rejects arbitrary command links', async ({ page }) => {

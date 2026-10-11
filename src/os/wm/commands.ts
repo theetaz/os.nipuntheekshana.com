@@ -30,7 +30,7 @@ function registry(store: OsStore): Registrations {
 }
 const dispatch = (action: WMAction) => getStore().set(desktopAtom, action);
 // Keep the synthesiser outside the initial shell bundle and the muted path.
-function playSound(name: SoundName): void {
+export function playSound(name: SoundName): void {
   if (getStore().get(soundAtom)) void import('../lib/sound').then(sound => sound.playSound(name)).catch(() => {});
 }
 export function openApp(appId: AppId, opts: { route?: string; query?: Record<string, string>; origin?: Point; newInstance?: boolean } = {}): void {
@@ -75,7 +75,7 @@ export function closeWindow(id: WindowId): Promise<boolean> {
 export function minimizeWindow(id: WindowId): void { dispatch({ type: 'MINIMIZE', id }); playSound('swoosh'); }
 export function restoreWindow(id: WindowId): void { dispatch({ type: 'RESTORE', id }); }
 export function toggleMaximize(id: WindowId): void { dispatch({ type: 'TOGGLE_MAXIMIZE', id }); }
-export function snapWindow(id: WindowId, zone: SnapZone): void { dispatch({ type: 'SNAP', id, zone }); }
+export function snapWindow(id: WindowId, zone: SnapZone): void { dispatch({ type: 'SNAP', id, zone }); playSound('thunk'); }
 export function focusWindow(id: WindowId): void { dispatch({ type: 'FOCUS', id }); }
 export function cycleWindows(direction: 1 | -1): void { dispatch({ type: 'CYCLE', direction }); }
 export async function quitApp(appId: AppId): Promise<void> {

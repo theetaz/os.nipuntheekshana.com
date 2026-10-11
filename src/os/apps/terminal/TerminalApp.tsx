@@ -29,15 +29,26 @@ export default function TerminalApp(props: AppProps) {
   const [fontSize, setFontSize] = useState(13); const [announcement, setAnnouncement] = useState({ text: '', seq: 0 });
   const columns = useRef(80); const controller = useRef<AbortController | null>(null); const mounted = useRef(true);
   const historyIndex = useRef<number | null>(null); const draft = useRef(''); const previousTab = useRef<string | null>(null);
+  const pendingSelection = useRef<{ value: string; cursor: number } | null>(null);
   const consumed = useRef<string | null>(null); const readyCalled = useRef(false);
   const propsRef = useRef(props); propsRef.current = props;
   const clear = useCallback(() => { setLines([]); setWelcome(false); }, []);
   const announce = useCallback((text: string) => setAnnouncement(previous => ({ text: text.slice(0, 200), seq: previous.seq + 1 })), []);
-  const change = useCallback((next: string, cursor = next.length) => { setValue(next); setCaret(cursor); }, []);
+  const change = useCallback((next: string, cursor = next.length) => {
+    pendingSelection.current = null; setValue(next); setCaret(cursor);
+  }, []);
   const replaceInput = useCallback((next: string, cursor = next.length) => {
-    change(next, cursor);
-    requestAnimationFrame(() => inputRef.current?.setSelectionRange(cursor, cursor));
-  }, [change]);
+    pendingSelection.current = { value: next, cursor }; setValue(next); setCaret(cursor);
+    if (inputRef.current?.value === next) {
+      inputRef.current.setSelectionRange(cursor, cursor); pendingSelection.current = null;
+    }
+  }, []);
+  useLayoutEffect(() => {
+    const selection = pendingSelection.current;
+    if (selection && inputRef.current?.value === selection.value) {
+      inputRef.current.setSelectionRange(selection.cursor, selection.cursor); pendingSelection.current = null;
+    }
+  }, [value, caret]);
   const context = useCallback((signal?: AbortSignal): ShellContext => ({
     cwd: cwdRef.current, columns: columns.current, history: store.get(terminalHistoryAtom), data: loadTerminalData,
     activity: loadTerminalActivity, now: () => new Date(), signal,

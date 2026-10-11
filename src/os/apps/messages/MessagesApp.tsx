@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useAtomValue, useStore } from 'jotai';
+import { useAtomValue } from 'jotai';
 import type { AppProps } from '../../registry/apps';
 import { useAppData } from '../../lib/fetch-json';
 import * as mochi from '../../mochi/api';
-import { mochiPrefsAtom, reducedMotionAtom } from '../../state/atoms';
+import { reducedMotionAtom } from '../../state/atoms';
 import type { ClientProfile } from '../../types/content';
 import { alert, toast, useAppCommands, useAppMenuState, useBeforeClose } from '../../wm/commands';
 import { appendMessages, parseSession, SESSION_KEY, type ConversationSession } from './session';
 import { createScriptEngine, initialTranscript, MAX_INPUT, replyDelay, type ConversationEngine, type ThreadId } from './script';
 import { MessagesView } from './views/MessagesView';
-import { createMochiPort } from './mochi';
 export { menus } from './menus';
 
 export type MessagesData = ClientProfile & { messagesAt?: number };
@@ -17,7 +16,6 @@ const scriptEngine = createScriptEngine();
 const messageId = () => `message-${crypto.randomUUID()}`;
 
 function Conversation({ profile, engine = scriptEngine, ...props }: AppProps & { profile: MessagesData; engine?: ConversationEngine }) {
-  const store = useStore();
   const reducedMotion = useAtomValue(reducedMotionAtom);
   const [session, setSession] = useState<ConversationSession>(() => ({ version: 1, selected: 'nipun',
     threads: { nipun: initialTranscript(profile, profile.messagesAt ?? Date.now()),
@@ -32,9 +30,6 @@ function Conversation({ profile, engine = scriptEngine, ...props }: AppProps & {
   const selected = session.selected;
   const draft = session.drafts[selected];
   const busy = !!session.pending || !!requesting;
-  const mochiPort = useMemo(() => createMochiPort(mochi, {
-    get: () => store.get(mochiPrefsAtom), set: update => store.set(mochiPrefsAtom, update),
-  }), [store]);
 
   useLayoutEffect(() => {
     if (readyCalled.current) return;
@@ -83,7 +78,7 @@ function Conversation({ profile, engine = scriptEngine, ...props }: AppProps & {
       threads: { ...value.threads, [target]: appendMessages(value.threads[target], { id: messageId(), role: 'user', text, at: Date.now() }) } }));
     try {
       const reply = await engine.reply({ thread: target, text, history: session.threads[target], signal: abort.signal },
-        { profile, now: () => new Date(), mochi: mochiPort });
+        { profile, now: () => new Date(), mochi });
       if (abort.signal.aborted) return;
       setSession(value => ({ ...value, pending: { thread: target, reply, dueAt: Date.now() + replyDelay(reply.text, reducedMotion) } }));
     } catch {
