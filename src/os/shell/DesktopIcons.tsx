@@ -1,3 +1,4 @@
+import './DesktopIcons.css';
 import { atom, useAtom, useAtomValue, useStore } from 'jotai';
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { APP_META } from '../registry/meta';
@@ -6,28 +7,15 @@ import { pathFor } from '../url/routes';
 import { openApp, openContextMenu } from '../wm/commands';
 import type { AppId } from '../types/apps';
 import type { Point } from '../wm/types';
-import { isOverKooda } from './dock-anchors';
+import { deferredPointer } from '../lib/deferred-pointer';
+import { canPrefetch } from '../registry/loader';
 
 const apps = Object.values(APP_META).filter(app => app.phase === 'v1' && app.desktopIcon)
   .sort((a, b) => a.desktopIcon!.order - b.desktopIcon!.order);
-// Kept in the shell's store so the surface and icons share selection without a global singleton.
-export const desktopSelectionAtom = atom<AppId[]>([]);
-const grid = { x: 96, y: 104 };
+import { desktopSelectionAtom } from './desktop-selection';
+export { desktopSelectionAtom } from './desktop-selection';
 const viewportAtom = atom(get => get(desktopAtom).viewport);
-const styles = `
-  .island-desktop .desktop-icons { pointer-events: none; }
-  .desktop-icons [role="option"] { pointer-events: auto; width: 84px; min-height: 80px; touch-action: none; user-select: none; position: relative; }
-  .desktop-icons [data-positioned] { position: fixed; }
-  .desktop-icons [role="option"]::before { content: ''; position: absolute; top: -4px; left: 10px; width: 64px; height: 64px; border-radius: 8px; z-index: -1; }
-  .desktop-icons [aria-selected="true"]::before { background: rgb(31 27 22 / .12); }
-  html[data-theme="dark"] .desktop-icons [aria-selected="true"]::before { background: rgb(255 255 255 / .14); }
-  .desktop-icons [aria-selected="true"] span { background: var(--os-accent); color: var(--os-on-accent); border-radius: 4px; padding: 1px 5px; margin: -1px -5px; text-shadow: none; }
-  .desktop-icons [role="option"]:focus-visible { outline: 2px solid var(--os-focus); outline-offset: 4px; border-radius: 8px; }
-  .desktop-icons [data-dragging] { cursor: grabbing; z-index: 1; }
-  .desktop-icons [data-dragging] svg { transform: none; }
-  html[data-motion="reduce"] .desktop-icons a:hover svg { transform: none; }
-  @media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) .desktop-icons a:hover svg { transform: none; } }
-`;
+
 
 export function DesktopIcons() {
   const store = useStore(); const [selected, setSelected] = useAtom(desktopSelectionAtom);
@@ -61,62 +49,12 @@ export function DesktopIcons() {
   const startDrag = (id: AppId, event: ReactPointerEvent<HTMLAnchorElement>) => {
     if (event.button !== 0 || event.pointerType === 'touch') return;
     cancelDrag.current?.(); suppressClick.current = false;
-    const element = event.currentTarget; const pointerId = event.pointerId; const start = { x: event.clientX, y: event.clientY };
-    const chosen = store.get(desktopSelectionAtom); const ids = chosen.includes(id) ? chosen : [id];
-    const entries = ids.map(value => { const node = nodes.current.get(value)!; return { id: value, node, rect: node.getBoundingClientRect(), transform: node.style.transform }; });
-    const viewport = { w: innerWidth, h: innerHeight }; let point = start; let frame = 0; let moving = false;
-    const paint = () => {
-      frame = 0;
-      for (const entry of entries) entry.node.style.transform = `translate3d(${point.x - start.x}px, ${point.y - start.y}px, 0)`;
-    };
-    const move = (next: PointerEvent) => {
-      if (next.pointerId !== pointerId) return;
-      point = { x: next.clientX, y: next.clientY };
-      if (!moving && Math.hypot(point.x - start.x, point.y - start.y) < 4) return;
-      if (!moving) {
-        moving = true; suppressClick.current = true;
-        store.set(desktopAtom, { type: 'FOCUS_DESKTOP' }); setSelected(ids); anchor.current = id; focus(id);
-        for (const entry of entries) { entry.node.dataset.dragging = ''; entry.node.style.willChange = 'transform'; }
-      }
-      if (!frame) frame = requestAnimationFrame(paint);
-    };
-    const finish = (commit: boolean) => {
-      cancelAnimationFrame(frame);
-      element.removeEventListener('pointermove', move); element.removeEventListener('pointerup', up);
-      element.removeEventListener('pointercancel', cancel); element.removeEventListener('lostpointercapture', cancel);
-      window.removeEventListener('blur', cancel); document.removeEventListener('keydown', escape, true);
-      if (element.hasPointerCapture(pointerId)) element.releasePointerCapture(pointerId);
-      cancelDrag.current = null;
-      const accept = moving && commit && !isOverKooda(point);
-      const updates: Partial<Record<AppId, Point>> = {};
-      for (const entry of entries) {
-        const delta = { x: point.x - start.x, y: point.y - start.y };
-        if (accept) {
-          // Persist grid offsets from right=24/top=48, independent of the default 96px flow.
-          updates[entry.id] = {
-            x: Math.max(0, Math.min(Math.floor((viewport.w - 132) / grid.x), Math.round((viewport.w - 108 - entry.rect.x - delta.x) / grid.x))) * grid.x,
-            y: Math.max(0, Math.min(Math.floor((viewport.h - 224) / grid.y), Math.round((entry.rect.y + delta.y - 48) / grid.y))) * grid.y,
-          };
-        }
-        delete entry.node.dataset.dragging; entry.node.style.willChange = '';
-        entry.node.style.transform = entry.transform;
-        if (moving && !store.get(reducedMotionAtom)) {
-          const target = updates[entry.id];
-          const end = target ? { x: viewport.w - 108 - target.x - entry.rect.x, y: 48 + target.y - entry.rect.y } : { x: 0, y: 0 };
-          const animation = entry.node.animate([{ transform: `translate(${delta.x - end.x}px, ${delta.y - end.y}px)` }, { transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.22,1,.36,1)' });
-          animations.current.add(animation);
-          void animation.finished.then(() => animations.current.delete(animation), () => animations.current.delete(animation));
-        }
-      }
-      if (accept) store.set(iconPositionsAtom, previous => ({ ...previous, ...updates }));
-    };
-    const up = (next: PointerEvent) => { if (next.pointerId === pointerId) { point = { x: next.clientX, y: next.clientY }; finish(true); } };
-    const cancel = () => finish(false);
-    const escape = (next: KeyboardEvent) => { if (next.key === 'Escape') { next.preventDefault(); next.stopPropagation(); cancel(); } };
-    cancelDrag.current = cancel; element.setPointerCapture(pointerId);
-    element.addEventListener('pointermove', move); element.addEventListener('pointerup', up);
-    element.addEventListener('pointercancel', cancel); element.addEventListener('lostpointercapture', cancel);
-    window.addEventListener('blur', cancel); document.addEventListener('keydown', escape, true);
+    const element = event.currentTarget; const native = event.nativeEvent;
+    cancelDrag.current = deferredPointer(element, native, () => import('./desktop-icon-drag').then(module =>
+      () => module.startIconDrag(store, element, id, native, nodes, anchor, suppressClick, animations, setSelected, focus,
+        () => { cancelDrag.current = null; })), next => {
+      if (Math.hypot(next.clientX - native.clientX, next.clientY - native.clientY) >= 4) suppressClick.current = true;
+    });
   };
   useEffect(() => {
     const unsubscribe = store.sub(reducedMotionAtom, () => { if (store.get(reducedMotionAtom)) for (const animation of animations.current) animation.cancel(); });
@@ -144,14 +82,15 @@ export function DesktopIcons() {
     return () => document.removeEventListener('keydown', keydown);
   }, [store, active]);
   return <nav aria-label="Desktop icons" className="os-chrome"><div className="desktop-icons" role="listbox" aria-label="Desktop" aria-multiselectable="true">
-    <style>{styles}</style><ul role="presentation">{apps.map(app => {
+    <ul role="presentation">{apps.map(app => {
       const position = positions[app.id];
       return <li key={app.id} role="presentation"><a ref={node => { if (node) nodes.current.set(app.id, node); else nodes.current.delete(app.id); }}
         role="option" aria-selected={selected.includes(app.id)} tabIndex={active === app.id ? 0 : -1}
         data-desktop-icon={app.id} data-positioned={position ? '' : undefined}
         style={position ? { right: 24 + Math.max(0, Math.min(viewport.w - 132, position.x)), top: 48 + Math.max(0, Math.min(viewport.h - 224, position.y)) } : undefined}
         href={pathFor(app.id, app.desktopIcon!.route ?? '')} draggable={false}
-        onFocus={() => setActive(app.id)} onPointerDown={event => {
+        onFocus={() => { setActive(app.id); if (canPrefetch()) void import('./desktop-icon-drag').catch(() => {}); }}
+        onPointerEnter={() => { if (canPrefetch()) void import('./desktop-icon-drag').catch(() => {}); }} onPointerDown={event => {
           controlClick.current = event.ctrlKey && event.button === 0;
           if (controlClick.current) { store.set(desktopAtom, { type: 'FOCUS_DESKTOP' }); select(app.id, true, event.shiftKey); }
           startDrag(app.id, event);

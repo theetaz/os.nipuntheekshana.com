@@ -77,10 +77,10 @@ test('failed adoption leaves static content usable and Simple view remains a rea
   await page.route('**/ProjectsApp.*.js', route => route.abort());
   const warnings: string[] = []; page.on('console', message => { if (message.type() === 'warning') warnings.push(message.text()); });
   await page.goto('/projects/salli'); await hydrated(page);
+  await expect.poll(() => warnings.some(message => message.includes('adoption timed out for projects'))).toBe(true);
   await expect(page.locator('[data-window-id]')).toHaveCount(0);
   await expect(page.locator('#static-window')).toBeVisible();
   await expect(page).toHaveURL(/\/projects\/salli$/);
-  expect(warnings.some(message => message.includes('adoption timed out for projects'))).toBe(true);
   await page.locator('[data-shell="desktop"] .simple-entry').click();
   await expect(page.locator('#static-window')).toBeVisible();
   expect(await page.locator('#static-window').evaluate(element => getComputedStyle(element).position)).toBe('static');

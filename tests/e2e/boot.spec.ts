@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
@@ -10,7 +10,9 @@ const artifacts = resolve('.astro/p2-9-artifacts');
 async function hydrated(page: Page) { await expect(page.locator('html')).toHaveClass(/os-ready/); }
 async function observeBoot(page: Page) {
   await page.addInitScript(() => {
-    const measurements = { removedAt: 0, cls: 0, lcp: 0, exitPhase: '', progress: 0, inputAt: 0 };
+    const supported = PerformanceObserver.supportedEntryTypes;
+    const measurements = { removedAt: 0, cls: 0, lcp: 0, exitPhase: '', progress: 0, inputAt: 0,
+      supportsCLS: supported.includes('layout-shift'), supportsLCP: supported.includes('largest-contentful-paint') };
     Object.assign(window, { bootMeasurements: measurements });
     const input = () => { if (!measurements.inputAt) measurements.inputAt = performance.now(); };
     window.addEventListener('keydown', input, true); window.addEventListener('pointerdown', input, true);
@@ -27,16 +29,16 @@ async function observeBoot(page: Page) {
       const fill = document.querySelector('.boot-progress span');
       if (fill) measurements.progress = new DOMMatrix(getComputedStyle(fill).transform).a;
     }).observe(document, { attributes: true, subtree: true, attributeFilter: ['data-boot-exit'] });
-    new PerformanceObserver(list => { for (const entry of list.getEntries()) {
+    if (measurements.supportsCLS) new PerformanceObserver(list => { for (const entry of list.getEntries()) {
       const shift = entry as PerformanceEntry & { value: number; hadRecentInput: boolean };
       if (!shift.hadRecentInput) measurements.cls += shift.value;
     } }).observe({ type: 'layout-shift', buffered: true });
-    new PerformanceObserver(list => { for (const entry of list.getEntries()) measurements.lcp = entry.startTime; })
+    if (measurements.supportsLCP) new PerformanceObserver(list => { for (const entry of list.getEntries()) measurements.lcp = entry.startTime; })
       .observe({ type: 'largest-contentful-paint', buffered: true });
   });
 }
 async function measurements(page: Page) {
-  return page.evaluate(() => (window as unknown as { bootMeasurements: { removedAt: number; cls: number; lcp: number; exitPhase: string; progress: number; inputAt: number } }).bootMeasurements);
+  return page.evaluate(() => (window as unknown as { bootMeasurements: { removedAt: number; cls: number; lcp: number; exitPhase: string; progress: number; inputAt: number; supportsCLS: boolean; supportsLCP: boolean } }).bootMeasurements);
 }
 
 test.describe('first visit boot', () => {
@@ -51,7 +53,8 @@ test.describe('first visit boot', () => {
     expect(await page.evaluate(() => localStorage.getItem('serendib:booted'))).toBe('true');
     const timing = await measurements(page); expect(timing.removedAt).toBeLessThanOrEqual(1800);
     expect(timing.exitPhase).toBe('normal'); expect(timing.progress).toBe(1);
-    expect(timing.cls).toBe(0); expect(timing.lcp).toBeGreaterThan(0); expect(timing.lcp).toBeLessThan(1300);
+    if (timing.supportsCLS) expect(timing.cls).toBe(0);
+    if (timing.supportsLCP) { expect(timing.lcp).toBeGreaterThan(0); expect(timing.lcp).toBeLessThan(1300); }
     await mkdir(artifacts, { recursive: true }); await writeFile(resolve(artifacts, 'boot-desktop-metrics.json'), JSON.stringify(timing, null, 2));
     const second = await context.newPage();
     try {
@@ -70,6 +73,19 @@ test.describe('first visit boot', () => {
       await expect(page.locator('[data-window-id]')).toHaveCount(0);
     });
   }
+  test('input while the boot controller loads is consumed and replayed as a skip', async ({ page }) => {
+    await observeBoot(page);
+    let release!: () => void; const hold = new Promise<void>(done => { release = done; });
+    await page.route('**/BootController.*.js', async route => { await hold; await route.continue(); });
+    try {
+      await page.goto('/', { waitUntil: 'domcontentloaded' }); await hydrated(page);
+      await page.keyboard.press('Control+k'); release();
+      await expect(page.locator('.boot-screen')).toHaveCount(0);
+      const timing = await measurements(page); expect(timing.exitPhase).toBe('skip');
+      expect(timing.removedAt - timing.inputAt).toBeLessThanOrEqual(250);
+      await expect(page.getByRole('dialog', { name: 'Spotlight search' })).toHaveCount(0);
+    } finally { release(); }
+  });
   for (const [name, setup] of [
     ['system reduced motion', async (page: Page) => page.emulateMedia({ reducedMotion: 'reduce' })],
     ['saved reduced motion', async (page: Page) => page.addInitScript(() => localStorage.setItem('serendib:motion', '"reduce"'))],
@@ -100,7 +116,7 @@ test.describe('first visit boot', () => {
     await page.setViewportSize({ width: 390, height: 844 }); await observeBoot(page);
     await page.goto('/', { waitUntil: 'domcontentloaded' }); await expect(page.locator('.boot-screen')).toBeVisible();
     await expect(page.locator('.boot-screen')).toHaveCount(0);
-    const timing = await measurements(page); expect(timing.removedAt).toBeLessThanOrEqual(1000); expect(timing.cls).toBe(0);
+    const timing = await measurements(page); expect(timing.removedAt).toBeLessThanOrEqual(1000); if (timing.supportsCLS) expect(timing.cls).toBe(0);
     await mkdir(artifacts, { recursive: true }); await writeFile(resolve(artifacts, 'boot-mobile-metrics.json'), JSON.stringify(timing, null, 2));
   });
   test('slow hydration keeps the CSS fail-safe and does not replay a finished boot', async ({ page }) => {
@@ -133,7 +149,7 @@ test.describe('first visit boot', () => {
   });
 });
 
-test.describe('power commands with independent menu and alert adapters', () => {
+test.describe('integrated power commands', () => {
   const root = fileURLToPath(new URL('../../', import.meta.url));
   let server: ChildProcess; let origin: string; let fixtureDirectory: string;
   test.beforeAll(async ({}, info) => {
@@ -141,17 +157,21 @@ test.describe('power commands with independent menu and alert adapters', () => {
     fixtureDirectory = resolve(root, `.astro/p2-9-fixture-${info.workerIndex}`);
     await mkdir(resolve(fixtureDirectory, 'pages'), { recursive: true });
     await writeFile(resolve(fixtureDirectory, 'config.mjs'), `import base from '../../astro.config.mjs';
-export default { ...base, srcDir: '.astro/p2-9-fixture-${info.workerIndex}/', cacheDir: '.astro/p2-9-fixture-${info.workerIndex}/cache/' };`);
-    await writeFile(resolve(fixtureDirectory, 'pages/power.astro'), `---
-import { Font } from 'astro:assets';
+export default { ...base, srcDir: '.astro/p2-9-fixture-${info.workerIndex}/', cacheDir: '.astro/p2-9-fixture-${info.workerIndex}/cache/', outDir: '.astro/p2-9-fixture-${info.workerIndex}/dist/' };`);
+    await writeFile(resolve(fixtureDirectory, 'pages/index.astro'), `---
+import OsLayout from '../../../src/layouts/OsLayout.astro';
 import PowerHarness from '../../../tests/fixtures/p2-9/PowerHarness';
-import '../../../src/styles/global.css';
-import '../../../src/styles/static-window.css';
+import { seoFor } from '../../../src/lib/seo';
+const seo = seoFor({ path: '/', title: 'Power verification', description: 'Power integration verification', kind: 'home' });
 ---
-<!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Power verification</title>
-<Font cssVariable="--font-instrument" preload /><Font cssVariable="--font-fraunces" preload={[{ style: 'normal' }]} /><Font cssVariable="--font-martian" /></head>
-<body><PowerHarness client:load /></body></html>`);
-    server = spawn('npm', ['run', 'dev', '--', '--config', `.astro/p2-9-fixture-${info.workerIndex}/config.mjs`, '--ignore-lock', '--host', 'localhost', '--port', String(port)], {
+<OsLayout seo={seo} initial={null} home><Fragment slot="after-main"><PowerHarness client:load /></Fragment></OsLayout>`);
+    await new Promise<void>((done, reject) => {
+      const build = spawn('npm', ['run', 'build', '--', '--config', `.astro/p2-9-fixture-${info.workerIndex}/config.mjs`], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+      let output = ''; build.stdout.on('data', chunk => { output += chunk; }); build.stderr.on('data', chunk => { output += chunk; });
+      build.once('error', reject); build.once('exit', code => code === 0 ? done() : reject(new Error(`Power fixture build failed: ${output}`)));
+    });
+    await cp(resolve(root, 'dist/data'), resolve(fixtureDirectory, 'dist/data'), { recursive: true });
+    server = spawn('npx', ['astro', 'preview', '--config', `.astro/p2-9-fixture-${info.workerIndex}/config.mjs`, '--ignore-lock', '--host', 'localhost', '--port', String(port)], {
       cwd: root, stdio: ['ignore', 'pipe', 'pipe'], detached: true,
     });
     await new Promise<void>((done, reject) => {
@@ -170,10 +190,17 @@ import '../../../src/styles/static-window.css';
     }
     if (fixtureDirectory) await rm(fixtureDirectory, { recursive: true, force: true });
   });
-  async function openFixture(page: Page) { await page.goto(`${origin}/power`); await hydrated(page); }
+  async function openFixture(page: Page) { await page.goto(origin); await hydrated(page); await expect(page.locator('html')).toHaveAttribute('data-power-probe', 'ready'); }
   async function command(page: Page, name: string) {
-    await page.getByRole('button', { name: 'Island menu', exact: true }).click();
-    await page.getByRole('menuitem', { name, exact: true }).click();
+    const island = page.getByRole('menubar').getByRole('menuitem', { name: 'Island menu', exact: true });
+    if (await island.isVisible()) {
+      await island.click(); await page.getByRole('menuitem', { name, exact: true }).click();
+    } else {
+      // Pocket's menu UI arrives in P4; exercise the same public command bus here.
+      const id = name === 'Sleep' ? 'os.sleep' : name === 'Restart…' ? 'os.restart' : 'os.shutdown';
+      await page.evaluate(command => (window as unknown as { powerFixture: { command(value: string): void } }).powerFixture.command(command), id);
+    }
+    await expect(name === 'Sleep' ? page.getByRole('dialog', { name: 'Night Mail screensaver' }) : page.getByRole('alertdialog')).toBeVisible();
   }
   async function confirm(page: Page, name: string) { await page.getByRole('alertdialog').getByRole('button', { name, exact: true }).click(); }
   async function setHidden(page: Page, hidden: boolean) {
@@ -183,8 +210,8 @@ import '../../../src/styles/static-window.css';
     }, hidden);
   }
   test('shutdown confirmation can cancel, staggers closes, and any key reboots', async ({ page }) => {
-    await openFixture(page); await page.getByRole('button', { name: 'Open Projects' }).click();
-    await page.getByRole('button', { name: 'Open Terminal' }).click();
+    await openFixture(page); await page.getByRole('navigation', { name: 'Dock' }).getByRole('link', { name: 'Projects', exact: true }).click();
+    await page.getByRole('navigation', { name: 'Dock' }).getByRole('link', { name: 'Terminal', exact: true }).click();
     await command(page, 'Shut down…'); await confirm(page, 'Cancel'); await expect(page.locator('[data-window-id]')).toHaveCount(2);
     await command(page, 'Shut down…'); await confirm(page, 'Shut down');
     const shutdown = page.getByRole('dialog', { name: "It's now safe to close this tab." }); await expect(shutdown).toBeVisible();
@@ -195,17 +222,18 @@ import '../../../src/styles/static-window.css';
     await page.keyboard.press('Control+k'); await expect(shutdown).toHaveCount(0);
     expect(await page.evaluate(() => (window as unknown as { powerFixture: { spotlight(): boolean } }).powerFixture.spotlight())).toBe(false);
     await expect(page.getByRole('dialog', { name: 'Starting Serendib' })).toBeVisible(); await page.keyboard.press('Escape');
-    await expect(page.locator('.boot-screen')).toHaveCount(0); await expect(page.locator('#fixture-desktop')).not.toHaveAttribute('inert');
-    await expect(page.getByRole('button', { name: 'Island menu', exact: true })).toBeFocused();
+    await expect(page.locator('.boot-screen')).toHaveCount(0); await expect(page.locator('[data-shell="desktop"]')).not.toHaveAttribute('inert');
+    await expect(page.getByRole('menubar').getByRole('menuitem', { name: 'Island menu', exact: true })).toBeFocused();
+    expect(await page.locator('[data-shell="desktop"]').evaluate(element => !!element.closest('[inert]'))).toBe(false);
   });
   test('close guards cancel a power operation', async ({ page }) => {
-    await openFixture(page); await page.getByRole('button', { name: 'Open Projects' }).click();
+    await openFixture(page); await page.getByRole('navigation', { name: 'Dock' }).getByRole('link', { name: 'Projects', exact: true }).click();
     await page.evaluate(() => (window as unknown as { powerFixture: { guard(): void } }).powerFixture.guard());
     await command(page, 'Shut down…'); await confirm(page, 'Shut down');
     await expect(page.locator('[data-window-id]')).toHaveCount(1); await expect(page.locator('.shutdown-screen')).toHaveCount(0);
   });
   test('restart closes windows, returns URL home and replays after a persisted boot', async ({ page }) => {
-    await openFixture(page); await page.getByRole('button', { name: 'Open Projects' }).click();
+    await openFixture(page); await page.getByRole('navigation', { name: 'Dock' }).getByRole('link', { name: 'Projects', exact: true }).click();
     await command(page, 'Restart…'); await confirm(page, 'Restart');
     await expect(page.locator('[data-window-id]')).toHaveCount(0); await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole('dialog', { name: 'Starting Serendib' })).toBeVisible();
@@ -213,16 +241,16 @@ import '../../../src/styles/static-window.css';
     expect(await page.evaluate(() => localStorage.getItem('serendib:booted'))).toBe('true');
   });
   test('sleep retains windows, shows Colombo time and consumes wake shortcuts', async ({ page }) => {
-    await openFixture(page); await page.getByRole('button', { name: 'Open Projects' }).click();
+    await openFixture(page); await page.getByRole('navigation', { name: 'Dock' }).getByRole('link', { name: 'Projects', exact: true }).click();
     await command(page, 'Sleep'); const saver = page.getByRole('dialog', { name: 'Night Mail screensaver' });
     await expect(saver).toBeVisible(); await expect(saver.locator('time')).toHaveText('23:11');
     await expect(saver.getByRole('img', { name: 'Mochi asleep' })).toBeVisible();
     await expect(saver.getByRole('button')).toBeFocused();
-    expect(await page.locator('#fixture-desktop').evaluate(element => !!element.closest('[inert]'))).toBe(true);
+    expect(await page.locator('[data-shell="desktop"]').evaluate(element => !!element.closest('[inert]'))).toBe(true);
     await page.keyboard.press('Control+k'); await expect(saver).toHaveCount(0); await expect(page.locator('[data-window-id]')).toHaveCount(1);
     expect(await page.evaluate(() => (window as unknown as { powerFixture: { overlay(): string } }).powerFixture.overlay())).toBe('none');
     expect(await page.evaluate(() => (window as unknown as { powerFixture: { spotlight(): boolean } }).powerFixture.spotlight())).toBe(false);
-    await expect(page.getByRole('button', { name: 'Island menu', exact: true })).toBeFocused();
+    await expect(page.getByRole('menubar').getByRole('menuitem', { name: 'Island menu', exact: true })).toBeFocused();
     await command(page, 'Sleep'); await page.getByRole('button', { name: 'Press any key or tap to wake.' }).dispatchEvent('click');
     await expect(saver).toHaveCount(0);
     await command(page, 'Sleep'); await saver.dispatchEvent('pointerdown', { pointerType: 'touch' }); await expect(saver).toHaveCount(0);
@@ -230,9 +258,9 @@ import '../../../src/styles/static-window.css';
   test('live motion overrides stop drift and dismiss an active boot', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' }); await openFixture(page);
     await page.evaluate(() => (window as unknown as { powerFixture: { setMotion(value: string): void } }).powerFixture.setMotion('full'));
-    await command(page, 'Sleep'); expect(await page.locator('.screensaver-island').evaluate(element => getComputedStyle(element).animationName)).toBe('night-mail-drift');
+    await command(page, 'Sleep'); await expect(page.locator('.screensaver-island')).toHaveCSS('animation-name', 'night-mail-drift');
     await page.evaluate(() => (window as unknown as { powerFixture: { setMotion(value: string): void } }).powerFixture.setMotion('reduce'));
-    expect(await page.locator('.screensaver-island').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    await expect(page.locator('.screensaver-island')).toHaveCSS('animation-name', 'none');
     await page.keyboard.press('Escape'); await expect(page.locator('.screensaver')).toHaveCount(0);
     await page.evaluate(() => (window as unknown as { powerFixture: { setMotion(value: string): void } }).powerFixture.setMotion('full'));
     await command(page, 'Restart…'); await confirm(page, 'Restart'); await expect(page.locator('.boot-screen')).toBeVisible();
@@ -242,12 +270,12 @@ import '../../../src/styles/static-window.css';
   });
   test('reduced motion makes sleep static and skips restart and shutdown boots', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' }); await openFixture(page); await command(page, 'Sleep');
-    expect(await page.locator('.screensaver-island').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    await expect(page.locator('.screensaver-island')).toHaveCSS('animation-name', 'none');
     await page.keyboard.press('Tab'); await expect(page.locator('.screensaver')).toHaveCount(0);
     await command(page, 'Restart…'); await confirm(page, 'Restart'); await expect(page.locator('.boot-screen')).toHaveCount(0);
     await command(page, 'Shut down…'); await confirm(page, 'Shut down'); await expect(page.locator('.shutdown-screen')).toBeVisible();
     await page.keyboard.press('Escape'); await expect(page.locator('.shutdown-screen')).toHaveCount(0);
-    await expect(page.locator('.boot-screen')).toHaveCount(0); await expect(page.locator('#fixture-desktop')).not.toHaveAttribute('inert');
+    await expect(page.locator('.boot-screen')).toHaveCount(0); await expect(page.locator('[data-shell="desktop"]')).not.toHaveAttribute('inert');
   });
   test('never sleeps automatically, even after a long idle period', async ({ page }) => {
     await page.clock.install(); await openFixture(page); await page.clock.fastForward(3_600_000);
@@ -267,8 +295,17 @@ import '../../../src/styles/static-window.css';
     for (const [mode, viewport] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 390, height: 844 }]] as const) {
       await page.setViewportSize(viewport);
       for (const theme of ['light', 'dark'] as const) {
-        await page.emulateMedia({ colorScheme: theme }); await openFixture(page); await command(page, 'Restart…'); await confirm(page, 'Restart');
-        await expect(page.locator('.boot-screen')).toBeVisible(); await expect(page.locator('.boot-wordmark')).toHaveCSS('opacity', '1');
+        await page.emulateMedia({ colorScheme: theme }); await openFixture(page);
+        await command(page, 'Restart…'); await confirm(page, 'Restart');
+        await expect(page.getByRole('alertdialog')).toHaveCount(0);
+        await expect(page.locator('.boot-screen')).toBeVisible();
+        // Read at the animation's completion, inside the same browser task. Mobile's
+        // fully visible plateau is 50 ms, too short for a cross-process polling retry.
+        const wordmarkOpacity = await page.locator('.boot-wordmark').evaluate(async element => {
+          await Promise.all(element.getAnimations().map(animation => animation.finished));
+          return getComputedStyle(element).opacity;
+        });
+        expect(wordmarkOpacity).toBe('1');
         await page.screenshot({ path: resolve(artifacts, `boot-${theme}-${mode}.png`) }); await page.keyboard.press('Escape');
         await expect(page.locator('.boot-screen')).toHaveCount(0); await command(page, 'Sleep');
         await expect(page.locator('.screensaver time')).toHaveText('23:11');

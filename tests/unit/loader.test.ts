@@ -19,6 +19,13 @@ describe('app loader', () => {
     expect(store.get(appLoadAtom).writing).toBe('error'); await expect(loadApp('writing', store)).resolves.toBe(module);
     expect(load).toHaveBeenCalledTimes(2); expect(store.get(appLoadAtom).writing).toBe('ready');
   });
+  it('rejects a suppressed preload failure instead of caching an undefined module', async () => {
+    const load = vi.spyOn(APPS.about, 'load').mockResolvedValueOnce(undefined as never).mockResolvedValue(module);
+    const store = createOsStore(); await expect(loadApp('about', store)).rejects.toThrow('The app could not be loaded');
+    expect(store.get(appLoadAtom).about).toBe('error');
+    await expect(loadApp('about', store)).resolves.toBe(module);
+    expect(load).toHaveBeenCalledTimes(2); expect(store.get(appLoadAtom).about).toBe('ready');
+  });
   it('blocks intent prefetch on Save-Data/2G and does not enable later apps', () => {
     const load = vi.spyOn(APPS.maps, 'load').mockResolvedValue(module); const remove = registerStore(createOsStore());
     vi.stubGlobal('navigator', { connection: { saveData: true, effectiveType: '4g' } }); prefetchApp('maps'); expect(load).not.toHaveBeenCalled();

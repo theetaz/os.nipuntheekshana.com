@@ -2,8 +2,8 @@
 [data-theme="dark"] .boot-screen { background: #0E0D0B; }
 html[data-boot] .boot-screen { display: grid; animation: boot-exit 350ms 1300ms var(--ease-in) forwards; }
 html[data-boot] .boot-screen[data-boot-managed] { animation: none; pointer-events: auto; }
-html[data-boot][data-boot-exit] .boot-screen[data-boot-managed] { animation: boot-exit 350ms var(--ease-in) forwards; }
-html[data-boot][data-boot-exit="skip"] .boot-screen[data-boot-managed] { animation-duration: 200ms; }
+html[data-boot][data-boot-exit] .boot-screen { animation: boot-exit 350ms var(--ease-in) forwards; }
+html[data-boot][data-boot-exit="skip"] .boot-screen { animation: boot-exit 200ms var(--ease-in) forwards; animation-delay: calc(-1 * var(--boot-skipped-at, 0ms)); }
 .boot-outline { stroke-dasharray: 1; stroke-dashoffset: 1; animation: boot-draw 700ms var(--ease-out) forwards; }
 .boot-fill { opacity: 0; animation: boot-fade 600ms 300ms forwards; }
 .boot-ring { animation: boot-ring 600ms 300ms var(--ease-out) forwards; }

@@ -4,6 +4,7 @@ import { useAtomValue, useStore } from 'jotai';
 import { AnimatePresence, m, useIsPresent } from 'motion/react';
 import { alertsAtom, desktopAtom, reducedMotionAtom, type AlertSpec } from '../state/atoms';
 import { resolveAlert } from '../wm/commands';
+import { isolateModal } from '../lib/modal-focus';
 import { focusableWithin, trapTab } from '../lib/focus';
 import { springs } from '../lib/springs';
 import { Button } from '../ui/Button';
@@ -17,19 +18,8 @@ export function useModalFocus(panel: RefObject<HTMLElement | null>, active: bool
   useLayoutEffect(() => {
     if (!active || !host || !panel.current) return;
     const node = panel.current;
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const background = Array.from(document.body.children).filter((child): child is HTMLElement => child instanceof HTMLElement && child !== host);
-    const inert = background.map(element => [element, element.inert] as const);
-    background.forEach(element => { element.inert = true; });
     const focus = () => (node.querySelector<HTMLElement>('[data-autofocus]') ?? focusableWithin(node)[0] ?? node).focus({ preventScroll: true });
-    focus();
-    const contain = (event: FocusEvent) => { if (event.target instanceof Node && !node.contains(event.target)) focus(); };
-    document.addEventListener('focusin', contain);
-    return () => {
-      document.removeEventListener('focusin', contain);
-      inert.forEach(([element, value]) => { element.inert = value; });
-      if (previous?.isConnected && !previous.closest('[inert], [hidden]')) previous.focus({ preventScroll: true });
-    };
+    return isolateModal(node, focus);
   }, [active, host, panel]);
 }
 

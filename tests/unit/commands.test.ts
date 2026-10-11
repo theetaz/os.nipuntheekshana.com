@@ -71,6 +71,10 @@ describe('window commands', () => {
   });
 });
 describe('shell command APIs', () => {
+  it('opens the desktop wallpaper action in the Wallpaper settings section', () => {
+    runCommand('desktop.wallpaper', 'menu');
+    expect(windowState('settings').query).toEqual({ section: 'wallpaper' });
+  });
   it('routes commands and scopes Quick Look to the Projects query', () => {
     runCommand('theme.dark', 'terminal'); expect(store.get(themePrefAtom)).toBe('dark');
     runCommand('os.spotlight', 'shortcut'); expect(store.get(spotlightOpenAtom)).toBe(true);

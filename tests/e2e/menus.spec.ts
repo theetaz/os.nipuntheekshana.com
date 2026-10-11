@@ -1,43 +1,27 @@
-import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
 import { test as nativeDateTest, type Page } from '@playwright/test';
 import { test, expect, openApp } from './fixtures';
+import { fixtureServer, type FixtureServer } from './fixture-server';
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
-let fixtureRoute: string; let fixtureOrigin: string; let fixtureServer: ChildProcess;
+let fixtureRoute: string; let fixtureOrigin: string; let server: FixtureServer;
 test.beforeAll(async ({}, info) => {
-  const port = 4600 + info.workerIndex; fixtureOrigin = `http://localhost:${port}`;
   fixtureRoute = `p2-5-menus-${info.workerIndex}`;
-  await writeFile(`${root}src/pages/${fixtureRoute}.astro`, `---
-import MenuFixture from '../../tests/fixtures/p2-5-menus';
-import '../styles/global.css';
+  server = await fixtureServer(`menus-${info.workerIndex}`, 4600 + info.workerIndex, { [fixtureRoute]: `---
+import MenuFixture from '../../../tests/fixtures/p2-5-menus';
+import '../../../src/styles/global.css';
 ---
-<!doctype html><html lang="en" data-motion="reduce"><head><meta charset="UTF-8" /><title>Menu fixture</title></head><body><MenuFixture client:load /></body></html>`);
-  fixtureServer = spawn('npm', ['run', 'dev', '--', '--ignore-lock', '--host', 'localhost', '--port', String(port)],
-    { cwd: root, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
-  await new Promise<void>((done, reject) => {
-    const timer = setTimeout(() => reject(new Error('Menu fixture server did not become ready')), 60_000);
-    const output = (chunk: Buffer) => { if (chunk.toString().includes(`localhost:${port}`)) { clearTimeout(timer); done(); } };
-    fixtureServer.stdout?.on('data', output); fixtureServer.stderr?.on('data', output);
-    fixtureServer.once('error', error => { clearTimeout(timer); reject(error); });
-    fixtureServer.once('exit', code => { clearTimeout(timer); reject(new Error(`Menu fixture exited: ${code}`)); });
-  });
+<!doctype html><html lang="en" data-motion="reduce"><head><meta charset="UTF-8" /><title>Menu fixture</title></head><body><MenuFixture client:load /></body></html>` });
+  fixtureOrigin = server.origin;
 });
-test.afterAll(async () => {
-  if (fixtureServer?.pid) {
-    try { process.kill(-fixtureServer.pid, 'SIGTERM'); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error; }
-    await new Promise<void>(done => { if (fixtureServer.exitCode !== null || fixtureServer.signalCode !== null) done(); else fixtureServer.once('exit', () => done()); });
-  }
-  if (fixtureRoute) await unlink(`${root}src/pages/${fixtureRoute}.astro`).catch(() => {});
-});
+test.afterAll(async () => { await server?.stop(); });
 const bar = (page: Page) => page.getByRole('menubar', { name: 'Application menus' });
 async function hydrated(page: Page, route = '/') { await page.goto(route); await expect(page.locator('html')).toHaveClass(/os-ready/); }
 async function menu(page: Page, name: string) {
   await bar(page).getByRole('menuitem', { name, exact: true }).click();
-  return page.getByRole('menu', { name, exact: true });
+  const panel = page.getByRole('menu', { name, exact: true });
+  await expect(panel).toBeVisible(); return panel;
 }
 
 test('Tab and Option-1 reach the island; arrows, Home, End, typeahead and Escape rove', async ({ page }) => {

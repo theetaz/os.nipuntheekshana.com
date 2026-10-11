@@ -4,8 +4,8 @@ import type { DesktopProps } from '../Desktop';
 import { openMenuAtom, soundAtom, spotlightOpenAtom, themePrefAtom } from '../state/atoms';
 import { openApp, toast } from '../wm/commands';
 import { isMac } from '../lib/platform';
-import { Popover } from '../ui/Popover';
-import { ClockPopover, clockText, nextMinuteDelay } from './ClockPopover';
+import { clockText, nextMinuteDelay } from '../lib/clock';
+import { statusPopovers } from './deferred-features';
 
 function StatusIcon({ children }: { children: ReactNode }) {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"
@@ -25,6 +25,8 @@ export function StatusItems({ home }: { home?: DesktopProps['home'] }) {
     tick(); document.addEventListener('visibilitychange', resume);
     return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', resume); };
   }, []);
+  const [popoversLoaded, setPopoversLoaded] = useState(false);
+  useEffect(() => { if (open === 'status.now' || open === 'status.clock') setPopoversLoaded(true); }, [open]);
   const toggle = (id: string) => setOpen(value => value === id ? null : id);
   return <div className="mb-status" role="group" aria-label="Status">
     <button ref={nowAnchor} type="button" className="mb-status-button" aria-label="What Nipun's up to" title="What Nipun's up to"
@@ -48,11 +50,6 @@ export function StatusItems({ home }: { home?: DesktopProps['home'] }) {
       aria-controls={open === 'status.clock' ? 'clock-popover' : undefined} onClick={event => {
         if (event.altKey) { setLk(value => !value); setOpen(null); } else toggle('status.clock');
       }}><time dateTime={date?.toISOString()}>{date ? clockText(date, locale, lk) : '\u00a0'}</time></button>
-    <Popover id="now-popover" open={open === 'status.now'} anchorRef={nowAnchor} label="What Nipun's up to" onClose={() => setOpen(null)} style={{ width: 300 }}>
-      <h2 className="mb-3 text-title-3">Now</h2>
-      <ul className="list-disc space-y-2 pl-4 text-ui">{home?.nowItems.slice(0, 3).map((item, index) => <li key={index}>{item}</li>)}</ul>
-      <button type="button" className="mt-3 text-ui-strong text-accent-ink" onClick={() => { setOpen(null); openApp('now'); }}>Open Now ›</button>
-    </Popover>
-    <ClockPopover open={open === 'status.clock'} anchorRef={clockAnchor} date={date} locale={locale} onClose={() => setOpen(null)} />
+    {(open === 'status.now' || open === 'status.clock' || popoversLoaded) && <statusPopovers.Component open={open} home={home} nowAnchor={nowAnchor} clockAnchor={clockAnchor} date={date} locale={locale} onClose={() => setOpen(null)} />}
   </div>;
 }

@@ -153,6 +153,7 @@ function focusRegion(selector: string): void {
 }
 async function power(action: 'restart' | 'shutdown'): Promise<void> {
   const store = getStore();
+  const source = typeof document !== 'undefined' && document.activeElement instanceof HTMLElement ? document.activeElement : null;
   if (await alert({ title: action === 'restart' ? 'Restart Serendib?' : 'Shut down Serendib?',
     body: 'Open windows will close.', primary: action === 'restart' ? 'Restart' : 'Shut down' }) !== 'primary') return;
   const windows = [...store.get(desktopAtom).order].reverse();
@@ -163,6 +164,9 @@ async function power(action: 'restart' | 'shutdown'): Promise<void> {
     }
   }
   store.set(desktopAtom, { type: 'CLOSE_ALL' });
+  // Closing windows can temporarily return focus to their launchers. The power
+  // overlay should remember the initiating control, independent of animation order.
+  if (source?.isConnected && !source.closest('[inert], [hidden]')) source.focus({ preventScroll: true });
   if (action === 'restart') store.set(bootPhaseAtom, 'running');
   else store.set(overlayAtom, 'shutdown');
 }

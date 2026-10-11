@@ -91,11 +91,4 @@ export function getItemState(command: string, context: MenuStateContext): { disa
   return context.appState?.[command] ?? {};
 }
 
-/** Keep the app menu visible; move trailing menus into submenus when space runs out. */
-export function overflowMenus(menus: readonly ShellMenu[], widths: readonly number[], available: number, moreWidth: number): readonly ShellMenu[] {
-  if (widths.reduce((total, width) => total + width, 0) <= available) return menus;
-  let count = 1; let used = (widths[0] ?? 0) + moreWidth;
-  while (count < menus.length && used + (widths[count] ?? 0) <= available) used += widths[count++] ?? 0;
-  return [...menus.slice(0, count), { id: 'more', label: 'More', items: menus.slice(count).map(menu =>
-    ({ kind: 'submenu' as const, label: menu.label, items: menu.items })) }];
-}
+export { overflowMenus } from './menu-layout';

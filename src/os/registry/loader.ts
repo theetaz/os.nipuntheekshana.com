@@ -7,7 +7,12 @@ const cache = new Map<AppId, Promise<AppModule>>();
 export function loadApp(id: AppId, store: OsStore = getStore()): Promise<AppModule> {
   let pending = cache.get(id);
   if (!pending) {
-    pending = Promise.resolve().then(() => APPS[id].load()).catch(error => { cache.delete(id); throw error; });
+    pending = Promise.resolve().then(() => APPS[id].load()).then(module => {
+      // A cancelled Vite preload error can fulfil with undefined (for example
+      // when native navigation aborts an in-flight app import).
+      if (!module?.default) throw new Error('The app could not be loaded. Reload or try again.');
+      return module;
+    }).catch(error => { cache.delete(id); throw error; });
     cache.set(id, pending);
   }
   store.set(appLoadAtom, state => ({ ...state, [id]: 'loading' }));

@@ -18,6 +18,11 @@ export default defineConfig({
   integrations: [react(), sitemap({ filter: sitemapFilter })],
   vite: {
     plugins: [tailwindcss()],
+    build: { rolldownOptions: { output: { codeSplitting: { groups: [{
+      // Pack the shell's static dependencies together: fewer request hops and
+      // gzip dictionaries. Dynamic app and feature imports keep their own chunks.
+      name: 'shell-runtime', test: /src\/os\/Desktop\.tsx$|node_modules\/(?:(?:react|react-dom|scheduler)\/|jotai\/dist\/(?:react\/[^/]+|vanilla\/(?:atom|store|internals))\.js$)/,
+    }] } } } },
     // three is only reached through a lazy import; pre-bundle it so dev does not reload mid-session.
     optimizeDeps: { include: ['three', 'jotai', 'jotai/utils', 'motion/react', 'motion/mini'] },
   },

@@ -1,46 +1,25 @@
-import { spawn, type ChildProcess } from 'node:child_process';
-import { writeFile, unlink } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from '@playwright/test';
-// These two acceptance routes are temporary and never become part of the site.
-const root = fileURLToPath(new URL('../../', import.meta.url));
-let routes: string[];
-let origin: string;
-let fixturePort: number;
-let server: ChildProcess;
+import { fixtureServer, type FixtureServer } from './fixture-server';
+// These acceptance routes stay in an isolated, temporary build.
+let routes: string[]; let origin: string; let server: FixtureServer;
 test.beforeAll(async ({}, info) => {
-  // Keep fixture ports separate when worktrees test different preview servers in parallel.
   const previewPort = Number(new URL(process.env.BASE_URL ?? 'http://localhost:4321').port);
-  fixturePort = 10_000 + (previewPort % 1000) * 32 + info.workerIndex;
-  origin = `http://localhost:${fixturePort}`;
+  const port = 10_000 + (previewPort % 1000) * 32 + info.workerIndex;
   routes = [`p2-ui-static-${info.workerIndex}`, `p2-ui-hydrated-${info.workerIndex}`];
-  for (const name of routes) await writeFile(`${root}src/pages/${name}.astro`, `---
-import UiKit from '../../tests/fixtures/ui-kit/UiKit';
-import '../styles/global.css';
+  const pages = Object.fromEntries(routes.map(name => [name, `---
+import UiKit from '../../../tests/fixtures/ui-kit/UiKit';
+import '../../../src/styles/global.css';
 ---
 <!doctype html><html lang="en" data-motion="reduce"><head><meta charset="UTF-8" /><title>UI kit verification</title></head><body style="overflow:auto;height:auto">
 ${name.startsWith('p2-ui-hydrated') ? '<script is:inline type="application/json" id="os-initial-data" data-key="fixture">{"title":"Embedded data"}</script>' : ''}
-<UiKit ${name.startsWith('p2-ui-hydrated') ? 'interactive client:load' : ''} /></body></html>`);
-  server = spawn('npm', ['run', 'dev', '--', '--ignore-lock', '--host', 'localhost', '--port', String(fixturePort)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
-  // Wait on Astro's readiness output, never on a fixed startup delay.
-  await new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('UI fixture server did not become ready')), 60_000);
-    const output = (chunk: Buffer) => { if (chunk.toString().includes(`localhost:${fixturePort}`)) { clearTimeout(timer); resolve(); } };
-    server.stdout?.on('data', output); server.stderr?.on('data', output);
-    server.once('error', error => { clearTimeout(timer); reject(error); });
-    server.once('exit', code => { clearTimeout(timer); reject(new Error(`Fixture server exited: ${code}`)); });
-  });
+<UiKit ${name.startsWith('p2-ui-hydrated') ? 'interactive client:load' : ''} /></body></html>`]));
+  server = await fixtureServer(`ui-${info.workerIndex}`, port, pages); origin = server.origin;
 });
-test.afterAll(async () => {
-  if (server?.pid) {
-    try { process.kill(-server.pid, 'SIGTERM'); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error; }
-    await new Promise<void>(resolve => { if (server.exitCode !== null || server.signalCode !== null) resolve(); else server.once('exit', () => resolve()); });
-  }
-  await Promise.all(routes.map(name => unlink(`${root}src/pages/${name}.astro`).catch(() => {})));
-});
+test.afterAll(async () => { await server?.stop(); });
 async function openFixture(page: import('@playwright/test').Page) {
   await page.goto(`${origin}/${routes[1]}`);
+  await expect(page.locator('[data-ui-hydrated]')).toHaveAttribute('data-ui-hydrated', 'true');
   await expect(page.getByTestId('app-data')).toHaveText('Embedded data');
 }
 test('all primitives render without hydration and the hydrated page has no console errors', async ({ page, browser }) => {
@@ -146,6 +125,7 @@ test('initial data matches the key; failed network data retries without duplicat
 });
 test('reduced motion suppresses spatial overlays and skeleton shimmer; axe passes', async ({ page }) => {
   await openFixture(page); await page.getByRole('button', { name: 'Menu trigger' }).click();
+  await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeVisible();
   expect(await page.getByRole('menu', { name: 'Actions menu' }).evaluate(element => element.getAnimations().flatMap(animation => (animation.effect as KeyframeEffect).getKeyframes()).some(frame => 'transform' in frame))).toBe(false);
   expect(await page.locator('.os-skeleton-part').first().evaluate(element => getComputedStyle(element).animationName)).toBe('none');
   const result = await new AxeBuilder({ page }).analyze(); expect(result.violations).toEqual([]);
@@ -157,8 +137,10 @@ test('focus rings and overlay motion follow system preference and live Settings 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.evaluate(() => delete document.documentElement.dataset.motion);
   await trigger.click();
+  await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeVisible();
   expect(await page.getByRole('menu', { name: 'Actions menu' }).evaluate(element => element.getAnimations().flatMap(animation => (animation.effect as KeyframeEffect).getKeyframes()).some(frame => 'transform' in frame))).toBe(false);
   await page.keyboard.press('Escape');
+  await expect(page.getByRole('menu', { name: 'Actions menu' })).toBeHidden();
   await page.evaluate(() => { document.documentElement.dataset.motion = 'full'; });
   await trigger.click();
   // Live reduction completes an in-progress spatial transition and removes its transform.

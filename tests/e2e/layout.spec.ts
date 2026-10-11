@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises';
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test('layout emits crawlable metadata, two font preloads and ordered landmarks', async ({ page }) => {
   const errors: string[] = [];

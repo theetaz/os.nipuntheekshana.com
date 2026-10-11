@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useState, type RefObject } from 'react';
 import { animate } from 'motion/mini';
 import { rafThrottle } from '../lib/raf';
+import { reducedMotion } from '../lib/motion-preferences';
+export { reducedMotion } from '../lib/motion-preferences';
 export type Anchor = RefObject<HTMLElement | null>;
 let sharedHost: HTMLElement | null = null;
 let hostUsers = 0;
@@ -20,11 +22,6 @@ export function useOverlayHost() {
   return host;
 }
 export type Placement = 'top' | 'bottom' | 'right';
-export function reducedMotion(): boolean {
-  if (typeof window === 'undefined') return true;
-  const override = document.documentElement.dataset.motion;
-  return override === 'reduce' || (override !== 'full' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-}
 /** Shared small WAAPI entrance/exit; no full Motion component bundle. */
 export function useOverlayPresence(open: boolean, panel: RefObject<HTMLElement | null>, duration = 0.12, host?: HTMLElement | null) {
   const [present, setPresent] = useState(open);

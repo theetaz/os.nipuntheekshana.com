@@ -1,25 +1,14 @@
-import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type RefObject } from 'react';
-import { atom, useAtomValue, useSetAtom, useStore } from 'jotai';
+import { useRef, type KeyboardEvent } from 'react';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { desktopAtom, menuStateAtom, mochiPrefsAtom, openMenuAtom, showWidgetsAtom, themePrefAtom, wallpaperAtom } from '../state/atoms';
 import { APP_META } from '../registry/meta';
-import { getItemState, windowItems, type ShellMenu } from '../registry/menus';
+import { appMenus, desktopMenus, islandMenu, getItemState, windowItems, type ShellMenu } from '../registry/menus';
 import { VERSION } from '../config';
 import { alert, focusWindow, openApp, runCommand } from '../wm/commands';
 import { Menu } from '../ui/Menu';
 
-export interface MenuHostSpec {
-  menus: readonly ShellMenu[]; anchors: ReadonlyMap<string, RefObject<HTMLButtonElement | null>>;
-  version?: string; move(id: string, direction: 1 | -1): void;
-}
-const hostsAtom = atom<ReadonlyMap<object, MenuHostSpec>>(new Map());
-export function useMenuHost(spec: MenuHostSpec): void {
-  const setHosts = useSetAtom(hostsAtom); const store = useStore(); const owner = useRef({});
-  useLayoutEffect(() => { setHosts(previous => new Map(previous).set(owner.current, spec)); }, [setHosts, spec]);
-  useEffect(() => () => {
-    setHosts(previous => { const next = new Map(previous); next.delete(owner.current); return next; });
-    store.set(openMenuAtom, null);
-  }, [setHosts, store]);
-}
+import { hostsAtom, type MenuHostSpec } from './menu-host-state';
+export { useMenuHost, type MenuHostSpec } from './menu-host-state';
 
 /** App-prefixed commands continue through the focused window's useAppCommands handler. */
 function routeMenuCommand(command: string): void {
@@ -39,7 +28,12 @@ export function MenuHost() {
   const widgets = useAtomValue(showWidgetsAtom); const mochi = useAtomValue(mochiPrefsAtom);
   const win = desktop.focusedId ? desktop.windows[desktop.focusedId] : undefined;
   const meta = win ? APP_META[win.appId] : undefined;
-  const current = spec?.menus.find(menu => menu.id === open);
+  const outline = spec?.menus.find(menu => menu.id === open);
+  const definitions = spec?.appId ? appMenus(APP_META[spec.appId], spec.definitions) : desktopMenus();
+  const current = outline && { ...outline, items: outline.id === 'island' ? islandMenu()
+    : outline.id === 'more' ? definitions.filter(menu => !spec?.menus.some(visible => visible.id === menu.id))
+      .map(menu => ({ kind: 'submenu' as const, label: menu.label, items: menu.items }))
+    : definitions.find(menu => menu.id === outline.id)?.items ?? outline.items };
   const last = useRef<{ menu: ShellMenu; spec: MenuHostSpec } | null>(null);
   if (current && spec) last.current = { menu: current, spec };
   const shown = current && spec ? { menu: current, spec } : last.current;

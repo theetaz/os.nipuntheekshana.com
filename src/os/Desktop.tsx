@@ -1,11 +1,12 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { LazyMotion, MotionConfig } from 'motion/react';
+import './shell/adoption.css';
+import { useEffect, useState } from 'react';
 import { Provider, useAtomValue, useSetAtom, useStore } from 'jotai';
 import { RESET } from 'jotai/utils';
-import { LazyMotion, MotionConfig } from 'motion/react';
 import type { AppId } from './types/apps';
 import { createOsStore, historyStore, registerStore } from './state/store';
 import { desktopAtom, modeAtom, motionPrefAtom, onlineAtom, systemDarkAtom, systemReducedMotionAtom,
-  systemReducedTransparencyAtom, updateAvailableAtom, viewAtom, spotlightOpenAtom, contextMenuAtom, alertsAtom, toastsAtom, recentAtom } from './state/atoms';
+  systemReducedTransparencyAtom, updateAvailableAtom, viewAtom, spotlightOpenAtom, contextMenuAtom, alertsAtom, toastsAtom, recentAtom, bootedAtom, bootPhaseAtom, overlayAtom, openMenuAtom } from './state/atoms';
 import { subscribePreferences } from './state/prefs';
 import { subscribeHistory } from './url/history';
 import { interceptLinks } from './url/links';
@@ -14,13 +15,12 @@ import { subscribeHotkeys } from './shell/Hotkeys';
 import { ModeSwitch, MODE_QUERY } from './shell/ModeSwitch';
 import { DesktopShell } from './shell/DesktopShell';
 import { PhoneShell } from './mobile/PhoneShell';
-import { MenuHost } from './shell/MenuHost';
 import { LiveRegion } from './shell/LiveRegion';
-import { BootController } from './shell/BootController';
-import { Screensaver } from './shell/Screensaver';
-import { ShutDown } from './shell/ShutDown';
+import * as deferred from './shell/deferred-features';
+import { trackWindowLaunches } from './shell/window-launchers';
 import { canPrefetch, prefetchApp } from './registry/loader';
 import { isMac } from './lib/platform';
+import { loadMotionFeatures, preloadMotionFeatures } from './lib/motion-loader';
 import { FEATURES } from './config';
 
 export interface DesktopProps {
@@ -28,12 +28,6 @@ export interface DesktopProps {
   build: { version: string; codename: string; sha: string; date: string };
   home: { nowItems: string[]; nowUpdated: string };
 }
-const loadMotionFeatures = () => import('./lib/motion-features').then(module => module.default);
-const Spotlight = lazy(() => import('./shell/Spotlight').then(module => ({ default: module.Spotlight })));
-const QuickLook = lazy(() => import('./shell/QuickLook').then(module => ({ default: module.QuickLook })));
-const ContextMenuHost = lazy(() => import('./shell/ContextMenuHost').then(module => ({ default: module.ContextMenuHost })));
-const Alerts = lazy(() => import('./shell/Alerts').then(module => ({ default: module.Alerts })));
-const Toasts = lazy(() => import('./shell/Toasts').then(module => ({ default: module.Toasts })));
 function SystemOverlays() {
   const spotlight = useAtomValue(spotlightOpenAtom); const context = useAtomValue(contextMenuAtom);
   const alerts = useAtomValue(alertsAtom); const toasts = useAtomValue(toastsAtom); const desktop = useAtomValue(desktopAtom);
@@ -53,11 +47,43 @@ function SystemOverlays() {
     setLoaded(previous => requested.some((value, i) => value && !previous[i]) ? previous.map((value, i) => value || requested[i]!) : previous);
   }, [spotlight, quicklook, context, alerts.length, toasts.length]);
   // Keep activated hosts mounted so they can finish exit animations and restore focus.
-  return <><Suspense fallback={null}>{(spotlight || loaded[0]) && <Spotlight />}</Suspense>
-    <Suspense fallback={null}>{(quicklook || loaded[1]) && <QuickLook />}</Suspense>
-    <Suspense fallback={null}>{(context || loaded[2]) && <ContextMenuHost />}</Suspense>
-    <Suspense fallback={null}>{(alerts.length > 0 || loaded[3]) && <Alerts />}</Suspense>
-    <Suspense fallback={null}>{(toasts.length > 0 || loaded[4]) && <Toasts />}</Suspense></>;
+  return <>{(spotlight || loaded[0]) && <deferred.spotlight.Component />}
+    {(quicklook || loaded[1]) && <deferred.quickLook.Component />}
+    {(context || loaded[2]) && <deferred.contextMenus.Component />}
+    {(alerts.length > 0 || loaded[3]) && <deferred.alerts.Component />}
+    {(toasts.length > 0 || loaded[4]) && <deferred.toasts.Component />}</>;
+}
+function DeferredSystem() {
+  const menu = useAtomValue(openMenuAtom); const phase = useAtomValue(bootPhaseAtom); const overlay = useAtomValue(overlayAtom);
+  const [activated, setActivated] = useState({ menus: false, boot: false, sleep: false, shutdown: false });
+  useEffect(() => {
+    const boot = document.documentElement.hasAttribute('data-boot') || phase !== 'off';
+    if (!boot && !activated.boot) document.querySelector('.boot-screen')?.remove();
+    setActivated(previous => {
+      const next = { menus: previous.menus || !!menu, boot: previous.boot || boot,
+        sleep: previous.sleep || overlay === 'screensaver', shutdown: previous.shutdown || overlay === 'shutdown' };
+      return Object.keys(next).some(key => next[key as keyof typeof next] !== previous[key as keyof typeof next]) ? next : previous;
+    });
+  }, [menu, phase, overlay, activated.boot]);
+  return <>{(menu || activated.menus) && <deferred.menus.Component />}
+    {(phase !== 'off' || activated.boot) && <deferred.boot.Component />}
+    {(overlay === 'screensaver' || activated.sleep) && <deferred.screensaver.Component />}
+    {(overlay === 'shutdown' || activated.shutdown) && <deferred.shutdown.Component />}</>;
+}
+/** Import only the feature under the pointer/focus; don't fetch search data or initialise audio. */
+function preloadShellIntent(document: Document): () => void {
+  const intent = (event: Event) => {
+    if (!canPrefetch()) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('[role="menubar"], .mb-status, [data-dock-item], [role="option"], a[href^="/"]')) void preloadMotionFeatures().catch(() => {});
+    if (target?.closest('[role="menubar"]')) { void deferred.menus.preload().catch(() => {}); return; }
+    if (target?.closest('.mb-clock, [aria-controls="now-popover"], [aria-label="What Nipun\'s up to"]')) void deferred.statusPopovers.preload().catch(() => {});
+    if (target?.closest('[aria-label="Spotlight"]')) void deferred.spotlight.preload().catch(() => {});
+    if (target?.closest('a[href^="/"]')) void deferred.windows.preload().catch(() => {});
+    if (target?.closest('[data-dock-item], [role="option"]')) void deferred.contextMenus.preload().catch(() => {});
+  };
+  document.addEventListener('pointerover', intent); document.addEventListener('focusin', intent);
+  return () => { document.removeEventListener('pointerover', intent); document.removeEventListener('focusin', intent); };
 }
 function ClientBootstrap() {
   const store = useStore();
@@ -65,6 +91,27 @@ function ClientBootstrap() {
     const cleanups: (() => void)[] = [];
     // Order matters: adoption must precede the history subscription and app loading.
     cleanups.push(registerStore(store));
+    cleanups.push(trackWindowLaunches(document));
+    cleanups.push(preloadShellIntent(document));
+    if (document.documentElement.hasAttribute('data-boot')) {
+      void deferred.boot.preload().catch(() => {});
+      let skipTimer: ReturnType<typeof setTimeout> | undefined;
+      // Capture input while the boot controller's chunk is in flight.
+      const skip = (event: Event) => {
+        if (!document.documentElement.hasAttribute('data-boot') || document.querySelector('[data-boot-managed]')) return;
+        if (event.cancelable) event.preventDefault();
+        event.stopImmediatePropagation();
+        const html = document.documentElement;
+        if (html.hasAttribute('data-boot-skip-requested')) return;
+        html.dataset.bootSkipRequested = String(performance.now()); html.dataset.bootExit = 'skip';
+        skipTimer = setTimeout(() => {
+          document.querySelector('.boot-screen')?.remove(); delete html.dataset.boot; delete html.dataset.bootExit;
+          delete html.dataset.bootSkipRequested; store.set(bootPhaseAtom, 'off'); store.set(bootedAtom, true);
+        }, 200);
+      };
+      for (const type of ['keydown', 'pointerdown', 'click']) window.addEventListener(type, skip, { capture: true, passive: false });
+      cleanups.push(() => { clearTimeout(skipTimer); for (const type of ['keydown', 'pointerdown', 'click']) window.removeEventListener(type, skip, true); });
+    }
     const media = [
       ['(prefers-color-scheme: dark)', systemDarkAtom],
       ['(prefers-reduced-motion: reduce)', systemReducedMotionAtom],
@@ -123,7 +170,7 @@ function ClientBootstrap() {
 function Shells(props: DesktopProps) {
   const view = useAtomValue(viewAtom);
   return view === 'simple' ? null : <><ModeSwitch desktop={<DesktopShell {...props} />} mobile={<PhoneShell {...props} />} />
-    <SystemOverlays /><MenuHost /><LiveRegion /><BootController /><Screensaver /><ShutDown /></>;
+    <SystemOverlays /><DeferredSystem /><LiveRegion /></>;
 }
 function MotionPreferences({ children }: { children: React.ReactNode }) {
   const motion = useAtomValue(motionPrefAtom);
@@ -132,19 +179,6 @@ function MotionPreferences({ children }: { children: React.ReactNode }) {
 export default function Desktop(props: DesktopProps) {
   const [store] = useState(() => createOsStore(props));
   return <Provider store={store}><LazyMotion features={loadMotionFeatures} strict><MotionPreferences>
-    <style>{`.island-desktop, .island-mobile { display: none; }
-      html.os-ready[data-mode="desktop"] .island-desktop, html.os-ready[data-mode="mobile"] .island-mobile { display: contents; }
-      html.os-ready body > :is(.static-menubar, .static-dock, .desktop-icons, .pocket-grid) { display: none; }
-      .managed-window[data-adopting] { opacity: 0; pointer-events: none; }
-      .managed-window[hidden] { display: none; }
-      html[data-view="simple"] .managed-window { display: none; }
-      html.os-ready[data-mode="mobile"] .island-mobile :is(.static-dock, .pocket-grid) { display: block; }
-      html.os-ready[data-mode="mobile"] body:not(:has(.static-window)) > .static-menubar { display: flex; visibility: hidden; pointer-events: none; }
-      .island-mobile .static-menubar { position: fixed; }
-      html[data-mode="mobile"]:has(.managed-window:not([hidden])) .desktop-widgets { display: none; }
-      .island-mobile .traffic-light.close { width: 44px; height: 44px; }
-      .island-mobile .traffic-light.close > span:first-child { display: inline; }
-    `}</style>
     <Shells {...props} /><ClientBootstrap />
   </MotionPreferences></LazyMotion></Provider>;
 }

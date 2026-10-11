@@ -1,0 +1,18 @@
+.static-menubar.mb-bar { height:32px; padding:0 10px; gap:0; border-bottom:1px solid var(--glass-edge); box-shadow:inset 0 1px 0 var(--glass-border); -webkit-backdrop-filter:var(--glass-filter); }
+.mb-bar nav.mb-nav { display:flex; align-items:center; gap:0; min-width:0; flex:1; }
+.mb-menus { display:flex; align-items:center; margin:0; padding:0; list-style:none; white-space:nowrap; min-width:0; }
+.mb-trigger { display:flex; align-items:center; justify-content:center; height:24px; padding:0 10px; border:0; border-radius:6px; color:var(--os-ink); font:450 13px/18px var(--font-ui); white-space:nowrap; cursor:default; }
+.mb-trigger[aria-expanded="true"], .mb-status-button[aria-expanded="true"] { background:var(--os-pressed); }
+.mb-trigger.mb-app { font-weight:600; max-width:150px; overflow:hidden; text-overflow:ellipsis; display:block; }
+.mb-status { margin-left:auto; display:flex; align-items:center; gap:2px; flex-shrink:0; }
+.mb-status-button { display:grid; place-items:center; width:24px; height:24px; border-radius:6px; color:var(--os-ink); }
+.mb-now-dot { width:7px; height:7px; border-radius:50%; background:var(--os-success); box-shadow:0 0 0 3px color-mix(in oklch, var(--os-success) 22%, transparent); animation:mb-now-pulse 2.4s ease-in-out infinite; }
+@keyframes mb-now-pulse { 50% { box-shadow:0 0 0 5px color-mix(in oklch, var(--os-success) 0%, transparent); } }
+@media (prefers-reduced-motion:reduce) { .mb-now-dot { animation:none; } }
+html[data-motion="reduce"] .mb-now-dot { animation:none; }
+.mb-clock { font-variant-numeric:tabular-nums; min-width:11em; padding:0 8px 0 10px; }
+.mb-clock time { white-space:pre; }
+.mb-measure { position:absolute; visibility:hidden; pointer-events:none; display:flex; white-space:nowrap; }
+.mb-bar .simple-entry { margin:0 8px; flex-shrink:0; }
+@media (max-width:759px), (pointer:coarse) { .static-menubar.mb-bar { height:calc(52px + env(safe-area-inset-top)); padding:env(safe-area-inset-top) 16px 0; } .mb-bar nav.mb-nav, .mb-status, .mb-measure, .mb-bar .simple-entry { display:none; } .mb-bar .mb-pocket-brand { display:flex; } }
+@media (min-width:760px) and (pointer:fine) { .mb-pocket-brand { display:none; } }

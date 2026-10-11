@@ -1,5 +1,4 @@
-import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
@@ -8,46 +7,9 @@ import { test, expect } from './fixtures';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const artifacts = resolve(root, '.astro/p2-7-artifacts');
-let server: ChildProcess; let fixturePath: string; let fixtureUrl: string;
-// A temporary route supplies the P2-8 consumer without changing its owned production stub.
-test.beforeAll(async ({}, info) => {
-  const port = 4507 + info.workerIndex; const route = `p2-7-desktop-${info.workerIndex}`;
-  fixturePath = resolve(root, `src/pages/${route}.astro`); fixtureUrl = `http://localhost:${port}/${route}`;
-  await writeFile(fixturePath, `---
-import OsLayout from '../layouts/OsLayout.astro';
-import TicketWidget from '../components/static/TicketWidget.astro';
-import NowSticky from '../components/static/NowSticky.astro';
-import ActivityStrip from '../components/static/ActivityStrip.astro';
-import DesktopMenuFixture from '../../tests/fixtures/p2-7-desktop';
-import { getClientActivity } from '../lib/client-data';
-import { seoFor } from '../lib/seo';
-const activity = await getClientActivity();
-const seo = seoFor({ path: '/', title: 'Desktop verification', description: 'Desktop acceptance fixture', kind: 'home' });
----
-<OsLayout seo={seo} initial={null} home>
-<div class="desktop-widgets"><TicketWidget /><NowSticky /><ActivityStrip activity={activity} /></div>
-<Fragment slot="after-main"><DesktopMenuFixture client:load /></Fragment>
-</OsLayout>`);
-  server = spawn('npm', ['run', 'dev', '--', '--ignore-lock', '--host', 'localhost', '--port', String(port)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
-  await new Promise<void>((done, reject) => {
-    const timer = setTimeout(() => reject(new Error('Desktop menu fixture did not start')), 60_000);
-    const output = (chunk: Buffer) => { if (chunk.toString().includes(`localhost:${port}`)) { clearTimeout(timer); done(); } };
-    server.stdout?.on('data', output); server.stderr?.on('data', output);
-    server.once('error', error => { clearTimeout(timer); reject(error); });
-    server.once('exit', code => { clearTimeout(timer); reject(new Error(`Desktop fixture exited: ${code}`)); });
-  });
-});
-test.afterAll(async () => {
-  if (server?.pid) {
-    try { process.kill(-server.pid, 'SIGTERM'); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error; }
-    await new Promise<void>(done => { if (server.exitCode !== null || server.signalCode !== null) done(); else server.once('exit', () => done()); });
-  }
-  if (fixturePath) await unlink(fixturePath).catch(() => {});
-});
-async function desktop(page: Page, menu = false) {
-  await page.goto(menu ? fixtureUrl : '/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
+async function desktop(page: Page) {
+  await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
   await expect(page.getByRole('listbox', { name: 'Desktop', exact: true })).toBeVisible();
-  if (menu) await expect(page.locator('[data-desktop-menu-fixture]')).toHaveCount(1);
 }
 const icon = (page: Page, name: string) => page.getByRole('option', { name, exact: true });
 async function drag(page: Page, target: Locator, dx: number, dy: number) {
@@ -100,12 +62,12 @@ test('static desktop icon links remain clickable with JavaScript disabled', asyn
   } finally { await context.close(); }
 });
 test('drag snaps to a 96 × 104 grid, persists through reload, and cleans up', async ({ page }) => {
-  await desktop(page, true); const readme = icon(page, 'Read me.txt'); await drag(page, readme, -120, 130);
+  await desktop(page); const readme = icon(page, 'Read me.txt'); await drag(page, readme, -120, 130);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:icons:v1')!))).toEqual({ readme: { x: 96, y: 104 } });
   let box = (await readme.boundingBox())!; expect(box.x).toBe(1236); expect(box.y).toBe(152);
   await page.reload(); await expect(page.locator('html')).toHaveClass(/os-ready/); box = (await readme.boundingBox())!;
   expect(box.x).toBe(1236); expect(box.y).toBe(152);
-  await desktop(page, true);
+  await desktop(page);
   await page.mouse.click(900, 650, { button: 'right' }); await page.getByRole('menuitem', { name: 'Clean up icons' }).click();
   await expect(readme).not.toHaveAttribute('data-positioned'); expect((await readme.boundingBox())!.y).toBe(48);
   expect(await page.evaluate(() => localStorage.getItem('serendib:icons:v1'))).toBe('{}');
@@ -129,14 +91,14 @@ test('rubber band selects two touched icons and additive marquee retains another
   await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(3);
 });
 test('empty desktop clears selection and blurs a window without minimizing it', async ({ page }) => {
-  await desktop(page, true); await icon(page, 'Projects').dblclick(); await page.mouse.click(900, 780);
+  await desktop(page); await icon(page, 'Projects').dblclick(); await page.mouse.click(900, 780);
   await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(0);
   await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
-  expect(await page.locator('[data-desktop-state]').evaluate(node => JSON.parse(node.textContent!).focusedId)).toBeNull();
+  await expect(page.locator('[data-window-id="projects"]')).toHaveAttribute('data-focused', 'false');
 });
 test('desktop right-click menu provides the specified actions and checkbox state', async ({ page }) => {
-  await desktop(page, true); await page.mouse.click(900, 650, { button: 'right' });
-  await expect(page.getByRole('menu', { name: 'Desktop actions' })).toBeVisible();
+  await desktop(page); await page.mouse.click(900, 650, { button: 'right' });
+  await expect(page.getByRole('menu', { name: 'desktop context menu' })).toBeVisible();
   for (const name of ['New Terminal window', 'Change wallpaper…', 'Clean up icons', 'About Serendib']) await expect(page.getByRole('menuitem', { name, exact: true })).toBeVisible();
   await expect(page.getByRole('menuitemcheckbox', { name: 'Show widgets' })).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByRole('menuitemcheckbox', { name: 'Show Mochi' })).toHaveAttribute('aria-checked', 'true');
@@ -145,11 +107,13 @@ test('desktop right-click menu provides the specified actions and checkbox state
   await page.getByRole('menuitemcheckbox', { name: 'Show widgets' }).click(); await expect(page.locator('.ticket-wrap')).toBeVisible();
   await page.mouse.click(900, 650, { button: 'right' }); await page.getByRole('menuitem', { name: 'Change wallpaper…' }).click();
   await expect(page.locator('[data-window-id="settings"]')).toBeVisible();
-  expect(await page.locator('[data-desktop-state]').evaluate(node => JSON.parse(node.textContent!).windows.settings.query)).toEqual({ section: 'wallpaper' });
+  // Settings is a Phase 3 stub. commands.test.ts asserts its wallpaper section
+  // query; here the production host must open the actual Settings window.
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
 });
 test('icon right-click and keyboard context menus hand off their Open action', async ({ page }) => {
-  await desktop(page, true); const projects = icon(page, 'Projects'); await projects.click({ button: 'right' });
-  await expect(projects).toHaveAttribute('aria-selected', 'true'); await expect(page.getByRole('menu', { name: 'Desktop icon actions' })).toBeVisible();
+  await desktop(page); const projects = icon(page, 'Projects'); await projects.click({ button: 'right' });
+  await expect(projects).toHaveAttribute('aria-selected', 'true'); await expect(page.getByRole('menu', { name: 'desktop:projects context menu' })).toBeVisible();
   await page.keyboard.press('Escape'); await projects.focus(); await page.keyboard.press('Shift+F10');
   await page.getByRole('menuitem', { name: 'Open', exact: true }).click(); await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
 });
@@ -182,7 +146,9 @@ test('hydration preserves static icon positions, mobile widget flow, CLS 0 and c
   await mkdir(artifacts, { recursive: true }); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await page.addInitScript(() => {
-    Object.assign(window, { desktopCLS: 0 }); new PerformanceObserver(list => { for (const entry of list.getEntries()) {
+    Object.assign(window, { desktopCLS: 0 });
+    if (!PerformanceObserver.supportedEntryTypes.includes('layout-shift')) return;
+    new PerformanceObserver(list => { for (const entry of list.getEntries()) {
       const shift = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
       if (!shift.hadRecentInput) (window as unknown as { desktopCLS: number }).desktopCLS += shift.value;
     } }).observe({ type: 'layout-shift', buffered: true });
@@ -193,17 +159,65 @@ test('hydration preserves static icon positions, mobile widget flow, CLS 0 and c
       await page.emulateMedia({ colorScheme: theme }); let release!: () => void; const held = new Promise<void>(done => { release = done; });
       await page.route('**/Desktop.*.js', async route => { await held; await route.continue(); });
       try {
-        await page.goto('/', { waitUntil: 'domcontentloaded' }); await page.evaluate(() => document.fonts.ready);
+        await page.goto('/', { waitUntil: 'domcontentloaded' });
+        // WebKit's fonts.ready also waits for the held module/load event.
+        // Load the rendered faces directly before measuring static geometry.
+        await page.evaluate(async () => {
+          const text = document.body.innerText;
+          const fonts = new Set(Array.from(document.querySelectorAll('*'), node => getComputedStyle(node).font));
+          await Promise.all(Array.from(fonts).filter(Boolean).map(font => document.fonts.load(font, text)));
+          await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
+        });
         const widgets = await page.locator('.desktop-widgets').boundingBox();
         const icons = await page.locator('body > .desktop-icons svg').evaluateAll(nodes => nodes.map(node => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y }; }));
         release(); await expect(page.locator('html')).toHaveClass(/os-ready/);
         await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
         expect(await page.locator('.desktop-widgets').boundingBox()).toEqual(widgets);
         if (mode === 'desktop') expect(await page.locator('[data-shell="desktop"] .desktop-icons svg').evaluateAll(nodes => nodes.map(node => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y }; }))).toEqual(icons);
-        expect(await page.evaluate(() => (window as unknown as { desktopCLS: number }).desktopCLS)).toBe(0);
+        if (await page.evaluate(() => PerformanceObserver.supportedEntryTypes.includes('layout-shift'))) {
+          expect(await page.evaluate(() => (window as unknown as { desktopCLS: number }).desktopCLS)).toBe(0);
+        }
         await page.screenshot({ path: resolve(artifacts, `${mode}-${theme}.png`) });
       } finally { release(); await page.unroute('**/Desktop.*.js'); }
     }
   }
   expect(errors).toEqual([]);
+});
+
+test('a cold icon controller retains a completed first drag', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/desktop-icon-drag.*.js', async route => { await held; await route.continue(); });
+  try {
+    await desktop(page); await drag(page, icon(page, 'Read me.txt'), -120, 130);
+    release();
+    await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('serendib:icons:v1')!))).toEqual({ readme: { x: 96, y: 104 } });
+    await expect(icon(page, 'Read me.txt')).not.toHaveAttribute('data-dragging');
+    await expect(page.locator('[data-window-id]')).toHaveCount(0);
+  } finally { release(); }
+});
+
+test('a cold marquee controller retains a completed first selection', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/desktop-marquee.*.js', async route => { await held; await route.continue(); });
+  try {
+    await desktop(page);
+    await page.mouse.move(1300, 40); await page.mouse.down(); await page.mouse.move(1430, 235, { steps: 8 }); await page.mouse.up();
+    release(); await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(2);
+    await expect(page.locator('[data-desktop-marquee]')).toBeHidden();
+  } finally { release(); }
+});
+
+test('Escape cancels a cold marquee before its controller arrives', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/desktop-marquee.*.js', async route => { await held; await route.continue(); });
+  try {
+    await desktop(page); await icon(page, 'CV.pdf').click();
+    await page.mouse.move(1300, 40); await page.mouse.down(); await page.mouse.move(1430, 235);
+    await page.keyboard.press('Escape'); await page.mouse.up();
+    const downloaded = page.waitForEvent('requestfinished', { predicate: request => /desktop-marquee\..*\.js/.test(request.url()) });
+    release(); await downloaded; await page.evaluate(() => new Promise(done => requestAnimationFrame(done)));
+    await expect(icon(page, 'CV.pdf')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(1);
+    await expect(page.locator('[data-desktop-marquee]')).toBeHidden();
+  } finally { release(); }
 });

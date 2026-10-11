@@ -1,0 +1,12 @@
+.island-desktop, .island-mobile { display: none; }
+html.os-ready[data-mode="desktop"] .island-desktop, html.os-ready[data-mode="mobile"] .island-mobile { display: contents; }
+html.os-ready body > :is(.static-menubar, .static-dock, .desktop-icons, .pocket-grid) { display: none; }
+.managed-window[data-adopting] { opacity: 0; pointer-events: none; }
+.managed-window[hidden] { display: none; }
+html[data-view="simple"] .managed-window { display: none; }
+html.os-ready[data-mode="mobile"] .island-mobile :is(.static-dock, .pocket-grid) { display: block; }
+html.os-ready[data-mode="mobile"] body:not(:has(.static-window)) > .static-menubar { display: flex; visibility: hidden; pointer-events: none; }
+.island-mobile .static-menubar { position: fixed; }
+html[data-mode="mobile"]:has(.managed-window:not([hidden])) .desktop-widgets { display: none; }
+.island-mobile .traffic-light.close { width: 44px; height: 44px; }
+.island-mobile .traffic-light.close > span:first-child { display: inline; }

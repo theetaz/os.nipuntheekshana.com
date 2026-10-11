@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Search, Folder } from 'lucide-react';
 import { Button } from '../../../src/os/ui/Button';
 import { IconButton } from '../../../src/os/ui/IconButton';
@@ -42,13 +42,15 @@ function DataProbe() {
   return <div><span data-testid="app-data">{error?.message ?? data?.title ?? 'Waiting for data'}</span><Button onClick={retry}>Retry data</Button></div>;
 }
 export default function UiKit({ interactive = false }: { interactive?: boolean }) {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   const [menu, setMenu] = useState(!interactive); const menuTrigger = useRef<HTMLButtonElement>(null);
   const [popover, setPopover] = useState(!interactive); const popoverTrigger = useRef<HTMLButtonElement>(null);
   const [modal, setModal] = useState(false); const modalTrigger = useRef<HTMLButtonElement>(null);
   const [value, setValue] = useState('icons'); const [checked, setChecked] = useState(false);
   const [status, setStatus] = useState(true); const [command, setCommand] = useState('None'); const [slider, setSlider] = useState(50);
   const [links, setLinks] = useState(0); const [focusCount, setFocusCount] = useState(0);
-  return <main className="mx-auto max-w-4xl space-y-6 p-6">
+  return <main data-ui-hydrated={hydrated} className="mx-auto max-w-4xl space-y-6 p-6">
     <h1 className="text-title-1">UI kit verification</h1>
     <svg width="0" height="0" aria-hidden="true"><defs><symbol id="app-projects" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="var(--os-accent)" /><path d="M20 20h24v24H20z" fill="var(--os-on-accent)" /></symbol></defs></svg>
     <Toolbar label="Actions"><Button variant="primary" size={36}>Primary</Button><Button size={32}>Secondary</Button><Button variant="ghost" size={28}>Ghost</Button><Button variant="danger">Danger</Button><Button disabled>Disabled</Button><IconButton aria-label="Search icon"><Search size={16} /></IconButton></Toolbar>

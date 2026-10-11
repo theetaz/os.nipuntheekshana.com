@@ -18,7 +18,8 @@ export function trapTab(event: Pick<KeyboardEvent, 'key' | 'shiftKey' | 'prevent
   const active = container.ownerDocument.activeElement;
   const index = items.findIndex(item => item === active);
   if (!items.length) { event.preventDefault(); container.focus(); return; }
-  if (index === -1 || (event.shiftKey ? index === 0 : index === items.length - 1)) {
-    event.preventDefault(); items[event.shiftKey ? items.length - 1 : 0]?.focus();
-  }
+  // Safari's native Tab policy can skip buttons. A modal owns its entire
+  // focus sequence, so move explicitly between every usable control.
+  event.preventDefault();
+  items[nextFocusIndex(index, event.shiftKey ? -1 : 1, items.length)]?.focus();
 }

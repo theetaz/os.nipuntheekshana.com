@@ -48,15 +48,28 @@ test('resting dock exactly replaces the static dock with zero hydration CLS', as
     expect(await page.evaluate(() => (window as unknown as { dockCls: number }).dockCls)).toBe(0);
     const projects = await link(page, 'Projects').boundingBox();
     await page.mouse.move(projects!.x + 24, projects!.y + 24);
-    await expect.poll(() => width(page, 'Projects'), { timeout: 500 }).toBeGreaterThanOrEqual(71);
+    // Default polling backs off past the deadline; sample the spring each frame.
+    await expect.poll(() => width(page, 'Projects'), { timeout: 500, intervals: [16] }).toBeGreaterThanOrEqual(71);
   } finally { release(); }
 });
 
 test('magnifies to 72 px within 500 ms without React commits and settles on leave', async ({ page }) => {
   await page.addInitScript(() => {
-    const state = { commits: 0 };
+    type Fiber = { memoizedProps?: Record<string, unknown>; child?: Fiber; sibling?: Fiber };
+    const state = { commits: 0 }; let previous: Record<string, unknown> | undefined;
+    const dockProps = (fiber: Fiber | undefined): Record<string, unknown> | undefined => {
+      if (!fiber) return;
+      if (fiber.memoizedProps?.['data-dock-mode'] === 'desktop') return fiber.memoizedProps;
+      return dockProps(fiber.child) ?? dockProps(fiber.sibling);
+    };
     Object.assign(window, { dockReact: state, __REACT_DEVTOOLS_GLOBAL_HOOK__: {
-      supportsFiber: true, inject: () => 1, onCommitFiberRoot: () => { state.commits++; }, onCommitFiberUnmount: () => {},
+      supportsFiber: true, inject: () => 1,
+      onCommitFiberRoot: (_id: number, root: { current: Fiber }) => {
+        // LazyMotion and the clock can commit elsewhere; magnification must never render Dock.
+        const props = dockProps(root.current);
+        if (props && props !== previous) state.commits++;
+        previous = props;
+      }, onCommitFiberUnmount: () => {},
     } });
   });
   await ready(page);
@@ -64,7 +77,7 @@ test('magnifies to 72 px within 500 ms without React commits and settles on leav
   expect(commits).toBeGreaterThan(0);
   const box = await link(page, 'Projects').boundingBox();
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
-  await expect.poll(() => width(page, 'Projects'), { timeout: 500 }).toBeGreaterThanOrEqual(71);
+  await expect.poll(() => width(page, 'Projects'), { timeout: 500, intervals: [16] }).toBeGreaterThanOrEqual(71);
   expect(await width(page, 'Projects')).toBeLessThanOrEqual(73);
   expect(await page.evaluate(() => (window as unknown as { dockReact: { commits: number } }).dockReact.commits)).toBe(commits);
   const expanded = await dock(page).boundingBox(); expect(expanded!.height).toBe(64); expect(expanded!.width).toBeGreaterThan(734);
@@ -81,6 +94,8 @@ test('the 24 px slack above the resting dock still magnifies icons', async ({ pa
 test('magnification shifts only dock nodes and keeps widgets and windows fixed', async ({ page }) => {
   await ready(page); await link(page, 'Terminal').click();
   await page.mouse.move(0, 0);
+  await expect(page.locator('[data-window-id="terminal"]')).toBeVisible();
+  await expect(page.locator('[data-window-id="terminal"]')).not.toHaveAttribute('data-transition');
   const ticket = await page.locator('.ticket-wrap').boundingBox(); const terminal = await page.locator('[data-window-id="terminal"]').boundingBox();
   await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(734);
   await page.evaluate(() => {
@@ -156,7 +171,8 @@ test('Terminal shows a running dot, Option-click creates Terminal 2, and clicks 
   await expect(terminal.locator('.os-dock-indicator')).toBeVisible(); await expect(terminal).toHaveAccessibleDescription(/Running/);
   await terminal.click({ modifiers: ['Alt'] }); await expect(page.getByRole('dialog', { name: 'Terminal 2', exact: true })).toBeVisible();
   await expect(page.locator('[data-window-id]')).toHaveCount(2);
-  await terminal.click(); await expect(page.locator('[data-window-id="terminal"]')).toHaveAttribute('style', /z-index: 31/);
+  await terminal.click(); await expect(page.locator('[data-window-id="terminal"]')).toHaveAttribute('data-focused', 'true');
+  expect(await page.locator('[data-window-id="terminal"]').evaluate(el => +getComputedStyle(el).zIndex)).toBeGreaterThan(await page.locator('[data-window-id="terminal~2"]').evaluate(el => +getComputedStyle(el).zIndex));
   await page.keyboard.press('Alt+KeyM'); await page.keyboard.press('Alt+KeyM');
   await expect(terminal.locator('.os-dock-indicator')).toHaveAttribute('data-minimized', 'true');
   await expect(terminal).toHaveAccessibleDescription(/Minimised/);
@@ -212,9 +228,18 @@ test('external links have secure native targets, a hover badge and Option-copy',
   await expect(page).toHaveURL(/\/$/);
 });
 
-test('middle-click and platform-modified click retain native navigation to a new tab', async ({ page, context }) => {
+test('middle-click and platform-modified click retain native browser navigation', async ({ page, context, browserName }) => {
   await ready(page);
   for (const options of [{ button: 'middle' as const }, { modifiers: ['ControlOrMeta' as const] }]) {
+    // Playwright's WebKit follows middle-click anchors in the current tab,
+    // including on a plain HTML control page. Assert that native navigation.
+    if (browserName === 'webkit' && 'button' in options) {
+      await page.evaluate(() => Object.assign(window, { nativeNavigationMarker: true }));
+      await link(page, 'Terminal').click(options); await expect(page).toHaveURL(/\/terminal$/);
+      expect(await page.evaluate(() => 'nativeNavigationMarker' in window)).toBe(false);
+      await ready(page);
+      continue;
+    }
     const popup = context.waitForEvent('page'); await link(page, 'Terminal').click(options); const opened = await popup;
     try { await expect(opened).toHaveURL(/\/terminal$/); await expect(page.locator('[data-window-id]')).toHaveCount(0); }
     finally { await opened.close(); }
