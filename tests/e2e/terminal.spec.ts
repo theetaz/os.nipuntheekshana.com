@@ -45,6 +45,32 @@ test('Tab completion, double Tab candidates, history draft and persistent recall
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:terminal:history')!))).toEqual(['neofetch ', 'echo persisted']);
 });
 
+test('completion cannot replace a later select-all selection on the next frame', async ({ page }) => {
+  const win = await start(page); const input = win.getByRole('textbox', { name: 'Terminal command' });
+  await command(win, 'cat now.txt'); await expect(output(win)).toContainText('Updated');
+  await page.evaluate(() => {
+    const request = window.requestAnimationFrame; const cancel = window.cancelAnimationFrame;
+    const queued = new Map<number, FrameRequestCallback>(); let id = 0;
+    window.requestAnimationFrame = callback => { queued.set(++id, callback); return id; };
+    window.cancelAnimationFrame = handle => { queued.delete(handle); };
+    Object.assign(window, { releaseTerminalFrames: () => {
+      window.requestAnimationFrame = request; window.cancelAnimationFrame = cancel;
+      const callbacks = [...queued.values()]; queued.clear(); callbacks.forEach(callback => callback(performance.now()));
+    } });
+  });
+  try {
+    await input.fill('cat no'); await input.press('Tab'); await expect(input).toHaveValue('cat now.txt ');
+    await expect(input).not.toHaveAttribute('readonly');
+    await input.evaluate(element => {
+      (element as HTMLInputElement).select();
+      (window as unknown as { releaseTerminalFrames(): void }).releaseTerminalFrames();
+    });
+    await page.keyboard.insertText('c'); await expect(input).toHaveValue('c');
+    await input.press('Tab'); await expect(input).not.toHaveAttribute('readonly'); await input.press('Tab');
+    await expect(output(win)).toContainText('cat  cd  clear  contact  cv');
+  } finally { await page.evaluate(() => (window as unknown as { releaseTerminalFrames(): void }).releaseTerminalFrames()); }
+});
+
 test('open projects/salli and output links open the matching window; exit closes this instance', async ({ page }) => {
   const win = await start(page);
   await command(win, 'open projects/salli'); await expect(page.locator('[data-window-id="projects"]')).toBeVisible(); await expect(page).toHaveURL(/\/projects\/salli/);
