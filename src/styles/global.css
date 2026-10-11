@@ -1,1 +1,835 @@
 @import "tailwindcss";
+@import "./prose.css";
+@import "./print.css";
+/* Component styles import their own wallpapers, window frames and shell styles. */
+
+/* Theme and preference variants driven by attributes on <html> (set by the inline head script). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant motion-ok {
+  @media (prefers-reduced-motion: no-preference) {
+    &:where(html:not([data-motion="reduce"]) *) { @slot; }
+  }
+  &:where(html[data-motion="full"] *) { @slot; }
+}
+@custom-variant motion-reduce-os {
+  @media (prefers-reduced-motion: reduce) {
+    &:where(html:not([data-motion="full"]) *) { @slot; }
+  }
+  &:where(html[data-motion="reduce"] *) { @slot; }
+}
+@custom-variant mobile (&:where(html[data-mode="mobile"] *));
+@custom-variant focused-window (&:where([data-focused="true"] *));
+
+@theme {
+  /* Type scale: utilities text-caption-2 … text-terminal (DESIGN §2.3) */
+  --text-caption-2: 11px;  --text-caption-2--line-height: 14px; --text-caption-2--font-weight: 500; --text-caption-2--letter-spacing: 0.01em;
+  --text-caption: 12px;    --text-caption--line-height: 16px;   --text-caption--font-weight: 450;
+  --text-ui: 13px;         --text-ui--line-height: 18px;        --text-ui--font-weight: 450;
+  --text-ui-strong: 13px;  --text-ui-strong--line-height: 18px; --text-ui-strong--font-weight: 600;
+  --text-body: 15px;       --text-body--line-height: 24px;      --text-body--font-weight: 400;
+  --text-body-lg: 17px;    --text-body-lg--line-height: 28px;   --text-body-lg--font-weight: 400;
+  --text-title-3: 20px;    --text-title-3--line-height: 26px;   --text-title-3--font-weight: 500; --text-title-3--letter-spacing: -0.005em;
+  --text-title-2: 24px;    --text-title-2--line-height: 30px;   --text-title-2--font-weight: 500; --text-title-2--letter-spacing: -0.01em;
+  --text-title-1: 32px;    --text-title-1--line-height: 38px;   --text-title-1--font-weight: 450; --text-title-1--letter-spacing: -0.015em;
+  --text-display-2: 44px;  --text-display-2--line-height: 48px; --text-display-2--font-weight: 420; --text-display-2--letter-spacing: -0.02em;
+  --text-display-1: 64px;  --text-display-1--line-height: 64px; --text-display-1--font-weight: 380; --text-display-1--letter-spacing: -0.025em;
+  --text-mono-label: 10.5px; --text-mono-label--line-height: 14px; --text-mono-label--font-weight: 500; --text-mono-label--letter-spacing: 0.08em;
+  --text-mono: 12px;       --text-mono--line-height: 18px;
+  --text-terminal: 13px;   --text-terminal--line-height: 20px;
+
+  --text-caption--letter-spacing: 0;
+  --text-ui--letter-spacing: 0;
+  --text-ui-strong--letter-spacing: 0;
+  --text-body--letter-spacing: 0;
+  --text-body-lg--letter-spacing: 0;
+  --text-mono--letter-spacing: 0;
+  --text-mono--font-weight: 400;
+  --text-terminal--letter-spacing: 0;
+  --text-terminal--font-weight: 400;
+  --spacing: 4px; /* Keep the 4px grid independent of the 13px UI root. */
+}
+
+/* Utilities that must follow theme switches reference runtime variables. */
+@theme inline {
+  --font-ui: var(--font-instrument, "Instrument Sans Variable"), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces, "Fraunces Variable"), ui-serif, Georgia, serif;
+  --font-mono: var(--font-martian, "Martian Mono Variable"), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sinhala: 'Noto Sans Sinhala', 'Sinhala Sangam MN', 'Sinhala MN', 'Nirmala UI', 'Iskoola Pota', sans-serif;
+  --font-tamil: 'Noto Sans Tamil', 'Tamil Sangam MN', 'Nirmala UI', 'Latha', sans-serif;
+
+  --color-ink: var(--os-ink);          --color-ink-2: var(--os-ink-2);   --color-ink-3: var(--os-ink-3);
+  --color-ink-inverse: var(--os-ink-inverse);
+  --color-window: var(--os-window);    --color-titlebar: var(--os-titlebar); --color-sidebar: var(--os-sidebar);
+  --color-raised: var(--os-raised);    --color-sunken: var(--os-sunken);
+  --color-line: var(--os-line);        --color-line-strong: var(--os-line-strong);
+  --color-hover: var(--os-hover);      --color-pressed: var(--os-pressed);
+  --color-accent: var(--os-accent);    --color-accent-ink: var(--os-accent-ink);
+  --color-on-accent: var(--os-on-accent); --color-accent-soft: var(--os-accent-soft);
+  --color-selection: var(--os-selection); --color-selection-ink: var(--os-selection-ink);
+  --color-selection-inactive: var(--os-selection-inactive);
+  --color-focus: var(--os-focus);
+  --color-success: var(--os-success); --color-warning: var(--os-warning); --color-danger: var(--os-danger); --color-info: var(--os-info);
+
+  --shadow-window: var(--os-shadow-window);
+  --shadow-window-focused: var(--os-shadow-window-focused);
+  --shadow-menu: var(--os-shadow-menu);
+  --shadow-dock: var(--os-shadow-dock);
+  --shadow-widget: var(--os-shadow-widget);
+  --shadow-card: var(--os-shadow-card);
+
+  --color-palette-ink: var(--palette-ink);
+  --color-palette-ink-2: var(--palette-ink-2);
+  --color-palette-ink-3: var(--palette-ink-3);
+  --color-palette-paper: var(--palette-paper);
+  --color-palette-paper-2: var(--palette-paper-2);
+  --color-palette-paper-3: var(--palette-paper-3);
+  --color-palette-sand: var(--palette-sand);
+  --color-palette-charcoal: var(--palette-charcoal);
+  --color-palette-charcoal-2: var(--palette-charcoal-2);
+  --color-palette-charcoal-3: var(--palette-charcoal-3);
+  --color-palette-night: var(--palette-night);
+  --color-palette-bone: var(--palette-bone);
+  --color-palette-bone-2: var(--palette-bone-2);
+  --color-palette-bone-3: var(--palette-bone-3);
+  --color-palette-thambili: var(--palette-thambili);
+  --color-palette-thambili-ink: var(--palette-thambili-ink);
+  --color-palette-thambili-bright: var(--palette-thambili-bright);
+  --color-palette-thambili-glow: var(--palette-thambili-glow);
+  --color-palette-on-accent: var(--palette-on-accent);
+  --color-palette-lagoon: var(--palette-lagoon);
+  --color-palette-lagoon-ink: var(--palette-lagoon-ink);
+  --color-palette-lagoon-bright: var(--palette-lagoon-bright);
+  --color-palette-lagoon-glow: var(--palette-lagoon-glow);
+  --color-scrim: var(--os-scrim);
+  --color-tl-close: var(--os-tl-close);
+  --color-tl-close-b: var(--os-tl-close-b);
+  --color-tl-min: var(--os-tl-min);
+  --color-tl-min-b: var(--os-tl-min-b);
+  --color-tl-zoom: var(--os-tl-zoom);
+  --color-tl-zoom-b: var(--os-tl-zoom-b);
+  --color-tl-glyph: var(--os-tl-glyph);
+  --color-term-bg: var(--term-bg);
+  --color-term-ink: var(--term-ink);
+  --color-term-user: var(--term-user);
+  --color-term-host: var(--term-host);
+  --color-term-path: var(--term-path);
+  --color-term-dim: var(--term-dim);
+  --color-term-err: var(--term-err);
+  --color-term-ok: var(--term-ok);
+  --color-term-link: var(--term-link);
+  --color-term-caret: var(--term-caret);
+  --color-note-paper: var(--note-paper);
+  --color-note-ink: var(--note-ink);
+  --color-note-tape: var(--note-tape);
+  --color-ticket-card: var(--ticket-card);
+  --color-ticket-ink: var(--ticket-ink);
+  --color-ticket-ink-2: var(--ticket-ink-2);
+  --color-ticket-perf: var(--ticket-perf);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-glass-edge: var(--glass-edge);
+  --color-menu-bg: var(--menu-bg);
+  --radius-window: var(--r-window);
+  --radius-menu: var(--r-menu);
+  --radius-menu-item: var(--r-menu-item);
+  --radius-control: var(--r-control);
+  --radius-card: var(--r-card);
+  --radius-widget: var(--r-widget);
+  --radius-dock: var(--r-dock);
+  --radius-icon: var(--r-icon);
+  --radius-pill: var(--r-pill);
+  --radius-paper: var(--r-paper);
+  --radius-spotlight: var(--r-spotlight);
+  --radius-toolbar: var(--r-toolbar);
+  --radius-ticket: var(--r-ticket);
+  --radius-cv-page: var(--r-cv-page);
+  --ease-os-out: var(--ease-out);
+  --ease-os-in: var(--ease-in);
+  --ease-os-in-out: var(--ease-in-out);
+  --ease-os-suck: var(--ease-suck);
+}
+
+:root {
+  color-scheme: light;
+  --font-ui: var(--font-instrument, "Instrument Sans Variable"), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces, "Fraunces Variable"), ui-serif, Georgia, serif;
+  --font-mono: var(--font-martian, "Martian Mono Variable"), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sinhala: 'Noto Sans Sinhala', 'Sinhala Sangam MN', 'Sinhala MN', 'Nirmala UI', 'Iskoola Pota', sans-serif;
+  --font-tamil: 'Noto Sans Tamil', 'Tamil Sangam MN', 'Nirmala UI', 'Latha', sans-serif;
+  --palette-ink: #1F1B16;
+  --palette-ink-2: #5C554B;
+  --palette-ink-3: #6E665B;
+  --palette-paper: #FCFBF8;
+  --palette-paper-2: #F5F3EE;
+  --palette-paper-3: #F1EEE8;
+  --palette-sand: #EAE6DE;
+  --palette-charcoal: #1C1A17;
+  --palette-charcoal-2: #22201C;
+  --palette-charcoal-3: #181614;
+  --palette-night: #121110;
+  --palette-bone: #F3EFE8;
+  --palette-bone-2: #BAB2A6;
+  --palette-bone-3: #8F877B;
+  --palette-thambili: #E8722A;
+  --palette-thambili-ink: #B0500E;
+  --palette-thambili-bright: #FF9A4D;
+  --palette-thambili-glow: #FFB070;
+  --palette-on-accent: #1E0D02;
+  --palette-lagoon: #2BB3A6;
+  --palette-lagoon-ink: #0E7369;
+  --palette-lagoon-bright: #5FD4C4;
+  --palette-lagoon-glow: #6FDCCD;
+  --os-ink: #1F1B16;
+  --os-ink-2: #5C554B;
+  --os-ink-3: #6E665B;
+  --os-ink-inverse: #FCFBF8;
+  --os-window: #FCFBF8;
+  --os-titlebar: #F5F3EE;
+  --os-sidebar: #F1EEE8;
+  --os-raised: #FFFFFF;
+  --os-sunken: #EAE6DE;
+  --os-line: rgb(31 27 22 / 0.10);
+  --os-line-strong: rgb(31 27 22 / 0.18);
+  --os-hover: rgb(31 27 22 / 0.06);
+  --os-pressed: rgb(31 27 22 / 0.10);
+  --os-accent: #E8722A;
+  --os-accent-ink: #B0500E;
+  --os-on-accent: #1E0D02;
+  --os-accent-soft: rgb(232 114 42 / 0.14);
+  --os-selection-inactive: #E4DFD5;
+  --os-focus: #B0500E;
+  --os-success: #1E7A45;
+  --os-warning: #8A5F00;
+  --os-danger: #C2352B;
+  --os-info: #0E7369;
+  --os-scrim: rgb(20 16 12 / 0.38);
+  --os-tl-close: #EF5B4B;
+  --os-tl-close-b: #D4473A;
+  --os-tl-min: #F4B43C;
+  --os-tl-min-b: #D3952A;
+  --os-tl-zoom: #39B57A;
+  --os-tl-zoom-b: #2A9663;
+  --os-tl-glyph: rgb(0 0 0 / 0.55);
+  --term-bg: #14110E;
+  --term-ink: #E9E3D8;
+  --term-user: #6FDCCD;
+  --term-host: #FFB070;
+  --term-path: #D9C8A9;
+  --term-dim: #8F877B;
+  --term-err: #FF7A6E;
+  --term-ok: #9BE37F;
+  --term-link: #8AB8FF;
+  --term-caret: #FFB070;
+  --note-paper: #FFE9A8;
+  --note-ink: #3A2E12;
+  --note-tape: rgb(255 255 255 / 0.55);
+  --ticket-card: #F3E6C8;
+  --ticket-ink: #2B2112;
+  --ticket-ink-2: #6B5A3A;
+  --ticket-perf: rgb(43 33 18 / 0.28);
+  --shadow-icon: drop-shadow(0 4px 6px rgb(31 27 22 / 0.18));
+  --label-shadow: 0 0 2px rgb(252 250 246 / 0.9), 0 0 8px rgb(252 250 246 / 0.6);
+  --glass-bg: rgb(252 250 246 / 0.62);
+  --glass-border: rgb(255 255 255 / 0.55);
+  --glass-edge: rgb(31 27 22 / 0.10);
+  --glass-filter: blur(24px) saturate(180%);
+  --menu-bg: rgb(250 248 244 / 0.88);
+  --menu-filter: blur(20px) saturate(160%);
+  --os-shadow-window: 0 0 0 1px rgb(31 27 22 / 0.08), 0 8px 24px -6px rgb(31 27 22 / 0.18);
+  --os-shadow-window-focused: 0 0 0 1px rgb(31 27 22 / 0.10), 0 2px 6px rgb(31 27 22 / 0.06), 0 18px 48px -8px rgb(31 27 22 / 0.28), 0 42px 96px -24px rgb(31 27 22 / 0.30);
+  --os-shadow-menu: 0 0 0 1px rgb(31 27 22 / 0.10), 0 12px 32px -8px rgb(31 27 22 / 0.25);
+  --os-shadow-dock: 0 10px 30px -10px rgb(31 27 22 / 0.35);
+  --os-shadow-widget: 0 1px 2px rgb(31 27 22 / 0.08), 0 10px 24px -8px rgb(31 27 22 / 0.25);
+  --os-shadow-card: 0 0 0 1px rgb(31 27 22 / 0.08), 0 1px 2px rgb(31 27 22 / 0.06);
+  --os-line-contrast: rgb(31 27 22 / 0.20);
+  --os-line-strong-contrast: rgb(31 27 22 / 0.36);
+  --r-window: 14px;
+  --r-menu: 10px;
+  --r-menu-item: 6px;
+  --r-control: 8px;
+  --r-card: 12px;
+  --r-widget: 18px;
+  --r-dock: 22px;
+  --r-icon: 22.5%;
+  --r-pill: 9999px;
+  --r-paper: 4px;
+  --r-spotlight: 16px;
+  --r-toolbar: 7px;
+  --r-ticket: 6px;
+  --r-cv-page: 2px;
+  --os-menubar-height: 32px;
+  --os-menubar-item-height: 24px;
+  --os-menubar-item-padding: 10px;
+  --os-dock-icon: 48px;
+  --os-dock-icon-max: 72px;
+  --os-dock-height: 64px;
+  --os-dock-bottom: 10px;
+  --os-titlebar-height: 40px;
+  --os-titlebar-unified-height: 52px;
+  --os-traffic-light-size: 13px;
+  --os-traffic-light-gap: 11px;
+  --os-traffic-light-inset: 14px;
+  --os-toolbar-button: 28px;
+  --os-toolbar-icon: 16px;
+  --os-sidebar-width: 208px;
+  --os-writing-sidebar-width: 180px;
+  --os-sidebar-row-height: 28px;
+  --os-list-row-height: 32px;
+  --os-list-row-compact-height: 24px;
+  --os-grid-cell-width: 112px;
+  --os-grid-cell-height: 116px;
+  --os-grid-icon: 64px;
+  --os-desktop-cell-width: 84px;
+  --os-desktop-cell-height: 96px;
+  --os-desktop-icon: 56px;
+  --os-work-area-top: 40px;
+  --os-work-area-left: 8px;
+  --os-work-area-right: 8px;
+  --os-work-area-bottom: 84px;
+  --os-hit-target: 24px;
+  --os-touch-target: 44px;
+  --prose-width: 68ch;
+  --font-mono-stretch: 87.5%;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-suck: cubic-bezier(0.32, 0.72, 0, 1);
+  --spring-window-open-stiffness: 420;
+  --spring-window-open-damping: 34;
+  --spring-window-open-mass: 0.9;
+  --spring-window-open-settle: 280ms;
+  --spring-window-snap-stiffness: 380;
+  --spring-window-snap-damping: 36;
+  --spring-window-snap-mass: 1;
+  --spring-window-snap-settle: 300ms;
+  --spring-window-restore-stiffness: 320;
+  --spring-window-restore-damping: 32;
+  --spring-window-restore-mass: 1;
+  --spring-window-restore-settle: 340ms;
+  --spring-dock-magnify-stiffness: 380;
+  --spring-dock-magnify-damping: 28;
+  --spring-dock-magnify-mass: 0.6;
+  --spring-sheet-stiffness: 380;
+  --spring-sheet-damping: 36;
+  --spring-sheet-mass: 1;
+  --spring-sheet-settle: 300ms;
+  --spring-popover-stiffness: 600;
+  --spring-popover-damping: 40;
+  --spring-popover-mass: 0.8;
+  --spring-popover-settle: 160ms;
+  --spring-mochi-home-stiffness: 170;
+  --spring-mochi-home-damping: 11;
+  --spring-mochi-home-mass: 1;
+  --duration-close: 140ms;
+  --duration-minimise: 360ms;
+  --duration-menu-in: 120ms;
+  --duration-menu-out: 80ms;
+  --duration-tooltip-in: 100ms;
+  --duration-tooltip-delay: 600ms;
+  --duration-snap-preview: 140ms;
+  --duration-toast-in: 220ms;
+  --duration-toast-out: 160ms;
+  --duration-theme-fade: 240ms;
+  --duration-hover: 120ms;
+  --duration-reduced: 120ms;
+  --z-wallpaper: 0;
+  --z-widgets: 10;
+  --z-icons: 15;
+  --z-mochi: 18;
+  --z-static-window: 20;
+  --z-windows: 30;
+  --z-dock: 50;
+  --z-menubar: 60;
+  --z-menus: 70;
+  --z-overlay: 80;
+  --z-toasts: 90;
+  --z-boot: 100;
+  --z-skip: 110;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --os-ink: #F3EFE8;
+  --os-ink-2: #BAB2A6;
+  --os-ink-3: #8F877B;
+  --os-ink-inverse: #1C1A17;
+  --os-window: #1C1A17;
+  --os-titlebar: #22201C;
+  --os-sidebar: #181614;
+  --os-raised: #282521;
+  --os-sunken: #121110;
+  --os-line: rgb(255 244 228 / 0.08);
+  --os-line-strong: rgb(255 244 228 / 0.16);
+  --os-hover: rgb(255 244 228 / 0.06);
+  --os-pressed: rgb(255 244 228 / 0.10);
+  --os-accent: #FF9A4D;
+  --os-accent-ink: #FFB070;
+  --os-accent-soft: rgb(255 154 77 / 0.16);
+  --os-selection-inactive: #34302B;
+  --os-focus: #FFB070;
+  --os-success: #5BD08C;
+  --os-warning: #F5C04A;
+  --os-danger: #FF7A6E;
+  --os-info: #6FDCCD;
+  --os-scrim: rgb(0 0 0 / 0.50);
+  --os-tl-glyph: rgb(0 0 0 / 0.60);
+  --note-paper: #3B3220;
+  --note-ink: #F6E7C0;
+  --note-tape: rgb(255 244 228 / 0.18);
+  --ticket-card: #2A251C;
+  --ticket-ink: #EADFC6;
+  --ticket-ink-2: #B9A985;
+  --ticket-perf: rgb(234 223 198 / 0.22);
+  --shadow-icon: drop-shadow(0 4px 6px rgb(0 0 0 / 0.45));
+  --label-shadow: 0 1px 2px rgb(0 0 0 / 0.8);
+  --glass-bg: rgb(30 28 25 / 0.55);
+  --glass-border: rgb(255 244 228 / 0.10);
+  --glass-edge: rgb(0 0 0 / 0.50);
+  --glass-filter: blur(24px) saturate(160%);
+  --menu-bg: rgb(36 33 30 / 0.88);
+  --menu-filter: blur(20px) saturate(140%);
+  --os-shadow-window: 0 0 0 1px rgb(0 0 0 / 0.60), inset 0 1px 0 rgb(255 255 255 / 0.05), 0 8px 24px -6px rgb(0 0 0 / 0.45);
+  --os-shadow-window-focused: 0 0 0 1px rgb(0 0 0 / 0.70), inset 0 1px 0 rgb(255 255 255 / 0.07), 0 18px 48px -8px rgb(0 0 0 / 0.55), 0 42px 96px -24px rgb(0 0 0 / 0.60);
+  --os-shadow-menu: 0 0 0 1px rgb(0 0 0 / 0.60), inset 0 1px 0 rgb(255 255 255 / 0.06), 0 12px 32px -8px rgb(0 0 0 / 0.55);
+  --os-shadow-dock: 0 10px 30px -10px rgb(0 0 0 / 0.60);
+  --os-shadow-widget: 0 1px 2px rgb(0 0 0 / 0.40), 0 10px 24px -8px rgb(0 0 0 / 0.55);
+  --os-shadow-card: 0 0 0 1px rgb(255 244 228 / 0.08);
+  --os-line-contrast: rgb(255 244 228 / 0.16);
+  --os-line-strong-contrast: rgb(255 244 228 / 0.32);
+}
+
+/* Re-resolve aliases on local theme surfaces as well as the document root. */
+:root, [data-theme] {
+  --os-selection: var(--os-accent);
+  --os-selection-ink: var(--os-on-accent);
+  --shadow-window: var(--os-shadow-window);
+  --shadow-window-focused: var(--os-shadow-window-focused);
+  --shadow-menu: var(--os-shadow-menu);
+  --shadow-dock: var(--os-shadow-dock);
+  --shadow-widget: var(--os-shadow-widget);
+  --shadow-card: var(--os-shadow-card);
+}
+
+html[data-accent="thambili"] {
+  --os-accent: #E8722A;
+  --os-accent-ink: #B0500E;
+  --os-accent-soft: rgb(232 114 42 / 0.14);
+  --os-focus: #B0500E;
+}
+
+html[data-theme="dark"][data-accent="thambili"] {
+  --os-accent: #FF9A4D;
+  --os-accent-ink: #FFB070;
+  --os-accent-soft: rgb(255 154 77 / 0.16);
+  --os-focus: #FFB070;
+}
+
+html[data-accent="lagoon"] {
+  --os-accent: #2BB3A6;
+  --os-accent-ink: #0E7369;
+  --os-accent-soft: rgb(43 179 166 / .14);
+  --os-focus: #0E7369;
+}
+
+html[data-theme="dark"][data-accent="lagoon"] {
+  --os-accent: #5FD4C4;
+  --os-accent-ink: #6FDCCD;
+  --os-accent-soft: rgb(95 212 196 / .16);
+  --os-focus: #6FDCCD;
+}
+
+html[data-accent="lotus"] {
+  --os-accent: #B866D6;
+  --os-accent-ink: #8A3FA8;
+  --os-accent-soft: rgb(184 102 214 / .14);
+  --os-focus: #8A3FA8;
+}
+
+html[data-theme="dark"][data-accent="lotus"] {
+  --os-accent: #D59AEB;
+  --os-accent-ink: #E2B5F2;
+  --os-accent-soft: rgb(213 154 235 / .16);
+  --os-focus: #E2B5F2;
+}
+
+html[data-accent="tea"] {
+  --os-accent: #5FA552;
+  --os-accent-ink: #3D7A33;
+  --os-accent-soft: rgb(95 165 82 / .14);
+  --os-focus: #3D7A33;
+}
+
+html[data-theme="dark"][data-accent="tea"] {
+  --os-accent: #8FD07F;
+  --os-accent-ink: #A6DD98;
+  --os-accent-soft: rgb(143 208 127 / .16);
+  --os-focus: #A6DD98;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.no-js:not([data-theme="light"]) {
+    color-scheme: dark;
+    --os-ink: #F3EFE8;
+    --os-ink-2: #BAB2A6;
+    --os-ink-3: #8F877B;
+    --os-ink-inverse: #1C1A17;
+    --os-window: #1C1A17;
+    --os-titlebar: #22201C;
+    --os-sidebar: #181614;
+    --os-raised: #282521;
+    --os-sunken: #121110;
+    --os-line: rgb(255 244 228 / 0.08);
+    --os-line-strong: rgb(255 244 228 / 0.16);
+    --os-hover: rgb(255 244 228 / 0.06);
+    --os-pressed: rgb(255 244 228 / 0.10);
+    --os-accent: #FF9A4D;
+    --os-accent-ink: #FFB070;
+    --os-accent-soft: rgb(255 154 77 / 0.16);
+    --os-selection-inactive: #34302B;
+    --os-focus: #FFB070;
+    --os-success: #5BD08C;
+    --os-warning: #F5C04A;
+    --os-danger: #FF7A6E;
+    --os-info: #6FDCCD;
+    --os-scrim: rgb(0 0 0 / 0.50);
+    --os-tl-glyph: rgb(0 0 0 / 0.60);
+    --note-paper: #3B3220;
+    --note-ink: #F6E7C0;
+    --note-tape: rgb(255 244 228 / 0.18);
+    --ticket-card: #2A251C;
+    --ticket-ink: #EADFC6;
+    --ticket-ink-2: #B9A985;
+    --ticket-perf: rgb(234 223 198 / 0.22);
+    --shadow-icon: drop-shadow(0 4px 6px rgb(0 0 0 / 0.45));
+    --label-shadow: 0 1px 2px rgb(0 0 0 / 0.8);
+    --glass-bg: rgb(30 28 25 / 0.55);
+    --glass-border: rgb(255 244 228 / 0.10);
+    --glass-edge: rgb(0 0 0 / 0.50);
+    --glass-filter: blur(24px) saturate(160%);
+    --menu-bg: rgb(36 33 30 / 0.88);
+    --menu-filter: blur(20px) saturate(140%);
+    --os-shadow-window: 0 0 0 1px rgb(0 0 0 / 0.60), inset 0 1px 0 rgb(255 255 255 / 0.05), 0 8px 24px -6px rgb(0 0 0 / 0.45);
+    --os-shadow-window-focused: 0 0 0 1px rgb(0 0 0 / 0.70), inset 0 1px 0 rgb(255 255 255 / 0.07), 0 18px 48px -8px rgb(0 0 0 / 0.55), 0 42px 96px -24px rgb(0 0 0 / 0.60);
+    --os-shadow-menu: 0 0 0 1px rgb(0 0 0 / 0.60), inset 0 1px 0 rgb(255 255 255 / 0.06), 0 12px 32px -8px rgb(0 0 0 / 0.55);
+    --os-shadow-dock: 0 10px 30px -10px rgb(0 0 0 / 0.60);
+    --os-shadow-widget: 0 1px 2px rgb(0 0 0 / 0.40), 0 10px 24px -8px rgb(0 0 0 / 0.55);
+    --os-shadow-card: 0 0 0 1px rgb(255 244 228 / 0.08);
+    --os-line-contrast: rgb(255 244 228 / 0.16);
+    --os-line-strong-contrast: rgb(255 244 228 / 0.32);
+  }
+
+  html.no-js:not([data-theme="light"])[data-accent="lagoon"] {
+    --os-accent: #5FD4C4;
+    --os-accent-ink: #6FDCCD;
+    --os-accent-soft: rgb(95 212 196 / .16);
+    --os-focus: #6FDCCD;
+  }
+
+  html.no-js:not([data-theme="light"])[data-accent="lotus"] {
+    --os-accent: #D59AEB;
+    --os-accent-ink: #E2B5F2;
+    --os-accent-soft: rgb(213 154 235 / .16);
+    --os-focus: #E2B5F2;
+  }
+
+  html.no-js:not([data-theme="light"])[data-accent="tea"] {
+    --os-accent: #8FD07F;
+    --os-accent-ink: #A6DD98;
+    --os-accent-soft: rgb(143 208 127 / .16);
+    --os-focus: #A6DD98;
+  }
+}
+
+@utility text-caption-2 {
+  font-family: var(--font-ui);
+}
+
+@utility text-caption {
+  font-family: var(--font-ui);
+}
+
+@utility text-ui {
+  font-family: var(--font-ui);
+}
+
+@utility text-ui-strong {
+  font-family: var(--font-ui);
+}
+
+@utility text-body {
+  font-family: var(--font-ui);
+}
+
+@utility text-body-lg {
+  font-family: var(--font-ui);
+}
+
+@utility text-title-3 {
+  font-family: var(--font-display);
+}
+
+@utility text-title-2 {
+  font-family: var(--font-display);
+}
+
+@utility text-title-1 {
+  font-family: var(--font-display);
+}
+
+@utility text-display-2 {
+  font-family: var(--font-display);
+}
+
+@utility text-display-1 {
+  font-family: var(--font-display);
+}
+
+@utility text-mono-label {
+  font-family: var(--font-mono);
+  font-stretch: var(--font-mono-stretch);
+  text-transform: uppercase;
+}
+
+@utility text-mono {
+  font-family: var(--font-mono);
+  font-stretch: var(--font-mono-stretch);
+}
+
+@utility text-terminal {
+  font-family: var(--font-mono);
+  font-stretch: var(--font-mono-stretch);
+}
+
+@utility shadow-icon {
+  filter: var(--shadow-icon);
+}
+
+/* Opaque materials also avoid unsupported or unwanted background blur. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root:root, [data-theme] {
+    --glass-bg: var(--os-titlebar) !important;
+    --menu-bg: var(--os-raised) !important;
+    --glass-filter: none !important;
+    --menu-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root:root, [data-theme] {
+    --glass-bg: var(--os-titlebar) !important;
+    --menu-bg: var(--os-raised) !important;
+    --glass-filter: none !important;
+    --menu-filter: none !important;
+  }
+}
+
+html[data-transparency="reduce"],
+html[data-transparency="reduce"] [data-theme] {
+  --glass-bg: var(--os-titlebar) !important;
+  --menu-bg: var(--os-raised) !important;
+  --glass-filter: none !important;
+  --menu-filter: none !important;
+}
+
+/* Glass consumers that need raised surfaces use this shared material class. */
+@utility glass-raised {
+  background-color: var(--menu-bg);
+  -webkit-backdrop-filter: var(--menu-filter);
+  backdrop-filter: var(--menu-filter);
+}
+
+@media (prefers-contrast: more) {
+  :root:root, [data-theme] {
+    --os-line: var(--os-line-contrast) !important;
+    --os-line-strong: var(--os-line-strong-contrast) !important;
+    --os-ink-3: var(--os-ink-2) !important;
+    --glass-bg: var(--os-titlebar) !important;
+    --menu-bg: var(--os-raised) !important;
+    --glass-filter: none !important;
+    --menu-filter: none !important;
+  }
+}
+
+html[data-contrast="more"],
+html[data-contrast="more"] [data-theme] {
+  --os-line: var(--os-line-contrast) !important;
+  --os-line-strong: var(--os-line-strong-contrast) !important;
+  --os-ink-3: var(--os-ink-2) !important;
+  --glass-bg: var(--os-titlebar) !important;
+  --menu-bg: var(--os-raised) !important;
+  --glass-filter: none !important;
+  --menu-filter: none !important;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 450;
+    line-height: 18px;
+    color: var(--os-ink);
+    background-color: var(--os-window);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    height: 100dvh;
+  }
+
+  html.no-js body,
+  html[data-mode="mobile"] body,
+  html[data-view="simple"] body,
+  html:has(#simple:target) body {
+    overflow: auto;
+    height: auto;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--os-line-strong) transparent;
+  }
+
+  ::selection {
+    color: var(--os-selection-ink);
+    background-color: var(--os-selection);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--os-focus);
+    outline-offset: 2px;
+  }
+
+  [lang="si"] { font-family: var(--font-sinhala); }
+  [lang="ta"] { font-family: var(--font-tamil); }
+  .font-mono, code, kbd, pre {
+    font-family: var(--font-mono);
+    font-stretch: var(--font-mono-stretch);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: var(--z-skip);
+    transform: translateY(calc(-100% - 16px));
+    padding: 8px 12px;
+    border-radius: var(--r-control);
+    color: var(--os-ink);
+    background-color: var(--os-window);
+    box-shadow: var(--shadow-menu);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .skip-link:focus { transform: none; }
+
+  html.no-js .js-only,
+  html:not(.no-js) .no-js-only { display: none !important; }
+
+}
+
+/* Primary controls keep a visible ring against the accent itself. */
+:where(.bg-accent, [data-accent-filled="true"]):focus-visible {
+  outline-color: transparent;
+  box-shadow: 0 0 0 2px var(--os-window), 0 0 0 4px var(--os-ink);
+}
+
+html.theme-changing *,
+html.theme-changing *::before,
+html.theme-changing *::after {
+  transition-property: color, background-color;
+  transition-duration: var(--duration-theme-fade);
+  transition-timing-function: var(--ease-in-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) *,
+  html:not([data-motion="full"]) *::before,
+  html:not([data-motion="full"]) *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+@media (forced-colors: active) {
+  :root:root, [data-theme] {
+    --os-ink: CanvasText !important;
+    --os-ink-2: CanvasText !important;
+    --os-ink-3: CanvasText !important;
+    --os-ink-inverse: Canvas !important;
+    --os-window: Canvas !important;
+    --os-titlebar: Canvas !important;
+    --os-sidebar: Canvas !important;
+    --os-raised: Canvas !important;
+    --os-sunken: Canvas !important;
+    --os-line: CanvasText !important;
+    --os-line-strong: CanvasText !important;
+    --os-line-contrast: CanvasText !important;
+    --os-line-strong-contrast: CanvasText !important;
+    --os-accent: Highlight !important;
+    --os-accent-ink: LinkText !important;
+    --os-on-accent: HighlightText !important;
+    --os-accent-soft: Canvas !important;
+    --os-selection: Highlight !important;
+    --os-selection-ink: HighlightText !important;
+    --os-selection-inactive: Canvas !important;
+    --os-focus: Highlight !important;
+    --glass-bg: Canvas !important;
+    --glass-border: CanvasText !important;
+    --glass-edge: CanvasText !important;
+    --menu-bg: Canvas !important;
+    --glass-filter: none !important;
+    --menu-filter: none !important;
+    --os-tl-close: ButtonFace !important;
+    --os-tl-close-b: ButtonText !important;
+    --os-tl-min: ButtonFace !important;
+    --os-tl-min-b: ButtonText !important;
+    --os-tl-zoom: ButtonFace !important;
+    --os-tl-zoom-b: ButtonText !important;
+    --os-tl-glyph: ButtonText !important;
+  }
+
+  html, body { background: Canvas; }
+  .wallpaper { display: none !important; }
+  :where(.window, #static-window, .static-window, [data-window-id]) { border: 1px solid CanvasText !important; }
+  :where(.traffic-light, .traffic-lights :is(button, a), [data-traffic-light]) {
+    border: 1px solid ButtonText !important;
+    border-radius: 0 !important;
+    color: ButtonText !important;
+    background: ButtonFace !important;
+  }
+  :where(.traffic-light, .traffic-lights :is(button, a), [data-traffic-light]) svg {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  :focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+    box-shadow: none !important;
+  }
+}
