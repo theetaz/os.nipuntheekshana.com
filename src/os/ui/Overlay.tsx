@@ -38,7 +38,8 @@ export function useOverlayPresence(open: boolean, panel: RefObject<HTMLElement |
       opacity: open ? [0, 1] : [1, 0],
       ...(reduce ? {} : { transform: open ? ['translateY(-4px)', 'translateY(0px)'] : ['translateY(0px)', 'translateY(-4px)'] }),
     }, { duration: open ? Math.min(duration, reduce ? 0.12 : duration) : 0.08, ease: open ? [0.22, 1, 0.36, 1] : [0.4, 0, 1, 1] });
-    if (!open) void controls.finished.then(() => setPresent(false));
+    let active = true;
+    if (!open) void controls.finished.then(() => { if (active) setPresent(false); });
     const stopSpatialMotion = () => {
       if (!reducedMotion()) return;
       controls.cancel(); node.style.transform = 'none'; node.style.opacity = open ? '1' : '0';
@@ -48,7 +49,7 @@ export function useOverlayPresence(open: boolean, panel: RefObject<HTMLElement |
     media.addEventListener('change', stopSpatialMotion);
     const observer = new MutationObserver(stopSpatialMotion);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] });
-    return () => { controls.stop(); observer.disconnect(); media.removeEventListener('change', stopSpatialMotion); };
+    return () => { active = false; controls.stop(); observer.disconnect(); media.removeEventListener('change', stopSpatialMotion); };
   }, [open, present, panel, duration, host]);
   return present;
 }

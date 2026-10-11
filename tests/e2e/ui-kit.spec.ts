@@ -10,7 +10,9 @@ let origin: string;
 let fixturePort: number;
 let server: ChildProcess;
 test.beforeAll(async ({}, info) => {
-  fixturePort = 4400 + info.workerIndex;
+  // Keep fixture ports separate when worktrees test different preview servers in parallel.
+  const previewPort = Number(new URL(process.env.BASE_URL ?? 'http://localhost:4321').port);
+  fixturePort = 10_000 + (previewPort % 1000) * 32 + info.workerIndex;
   origin = `http://localhost:${fixturePort}`;
   routes = [`p2-ui-static-${info.workerIndex}`, `p2-ui-hydrated-${info.workerIndex}`];
   for (const name of routes) await writeFile(`${root}src/pages/${name}.astro`, `---
@@ -72,6 +74,9 @@ test('Menu has roving focus, typeahead, nested submenus, checked roles, and focu
   await openFixture(page); const trigger = page.getByRole('button', { name: 'Menu trigger' });
   const menu = page.getByRole('menu', { name: 'Actions menu' });
   await trigger.click(); await expect(page.getByRole('menuitem', { name: 'Open', exact: true })).toBeFocused();
+  await page.keyboard.press('ArrowDown'); const unavailable = page.getByRole('menuitem', { name: 'Unavailable', exact: true });
+  await expect(unavailable).toBeFocused(); await expect(unavailable).toHaveAttribute('aria-disabled', 'true');
+  await page.keyboard.press('Enter'); await expect(menu).toBeVisible(); await expect(page.getByTestId('command')).not.toHaveText('disabled');
   await page.keyboard.press('ArrowDown'); const checkbox = page.getByRole('menuitemcheckbox', { name: 'Show status bar' });
   await expect(checkbox).toBeFocused(); await expect(checkbox).toHaveAttribute('aria-checked', 'true');
   await page.keyboard.press('Enter'); await expect(menu).toBeHidden(); await expect(page.getByTestId('command')).toHaveText('status');

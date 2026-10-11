@@ -29,8 +29,7 @@ const MenuLevel = forwardRef<HTMLDivElement, LevelProps>(function RenderMenuLeve
   const activationTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const typeahead = useRef({ text: '', at: 0 });
   const expanded = items.flatMap(item => item.kind === 'windows' ? [...windowItems] : [item]);
-  const enabled = expanded.map((item, i) => item.kind === 'separator' || item.kind === 'windows'
-    || (item.kind === 'item' && getItemState?.(item.command).disabled) ? -1 : i).filter(i => i >= 0);
+  const enabled = expanded.map((item, i) => item.kind === 'separator' || item.kind === 'windows' ? -1 : i).filter(i => i >= 0);
   const present = useOverlayPresence(open, panel, 0.12, host);
   useImperativeHandle(forwarded, () => panel.current!, [present, host]);
   const position = useFloatingPanel(panel, present, anchorRef, nested ? 'right' : 'bottom', point, nested ? 0 : 4, host);
@@ -60,6 +59,7 @@ const MenuLevel = forwardRef<HTMLDivElement, LevelProps>(function RenderMenuLeve
   };
   const activate = (index: number) => {
     const item = expanded[index]; if (!item || !enabled.includes(index)) return;
+    if (item.kind === 'item' && getItemState?.(item.command).disabled) return;
     if (item.kind === 'submenu') { openSubmenu(index, true); return; }
     if (item.kind !== 'item' || activationTimer.current !== undefined) return;
     const invoke = () => { activationTimer.current = undefined; callback.current.onClose(); callback.current.onCommand(item.command); };
