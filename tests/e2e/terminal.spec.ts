@@ -25,7 +25,8 @@ test('help, hidden files, && navigation, 18 content files, cat and unknown comma
   await command(win, 'help'); await expect(output(win)).toContainText('Explore: ls, cd, pwd, cat, open');
   await command(win, 'ls -a'); await expect(output(win)).toContainText('.secrets');
   await command(win, 'cd projects && ls');
-  const files = await output(win).innerText(); expect(files.match(/[a-z0-9-]+\.md/g)).toHaveLength(19); // about.md plus 18 projects
+  // Offscreen scrollback uses content-visibility; Firefox omits it from innerText.
+  const files = (await output(win).textContent())!; expect(files.match(/[a-z0-9-]+\.md/g)).toHaveLength(19); // about.md plus 18 projects
   await command(win, 'cd ~ && cat now.txt'); await expect(output(win)).toContainText('Updated');
   await command(win, 'no-such-command'); await expect(output(win)).toContainText('nsh: command not found: no-such-command. Try help.');
   await expect(win.locator('.term-err').last()).toHaveText('no-such-command'); expect(errors).toEqual([]);
