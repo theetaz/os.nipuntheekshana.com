@@ -1,0 +1,115 @@
+.writing-static-window > .static-titlebar {
+  flex: 0 0 52px;
+  min-height: 52px;
+  display: flex;
+  padding: 0 14px 0 101px;
+}
+.managed-window[data-app="writing"] { container: window / inline-size; }
+.writing-static-window .static-titlebar > span,
+.managed-window[data-app="writing"] .window-title { max-width: calc(100cqw - 540px); }
+/* The app-owned toolbar occupies the unified chrome without a shell portal. */
+.managed-window[data-app="writing"] .window-content { contain: style; overflow: visible; }
+.writing-view { position: relative; display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; color: var(--os-ink); font: 450 13px/18px var(--font-ui); }
+.writing-toolbar { position: absolute; top: -52px; right: 14px; height: 52px; min-height: 52px; padding: 0; border: 0; flex-wrap: nowrap; background: transparent; z-index: 1; gap: 8px; }
+.writing-text-size { display: flex; gap: 0; }
+.writing-text-size button { padding-inline: 8px; }
+.writing-open-site { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 28px; padding: 0 8px; border-radius: 7px; color: var(--os-ink); text-decoration: none; white-space: nowrap; }
+.writing-open-site:hover { background: var(--os-hover); }
+.writing-open-site > svg { display: none; }
+.writing-panes { display: grid; grid-template-columns: 180px 280px minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; border-radius: 0 0 var(--r-window) var(--r-window); }
+.writing-folders { display: flex; flex-direction: column; width: 180px; min-height: 0; padding: 8px; }
+.writing-folder-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; }
+.writing-rss { display: inline-flex; align-items: center; gap: 8px; align-self: start; margin: auto 4px 8px; padding: 20px 4px 0; color: var(--os-accent-ink); text-decoration: none; }
+.writing-static-folder { align-items: center; gap: 8px; min-height: 28px; padding: 0 8px; }
+.writing-static-folder > span { margin-left: auto; color: var(--os-ink-2); font-variant-numeric: tabular-nums; }
+.writing-static-tag { border: 1px solid var(--os-line-strong); border-radius: var(--r-pill); padding: 4px 10px; color: var(--os-ink-2); font-size: 12px; line-height: 18px; }
+.writing-post-list { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--os-window); border-right: 1px solid var(--os-line); }
+.writing-list-controls { display: flex; flex-direction: column; flex-shrink: 0; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--os-line); }
+.writing-list-title { margin: 0; font: 500 20px/26px var(--font-display); }
+.writing-search { width: 100%; }
+.writing-folder-select { display: none; }
+.writing-folder-select select { width: 100%; min-height: 28px; border: 1px solid var(--os-line-strong); border-radius: var(--r-control); background: var(--os-raised); color: var(--os-ink); padding: 0 8px; font: inherit; }
+.writing-active-tag { align-self: start; }
+.writing-list-scroll { min-height: 0; flex: 1; overflow: auto; overscroll-behavior: contain; }
+.writing-posts { list-style: none; margin: 0; padding: 0; }
+.writing-posts > li { position: relative; content-visibility: auto; contain-intrinsic-size: auto 112px; }
+.writing-posts > li::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 1px; background: var(--os-line); pointer-events: none; }
+.writing-post-row { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px; color: var(--os-ink); text-decoration: none; }
+.writing-post-row:hover { background: var(--os-hover); }
+.writing-post-title { font-weight: 600; }
+.writing-post-meta { color: var(--os-ink-3); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.writing-post-description { color: var(--os-ink-2); }
+.writing-post-title, .writing-post-description { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.writing-view[data-focused="true"] .writing-post-row[data-selected="true"] { background: var(--os-selection); color: var(--os-selection-ink); }
+.writing-view[data-focused="true"] .writing-post-row[data-selected="true"] :is(.writing-post-meta, .writing-post-description) { color: inherit; }
+.writing-view[data-focused="false"] .writing-post-row[data-selected="true"] { background: var(--os-selection-inactive); color: var(--os-ink); }
+.writing-reader { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 40px 48px; }
+.writing-article { max-width: 68ch; margin: 0 auto; font: 400 17px/28px var(--font-ui); }
+.writing-eyebrow { display: flex; flex-wrap: wrap; align-items: center; font: 500 10.5px/14px var(--font-mono); font-stretch: 87.5%; letter-spacing: .08em; text-transform: uppercase; color: var(--os-ink-3); margin: 0 0 24px; }
+.writing-eyebrow > * { flex-shrink: 0; line-height: 14px; white-space: pre; }
+.writing-title { font: 420 44px/48px var(--font-display); letter-spacing: -.02em; margin: 0 0 16px; text-wrap: balance; }
+.writing-description { font: 400 17px/28px var(--font-ui); color: var(--os-ink-2); margin: 0 0 20px; }
+.writing-post-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.writing-rule { width: 48px; height: 1px; background: var(--os-line-strong); margin: 24px 0; }
+.writing-back { display: none; align-items: center; gap: 4px; color: var(--os-accent-ink); text-decoration: none; }
+.writing-reader-empty { margin-top: 80px; }
+.writing-data-error { display: flex; align-items: center; gap: 12px; padding: 8px 16px; color: var(--os-danger); background: color-mix(in srgb, var(--os-danger) 8%, var(--os-window)); }
+.writing-view[data-folders="false"] .writing-panes { grid-template-columns: 280px minmax(0, 1fr); }
+.writing-view[data-folders="false"] .writing-folders { display: none; }
+.writing-view[data-folders="false"] .writing-folder-select { display: block; }
+
+@container window (width < 780px) {
+  .writing-panes, .writing-view[data-folders="false"] .writing-panes { grid-template-columns: 280px minmax(0, 1fr); }
+  .writing-folders { display: none; }
+  .writing-folder-select { display: block; }
+  .writing-reader { padding: 24px; }
+  .writing-title { font-size: 32px; line-height: 38px; letter-spacing: -.015em; }
+  .writing-static-window .static-titlebar > span, .managed-window[data-app="writing"] .window-title { max-width: calc(100cqw - 320px); }
+  .writing-copy > span, .writing-open-site > span { display: none; }
+  .writing-copy { padding-inline: 8px; }
+  .writing-open-site > svg { display: block; }
+}
+@container window (width < 560px) {
+  .writing-panes, .writing-view[data-folders="false"] .writing-panes { grid-template-columns: minmax(0, 1fr); }
+  .writing-post-list { border: 0; }
+  .writing-view[data-reader-open="false"] .writing-reader,
+  .writing-view[data-reader-open="true"] .writing-post-list { display: none; }
+  .writing-back { display: inline-flex; min-height: 44px; margin: -12px 0 16px; }
+  .writing-list-controls { padding: 16px; }
+  .writing-search input, .writing-folder-select select { height: 44px; }
+  .writing-post-row { padding: 16px; }
+  .writing-toolbar button, .writing-open-site { min-height: 44px !important; min-width: 44px; padding-inline: 10px; }
+  .writing-toolbar { gap: 0; right: 8px; }
+  .writing-post-tags button, .writing-active-tag { min-height: 44px; }
+  .writing-static-window .static-titlebar > span, .managed-window[data-app="writing"] .window-title { max-width: calc(100cqw - 300px); }
+}
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  .writing-static-window > .static-titlebar { padding-left: 80px; flex-basis: calc(52px + env(safe-area-inset-top)); min-height: calc(52px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); }
+  html.js .writing-static-window > .static-titlebar { padding-left: 101px; }
+  html.js .writing-static-window .traffic-lights { left: 14px; }
+  html.js .writing-static-window .traffic-light.close { width: 13px; height: 13px; border: 1px solid var(--os-tl-close-b); border-radius: 50%; color: var(--os-tl-glyph); background: var(--os-tl-close); font-size: 12px; }
+  html.js .writing-static-window .traffic-light.js-only { display: grid; }
+  html.js .writing-static-window .traffic-light.close > span:first-child { display: block; }
+  html.js .writing-static-window .mobile-home { display: none; }
+  .writing-toolbar { top: -52px; }
+  .writing-panes { border-radius: 0; }
+  .writing-reader { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+}
+html.no-js .writing-static-folder { display: flex; }
+html.no-js .writing-static-tag { display: inline-block; }
+html.no-js .writing-toolbar { right: 14px; }
+html.no-js .writing-static-window .static-titlebar > span { max-width: calc(100% - 280px); }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window .writing-view { display: block; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window :is(.writing-toolbar, .writing-folders, .writing-list-controls > :not(h1)) { display: none; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window .writing-panes { display: block; overflow: visible; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window :is(.writing-reader, .writing-list-scroll) { overflow: visible; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window .writing-post-list { border: 0; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window .writing-view[data-reader-open="true"] .writing-post-list { display: none; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window .writing-reader { padding: 32px 0; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window .writing-back { display: inline-flex; min-height: 44px; margin: 0 0 16px; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window .writing-post-tags .js-only { display: none; }
+html:is([data-view="simple"], :has(#simple:target)) .writing-static-window .writing-post-tags .no-js-only { display: inline-block; }
+@media (forced-colors: active) {
+  .writing-view .writing-post-row[data-selected="true"] { background: Highlight; color: HighlightText; }
+  .writing-view .writing-post-row[data-selected="true"] :is(.writing-post-meta, .writing-post-description) { color: HighlightText; }
+}
