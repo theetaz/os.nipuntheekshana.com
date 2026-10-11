@@ -19,7 +19,6 @@ test('desktop widgets keep the reference geometry in light and dark @visual', as
       ['.activity-strip', { x: 48, y: 604, width: 360, height: 112 }],
     ] as const) {
       const rect = await page.locator(built).boundingBox();
-      if (built === '.activity-strip' && !rect) continue; // Build-time data can be unavailable.
       expect(rect).not.toBeNull();
       for (const field of ['x', 'y', 'width', 'height'] as const) expect(Math.abs(rect![field] - target![field]), `${theme} ${built} ${field}`).toBeLessThanOrEqual(2);
     }

@@ -1,3 +1,5 @@
+import snapshot from '../data/activity-snapshot.json';
+import { selectActivity } from './github-calendar.mjs';
 import type { CollectionEntry } from 'astro:content';
 import type {
   ClientActivity, ClientArchiveItem, ClientBrand, ClientPost, ClientPostSummary,
@@ -126,9 +128,9 @@ export function getClientProfile(): Promise<ClientProfile> {
 let activityCache: Promise<ClientActivity> | undefined;
 export function getClientActivity(): Promise<ClientActivity> {
   return activityCache ??= (async () => {
-    const [contributions, stars] = await Promise.all([getContributions('theetaz'), getTotalStars()]);
-    const fetchedAt = new Date().toISOString();
-    if (!contributions) return { available: false, fetchedAt };
-    return { available: true, ...contributions, ...activityStats(contributions), stars, fetchedAt };
+    const offline = import.meta.env.SERENDIB_ACTIVITY_SOURCE === 'snapshot';
+    const [contributions, stars] = offline ? [null, null] : await Promise.all([getContributions('theetaz'), getTotalStars()]);
+    const data = selectActivity(contributions, stars, snapshot, new Date().toISOString());
+    return { available: true, ...data, ...activityStats(data) };
   })();
 }

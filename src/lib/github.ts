@@ -1,6 +1,6 @@
 // Ported from nipuntheekshana.com/src/lib/github.ts @ 64482c5325ceace12c645d1ac5ca211cece46445
-// Build-time GitHub stats. Any failure (rate limit, offline build) falls back to
-// null so the page simply omits the number instead of breaking the build.
+// Build-time GitHub stats. The activity builder retains a last-good snapshot.
+import { parseContributionCalendar } from './github-calendar.mjs';
 type Repo = { stargazers_count: number; fork: boolean };
 
 async function fetchRepos(url: string): Promise<Repo[]> {
@@ -40,44 +40,12 @@ export type Contributions = {
   total: number;
 };
 
-const DAY_MS = 86_400_000;
-
 async function fetchContributions(user: string): Promise<Contributions | null> {
   const response = await fetch(`https://github.com/users/${user}/contributions`, {
-    headers: { Accept: 'text/html' },
-    signal: AbortSignal.timeout(8000),
+    headers: { Accept: 'text/html' }, signal: AbortSignal.timeout(8000),
   });
   if (!response.ok) throw new Error(`GitHub ${response.status}`);
-  const html = await response.text();
-
-  const cells = new Map<string, { date: string; day: number; week: number }>();
-  for (const [tag] of html.matchAll(/<td[^>]*ContributionCalendar-day[^>]*>/g)) {
-    const id = tag.match(/id="(contribution-day-component-(\d+)-(\d+))"/);
-    const date = tag.match(/data-date="(\d{4}-\d{2}-\d{2})"/);
-    if (id && date) cells.set(id[1]!, { date: date[1]!, day: Number(id[2]), week: Number(id[3]) });
-  }
-  if (cells.size === 0) return null;
-
-  const tips = new Map<string, number>();
-  for (const [, id, text] of html.matchAll(/<tool-tip[^>]*for="(contribution-day-component-\d+-\d+)"[^>]*>([^<]*)<\/tool-tip>/g)) {
-    const count = text!.match(/^([\d,]+) contributions?/);
-    tips.set(id!, count ? Number(count[1]!.replace(/,/g, '')) : 0);
-  }
-
-  const weeks = Math.max(...[...cells.values()].map((c) => c.week)) + 1;
-  const counts: number[] = Array(weeks * 7).fill(-1);
-  let start = '';
-  let total = 0;
-  for (const [id, cell] of cells) {
-    const count = tips.get(id) ?? 0;
-    counts[cell.week * 7 + cell.day] = count;
-    total += count;
-    if (!start) {
-      const first = Date.parse(`${cell.date}T00:00:00Z`) - (cell.week * 7 + cell.day) * DAY_MS;
-      start = new Date(first).toISOString().slice(0, 10);
-    }
-  }
-  return { start, weeks, counts, total };
+  return parseContributionCalendar(await response.text());
 }
 
 let contributions: Promise<Contributions | null> | undefined;
