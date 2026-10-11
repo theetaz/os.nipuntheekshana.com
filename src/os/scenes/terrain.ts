@@ -309,10 +309,11 @@ export function initTerrain(root: HTMLElement, options: TerrainOptions = {}): Te
   }
 
   function resize() {
-    const rect = canvas.getBoundingClientRect();
+    // Layout dimensions exclude the window's opening/restore/snap transform.
+    // ResizeObserver observes layout, so a scale finishing never triggers it.
     dpr = Math.min(2, window.devicePixelRatio || 1);
-    width = rect.width;
-    height = rect.height;
+    width = canvas.clientWidth;
+    height = canvas.clientHeight;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     if (!orbited) {
@@ -786,7 +787,7 @@ export function initTerrain(root: HTMLElement, options: TerrainOptions = {}): Te
 
   function local(e: PointerEvent | MouseEvent): Point {
     const r = canvas.getBoundingClientRect();
-    return [e.clientX - r.left, e.clientY - r.top];
+    return [(e.clientX - r.left) * width / r.width, (e.clientY - r.top) * height / r.height];
   }
 
   canvas.addEventListener('pointerdown', (e) => {
@@ -947,6 +948,7 @@ export function initTerrain(root: HTMLElement, options: TerrainOptions = {}): Te
   resize();
   const sizeObserver = new ResizeObserver(resize);
   sizeObserver.observe(canvas);
+  window.addEventListener('resize', resize, { signal: events.signal });
   const themeObserver = new MutationObserver(() => {
     readTheme();
     if (reducedMotion()) riseDone = true;
