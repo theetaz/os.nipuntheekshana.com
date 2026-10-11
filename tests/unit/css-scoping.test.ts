@@ -60,6 +60,17 @@ for (const chunk of Object.values(chunks)) {
   }
 }
 
+const classesIn = (css: string) => new Set([...css.matchAll(/\.(-?[a-zA-Z_][\w-]*)/g)].map(match => `.${match[1]}`));
+const sourceClasses = new Map([...appSheets.keys()].map(source => [source, classesIn(readFileSync(resolve(root, source), 'utf8'))]));
+// Up to five classes per app sheet that no other app sheet defines.
+const fingerprints = new Map([...sourceClasses].map(([source, classes]) => [source, [...classes].filter(name =>
+  [...sourceClasses].every(([other, otherClasses]) => other === source || !otherClasses.has(name))).slice(0, 5)]));
+function pageCss(file: string): string {
+  const html = readFileSync(file, 'utf8');
+  const linked = [...html.matchAll(/href="(\/_astro\/[^" ]+\.css)"/g)].map(match => readFileSync(resolve(dist, match[1]!.slice(1)), 'utf8'));
+  return [...linked, ...[...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map(match => match[1]!)].join('\n');
+}
+
 describe('built CSS respects static pages and lazy app chunks', () => {
   it.each(Object.keys(APPS))('%s keeps every statically imported app sheet attached to its lazy chunk', appId => {
     const entries = Object.entries(chunks).filter(([, chunk]) => chunk.modules.some(module =>
@@ -78,8 +89,13 @@ describe('built CSS respects static pages and lazy app chunks', () => {
     expect(page, `No source page for ${route}`).toBeDefined();
     const expected = staticCss(page!.file);
     const actual = pageSheets(file);
+    const text = pageCss(file);
     for (const [source, sheets] of appSheets) {
-      const included = [...sheets].some(sheet => actual.has(sheet));
+      // A page sheet can bundle an app's CSS with other modules, so match on the
+      // classes only that source defines rather than on whole-file hashes.
+      const marks = fingerprints.get(source) ?? [];
+      const included = [...sheets].some(sheet => actual.has(sheet))
+        || (marks.length > 0 && marks.every(mark => text.includes(mark)));
       expect(included, `${route}: ${source}`).toBe(expected.has(source));
     }
   });
