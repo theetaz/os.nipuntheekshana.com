@@ -256,7 +256,9 @@ test('a runtime app exception stays inside its frame and Retry recovers focus', 
   await expect(win.getByRole('button', { name: 'Try again' })).toBeFocused();
   await page.evaluate(() => Object.assign(window, { appRecovered: true }));
   await win.getByRole('button', { name: 'Try again' }).click(); await expect(win.locator('h1')).toHaveText('Writing');
-  expect(await win.evaluate(el => el.contains(document.activeElement))).toBe(true);
+  // The heading renders before the async app data and ready() focus handoff.
+  await expect(win.getByRole('list', { name: 'Posts', exact: true }).getByRole('link')).toHaveCount(2);
+  await expect.poll(() => win.evaluate(el => el.contains(document.activeElement))).toBe(true);
 });
 
 test('closing during pointer capture cleans the gesture before playing the close animation', async ({ page }) => {

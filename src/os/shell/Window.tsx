@@ -27,8 +27,9 @@ import { launchers } from './window-launchers';
 function focusContent(el: HTMLElement) {
   const heading = el.querySelector<HTMLElement>('.window-content h1, .window-content h2');
   if (heading) heading.tabIndex = -1;
-  const target = el.querySelector<HTMLElement>('[data-autofocus]')
-    ?? focusableWithin(el).find(item => !item.closest('.window-traffic-lights')) ?? heading ?? el;
+  const controls = focusableWithin(el);
+  const target = controls.find(item => item.matches('[data-autofocus]'))
+    ?? controls.find(item => !item.closest('.window-traffic-lights')) ?? heading ?? el;
   target.focus({ preventScroll: true });
 }
 
@@ -71,7 +72,7 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
     setContentReady(true);
   }, [store, windowId]);
   const retry = useCallback(() => {
-    readyCalled.current = false;
+    readyCalled.current = false; previousReady.current = false;
     if (!store.get(desktopAtom).windows[windowId]?.adopted) setContentReady(false);
     setAttempt(value => value + 1);
   }, [store, windowId]);
@@ -139,7 +140,7 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2 }: { windowId: W
     if (focused && win && !win.closing && !win.minimized && el && (contentReady || error)
       && (!previousFocus.current || !previousReady.current) && !(win.adopted && !previousReady.current)) focusContent(el);
     previousFocus.current = focused; previousReady.current = contentReady || error;
-  }, [contentReady, error, focused, win]);
+  }, [attempt, contentReady, error, focused, win]);
 
   const finishKeyboard = useCallback((commit: boolean) => {
     const interaction = keyboard.current; const controller = frame.current;
