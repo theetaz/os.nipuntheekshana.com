@@ -22,6 +22,26 @@ test.beforeEach(async ({ page }) => {
 });
 test.afterEach(({}, info) => { if (info.expectedStatus !== 'skipped') expect(consoleErrors).toEqual([]); });
 
+test('the first revealed Dock retains pointer intent while its controller loads', async ({ page }) => {
+  let release!: () => void; const held = new Promise<void>(done => { release = done; });
+  await page.route('**/dock-magnification.*.js', async route => { await held; await route.continue(); });
+  await page.addInitScript(() => {
+    const observer = new MutationObserver(() => {
+      const nav = document.querySelector<HTMLElement>('.os-dock'); const icon = nav?.querySelector<HTMLElement>('[data-dock-app="projects"]');
+      if (!nav || !icon || !document.documentElement.classList.contains('os-ready')) return;
+      observer.disconnect(); const rect = icon.getBoundingClientRect();
+      nav.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse', clientX: rect.x + rect.width / 2, clientY: rect.y + rect.height / 2 }));
+      Object.assign(window, { earlyDockHover: true });
+    });
+    observer.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+  });
+  try {
+    await ready(page); await expect.poll(() => page.evaluate(() => (window as unknown as { earlyDockHover?: boolean }).earlyDockHover)).toBe(true);
+    expect(await width(page, 'Projects')).toBe(48); release();
+    await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
+  } finally { release(); }
+});
+
 test('resting dock exactly replaces the static dock with zero hydration CLS', async ({ page }) => {
   let release!: () => void; const hold = new Promise<void>(done => { release = done; });
   await page.route('**/Desktop.*.js', async route => { await hold; await route.continue(); });

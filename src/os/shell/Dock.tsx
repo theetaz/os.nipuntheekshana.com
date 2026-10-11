@@ -1,5 +1,5 @@
 import './Dock.css';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import { APP_META, DOCK_LINKS } from '../registry/meta';
 import { reducedMotionAtom } from '../state/atoms';
@@ -14,21 +14,26 @@ export function Dock({ mode = 'desktop' }: { mode?: 'desktop' | 'mobile' }) {
   const apps = Object.values(APP_META).filter(app => app.phase === 'v1' && (mode === 'mobile' ? app.mobile.dockOrder !== null : app.dockOrder !== null && app.id !== 'trash'))
     .sort((a, b) => (mode === 'mobile' ? a.mobile.dockOrder! - b.mobile.dockOrder! : a.dockOrder! - b.dockOrder!));
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const nav = root.current; const list = toolbar.current;
     if (!nav || !list || mode !== 'desktop' || reducedMotion) return;
     let disposed = false; let cleanup: (() => void) | undefined; let loading = false; let x = 0; let inside = false;
-    const enter = (event: PointerEvent) => {
-      if (event.pointerType === 'touch' || !matchMedia('(pointer: fine)').matches) return;
-      x = event.clientX; inside = true;
+    const load = () => {
       if (loading) return; loading = true;
       void import('./dock-magnification').then(module => {
         if (!disposed) cleanup = module.magnifyDock(nav, list, inside ? x : NaN);
       }).catch(() => { loading = false; });
     };
+    const enter = (event: PointerEvent) => {
+      if (event.pointerType === 'touch' || !matchMedia('(pointer: fine)').matches) return;
+      x = event.clientX; inside = true; load();
+    };
     const move = (event: PointerEvent) => { x = event.clientX; if (!loading) enter(event); };
     const leave = () => { inside = false; };
     nav.addEventListener('pointerenter', enter); nav.addEventListener('pointermove', move); nav.addEventListener('pointerleave', leave);
+    // Install input before the shell is revealed and warm this small controller
+    // for fine pointers; cold module latency must not consume the hover spring.
+    if (matchMedia('(pointer: fine)').matches) load();
     return () => { disposed = true; cleanup?.(); nav.removeEventListener('pointerenter', enter); nav.removeEventListener('pointermove', move); nav.removeEventListener('pointerleave', leave); };
   }, [mode, reducedMotion]);
 
