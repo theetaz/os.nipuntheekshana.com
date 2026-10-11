@@ -14,6 +14,7 @@ import type { Point, Rect, SnapZone, WindowId, WMAction } from './types';
 import { playSound } from '../lib/sound';
 import * as mochi from '../mochi/api';
 import { FEATURES } from '../config';
+import { runDockCommand } from '../shell/DockItem';
 
 export type CommandSource = 'menu' | 'shortcut' | 'spotlight' | 'terminal';
 export type BeforeClose = () => Promise<boolean>;
@@ -156,6 +157,7 @@ async function power(action: 'restart' | 'shutdown'): Promise<void> {
   else store.set(overlayAtom, 'shutdown');
 }
 export function runCommand(command: string, _source: CommandSource): void {
+  if (command.startsWith('dock.')) { runDockCommand(command); return; }
   const store = getStore(); const desktop = store.get(desktopAtom);
   const win = desktop.focusedId ? desktop.windows[desktop.focusedId] : undefined;
   switch (command) {
