@@ -144,8 +144,8 @@ test('focus raises windows, close finishes its animation before removal and rest
 });
 
 test('Tab wraps both ways between the first and last controls', async ({ page }) => {
-  const win = await projects(page); const close = win.getByRole('button', { name: 'Close Projects' }); const zoom = win.getByRole('button', { name: 'Zoom Projects' });
-  await close.focus(); await page.keyboard.press('Shift+Tab'); await expect(zoom).toBeFocused();
+  const win = await projects(page); const close = win.getByRole('button', { name: 'Close Projects' }); const last = win.getByRole('option', { selected: true });
+  await close.focus(); await page.keyboard.press('Shift+Tab'); await expect(last).toBeFocused();
   await page.keyboard.press('Tab'); await expect(close).toBeFocused();
   await page.keyboard.press('Escape'); await expect(win).toBeVisible();
 });
@@ -162,7 +162,7 @@ test('keyboard move/resize commits on Return and rolls back on Escape', async ({
   const win = await projects(page); const before = await box(win);
   const start = () => page.evaluate(() => document.dispatchEvent(new CustomEvent('window:keyboardMove', { detail: { windowId: 'projects' } })));
   await start(); await expect(win).toHaveAttribute('data-keyboard-move', '');
-  await expect(win.locator('[role="status"]')).toHaveText('Arrows move · Shift ×8 · ⌥ + arrows resize · Return to finish · Esc to cancel');
+  await expect(win.locator('[data-window-titlebar] [role="status"]')).toHaveText('Arrows move · Shift ×8 · ⌥ + arrows resize · Return to finish · Esc to cancel');
   await page.keyboard.press('ArrowRight'); await page.keyboard.press('Shift+ArrowDown'); await page.keyboard.press('Alt+ArrowRight');
   await rectIs(win, { x: before.x + 8, y: before.y + 64, w: before.w + 8, h: before.h });
   await page.keyboard.press('Escape'); await rectIs(win, before);
