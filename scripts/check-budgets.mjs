@@ -1,4 +1,4 @@
-import { readFile, readdir, writeFile } from 'node:fs/promises';
+import { readFile, readdir, writeFile, access } from 'node:fs/promises';
 import { basename, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -77,7 +77,9 @@ function htmlResources(html) {
  * HTML/JS/CSS/JSON are gzip level 9. Exported for synthetic build regressions.
  */
 export async function checkBudgets({ root = process.cwd(), log = true } = {}) {
-  const dist = resolve(root, 'dist');
+  const client = resolve(root, 'dist/client');
+  // Static synthetic fixtures still use dist; production uses the adapter root.
+  const dist = await access(client).then(() => client, () => resolve(root, 'dist'));
   const config = JSON.parse(await readFile(resolve(root, 'budgets.config.json'), 'utf8'));
   const all = await filesUnder(dist);
   const htmlFiles = all.filter((file) => file.endsWith('.html') && basename(file) !== 'og.html');
@@ -202,7 +204,7 @@ export async function checkBudgets({ root = process.cwd(), log = true } = {}) {
     })));
     notices.forEach((notice) => console.log(notice));
     errors.forEach((error) => console.error(`FAIL ${error}`));
-    console.log(`Budgets ${passed ? 'passed' : 'failed'}; report: dist/.budgets.json`);
+    console.log(`Budgets ${passed ? 'passed' : 'failed'}; report: ${relative(root, dist)}/.budgets.json`);
   }
   return report;
 }

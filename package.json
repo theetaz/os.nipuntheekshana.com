@@ -4,11 +4,13 @@
   "version": "1.0.0",
   "private": true,
   "description": "Serendib OS: the desktop-in-the-browser site of Nipun Theekshana.",
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview --port 4321",
+    "preview": "node scripts/preview-static.mjs",
     "check": "astro check",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -20,10 +22,13 @@
     "contours": "node scripts/build-contours.mjs",
     "icons": "node scripts/build-icons.mjs",
     "og": "node scripts/build-og.mjs",
-    "quality": "npm run check && npm run test && npm run build && npm run budgets",
-    "deploy": "npm run build && wrangler deploy"
+    "quality": "npm run check && npm run build && npm run test && npm run budgets",
+    "deploy": "npm run build && wrangler deploy",
+    "postcards:admin": "node scripts/postcards-admin.mjs",
+    "dev:worker": "node scripts/postcards-dev.mjs"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "14.3.4",
     "@astrojs/react": "7.0.1",
     "@astrojs/sitemap": "3.7.4",
     "@fontsource-variable/fraunces": "5.3.0",
@@ -34,6 +39,7 @@
     "jotai": "3.0.1",
     "lucide-react": "1.55.0",
     "motion": "14.1.0",
+    "obscenity": "0.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "sharp": "0.35.5",
@@ -43,6 +49,7 @@
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@axe-core/playwright": "4.13.0",
+    "@cloudflare/workers-types": "5.20261010.1",
     "@lhci/cli": "0.15.1",
     "@playwright/test": "1.64.0",
     "@types/react": "19.3.0",

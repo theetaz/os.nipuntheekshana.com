@@ -4,7 +4,7 @@ import { APPS } from '../../src/os/registry/apps';
 import { test, expect, openApp, openMenu } from './fixtures';
 
 interface Chunk { modules: string[]; imports: string[]; css: string[] }
-const { chunks } = JSON.parse(readFileSync(resolve('dist/.css-scope.json'), 'utf8')) as { chunks: Record<string, Chunk> };
+const { chunks } = JSON.parse(readFileSync(resolve('dist/client/.css-scope.json'), 'utf8')) as { chunks: Record<string, Chunk> };
 const artifacts = resolve('.astro/p3-css-artifacts');
 mkdirSync(artifacts, { recursive: true });
 test.beforeEach(({ browserName }) => {

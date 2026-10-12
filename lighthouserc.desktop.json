@@ -2,12 +2,12 @@
   "ci": {
     "collect": {
       "startServerCommand": "npm run preview -- --ignore-lock",
-      "startServerReadyPattern": "localhost:4321",
+      "startServerReadyPattern": "localhost:4357",
       "url": [
-        "http://localhost:4321/",
-        "http://localhost:4321/projects/salli",
-        "http://localhost:4321/writing/an-island-made-of-points",
-        "http://localhost:4321/maps"
+        "http://localhost:4357/",
+        "http://localhost:4357/projects/salli",
+        "http://localhost:4357/writing/an-island-made-of-points",
+        "http://localhost:4357/maps"
       ],
       "numberOfRuns": 3,
       "settings": { "preset": "desktop" }

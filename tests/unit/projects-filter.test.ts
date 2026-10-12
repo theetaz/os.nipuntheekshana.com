@@ -7,7 +7,7 @@ import { ProjectDetailView } from '../../src/os/apps/projects/views/ProjectDetai
 import type { ProjectsData } from '../../src/os/apps/projects/data';
 import type { ClientWork } from '../../src/os/types/content';
 
-const data: ProjectsData = JSON.parse(readFileSync('dist/data/projects.json', 'utf8'));
+const data: ProjectsData = JSON.parse(readFileSync('dist/client/data/projects.json', 'utf8'));
 
 describe('Projects catalogue filtering and ordering', () => {
   it('preserves all 18 projects, six featured, five incubating and eight archive entries', () => {
@@ -68,8 +68,8 @@ describe('Projects static content and contrast', () => {
     expect(safeBackdrop('#000000', 'dark')).toBe('#000000');
   });
   for (const project of data.projects) it(`${project.slug} ships its complete case study, facts, cards and responsive captures`, () => {
-    const work: ClientWork = JSON.parse(readFileSync(`dist/data/work/${project.slug}.json`, 'utf8'));
-    const html = readFileSync(`dist/projects/${project.slug}.html`, 'utf8');
+    const work: ClientWork = JSON.parse(readFileSync(`dist/client/data/work/${project.slug}.json`, 'utf8'));
+    const html = readFileSync(`dist/client/projects/${project.slug}.html`, 'utf8');
     const view = renderToStaticMarkup(createElement(ProjectDetailView, { project, work, next: { slug: 'salli', title: 'Salli' } }));
     expect(html).toContain(work.html);
     expect(view).toContain(work.html);

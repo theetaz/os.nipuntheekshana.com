@@ -20,3 +20,5 @@ export const toasts = animated(() => import('./Toasts').then(module => module.To
 export const boot = deferredComponent(() => import('./BootController').then(module => module.BootController));
 export const screensaver = deferredComponent(() => import('./Screensaver').then(module => module.Screensaver));
 export const shutdown = deferredComponent(() => import('./ShutDown').then(module => module.ShutDown));
+
+export const health = deferredComponent(() => import('../state/feature-health').then(module => module.FeatureHealth));

@@ -22,8 +22,8 @@ describe('island rendering and build contracts', () => {
     } finally { cleanup(); }
   });
   it('keeps every app module outside the built home page initial JavaScript closure', () => {
-    const html = readFileSync('dist/index.html', 'utf8');
-    const entries = [...html.matchAll(/(?:component-url|renderer-url)="([^"]+)"/g)].map(match => resolve('dist', `.${match[1]}`));
+    const html = readFileSync('dist/client/index.html', 'utf8');
+    const entries = [...html.matchAll(/(?:component-url|renderer-url)="([^"]+)"/g)].map(match => resolve('dist/client', `.${match[1]}`));
     expect(entries).toHaveLength(2);
     const closure = new Set<string>(); const queue = [...entries];
     while (queue.length) {

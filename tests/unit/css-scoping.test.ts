@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { APPS } from '../../src/os/registry/apps';
 
 const root = resolve(import.meta.dirname, '../..');
-const dist = resolve(root, 'dist');
+const dist = resolve(root, 'dist/client');
 interface Chunk { modules: string[]; imports: string[]; css: string[] }
 const { chunks } = JSON.parse(readFileSync(resolve(dist, '.css-scope.json'), 'utf8')) as { chunks: Record<string, Chunk> };
 const hash = (source: string) => createHash('sha256').update(source).digest('hex');

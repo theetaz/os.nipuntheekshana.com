@@ -4,7 +4,7 @@ import type { Page } from '@playwright/test';
 import { test, expect, openApp } from './fixtures';
 
 const errorsByPage = new WeakMap<Page, string[]>();
-const soundModule = `/_astro/${readdirSync('dist/_astro').find(name => /^sound\..*\.js$/.test(name))!}`;
+const soundModule = `/_astro/${readdirSync('dist/client/_astro').find(name => /^sound\..*\.js$/.test(name))!}`;
 
 interface Probe {
   contexts: number;

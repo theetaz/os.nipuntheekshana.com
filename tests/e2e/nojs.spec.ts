@@ -42,7 +42,7 @@ for (const [path, title] of routes) {
 
 test('every generated project and post has content and matching initial data', async ({ page }) => {
   for (const section of ['projects', 'writing']) {
-    for (const slug of readdirSync(`dist/${section}`, { withFileTypes: true }).filter((entry) => entry.isFile() && entry.name.endsWith('.html')).map((entry) => entry.name.slice(0, -5))) {
+    for (const slug of readdirSync(`dist/client/${section}`, { withFileTypes: true }).filter((entry) => entry.isFile() && entry.name.endsWith('.html')).map((entry) => entry.name.slice(0, -5))) {
       const path = `/${section}/${slug}`;
       expect((await page.goto(path))?.status()).toBe(200);
       await expect(page.locator('#static-window')).toHaveAttribute('data-route', slug);

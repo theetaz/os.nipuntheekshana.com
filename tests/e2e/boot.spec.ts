@@ -157,7 +157,8 @@ test.describe('integrated power commands', () => {
     fixtureDirectory = resolve(root, `.astro/p2-9-fixture-${info.workerIndex}`);
     await mkdir(resolve(fixtureDirectory, 'pages'), { recursive: true });
     await writeFile(resolve(fixtureDirectory, 'config.mjs'), `import base from '../../astro.config.mjs';
-export default { ...base, srcDir: '.astro/p2-9-fixture-${info.workerIndex}/', cacheDir: '.astro/p2-9-fixture-${info.workerIndex}/cache/', outDir: '.astro/p2-9-fixture-${info.workerIndex}/dist/' };`);
+export default { ...base, adapter: undefined, srcDir: '.astro/p2-9-fixture-${info.workerIndex}/', cacheDir: '.astro/p2-9-fixture-${info.workerIndex}/cache/', outDir: '.astro/p2-9-fixture-${info.workerIndex}/dist/',
+  vite: { ...base.vite, cacheDir: '.astro/p2-9-fixture-${info.workerIndex}/vite-cache/' } };`);
     await writeFile(resolve(fixtureDirectory, 'pages/index.astro'), `---
 import OsLayout from '../../../src/layouts/OsLayout.astro';
 import PowerHarness from '../../../tests/fixtures/p2-9/PowerHarness';
@@ -170,7 +171,10 @@ const seo = seoFor({ path: '/', title: 'Power verification', description: 'Power
       let output = ''; build.stdout.on('data', chunk => { output += chunk; }); build.stderr.on('data', chunk => { output += chunk; });
       build.once('error', reject); build.once('exit', code => code === 0 ? done() : reject(new Error(`Power fixture build failed: ${output}`)));
     });
-    await cp(resolve(root, 'dist/data'), resolve(fixtureDirectory, 'dist/data'), { recursive: true });
+    await cp(resolve(root, 'dist/client/data'), resolve(fixtureDirectory, 'dist/data'), { recursive: true });
+    // Standalone static fixtures expose the backend-unavailable health contract.
+    await mkdir(resolve(fixtureDirectory, 'dist/api'), { recursive: true });
+    await writeFile(resolve(fixtureDirectory, 'dist/api/health'), JSON.stringify({ ai: false, postcards: false }));
     server = spawn('npx', ['astro', 'preview', '--config', `.astro/p2-9-fixture-${info.workerIndex}/config.mjs`, '--ignore-lock', '--host', 'localhost', '--port', String(port)], {
       cwd: root, stdio: ['ignore', 'pipe', 'pipe'], detached: true,
     });

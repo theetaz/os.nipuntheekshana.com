@@ -178,7 +178,7 @@ function ClientBootstrap() {
 function Shells(props: DesktopProps) {
   const view = useAtomValue(viewAtom);
   return view === 'simple' ? null : <><ModeSwitch desktop={<DesktopShell {...props} />} mobile={<PhoneShell {...props} />} />
-    <SystemOverlays /><DeferredSystem /><LiveRegion /></>;
+    <SystemOverlays /><DeferredSystem /><deferred.health.Component /><LiveRegion /></>;
 }
 function MotionPreferences({ children }: { children: React.ReactNode }) {
   const motion = useAtomValue(motionPrefAtom);

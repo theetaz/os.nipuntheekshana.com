@@ -216,7 +216,7 @@ test('static index keeps every project and category anchors without JavaScript',
   } finally { await context.close(); }
 });
 
-const staticProjects: { slug: string; title: string }[] = JSON.parse(readFileSync('dist/data/projects.json', 'utf8')).projects;
+const staticProjects: { slug: string; title: string }[] = JSON.parse(readFileSync('dist/client/data/projects.json', 'utf8')).projects;
 for (let start = 0; start < staticProjects.length; start += 6) {
   const projects = staticProjects.slice(start, start + 6);
   test(`static case studies ${projects.map(project => project.slug).join(', ')} keep all content without JavaScript`, async ({ browser, baseURL }) => {

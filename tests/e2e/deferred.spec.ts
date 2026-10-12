@@ -11,7 +11,7 @@ const cases = [
   { name: 'Spotlight', trigger: 'button[aria-label="Spotlight"], [data-shell="mobile"] [aria-label="Spotlight"]', chunk: 'Spotlight', result: '[role="combobox"][aria-label="Search projects, writing, apps"]', event: 'click' },
   { name: 'context menu', trigger: '[data-desktop-icon="projects"]', chunk: 'ContextMenuHost', result: '[role="menu"][aria-label="desktop:projects context menu"]', event: 'contextmenu' },
 ] as const;
-const chunks = (JSON.parse(readFileSync('dist/.css-scope.json', 'utf8')) as { chunks: Record<string, { imports: string[]; css: string[] }> }).chunks;
+const chunks = (JSON.parse(readFileSync('dist/client/.css-scope.json', 'utf8')) as { chunks: Record<string, { imports: string[]; css: string[] }> }).chunks;
 function preloadAssets(feature: string) {
   const entries = [feature, 'motion-features'].map(name => Object.keys(chunks).find(file => new RegExp(`/${name}\\.[^/]+\\.js$`).test(file))!);
   const styles = new Set<string>(); const seen = new Set<string>(); const queue = [...entries];

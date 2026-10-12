@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 import react from '@astrojs/react';
+import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { sitemapFilter } from './src/lib/seo-routes.mjs';
@@ -12,6 +13,7 @@ const fontFile = (pkg, file) => `@fontsource-variable/${pkg}/files/${file}`;
 export default defineConfig({
   site: 'https://os.nipuntheekshana.com',
   output: 'static',
+  adapter: cloudflare({ imageService: 'compile', prerenderEnvironment: 'node' }),
   trailingSlash: 'never',
   // A shared static/lazy view must retain its CSS asset for Vite's lazy preload.
   build: { format: 'file', inlineStylesheets: 'never' },
@@ -23,7 +25,7 @@ export default defineConfig({
     build: { cssCodeSplit: true, rolldownOptions: { output: { codeSplitting: { groups: [{
       // Pack the shell's static dependencies together: fewer request hops and
       // gzip dictionaries. Dynamic app and feature imports keep their own chunks.
-      name: 'shell-runtime', test: /src\/os\/Desktop\.tsx$|node_modules\/(?:(?:react|react-dom|scheduler)\/|jotai\/dist\/(?:react\/[^/]+|vanilla\/(?:atom|store|internals))\.js$)/,
+      name: 'shell-runtime', test: /src\/os\/(?:Desktop\.tsx|state\/features\.ts)$|node_modules\/@astrojs\/react\/dist\/client\.js$|node_modules\/(?:(?:react|react-dom|scheduler)\/|jotai\/dist\/(?:react\/[^/]+|vanilla\/(?:atom|store|internals))\.js$)/,
     }] } } } },
     // three is only reached through a lazy import; pre-bundle it so dev does not reload mid-session.
     optimizeDeps: { include: ['three', 'jotai', 'jotai/utils', 'motion/react', 'motion/mini'] },

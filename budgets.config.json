@@ -1,5 +1,5 @@
 {
-  "initialJsHome": 133120,
+  "initialJsHome": 114688,
   "initialJsRoute": 143360,
   "motionFeatures": 24576,
   "apps": {
@@ -15,12 +15,19 @@
     "SettingsApp": 12288,
     "TrashApp": 6144,
     "ReadmeApp": 4096,
-    "island": 153600
+    "island": 153600,
+    "GuestbookApp": 12288
   },
   "cssPerPage": 30720,
-  "preloadFonts": { "count": 2, "bytes": 71680 },
+  "preloadFonts": {
+    "count": 2,
+    "bytes": 71680
+  },
   "htmlHome": 40960,
   "htmlRouteMax": 92160,
   "jsonMax": 20480,
-  "imageWarn": { "coverAvif640": 71680, "screenAvif1600": 225280 }
+  "imageWarn": {
+    "coverAvif640": 71680,
+    "screenAvif1600": 225280
+  }
 }

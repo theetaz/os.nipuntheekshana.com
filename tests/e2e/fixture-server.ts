@@ -24,13 +24,17 @@ export async function fixtureServer(name: string, port: number, pages: Record<st
     await mkdir(resolve(directory, 'pages'), { recursive: true });
     for (const [route, content] of Object.entries(pages)) await writeFile(resolve(directory, `pages/${route}.astro`), content);
     await writeFile(resolve(directory, 'config.mjs'), `import base from '../../astro.config.mjs';
-export default { ...base, srcDir: '${relative}/', cacheDir: '${relative}/cache/', outDir: '${relative}/dist/' };`);
+export default { ...base, adapter: undefined, srcDir: '${relative}/', cacheDir: '${relative}/cache/', outDir: '${relative}/dist/',
+  vite: { ...base.vite, cacheDir: '${relative}/vite-cache/' } };`);
     await new Promise<void>((done, reject) => {
       const build = spawn('npm', ['run', 'build', '--', '--config', `${relative}/config.mjs`], { cwd: root, env: { ...process.env, SERENDIB_ACTIVITY_SOURCE: 'snapshot' }, stdio: ['ignore', 'pipe', 'pipe'] });
       build.stdout.on('data', record); build.stderr.on('data', record);
       build.once('error', reject); build.once('exit', code => code === 0 ? done() : reject(new Error(`Fixture build failed: ${output}`)));
     });
-    await cp(resolve(root, 'dist/data'), resolve(directory, 'dist/data'), { recursive: true });
+    await cp(resolve(root, 'dist/client/data'), resolve(directory, 'dist/data'), { recursive: true });
+    // Standalone static fixtures expose the backend-unavailable health contract.
+    await mkdir(resolve(directory, 'dist/api'), { recursive: true });
+    await writeFile(resolve(directory, 'dist/api/health'), JSON.stringify({ ai: false, postcards: false }));
     server = spawn('npx', ['astro', 'preview', '--config', `${relative}/config.mjs`, '--ignore-lock', '--host', 'localhost', '--port', String(port)], {
       cwd: root, stdio: ['ignore', 'pipe', 'pipe'], detached: true,
     });
