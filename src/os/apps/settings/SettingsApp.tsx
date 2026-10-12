@@ -10,7 +10,7 @@ import { DEFAULT_DATA, SECTIONS, sectionFor, type SettingsActions, type Settings
 import { SettingsView } from './views/SettingsView';
 export { menus } from './menus';
 
-export default function SettingsApp({ windowId, query, setQuery, setTitle, ready, scrollRootRef, focused, initialData }: AppProps) {
+export default function SettingsApp({ windowId, mode, query, setQuery, setTitle, ready, scrollRootRef, focused, initialData }: AppProps) {
   const [theme, setTheme] = useAtom(themePrefAtom); const [accent, setAccent] = useAtom(accentAtom);
   const [wallpaper, setWallpaper] = useAtom(wallpaperAtom); const [motion, setMotion] = useAtom(motionPrefAtom);
   const [transparency, setTransparency] = useAtom(transparencyPrefAtom); const [sound, setSound] = useAtom(soundAtom);
@@ -18,7 +18,9 @@ export default function SettingsApp({ windowId, query, setQuery, setTitle, ready
   const [mochi, setMochi] = useAtom(mochiPrefsAtom); const developer = useAtomValue(devModeAtom);
   const setIcons = useSetAtom(iconPositionsAtom); const setGeometry = useSetAtom(geometryAtom); const setView = useSetAtom(viewAtom);
   const section = sectionFor(query.section, developer);
-  const title = SECTIONS.find(item => item.id === section)!.label;
+  // A phone sheet opens on the section list (D§13.3); its title is the app's.
+  const list = mode === 'mobile' && !query.section;
+  const title = list ? 'Settings' : SECTIONS.find(item => item.id === section)!.label;
   const titleCallback = useRef(setTitle); titleCallback.current = setTitle;
   const readyCalled = useRef(false);
   useLayoutEffect(() => { titleCallback.current(title); }, [title]);
@@ -38,9 +40,13 @@ export default function SettingsApp({ windowId, query, setQuery, setTitle, ready
     check(); connection?.addEventListener('change', check);
     return () => connection?.removeEventListener('change', check);
   }, [section]);
-  const selectSection = (next: typeof section) => {
-    setQuery({ ...query, section: next });
-    if (scrollRootRef.current) scrollRootRef.current.scrollTop = 0;
+  const top = () => { if (scrollRootRef.current) scrollRootRef.current.scrollTop = 0; };
+  // List → detail is a history entry on phones, so the system Back gesture returns to the list.
+  const selectSection = (next: typeof section) => { setQuery({ ...query, section: next }, { replace: !list }); top(); };
+  const showList = () => {
+    const { section: _section, ...rest } = query;
+    if (/^\/settings(\?(?!.*section=)|$)/.test(history.state?.serendibBack)) history.back(); else setQuery(rest, { replace: false });
+    top();
   };
   const actions: SettingsActions = {
     theme: setTheme, accent: setAccent, wallpaper: value => {
@@ -67,5 +73,6 @@ export default function SettingsApp({ windowId, query, setQuery, setTitle, ready
   const preferences: SettingsPreferences = { theme, accent, wallpaper, motion, transparency, sound, volume, widgets, mochi };
   const data = (initialData as SettingsData | null) ?? readInitialData<SettingsData>('settings:index') ?? DEFAULT_DATA;
   return <SettingsView preferences={preferences} actions={actions} section={section} developer={developer} focused={focused}
-    data={data} liveUnavailable={liveUnavailable} onSection={selectSection} scrollRootRef={scrollRootRef} />;
+    data={data} liveUnavailable={liveUnavailable} onSection={selectSection} scrollRootRef={scrollRootRef}
+    onList={showList} chosen={!!query.section} />;
 }
