@@ -5,7 +5,7 @@ import { APP_META } from '../registry/meta';
 import { loadApp } from '../registry/loader';
 import type { AppModule, AppProps } from '../registry/apps';
 import { readInitialData } from '../lib/initial-data';
-import { focusableWithin, trapTab } from '../lib/focus';
+import { focusableWithin, nextFocusIndex, trapTab } from '../lib/focus';
 import { closeWindow, focusWindow, navigateWindow } from '../wm/commands';
 import { clampMove, clampSize } from '../wm/geometry';
 import type { Rect, WindowId, WindowState } from '../wm/types';
@@ -35,7 +35,7 @@ function focusContent(el: HTMLElement) {
   const controls = focusableWithin(el);
   const target = controls.find(item => item.matches('[data-autofocus]'))
     ?? (el.hasAttribute('data-sheet') ? controls.find(item => item.closest('.window-content')) : undefined)
-    ?? controls.find(item => !item.closest('.window-traffic-lights')) ?? heading ?? el;
+    ?? controls.find(item => !item.closest('.k-winbtns')) ?? heading ?? el;
   target.focus({ preventScroll: true });
 }
 
@@ -138,6 +138,15 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2, elementRef, fra
     });
   }, [announce, focused, mode, returnToDesktop, store, win, windowId]);
 
+  useEffect(() => {
+    const el = element.current;
+    if (!el || mode !== 'desktop') return;
+    const visibility = () => { el.toggleAttribute('data-document-hidden', el.ownerDocument.hidden); };
+    visibility();
+    el.ownerDocument.addEventListener('visibilitychange', visibility);
+    return () => { el.ownerDocument.removeEventListener('visibilitychange', visibility); };
+  }, [mode]);
+
   useWindowDrag(windowId, frame, mode === 'desktop');
   useWindowResize(windowId, frame, mode === 'desktop');
 
@@ -220,14 +229,30 @@ export function Window({ windowId, mode = 'desktop', zIndex = 2, elementRef, fra
       }
     }} onKeyDown={event => {
       // App widgets and portalled overlays own their keyboard interaction first.
-      if (!event.defaultPrevented && event.currentTarget.contains(event.target as Node)) trapTab(event, event.currentTarget);
+      if (event.defaultPrevented || !event.currentTarget.contains(event.target as Node)) return;
+      if (mode === 'desktop' && event.key === 'Tab') {
+        // App-owned unified toolbars overlay the bar from the content slot.
+        // Follow their visual order before the bar's right-side buttons.
+        const controls = focusableWithin(event.currentTarget);
+        const toolbar = '.window-navigation, .window-toolbar, .projects-toolbar, .writing-toolbar';
+        const ordered = [
+          ...controls.filter(item => item.closest(toolbar)),
+          ...controls.filter(item => item.closest('.k-winbtns')),
+          ...controls.filter(item => !item.closest(`${toolbar}, .k-winbtns`)),
+        ];
+        event.preventDefault();
+        const index = ordered.indexOf(event.currentTarget.ownerDocument.activeElement as HTMLElement);
+        if (ordered.length) ordered[nextFocusIndex(index, event.shiftKey ? -1 : 1, ordered.length)]?.focus();
+        else event.currentTarget.focus();
+      } else trapTab(event, event.currentTarget);
     }} style={{ zIndex }}>
+    {mode === 'desktop' && <span className="k-ring" aria-hidden="true"><i /></span>}
     <span id={`window-hint-${windowId}`} className="sr-only">Window. Tab moves within it. Option or Alt plus backtick switches windows.</span>
     {header ? header(win, stillLoading && !App && !error) : <TitleBar windowId={windowId} title={win.title} kind={meta.window.titleBar} zoomable={meta.window.zoomable}
       maximized={win.mode === 'maximized'} keyboardMove={keyboardMove} stillLoading={stillLoading && !App && !error} />}
     <div className="window-content" data-titlebar={meta.window.titleBar}>
       {error ? <ErrorState className="window-error" role="alert" simpleHref={simpleHref}
-        title={updated ? 'Serendib was updated while you were here.' : undefined}
+        title={updated ? 'Kottu OS was updated while you were here.' : undefined}
         body={updated ? 'Reload to get the new version. Your windows will reopen.' : undefined}
         onRetry={updated ? undefined : retry}
         action={updated ? <div className="flex items-center gap-3"><Button variant="primary" onClick={() => location.reload()}>Reload</Button><a href={simpleHref}>Open simple view</a></div> : undefined} />
