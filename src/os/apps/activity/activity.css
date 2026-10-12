@@ -4,12 +4,6 @@
   font: 450 13px/18px var(--font-ui);
 }
 .activity-view { color: var(--os-ink); min-width: 0; }
-/* Match the static mobile header during adoption until the Pocket sheet owns it. */
-.managed-window[data-app="activity"][data-shell-mode="mobile"] .window-titlebar {
-  flex-basis: calc(52px + env(safe-area-inset-top));
-  padding-top: env(safe-area-inset-top);
-  border-radius: 0;
-}
 .activity-view p { margin: 0; }
 .activity-view a { color: var(--os-accent-ink); text-underline-offset: 3px; }
 .activity-toolbar {
@@ -84,6 +78,13 @@ html.no-js .activity-segmented { visibility: hidden; }
   .activity-toolbar { padding-inline: 12px; gap: 8px; }
   .activity-segmented button { padding-inline: 8px; }
   .activity-stat { padding: 10px; }
+}
+/* Pocket sheets (D§13.3): touch-sized view controls and link. The tiles'
+   two columns and the terrain's narrow pose follow the window container. */
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  .activity-segmented button { min-height: 44px; min-width: 44px; }
+  .activity-toolbar { padding-block: 4px; }
+  .activity-toolbar > a { display: inline-flex; align-items: center; min-height: 44px; }
 }
 html[data-transparency="reduce"] .activity-terrain-tip { background: var(--os-raised); backdrop-filter: none; -webkit-backdrop-filter: none; }
 @media (prefers-reduced-transparency: reduce) {
