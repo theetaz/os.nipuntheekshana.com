@@ -11,7 +11,7 @@
 .os-dock-link:hover .os-dock-tooltip { visibility: visible; transition: visibility 0s 300ms !important; }
 .os-dock-link:focus-visible .os-dock-tooltip { visibility: visible; transition: none !important; }
 .os-dock-link[data-tooltip-dismissed] .os-dock-tooltip { visibility: hidden; transition: none !important; }
-.k-launcher .os-dock-external { position: absolute; top: 0; right: 0; width: 9px; height: 9px; visibility: hidden; color: #1B1530; background: #FFF7E8; border-radius: 2px; }
+.k-launcher .os-dock-link > .os-dock-external { position: absolute; top: 0; right: 0; width: 9px; height: 9px; visibility: hidden; color: #1B1530; background: #FFF7E8; border-radius: 2px; }
 .os-dock-link:is(:hover, :focus-visible) .os-dock-external { visibility: visible; }
 .os-dock-link[data-kooda-over="true"] { outline: 2px solid var(--os-accent); outline-offset: 2px; }
 .k-launcher[data-reduced-motion="false"] .os-dock-link[data-kooda-over="true"] > svg { transform: scale(1.1); }

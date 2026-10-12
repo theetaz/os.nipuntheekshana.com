@@ -209,6 +209,9 @@ test('external links have secure native targets, a hover badge and Option-copy',
   const externals = dock(page).locator('a[target="_blank"]'); await expect(externals).toHaveCount(3);
   for (const external of await externals.all()) await expect(external).toHaveAttribute('rel', /(?:^|\s)noopener(?:\s|$)/);
   const github = link(page, 'GitHub'); await github.hover(); await expect(github.locator('.os-dock-external')).toBeVisible();
+  expect(await github.locator('.os-dock-external').evaluate(element => {
+    const css = getComputedStyle(element); return [css.width, css.height];
+  })).toEqual(['9px', '9px']);
   await page.evaluate(() => { Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (value: string) => Object.assign(window, { dockCopied: value }) } }); });
   await github.click({ modifiers: ['Alt'] });
   expect(await page.evaluate(() => (window as unknown as { dockCopied: string }).dockCopied)).toBe('https://github.com/theetaz');
