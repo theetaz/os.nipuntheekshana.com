@@ -102,6 +102,12 @@ describe('built CSS respects static pages and lazy app chunks', () => {
 
   it('ships the story on every story route and omits all retired widget sheets', () => {
     for (const file of files(dist).filter(file => file.endsWith('.html'))) {
+      if (file.endsWith('/og.html')) {
+        const html = readFileSync(file, 'utf8');
+        expect(html).toContain('content="noindex, nofollow"');
+        expect(html).not.toContain('id="story"');
+        continue;
+      }
       const text = pageCss(file);
       expect(text).toContain('.k-sec');
       expect(text).not.toMatch(/\.(?:ticket-wrap|now-sticky|activity-strip|home-document)\b/);
