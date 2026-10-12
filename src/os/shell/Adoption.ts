@@ -29,7 +29,7 @@ export function adoptStaticWindow(store: OsStore, document: Document): () => voi
       if (adoption.completed) return;
       dispatchWithoutHistory(store, { type: 'FINISH_CLOSE', id: windowId });
       element.hidden = false; element.inert = false;
-      console.warn(`[serendib] adoption timed out for ${appId}`);
+      console.warn(`[kottu] adoption timed out for ${appId}`);
     }, 3000) };
     adoptions.set(store, adoption);
   };

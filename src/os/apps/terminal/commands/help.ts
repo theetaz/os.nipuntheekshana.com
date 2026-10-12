@@ -15,14 +15,14 @@ export const USAGE: Record<string, [string, string]> = {
   projects: ['projects [--category <data|apps|hardware|worlds|ai>] [--status <active|incubating>]', 'projects --category data'],
   writing: ['writing', 'writing'], now: ['now', 'now'], cv: ['cv', 'cv'], contact: ['contact', 'contact'],
   socials: ['socials', 'socials'], neofetch: ['neofetch', 'neofetch'], date: ['date', 'date'],
-  theme: ['theme [light|dark|auto]', 'theme dark'], wallpaper: ['wallpaper [list|<id>]', 'wallpaper contours'],
+  theme: ['theme [light|dark|auto]', 'theme dark'], wallpaper: ['wallpaper [list|<id>]', 'wallpaper kottu'],
   accent: ['accent [list|<name>]', 'accent lagoon'], sound: ['sound [on|off]', 'sound on'],
   mochi: ['mochi [pet|sleep|wake|say <text>|hide|show]', 'mochi say "Hello, Mochi"'],
   pin: ['pin', 'pin'], sleep: ['sleep', 'sleep'], history: ['history', 'history'], echo: ['echo <text>', 'echo "Ceylon tea"'],
   clear: ['clear', 'clear'], exit: ['exit', 'exit'], tea: ['tea', 'tea'], make: ['make tea', 'make tea'],
   sudo: ['sudo <anything>', 'sudo make tea'], rm: ['rm <file>', 'rm now.txt'],
   vim: ['vim [file]', 'vim about.md'], nano: ['nano [file]', 'nano about.md'], emacs: ['emacs [file]', 'emacs about.md'],
-  ssh: ['ssh <host>', 'ssh serendib'], ayubowan: ['ayubowan', 'ayubowan'],
+  ssh: ['ssh <host>', 'ssh kottu'], ayubowan: ['ayubowan', 'ayubowan'],
 };
 export const help: CommandHandler = args => {
   if (!args.length) return success(HELP);

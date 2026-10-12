@@ -22,7 +22,7 @@ export function registerStore(store: OsStore): () => void {
   return () => { if (current === store) current = null; };
 }
 export function getStore(): OsStore {
-  if (!current) throw new Error('Serendib store has not been registered.');
+  if (!current) throw new Error('Kottu store has not been registered.');
   return current;
 }
 export function historyStore(store: OsStore): HistoryStore {

@@ -24,11 +24,11 @@ export function ReadmeView({ source, platform = 'other', onSection }: {
       <a href="#credits" onClick={event => followSection(event, 'credits')}>Credits</a>
     </nav>
     <section aria-labelledby="welcome"><h2 id="welcome" tabIndex={-1}>Welcome</h2>
-      <p>Serendib is Nipun Theekshana’s personal site, imagined as a small desktop made in Colombo. Open a window to explore projects, writing and life in Sri Lanka.</p>
+      <p>Kottu OS is Nipun's desktop in a browser. Drag the props, open the windows, or just scroll: the long version is below.</p>
     </section>
     <section aria-labelledby="getting-around"><h2 id="getting-around" tabIndex={-1}>Getting around</h2>
-      <p>Click an app in the dock to open it, or double-click a desktop icon. Drag a window’s title bar to move it; drag to the left or right edge to snap it, or to the top to maximise it.</p>
-      <p>The dock keeps your apps close by: click a running app to bring its window forward, or restore a minimised window. Spotlight searches apps, projects, writing and actions — open it from File → Open or with the shortcuts below.</p>
+      <p>Click a prop or an app in the launcher to open it. Drag a window’s title bar to move it; drag to the left or right edge to snap it, or to the top to maximise it.</p>
+      <p>The launcher keeps your apps close by: click a running app to bring its window forward, or restore a minimised window. Search finds apps, projects, writing and actions — open it from File → Open or with the shortcuts below. The workspace buttons jump between the desktop and the story.</p>
       <p>On a phone, tap an app to open its page. Every page also works without JavaScript.</p>
     </section>
     <section aria-labelledby="shortcuts"><h2 id="shortcuts" tabIndex={-1}>Keyboard shortcuts</h2>
@@ -37,7 +37,8 @@ export function ReadmeView({ source, platform = 'other', onSection }: {
         <tbody>{shortcutRows(platform).map(entry => <tr key={`${entry.command}:${entry.shortcut.code}:${!!entry.shortcut.shift}`}>
           <td><kbd>{entry.keys}</kbd></td><td>{entry.action}</td>
         </tr>)}
-          <tr><td>Arrows, Home, End, type-ahead</td><td>Move within menus, lists, grids, the dock and desktop icons</td></tr>
+          <tr><td><kbd>Super+1…5</kbd> (<kbd>⌃1…5</kbd> on a Mac)</td><td>Jump to a workspace; use digits 1–5 in the workspace group</td></tr>
+          <tr><td>Arrows, Home, End, type-ahead</td><td>Move within menus, lists, grids, the launcher and desktop props</td></tr>
           <tr><td><kbd>Space</kbd></td><td>Quick Look (Projects)</td></tr>
         </tbody>
       </table>
@@ -54,7 +55,7 @@ export function ReadmeView({ source, platform = 'other', onSection }: {
       <p>Made in Colombo by Nipun Theekshana.</p>
       <ul>
         <li>Sri Lanka outline: geoBoundaries gbOpen, derived from © OpenStreetMap contributors. ODbL 1.0.</li>
-        <li>Fonts: Instrument Sans, Fraunces and Martian Mono. SIL Open Font License.</li>
+        <li>Fonts: Shrikhand, Kalam, Instrument Sans, Fraunces and Martian Mono. SIL Open Font License.</li>
         <li>Icons: Lucide. ISC license.</li>
         <li>Built with Astro, React, Motion, Jotai, Tailwind CSS and three.js.</li>
       </ul>

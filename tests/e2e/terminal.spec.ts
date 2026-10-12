@@ -108,6 +108,10 @@ test('a loading app owns focus and cannot raise itself after returning to Termin
 
 test('?cmd=neofetch runs once, removes cmd with replace and rejects arbitrary command links', async ({ page }) => {
   await page.goto('/terminal?cmd=neofetch'); const win = terminal(page);
+  await expect(output(win)).toContainText('Kottu OS 2.0 "Pettah"');
+  await expect(output(win)).toContainText('Kernel    Astro 7 + React 19');
+  await expect(output(win)).toContainText('WM        Hyprland-ish (in your browser)');
+  await expect(win.locator('.terminal-input-line > span')).toHaveText('nipun@kottu:~$ ');
   await expect(output(win)).toContainText('Kernel'); await expect(page).toHaveURL(/\/terminal$/);
   await expect(output(win).locator('.terminal-line', { hasText: 'Packages' })).toHaveCount(1);
   await command(win, 'theme dark'); await expect(output(win).locator('.terminal-line', { hasText: 'Packages' })).toHaveCount(1);
@@ -250,7 +254,7 @@ test('no-JS route shows the banner, help, fallback links and readable phone cont
   const page = await context.newPage();
   try {
     await page.goto('/terminal'); const win = page.locator('#static-window');
-    await expect(win).toContainText('Serendib 2.0 "Pettah"'); await expect(win).toContainText('Explore: ls, cd, pwd, cat, open');
+    await expect(win).toContainText('Kottu OS 2.0 "Pettah"'); await expect(win).toContainText('Explore: ls, cd, pwd, cat, open');
     await expect(win).toContainText("JavaScript is off, so this terminal can't run commands.");
     await expect(win.getByRole('link', { name: 'ls projects', exact: true })).toHaveAttribute('href', '/projects');
     expect(await win.locator('.terminal-body').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);

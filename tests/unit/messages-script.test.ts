@@ -109,7 +109,7 @@ describe('replaceable conversation engine and email hand-off', () => {
   it.each(['Hello\nA second line & a query? # % +', 'සිංහල தமிழ்', '<img src=x onerror=alert(1)>', 'Hello\r\nBcc: someone@example.com'])
   ('encodes %j as body text without injecting email parameters', text => {
     const href = emailHref(text);
-    expect(href.startsWith('mailto:theekshana2@gmail.com?subject=Hello%20from%20Serendib&body=')).toBe(true);
+    expect(href.startsWith('mailto:theekshana2@gmail.com?subject=Hello%20from%20Kottu%20OS&body=')).toBe(true);
     const query = new URLSearchParams(href.split('?')[1]);
     expect([...query.keys()]).toEqual(['subject', 'body']);
     expect(query.get('body')).toBe(`${text}\n\n— sent from os.nipuntheekshana.com`);

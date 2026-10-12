@@ -192,7 +192,7 @@ export const APP_META: Readonly<Record<AppId, AppMeta>> = {
   readme: {
     id: 'readme',
     name: 'Read me',
-    description: 'How to use Serendib, shortcuts and credits.',
+    description: 'How to use Kottu OS, shortcuts and credits.',
     keywords: ['help', 'read me', 'shortcuts', 'keyboard', 'credits', 'guide'],
     icon: 'app-readme',
     basePath: '/readme',

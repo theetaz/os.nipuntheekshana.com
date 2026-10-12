@@ -4,13 +4,13 @@ import { HELP } from '../commands/help';
 import type { Line, TerminalSeed } from '../types';
 import { displayPath } from '../vfs';
 
-export const BANNER = `Serendib ${VERSION} "${CODENAME}" · nsh, the Nipun shell`;
+export const BANNER = `Kottu OS ${VERSION} "${CODENAME}" · nsh, the Nipun shell`;
 /** Phone sheets offer these above the keyboard (DESIGN §13.3). */
 export const QUICK_COMMANDS = ['help', 'ls', 'projects', 'now', 'neofetch', 'contact'] as const;
 export const HINT = 'Type help to see what I can do. Tab completes. ↑ and ↓ walk through history.';
 export function Prompt({ cwd }: { cwd: string }) {
-  return <><span className="term-user">nipun</span><span className="term-dim">@</span><span className="term-host">serendib</span>
-    {' '}<span className="term-path">{displayPath(cwd)}</span>{' % '}</>;
+  return <><span className="term-user">nipun</span><span className="term-dim">@</span><span className="term-host">kottu</span>
+    <span className="term-dim">:</span><span className="term-path">{displayPath(cwd)}</span>{'$ '}</>;
 }
 export function Output({ lines }: { lines: readonly Line[] }) {
   return <>{lines.map((line, i) => <div className="terminal-line" key={i}>{line.length ? line.map((part, j) => part.href

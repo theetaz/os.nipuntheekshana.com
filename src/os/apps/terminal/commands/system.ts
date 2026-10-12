@@ -56,15 +56,16 @@ export const system: Record<string, CommandHandler> = {
     const sys = context.system(); const site = data.profile.site;
     const years = Math.max(0, context.now().getFullYear() - site.careerStart);
     const info: [string, string][] = [
-      ['OS', `Serendib ${VERSION} "${CODENAME}"`], ['Host', 'os.nipuntheekshana.com'], ['Kernel', sys.kernel],
+      ['OS', `Kottu OS ${VERSION} "${CODENAME}"`], ['Host', 'os.nipuntheekshana.com'], ['Kernel', sys.kernel],
+      ['WM', 'Hyprland-ish (in your browser)'],
       ['Uptime', `${years} years (shipping since ${site.careerStart})`], ['Packages', `${data.projects.length} projects, ${data.posts.length} posts`],
       ['Shell', 'nsh 1.0'], ['Location', `${site.location.split(',')[0]} · ${Math.abs(site.coordinates.lat).toFixed(4)}°${site.coordinates.lat < 0 ? 'S' : 'N'} ${Math.abs(site.coordinates.lon).toFixed(4)}°${site.coordinates.lon < 0 ? 'W' : 'E'}`],
       ['Theme', `${wallpaperName(sys.wallpaper)} (${sys.theme}), accent ${wallpaperName(sys.accent)}`],
       ['Contrib.', activity?.available ? `${activity.total.toLocaleString('en-GB')} GitHub contributions this year` : 'GitHub contributions unavailable'],
     ];
-    const right: Line[] = [[segment('nipun', 'user'), segment('@', 'dim'), segment('serendib', 'host')], [segment('──────────────', 'dim')],
+    const right: Line[] = [[segment('nipun', 'user'), segment('@', 'dim'), segment('kottu', 'host')], [segment('───────────', 'dim')],
       ...info.map(([label, value]) => [segment(label.padEnd(10), 'user'), segment(value)]),
       ['dim', 'err', 'ok', 'host', 'link', 'path', 'user', 'ink'].map(tone => segment('■ ', tone as 'ink'))];
-    return { ok: true, lines: ISLAND.map((art, i) => [segment(art.padEnd(16), 'host'), ...right[i]!]) };
+    return { ok: true, lines: right.map((line, i) => [segment((ISLAND[i] ?? '').padEnd(16), 'host'), ...line]) };
   },
 };

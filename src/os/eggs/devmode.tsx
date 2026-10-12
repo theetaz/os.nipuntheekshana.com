@@ -42,7 +42,7 @@ export function subscribeDeveloper(store: OsStore): () => void {
   const log = () => {
     const next = store.get(desktopAtom);
     if (visible() && store.get(toolsAtom).log && !document.hidden && next !== lastState)
-      console.debug('[Serendib] Window actions', { before: lastState, after: next });
+      console.debug('[Kottu] Window actions', { before: lastState, after: next });
     lastState = next;
   };
   const subscriptions = [store.sub(toolsAtom, update), store.sub(devModeAtom, update), store.sub(viewAtom, update),

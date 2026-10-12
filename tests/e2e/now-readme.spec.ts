@@ -33,9 +33,11 @@ for (const width of [1440, 390]) {
       await expect(page.locator('#static-window time')).toHaveAttribute('datetime', '2026-09-28');
       await expect(page.getByRole('link', { name: 'Inspired by nownownow.com ↗' })).toHaveAttribute('href', 'https://nownownow.com');
       await page.goto('/readme');
+      await expect(page.locator('#static-window')).toContainText("Kottu OS is Nipun's desktop in a browser.");
+      await expect(page.getByRole('table')).toContainText('Super+1…5 (⌃1…5 on a Mac)');
       for (const name of ['Welcome', 'Getting around', 'Keyboard shortcuts', 'Prefer a plain page?', 'Privacy', 'Credits'])
         await expect(page.getByRole('heading', { name, exact: true })).toHaveCount(1);
-      await expect(page.getByRole('table').getByRole('row')).toHaveCount(GLOBAL_SHORTCUTS.length + 3);
+      await expect(page.getByRole('table').getByRole('row')).toHaveCount(GLOBAL_SHORTCUTS.length + 4);
       await page.getByRole('navigation', { name: 'In this document' }).getByRole('link', { name: 'Keyboard shortcuts' }).click();
       await expect(page.locator('#shortcuts')).toBeInViewport();
       await page.getByRole('link', { name: 'Switch to simple view' }).click();
