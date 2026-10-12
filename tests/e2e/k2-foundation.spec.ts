@@ -99,6 +99,14 @@ test('Simple view exposes the story, one h1 and no chrome', async ({ page }) => 
   await expect(page.locator('h1:visible')).toHaveCount(1); await expect(page.locator('.os-chrome:visible')).toHaveCount(0);
 });
 
+test('the legacy phone home keeps the story out of its translucent background', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 }); await page.goto('/');
+  await expect(page.locator('html')).toHaveClass(/os-ready/);
+  await expect(page.locator('.phone-home:visible')).toHaveCount(1);
+  await expect(page.locator('#story')).toBeHidden();
+  await page.goto('/#simple'); await expect(page.locator('#story')).toBeVisible();
+});
+
 test('the modal stack locks document scroll and releases it after Search closes', async ({ page }) => {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
   if (await page.locator('html').getAttribute('data-mode') === 'mobile') {

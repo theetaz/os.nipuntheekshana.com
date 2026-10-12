@@ -53,4 +53,5 @@ html:is([data-view="simple"], :has(#simple:target)) #story { display: block; }
 .simple-header a, .simple-footer a { color: var(--os-accent-ink); text-underline-offset: 3px; }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
   html:not([data-view="simple"]):not(:has(#simple:target)) body:has(.phone-home[role="main"]) main#content:empty { display: none; }
+  html:not([data-view="simple"]):not(:has(#simple:target)) body:has(.phone-home[role="main"]) #story { display: none; }
 }
