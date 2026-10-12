@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "./prose.css";
 @import "./print.css";
+/* Keep the static phone UI eager, sharing the page stylesheet's compression. */
+@import "../os/mobile/phone-home.css";
+@import "../os/mobile/app-sheet.css";
 /* Component styles import their own wallpapers, window frames and shell styles. */
 
 /* Theme and preference variants driven by attributes on <html> (set by the inline head script). */
