@@ -185,6 +185,38 @@ export async function checkBudgets({ root = process.cwd(), log = true } = {}) {
       } catch (error) { errors.push(`${label(file)}: ${error.message}`); }
     }
   }
+  for (const [name, limit] of Object.entries(config.storyChunks ?? {})) {
+    const matches = chunks.filter(file => basename(file).startsWith(`${name}.`) || basename(file).startsWith(`${name}-`));
+    if (!matches.length) notices.push(`SKIP K story chunk ${name}: chunk not built yet`);
+    for (const file of matches) {
+      try {
+        if (homeClosure.has(file)) errors.push(`${name}: story chunk in initial JS`);
+        const incremental = [...await closure([file])].filter(chunk => !homeClosure.has(chunk));
+        measure('K story chunk', label(file), await sumGzip(incremental), limit);
+      } catch (error) { errors.push(`${label(file)}: ${error.message}`); }
+    }
+  }
+  if (config.kottuImages) {
+    const images = all.filter(file => label(file).startsWith('_astro/') && /^(prop|sticker|badge)-.*\.(avif|webp)$/.test(basename(file)));
+    const provenance = images.length ? JSON.parse(await readFile(resolve(root, 'src/assets/kottu/provenance.json'), 'utf8')) : [];
+    const catalogue = images.length ? JSON.parse(await readFile(resolve(root, 'scripts/kottu-art/assets.json'), 'utf8')) : { assets: [] };
+    for (const file of images) {
+      try {
+        const entry = provenance.find(entry => basename(file).startsWith(`${entry.id}.`));
+        if (!entry) throw new Error('Missing Kottu image provenance');
+        const definition = catalogue.assets.find(asset => asset.id === entry.id);
+        if (!definition || definition.family !== entry.family) throw new Error('Kottu image family does not match its catalogue');
+        const { width } = await sharp(await read(file)).metadata();
+        const oneX = entry.family === 'prop' ? definition.W : entry.family === 'sticker' ? 200 : 56;
+        const scale = width <= oneX ? 0 : 1;
+        if (!width || width > 2 * oneX) throw new Error('Kottu image width exceeds its family box');
+        const format = file.endsWith('.avif') ? 'avif' : 'webp';
+        const limit = config.kottuImages[entry.family]?.[format]?.[scale];
+        measure(`K image ${entry.family} ${scale + 1}x ${format}`, label(file), (await read(file)).length, limit);
+      } catch (error) { errors.push(`${label(file)}: ${error.message}`); }
+    }
+    if (!images.length) notices.push('SKIP Kottu images: no art variants built yet');
+  }
   const json = all.filter((file) => label(file).startsWith('data/') && file.endsWith('.json'));
   if (!json.length) notices.push('SKIP B9 data JSON: no data endpoints built yet');
   for (const file of json) measure('B9 JSON', label(file), gzipBytes(await read(file)), config.jsonMax);

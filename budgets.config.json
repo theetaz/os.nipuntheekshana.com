@@ -12,11 +12,11 @@
     "ActivityApp": 16384,
     "MessagesApp": 12288,
     "NowApp": 4096,
-    "SettingsApp": 12288,
+    "SettingsApp": 13312,
     "TrashApp": 6144,
     "ReadmeApp": 4096,
     "island": 153600,
-    "GuestbookApp": 12288
+    "GuestbookApp": 10240
   },
   "cssPerPage": 30720,
   "preloadFonts": {
@@ -29,5 +29,45 @@
   "imageWarn": {
     "coverAvif640": 71680,
     "screenAvif1600": 225280
+  },
+  "storyChunks": {
+    "story-runtime": 1536,
+    "story-cards": 4096,
+    "story-board": 6144,
+    "story-workspaces": 1536,
+    "story-visits": 1024,
+    "props-runtime": 4096
+  },
+  "kottuImages": {
+    "prop": {
+      "avif": [
+        18432,
+        49152
+      ],
+      "webp": [
+        32768,
+        92160
+      ]
+    },
+    "sticker": {
+      "avif": [
+        10240,
+        24576
+      ],
+      "webp": [
+        18432,
+        45056
+      ]
+    },
+    "badge": {
+      "avif": [
+        3072,
+        6144
+      ],
+      "webp": [
+        5120,
+        10240
+      ]
+    }
   }
 }
