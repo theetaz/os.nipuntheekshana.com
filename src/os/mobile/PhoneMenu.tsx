@@ -23,13 +23,13 @@ export function PhoneMenu({ anchor, onClose, appId, onHome }: { anchor: HTMLElem
     ...menus.filter(menu=>meta?menu.id!=='window':['go','view','help'].includes(menu.id)).map(menu=>({kind:'submenu' as const,label:menu.label,items:menu.items})),
     ...(desktop.order.length?[{kind:'submenu' as const,label:'Apps',items:running}]:[])];
   const state=(command:string)=>getItemState(command,{desktop,appState:win?states[win.id]:undefined,theme,wallpaper,widgets,postcards,mochi:mochi.visible,zoomable:false,resizable:false});
-  return <Menu style={{maxHeight:'calc(100dvh - 68px - env(safe-area-inset-top) - env(safe-area-inset-bottom))'}} label={meta?'App commands':'Serendib menu'} anchorRef={{current:anchor}} items={items} getItemState={state} onClose={()=>{onClose();anchor.focus();}} onCommand={command=>{
+  return <Menu style={{maxHeight:'calc(100dvh - 68px - env(safe-area-inset-top) - env(safe-area-inset-bottom))'}} label={meta?'App commands':'Kottu menu'} anchorRef={{current:anchor}} items={items} getItemState={state} onClose={()=>{onClose();anchor.focus({preventScroll:true});}} onCommand={command=>{
     if(command==='phone.home'||command==='window.close'||command==='app.quit'||command==='app.hide'){onHome?.();return;}
     if(command.startsWith('window.focus:')){focusWindow(command.slice(13));return;}
     if(command==='app.about'&&meta){void alert({title:`About ${meta.name}`,body:`${meta.description}\nVersion ${VERSION}`,primary:'OK'});return;}
     if(command==='os.shortcuts'){if(win?.appId==='readme')runCommand('readme.shortcuts','menu');else openApp('readme',{query:{section:'shortcuts'}});return;}
     if(command==='help.source'){window.open('https://github.com/theetaz/os.nipuntheekshana.com','_blank','noopener,noreferrer');return;}
-    if(command==='help.report'){location.href='mailto:theekshana2@gmail.com?subject=Serendib%3A%20problem%20report';return;}
+    if(command==='help.report'){location.href='mailto:theekshana2@gmail.com?subject=Kottu%20OS%3A%20problem%20report';return;}
     runCommand(command,'menu');
   }}/>;
 }
