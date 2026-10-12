@@ -102,7 +102,13 @@ export async function processImage(source, asset) {
   const masterDefringe = defringeAlpha(final.data, final.info.width, final.info.height);
   const finalBorder = borderFraction(final.data, final.info.width, final.info.height);
   if (finalBorder < 0.85) throw new Error(`Resized border check failed: ${(finalBorder * 100).toFixed(1)}%`);
-  const master = await sharp(final.data, { raw: final.info }).png({ compressionLevel: 9, effort: 10, palette: false }).toBuffer();
+  // Raw resize info says premultiplication was used internally; the returned RGB
+  // is straight alpha. Do not feed that informational flag back into the encoder.
+  const master = await sharp(final.data, { raw: { width: final.info.width, height: final.info.height, channels: 4, premultiplied: false } })
+    .png({ compressionLevel: 9, effort: 10, palette: false }).toBuffer();
+  const stored = await sharp(master).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const storedBorder = borderFraction(stored.data, stored.info.width, stored.info.height);
+  if (storedBorder < 0.85) throw new Error(`Encoded master border check failed: ${(storedBorder * 100).toFixed(1)}%`);
   const quality = { avif: 50, webp: 78 };
   let variants;
   for (;;) {
@@ -115,7 +121,7 @@ export async function processImage(source, asset) {
       quality[format] -= 5;
     }
   }
-  return { master, quality, variants, keyed, border, finalBorder, sourceDefringe, masterDefringe, width: final.info.width, height: final.info.height };
+  return { master, quality, variants, keyed, border, finalBorder: storedBorder, sourceDefringe, masterDefringe, width: final.info.width, height: final.info.height };
 }
 export async function checkMasters(assets = catalogue.assets, provenance = loadProvenance()) {
   const rows = [], failures = [];

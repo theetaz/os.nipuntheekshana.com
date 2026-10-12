@@ -101,7 +101,21 @@ describe('Kottu art catalogue and masters', () => {
       expect(result.finalBorder).toBeGreaterThanOrEqual(0.85);
       const meta = await sharp(result.master).metadata();
       expect(meta.hasAlpha).toBe(true);
+      const stored = await sharp(result.master).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      expect(borderFraction(stored.data, stored.info.width, stored.info.height)).toBeGreaterThanOrEqual(0.85);
       expect(result.variants.every((v: { bytes: number; cap: number }) => v.bytes <= v.cap)).toBe(true);
+    } finally { await rm(directory, { recursive: true, force: true }); }
+  });
+  it('retains a translucent ink outline through the resized PNG round trip', async () => {
+    const directory = await mkdtemp(resolve(tmpdir(), 'kottu-alpha-test-'));
+    try {
+      const path = resolve(directory, 'outline.png');
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><circle cx="80" cy="80" r="64" fill="#1B1530"/><circle cx="80" cy="80" r="61" fill="#FFF"/><circle cx="80" cy="80" r="49" fill="#FFC93C"/></svg>';
+      await sharp(Buffer.from(svg)).png().toFile(path);
+      const result = await processImage(path, catalogue.assets.find((asset) => asset.id === 'badge-pin'));
+      const stored = await sharp(result.master).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      expect(borderFraction(stored.data, stored.info.width, stored.info.height)).toBeGreaterThanOrEqual(0.85);
+      expect(stored.data.some((value, i) => i % 4 === 3 && value > 8 && value < 224)).toBe(true);
     } finally { await rm(directory, { recursive: true, force: true }); }
   });
 });
