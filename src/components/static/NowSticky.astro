@@ -1,9 +1,0 @@
----
-import { now } from '../../data/profile';
-const updated = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${now.updated}T00:00:00Z`)).replace('Sept', 'Sep');
----
-<aside class="now-sticky os-chrome" aria-labelledby="sticky-title">
-  <h2 id="sticky-title">Now</h2>
-  <ol>{now.items.slice(0, 3).map((item, i) => <li><span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span>{item}</span></li>)}</ol>
-  <footer><time datetime={now.updated}>Updated {updated}</time><a class="stretched-link" href="/now" aria-label="Read all current updates">›</a></footer>
-</aside>

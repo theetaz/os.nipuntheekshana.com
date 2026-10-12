@@ -22,67 +22,10 @@
 .static-dock a { border-radius: 11px; }
 .static-dock .dock-divider { width: 1px; height: 40px; margin: 0 2px; background: var(--os-line-strong); }
 .pocket-grid, .simple-only { display: none; }
-.desktop-widgets { position: absolute; left: 48px; top: 72px; display: flex; flex-direction: column; align-items: start; gap: 32px; z-index: var(--z-widgets); }
-.ticket-wrap { width: 440px; height: 232px; transform: rotate(-1.2deg); filter: drop-shadow(0 1px 1px rgb(31 27 22 / .1)) drop-shadow(0 10px 14px rgb(31 27 22 / .18)); transition: transform 160ms var(--ease-out); }
-.ticket-wrap:hover { transform: translateY(-2px) rotate(-1.2deg); }
-[data-theme="dark"] .ticket-wrap { filter: drop-shadow(0 1px 1px rgb(0 0 0 / .5)) drop-shadow(0 10px 14px rgb(0 0 0 / .45)); }
-.ticket { position: relative; width: 100%; height: 100%; border-radius: 6px; display: grid; grid-template-columns: 72px minmax(0, 1fr); color: var(--ticket-ink); background: repeating-linear-gradient(0deg, rgb(43 33 18 / .025) 0 1px, transparent 1px 3px), var(--ticket-card); mask: radial-gradient(circle 5px at calc(100% - 19px) 19px, #0000 4.6px, #000 5px); }
-.ticket-stub { position: relative; display: grid; place-items: center; }
-.ticket-stub::after { content: ''; position: absolute; right: -1px; top: 6px; bottom: 6px; width: 2px; background: radial-gradient(circle, var(--ticket-perf) 1px, transparent 1.3px) center top / 2px 6px repeat-y; }
-.stub-name { transform: rotate(-90deg); font: 500 10.5px/14px var(--font-mono); letter-spacing: .3em; color: var(--ticket-ink-2); }
-.stub-serial { position: absolute; bottom: 14px; width: 100%; text-align: center; font: 500 9.5px/12px var(--font-mono); color: var(--ticket-ink-2); }
-.ticket-main { min-width: 0; padding: 18px 20px 16px; }
-.mono-label { font: 500 10.5px/14px var(--font-mono); font-stretch: 87.5%; letter-spacing: .08em; text-transform: uppercase; }
-.ticket .eyebrow { margin: 0; color: var(--ticket-ink-2); }
-.ticket h1 { margin: 14px 0 0; font: 500 40px/40px var(--font-display); letter-spacing: -.055em; white-space: nowrap; }
-.ticket-native { margin: 4px 0 0; font: 400 15px/20px var(--font-sinhala); color: var(--ticket-ink-2); }
-.ticket-route { margin: 14px 0 0; display: grid; grid-template-columns: 1fr 1.25fr; gap: 16px; }
-.ticket-route dt { color: var(--ticket-ink-2); }
-.ticket-route dd { margin: 2px 0 0; font: 600 14px/18px var(--font-ui); }
-.ticket-role { margin: 12px 0 0; font: 450 12.5px/16px var(--font-ui); color: var(--ticket-ink-2); }
-.ticket-cta { font-family: var(--font-ui); color: var(--os-accent-ink); text-decoration: none; }
-.now-sticky { display: flex; flex-direction: column; position: relative; margin-left: 16px; width: 248px; height: 236px; transform: rotate(2deg); background: var(--note-paper); color: var(--note-ink); border-radius: 4px; box-shadow: var(--shadow-widget); padding: 20px 18px 12px; }
-.now-sticky::before { content: ''; position: absolute; top: -8px; left: 50%; width: 64px; height: 18px; transform: translateX(-50%) rotate(-4deg); background: var(--note-tape); box-shadow: 0 0 0 1px rgb(0 0 0 / .03); }
-.now-sticky h2 { margin: 0; font: italic 500 22px/26px var(--font-display); }
-.now-sticky ol { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.now-sticky li { display: grid; grid-template-columns: 20px 1fr; font: 450 12px/16px var(--font-ui); }
-.now-sticky li span:first-child { font: 500 10.5px/16px var(--font-mono); color: color-mix(in oklch, var(--os-accent-ink) 60%, var(--note-ink)); }
-.now-sticky li span:last-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.now-sticky footer { margin-top: auto; display: flex; justify-content: space-between; font: 500 11px/14px var(--font-ui); }
-.now-sticky a { color: inherit; text-decoration: none; }
-.activity-strip { position: relative; width: 360px; height: 112px; padding: 16px; border-radius: 18px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); box-shadow: var(--shadow-widget), 0 0 0 1px var(--glass-edge), inset 0 1px 0 var(--glass-border); }
-.activity-heat { display: block; }
-.heat-0 { fill: var(--os-sunken); }
-.heat-1 { fill: color-mix(in oklch, var(--os-accent) 22%, var(--os-sunken)); }
-.heat-2 { fill: color-mix(in oklch, var(--os-accent) 40%, var(--os-sunken)); }
-.heat-3 { fill: color-mix(in oklch, var(--os-accent) 60%, var(--os-sunken)); }
-.heat-4 { fill: color-mix(in oklch, var(--os-accent) 80%, var(--os-sunken)); }
-.heat-5 { fill: var(--os-accent); }
-.activity-strip p { margin: 12px 0 0; display: flex; align-items: baseline; gap: 8px; }
-.activity-strip strong { font: 600 13px/18px var(--font-ui); font-variant-numeric: tabular-nums; }
-.activity-strip a { font: 450 11px/14px var(--font-ui); color: var(--os-ink-2); text-decoration: none; }
-@media (min-width: 1024px) and (max-width: 1279px) {
-  .ticket-wrap { width: 400px; height: 212px; }
-  .ticket-main { padding: 14px 16px; }
-  .ticket h1 { font-size: 36px; line-height: 36px; margin-top: 10px; }
-  .ticket-route { margin-top: 10px; }
-  .ticket-role { margin-top: 8px; }
-}
-@media (max-height: 859px), (max-width: 1179px) { .activity-strip { display: none; } }
-@media (min-width: 1024px) and (max-height: 699px) { .now-sticky { display: none; } }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
   .static-menubar { position: relative; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 16px 0; }
-  .serendib-brand { font: italic 500 22px/26px var(--font-display); }
+  .serendib-brand { font: 400 22px/26px var(--font-display); font-synthesis: none; }
   .serendib-brand svg, .static-menubar nav, .desktop-icons, .desktop-only { display: none !important; }
-  .desktop-widgets { position: relative; left: auto; top: auto; margin: 16px; gap: 24px; }
-  .ticket-wrap { width: 100%; height: 148px; transform: none; }
-  .ticket-wrap:hover { transform: none; }
-  .ticket { display: block; }
-  .ticket-main { padding: 16px; }
-  .ticket-stub, .ticket-route, .ticket-cta > span { display: none; }
-  .ticket h1 { margin-top: 8px; font-size: 28px; line-height: 28px; letter-spacing: -.03em; }
-  .ticket-role { margin-top: 8px; }
-  .now-sticky { margin: 0 0 0 4px; width: min(100%, 358px); height: 196px; transform: rotate(1deg); }
   .pocket-grid { display: block; position: relative; z-index: var(--z-icons); padding: 8px 16px 124px; }
   .pocket-grid ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 8px; margin: 0; padding: 0; list-style: none; }
   .pocket-grid a { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: var(--os-ink); font: 500 11px/14px var(--font-ui); text-shadow: var(--label-shadow); text-align: center; }
@@ -90,33 +33,24 @@
   .static-dock ul { height: 84px; padding: 18px 24px; gap: 24px; border-radius: 28px; }
   html.js body { overflow: auto; height: auto; }
 }
-/* A single home h1 serves both the ticket and the reading document. */
 html:is([data-view="simple"], :has(#simple:target)) body { overflow: auto; height: auto; }
 html:is([data-view="simple"], :has(#simple:target)) .os-chrome { display: none !important; }
 html:is([data-view="simple"], :has(#simple:target)) .simple-only { display: block; }
 html:is([data-view="simple"], :has(#simple:target)) :is(.simple-header, #content, .simple-footer) { width: min(100% - 40px, 80ch); margin: 0 auto; }
 html:is([data-view="simple"], :has(#simple:target)) .simple-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--os-line); }
-.simple-header a, .simple-footer a, .home-document a { color: var(--os-accent-ink); text-underline-offset: 3px; }
-.simple-wordmark { font: italic 500 24px/30px var(--font-display); text-decoration: none; }
+.simple-wordmark { font: 400 24px/30px var(--font-display); font-synthesis: none; text-decoration: none; }
 html:is([data-view="simple"], :has(#simple:target)) .static-window { position: static; display: block; width: 100%; height: auto; overflow: visible; box-shadow: none; border-radius: 0; background: transparent; }
 html:is([data-view="simple"], :has(#simple:target)) .static-titlebar { display: none; }
 html:is([data-view="simple"], :has(#simple:target)) .static-content { overflow: visible; padding: 0; }
 html:is([data-view="simple"], :has(#simple:target)) .static-document { padding: 32px 0; max-width: none; }
-html:is([data-view="simple"], :has(#simple:target)) .desktop-widgets { position: static; display: block; margin: 32px 0 16px; }
-html:is([data-view="simple"], :has(#simple:target)) :is(.ticket-wrap, .ticket, .ticket-main) { width: auto; height: auto; padding: 0; transform: none; filter: none; display: block; background: transparent; mask: none; color: var(--os-ink); }
-html:is([data-view="simple"], :has(#simple:target)) .ticket-main > :not(h1) { display: none; }
-html:is([data-view="simple"], :has(#simple:target)) .ticket-stub { display: none; }
-html:is([data-view="simple"], :has(#simple:target)) .ticket h1 { margin: 0; font-size: 36px; line-height: 42px; }
-.home-document { font: 450 15px/25px var(--font-ui); padding-bottom: 32px; }
-.home-document h2 { font: 500 26px/32px var(--font-display); margin: 32px 0 12px; }
-.home-document p { margin: 0 0 16px; }
-.home-document .lede { font-size: 17px; line-height: 28px; }
-.home-document ul { padding-left: 24px; }
-.home-document li { margin: 0 0 10px; }
 .simple-footer { border-top: 1px solid var(--os-line); padding: 24px 0; color: var(--os-ink-2); }
 .simple-footer nav { display: flex; flex-wrap: wrap; gap: 12px 20px; }
 
-@media (prefers-color-scheme: dark) { html.no-js:not([data-theme="light"]) .ticket-wrap { filter: drop-shadow(0 1px 1px rgb(0 0 0 / .5)) drop-shadow(0 10px 14px rgb(0 0 0 / .45)); } }
 
-.ticket-cta span { position: absolute; right: 20px; bottom: 14px; width: 96px; text-align: right; }
-.ticket-wrap:has(a:focus-visible) { outline: 2px solid var(--os-focus); outline-offset: 4px; border-radius: 6px; }
+html:is([data-view="simple"], :has(#simple:target)) main#content { min-height: 0; }
+html:is([data-view="simple"], :has(#simple:target)) #story { display: block; }
+
+.simple-header a, .simple-footer a { color: var(--os-accent-ink); text-underline-offset: 3px; }
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  html:not([data-view="simple"]):not(:has(#simple:target)) body:has(.phone-home[role="main"]) main#content:empty { display: none; }
+}

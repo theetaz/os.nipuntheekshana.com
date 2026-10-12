@@ -1,18 +1,12 @@
 ---
 import OsLayout from '../layouts/OsLayout.astro';
-import TicketWidget from '../components/static/TicketWidget.astro';
-import NowSticky from '../components/static/NowSticky.astro';
-import ActivityStrip from '../components/static/ActivityStrip.astro';
-import HomeDocument from '../components/static/HomeDocument.astro';
 import BootScreen from '../components/static/BootScreen.astro';
 import InitialData from '../components/static/InitialData.astro';
-import { getClientProjects, getClientPosts, getClientActivity } from '../lib/client-data';
+import { getClientActivity } from '../lib/client-data';
 import { seoFor } from '../lib/seo';
-const [projects, posts, activity] = await Promise.all([getClientProjects(), getClientPosts(), getClientActivity()]);
+const activity = await getClientActivity();
 const seo = seoFor({ path: '/', title: 'Nipun Theekshana', description: 'The desktop of Nipun Theekshana, an engineer from Sri Lanka building open data infrastructure. Open the projects, read the writing, try the terminal.', kind: 'home' });
 ---
 <OsLayout seo={seo} initial={null} home>
-  <div class="desktop-widgets"><TicketWidget /><NowSticky /><ActivityStrip activity={activity} /></div>
-  <HomeDocument projects={projects} posts={posts} />
   <Fragment slot="after-main"><BootScreen /><InitialData key="home" data={{ activity }} /></Fragment>
 </OsLayout>

@@ -13,7 +13,7 @@ html[data-boot][data-boot-exit="skip"] .boot-screen { animation: boot-exit 200ms
 .boot-progress span { display: block; width: 100%; height: 100%; background: var(--os-accent); transform: scaleX(0); transform-origin: left; animation: boot-progress 900ms 200ms var(--ease-out) forwards; }
 html.os-ready .boot-progress span { animation: boot-progress 900ms 200ms var(--ease-out) forwards, boot-complete 200ms calc(1100ms - var(--boot-hydrated-at, 0ms)) forwards; }
 html[data-boot-exit] .boot-progress span { animation: none; transform: scaleX(1); }
-html[data-boot-exit] :is(.desktop-widgets, .desktop-icons, .static-dock) { animation: boot-desktop 450ms var(--ease-out) both; }
+html[data-boot-exit] :is(.k-hero, .desktop-icons, .static-dock) { animation: boot-desktop 450ms var(--ease-out) both; }
 @keyframes boot-draw { to { stroke-dashoffset: 0; } }
 @keyframes boot-fade { to { opacity: 1; } }
 @keyframes boot-wordmark { from { transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -31,7 +31,7 @@ html[data-boot-exit] :is(.desktop-widgets, .desktop-icons, .static-dock) { anima
   .boot-progress { margin-top: 24px; }
   html.os-ready .boot-progress span { animation: boot-progress 300ms 200ms var(--ease-out) forwards, boot-complete 150ms calc(500ms - var(--boot-hydrated-at, 0ms)) forwards; }
   html[data-boot-exit] .boot-progress span { animation: none; transform: scaleX(1); }
-  html[data-boot-exit] :is(.desktop-widgets, .desktop-icons, .static-dock) { animation-duration: 300ms; }
+  html[data-boot-exit] :is(.k-hero, .desktop-icons, .static-dock) { animation-duration: 300ms; }
 }
 @media (prefers-reduced-motion: reduce) { html:not([data-motion="full"])[data-boot] .boot-screen { display: none; } }
 html[data-motion="reduce"][data-boot] .boot-screen { display: none; }
