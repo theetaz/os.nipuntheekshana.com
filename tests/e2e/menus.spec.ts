@@ -3,19 +3,6 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { test as nativeDateTest, type Page } from '@playwright/test';
 import { test, expect, openApp, openMenu } from './fixtures';
-import { fixtureServer, type FixtureServer } from './fixture-server';
-
-let fixtureRoute: string; let fixtureOrigin: string; let server: FixtureServer;
-test.beforeAll(async ({}, info) => {
-  fixtureRoute = `p2-5-menus-${info.workerIndex}`;
-  server = await fixtureServer(`menus-${info.workerIndex}`, 4600 + info.workerIndex, { [fixtureRoute]: `---
-import MenuFixture from '../../../tests/fixtures/p2-5-menus';
-import '../../../src/styles/global.css';
----
-<!doctype html><html lang="en" data-motion="reduce"><head><meta charset="UTF-8" /><title>Menu fixture</title></head><body><MenuFixture client:load /></body></html>` });
-  fixtureOrigin = server.origin;
-});
-test.afterAll(async () => { await server?.stop(); });
 const bar = (page: Page) => page.getByRole('menubar', { name: 'Application menus' });
 async function hydrated(page: Page, route = '/') { await page.goto(route); await expect(page.locator('html')).toHaveClass(/os-ready/); }
 async function menu(page: Page, name: string) {
@@ -26,21 +13,21 @@ async function menu(page: Page, name: string) {
 
 test('Tab and Option-1 reach the island; arrows, Home, End, typeahead and Escape rove', async ({ page }) => {
   await hydrated(page);
-  const island = bar(page).getByRole('menuitem', { name: 'Island menu' });
+  const island = bar(page).getByRole('menuitem', { name: 'Kottu menu' });
   await page.keyboard.press('Alt+1'); await expect(island).toBeFocused();
   await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab'); await expect(island).toBeFocused();
-  await page.keyboard.press('ArrowRight'); await expect(bar(page).getByRole('menuitem', { name: 'Serendib' })).toBeFocused();
+  await page.keyboard.press('ArrowRight'); await expect(bar(page).getByRole('menuitem', { name: 'Kottu OS' })).toBeFocused();
   await page.keyboard.press('End'); await expect(bar(page).getByRole('menuitem', { name: 'Help' })).toBeFocused();
   await page.keyboard.press('Home'); await expect(island).toBeFocused();
   await page.keyboard.press('w'); await expect(bar(page).getByRole('menuitem', { name: 'Window' })).toBeFocused();
   await page.keyboard.press('ArrowDown'); await expect(page.getByRole('menuitem', { name: 'Minimise', exact: true })).toBeFocused();
   await page.keyboard.press('Escape'); await expect(bar(page).getByRole('menuitem', { name: 'Window' })).toBeFocused();
 });
-test('Window Zoom routes Enter to the focused window and Escape returns to its trigger', async ({ page }) => {
+test('Window Maximise routes Enter to the focused window and Escape returns to its trigger', async ({ page }) => {
   await hydrated(page, '/projects'); await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
   const window = page.locator('[data-window-id="projects"]'); const initial = await window.boundingBox();
   await menu(page, 'Window'); await page.keyboard.press('ArrowDown');
-  await expect(page.getByRole('menuitem', { name: 'Zoom', exact: true })).toBeFocused(); await page.keyboard.press('Enter');
+  await expect(page.getByRole('menuitem', { name: 'Maximise', exact: true })).toBeFocused(); await page.keyboard.press('Enter');
   await expect.poll(async () => (await window.boundingBox())!.width).toBeGreaterThan(initial!.width);
   await expect(page.getByRole('menu', { name: 'Window', exact: true })).toBeHidden();
   await menu(page, 'Window'); await page.keyboard.press('Escape'); await expect(bar(page).getByRole('menuitem', { name: 'Window' })).toBeFocused();
@@ -73,19 +60,21 @@ test('disabled items remain focusable and inert on the desktop', async ({ page }
   await hydrated(page); await menu(page, 'Window'); const minimize = page.getByRole('menuitem', { name: 'Minimise', exact: true });
   await expect(minimize).toBeFocused(); await expect(minimize).toHaveAttribute('aria-disabled', 'true');
   await page.keyboard.press('Enter'); await expect(page.getByRole('menu', { name: 'Window', exact: true })).toBeVisible();
-  await page.keyboard.press('ArrowDown'); await expect(page.getByRole('menuitem', { name: 'Zoom', exact: true })).toBeFocused();
+  await page.keyboard.press('ArrowDown'); await expect(page.getByRole('menuitem', { name: 'Maximise', exact: true })).toBeFocused();
 });
 test('loaded app menus use live useAppMenuState and route through useAppCommands', async ({ page }) => {
-  await page.goto(`${fixtureOrigin}/${fixtureRoute}`); await expect(page.getByTestId('app-command')).toHaveText('None');
-  await menu(page, 'View'); const live = page.getByRole('menuitemcheckbox', { name: 'Live option' });
-  await expect(live).toHaveAttribute('aria-checked', 'false'); await live.click();
-  await expect(page.getByTestId('app-command')).toHaveText('projects.toggle');
-  await menu(page, 'View'); await expect(live).toHaveAttribute('aria-checked', 'true');
-  await page.keyboard.press('ArrowDown'); const disabled = page.getByRole('menuitem', { name: 'Unavailable action' });
+  await hydrated(page, '/projects'); const window = page.locator('[data-window-id="projects"]');
+  await expect(window.locator('.projects-statusbar')).toBeVisible();
+  await menu(page, 'View'); const live = page.getByRole('menuitemcheckbox', { name: 'Show status bar' });
+  await expect(live).toHaveAttribute('aria-checked', 'true'); await live.click();
+  await expect(window.locator('.projects-statusbar')).toHaveCount(0);
+  await menu(page, 'View'); await expect(live).toHaveAttribute('aria-checked', 'false'); await page.keyboard.press('Escape');
+  await hydrated(page, '/projects/salli'); await menu(page, 'View');
+  const disabled = page.getByRole('menuitemcheckbox', { name: 'Show status bar' }); await disabled.focus();
   await expect(disabled).toBeFocused(); await expect(disabled).toHaveAttribute('aria-disabled', 'true'); await page.keyboard.press('Enter');
-  await expect(page.getByTestId('app-command')).toHaveText('projects.toggle');
+  await expect(disabled).toHaveAttribute('aria-checked', 'true'); await expect(page).toHaveURL(/\/projects\/salli$/);
   await expect(page.getByRole('menu', { name: 'View', exact: true })).toBeVisible();
-  await page.keyboard.press('Escape'); await page.getByRole('button', { name: 'Focus another app' }).click();
+  await page.keyboard.press('Escape'); await openApp(page, 'Terminal');
   await menu(page, 'View'); await expect(live).toHaveCount(0);
 });
 test('More preserves menus at 200 percent text size and returns them when space recovers', async ({ page }) => {
@@ -101,9 +90,10 @@ test('More preserves menus at 200 percent text size and returns them when space 
   await expect(more).toHaveCount(0); await expect(bar(page).getByRole('menuitem', { name: 'Help', exact: true })).toBeVisible();
 });
 test('Now popover shows three items, dismisses with Escape and opens Now', async ({ page }) => {
-  await page.goto(`${fixtureOrigin}/${fixtureRoute}`); await expect(page.getByTestId('app-command')).toBeVisible();
-  const trigger = page.getByRole('button', { name: "What Nipun's up to" }); await trigger.click();
-  const popover = page.getByRole('dialog', { name: "What Nipun's up to" }); await expect(popover.getByRole('listitem')).toHaveText(['One', 'Two', 'Three']);
+  await hydrated(page);
+  const trigger = page.getByRole('button', { name: /^What Nipun's up to:/ }); await trigger.click();
+  const profile = await (await page.request.get('/data/profile.json')).json();
+  const popover = page.getByRole('dialog', { name: "What Nipun's up to" }); await expect(popover.getByRole('listitem')).toHaveText(profile.now.items.slice(0, 3));
   await page.keyboard.press('Escape'); await expect(trigger).toBeFocused(); await trigger.click();
   await page.getByRole('button', { name: 'Open Now ›' }).click(); await expect(bar(page).getByRole('menuitem', { name: 'Now', exact: true })).toBeVisible();
 });
@@ -114,34 +104,42 @@ test('sound and appearance write preferences and Option-click opens Appearance s
   const appearance = page.getByRole('button', { name: 'Appearance', exact: true });
   for (const theme of ['light', 'dark', 'auto']) { await appearance.click(); await expect.poll(() => page.evaluate(() => localStorage.getItem('serendib:theme'))).toBe(JSON.stringify(theme)); }
   await appearance.click({ modifiers: ['Alt'] }); await expect(page).toHaveURL(/\/settings\?section=appearance$/);
-  await page.goto(`${fixtureOrigin}/${fixtureRoute}`); await expect(page.getByTestId('app-command')).toBeVisible();
-  await appearance.click({ modifiers: ['Alt'] }); await expect(page.getByTestId('focused-section')).toHaveText('appearance');
+  await expect(page.locator('[data-window-id="settings"]')).toContainText('Appearance');
 });
-test('Spotlight, appearance toasts, app About version and shortcuts route through shell APIs', async ({ page }) => {
-  await page.goto(`${fixtureOrigin}/${fixtureRoute}`); await expect(page.getByTestId('app-command')).toBeVisible();
-  await page.getByRole('button', { name: 'Spotlight', exact: true }).click(); await expect(page.getByTestId('spotlight-open')).toHaveText('true');
-  await page.getByRole('button', { name: 'Appearance', exact: true }).click(); await expect(page.getByTestId('toast-title')).toContainText('appearance');
+test('Search, appearance toasts, app About version and shortcuts route through shell APIs', async ({ page }) => {
+  await hydrated(page, '/projects');
+  const search = page.getByRole('button', { name: 'Search', exact: true }); await search.click();
+  const dialog = page.getByRole('dialog', { name: 'Search', exact: true }); await expect(dialog.getByRole('combobox')).toBeFocused();
+  await page.keyboard.press('Escape'); await expect(search).toBeFocused();
+  await page.getByRole('button', { name: 'Appearance', exact: true }).click(); await expect(page.locator('.os-toast')).toContainText('appearance');
   await menu(page, 'Projects'); await page.getByRole('menuitem', { name: 'About Projects', exact: true }).click();
-  await expect(page.getByTestId('alert-body')).toContainText('Version 2.0');
+  await expect(page.getByRole('alertdialog')).toContainText('Version 2.0'); await page.keyboard.press('Escape');
   await menu(page, 'Help'); await page.getByRole('menuitem', { name: 'Keyboard shortcuts', exact: true }).click();
-  await expect(page.getByTestId('focused-section')).toHaveText('shortcuts');
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/readme');
+  await expect.poll(() => new URL(page.url()).searchParams.get('section')).toBe('shortcuts');
+  expect(new URL(page.url()).searchParams.get('w')).toBe('projects');
+  await expect(page.locator('[data-window-id="readme"]')).toContainText('Keyboard');
 });
 test('View checks track preference commands and the Wallpaper submenu', async ({ page }) => {
-  await hydrated(page); await menu(page, 'View'); const widgets = page.getByRole('menuitemcheckbox', { name: 'Show widgets' });
-  await expect(widgets).toHaveAttribute('aria-checked', 'true'); await widgets.click();
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('serendib:widgets'))).toBe('false'); await menu(page, 'View');
-  await expect(widgets).toHaveAttribute('aria-checked', 'false');
+  await hydrated(page); await menu(page, 'View');
+  await expect(page.getByRole('menuitemcheckbox', { name: 'Show widgets' })).toHaveCount(0);
+  const mochi = page.getByRole('menuitemcheckbox', { name: 'Show Mochi' });
+  await expect(mochi).toHaveAttribute('aria-checked', 'true'); await mochi.click();
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('serendib:mochi') ?? '{}').visible)).toBe(false);
+  await expect(page.getByRole('menu', { name: 'View', exact: true })).toBeHidden(); await menu(page, 'View');
+  await expect(mochi).toHaveAttribute('aria-checked', 'false');
   await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click(); await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await menu(page, 'View'); await expect(page.getByRole('menuitemradio', { name: 'Dark', exact: true })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('menuitem', { name: 'Wallpaper', exact: true }).focus(); await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('menu', { name: 'Wallpaper', exact: true }).getByRole('menuitemradio').locator('span.flex-1')).toHaveText(['Kottu', 'Galle Face', 'Pettah', 'Paper']);
   await page.getByRole('menuitemradio', { name: 'Paper', exact: true }).click(); await expect(page.locator('html')).toHaveAttribute('data-wallpaper', 'paper');
 });
 test('shortcut hints follow navigator platform precedence', async ({ page }) => {
   await page.addInitScript(() => { Object.defineProperty(navigator, 'userAgentData', { value: { platform: 'macOS' }, configurable: true }); });
   await hydrated(page); await menu(page, 'Window');
   await expect(page.getByRole('menuitem', { name: 'Snap left', exact: true })).toHaveText('Snap left⌥[');
-  await page.keyboard.press('Escape'); await menu(page, 'Island menu');
-  await expect(page.getByRole('menuitem', { name: 'System Settings…', exact: true })).toHaveText('System Settings…⌥,');
+  await page.keyboard.press('Escape'); await menu(page, 'Kottu menu');
+  await expect(page.getByRole('menuitem', { name: 'Settings…', exact: true })).toHaveText('Settings…⌥,');
 });
 test('non-Mac shortcut hints use Alt and Ctrl', async ({ page }) => {
   await page.addInitScript(() => {
@@ -150,7 +148,7 @@ test('non-Mac shortcut hints use Alt and Ctrl', async ({ page }) => {
   });
   await hydrated(page); await menu(page, 'Window');
   await expect(page.getByRole('menuitem', { name: 'Snap right', exact: true })).toHaveText('Snap rightAlt+]');
-  await expect(page.getByRole('button', { name: 'Spotlight', exact: true })).toHaveAttribute('title', 'Spotlight (Ctrl+K)');
+  await expect(page.getByRole('button', { name: 'Search', exact: true })).toHaveAttribute('title', 'Search (Ctrl+K)');
 });
 test.describe('visitor clock in Colombo', () => {
   test.use({ timezoneId: 'Asia/Colombo', locale: 'en-GB' });
@@ -183,7 +181,7 @@ test('menu screens have no console errors, zero hydration CLS, reduced motion an
       if (!shift.hadRecentInput) (window as unknown as { menuCLS: number }).menuCLS += shift.value;
     } }).observe({ type: 'layout-shift', buffered: true });
   });
-  const artifacts = resolve('.astro/p2-5-artifacts'); await mkdir(artifacts, { recursive: true });
+  const artifacts = resolve('.astro/k4-artifacts/screenshots'); await mkdir(artifacts, { recursive: true });
   for (const theme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' }); await page.setViewportSize({ width: 1440, height: 900 });
     await hydrated(page, '/projects'); await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');

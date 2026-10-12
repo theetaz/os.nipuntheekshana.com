@@ -10,9 +10,9 @@ const item = (label: string, command: string, shortcut?: Shortcut, role?: 'check
 const alt = (code: string, shift?: boolean): Shortcut => ({ code, alt: true, ...(shift && { shift }) });
 
 export function islandMenu(): readonly MenuItemSpec[] {
-  return [item('About Serendib', 'os.about'), separator, item('System Settings…', 'os.settings', alt('Comma')),
+  return [item('About Kottu OS', 'os.about'), item('Settings…', 'os.settings', alt('Comma')),
     item('Simple view', 'os.simpleView'), item('Keyboard shortcuts', 'os.shortcuts'), separator,
-    item('Sleep', 'os.sleep'), item('Restart…', 'os.restart'), item('Shut down…', 'os.shutdown')];
+    item('Suspend', 'os.sleep'), item('Reboot…', 'os.restart'), item('Power off…', 'os.shutdown')];
 }
 export function appMenu(meta: AppMeta): readonly MenuItemSpec[] {
   return [item(`About ${meta.name}`, 'app.about'), item('Settings…', 'os.settings', alt('Comma')), separator,
@@ -25,8 +25,8 @@ export function fileMenu(meta?: AppMeta, extra: readonly MenuItemSpec[] = []): r
 }
 export const defaultView: readonly MenuItemSpec[] = [
   { kind: 'submenu', label: 'Wallpaper', items: WALLPAPERS.map(id => item(WALLPAPER_NAMES[id], `wallpaper.${id}`, undefined, 'radio')) },
-  item('Show widgets', 'desktop.widgets', undefined, 'checkbox'), item('Show Mochi', 'desktop.mochi', undefined, 'checkbox'),
-  item('Clean up icons', 'desktop.cleanUp'), separator,
+  item('Show Mochi', 'desktop.mochi', undefined, 'checkbox'),
+  item('Clean up desktop', 'desktop.cleanUp'), separator,
   item('Light', 'theme.light', undefined, 'radio'), item('Dark', 'theme.dark', undefined, 'radio'),
   item('Automatic', 'theme.auto', undefined, 'radio'),
 ];
@@ -37,7 +37,7 @@ export function goMenu(): readonly MenuItemSpec[] {
     item('Messages', 'go.messages'), item('Postcards', 'go.guestbook'), separator, item('Pin the city', 'go.pin'), item('Kooda', 'go.trash')];
 }
 export function windowMenu(): readonly MenuItemSpec[] {
-  return [item('Minimise', 'window.minimize', alt('KeyM')), item('Zoom', 'window.zoom', alt('KeyZ')),
+  return [item('Minimise', 'window.minimize', alt('KeyM')), item('Maximise', 'window.zoom', alt('KeyZ')),
     item('Snap left', 'window.snapLeft', alt('BracketLeft')), item('Snap right', 'window.snapRight', alt('BracketRight')),
     item('Move & resize with keyboard', 'window.keyboardMove'), separator, item('Next window', 'window.next', alt('Backquote')),
     item('Previous window', 'window.prev', alt('Backquote', true)), item('Bring all to front', 'window.bringAllToFront'),
@@ -48,7 +48,7 @@ export function helpMenu(): readonly MenuItemSpec[] {
     separator, item('View source on GitHub ↗', 'help.source'), item('Report a problem ↗', 'help.report')];
 }
 export function desktopMenus(): readonly ShellMenu[] {
-  return [{ id: 'app', label: 'Serendib', strong: true, items: islandMenu() },
+  return [{ id: 'app', label: 'Kottu OS', strong: true, items: islandMenu() },
     { id: 'file', label: 'File', items: fileMenu() }, { id: 'view', label: 'View', items: viewMenu() },
     { id: 'go', label: 'Go', items: goMenu() }, { id: 'window', label: 'Window', items: windowMenu() },
     { id: 'help', label: 'Help', items: helpMenu() }];
