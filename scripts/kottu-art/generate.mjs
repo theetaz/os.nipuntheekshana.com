@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { catalogue, root, parseFlags, selectedAssets, positiveInteger, externalWork, loadProvenance, batchPrompt, writeJson } from './lib.mjs';
 
-const flags = parseFlags(process.argv.slice(2), ['family', 'only', 'batch-size', 'concurrency', 'passes', 'model', 'work', 'dry-run']);
+const flags = parseFlags(process.argv.slice(2), ['family', 'only', 'batch-size', 'concurrency', 'passes', 'model', 'work', 'dry-run', 'reroll-note']);
 const assets = selectedAssets(flags);
 const concurrency = positiveInteger(flags.concurrency, 3, 'concurrency', 6);
 const passes = positiveInteger(flags.passes, 2, 'passes', 10);
@@ -33,7 +33,7 @@ function command(command, args, cwd, logPath, timeoutMs) {
 }
 async function main() {
   if (flags['dry-run']) {
-    for (const batch of batchesFor(pending)) console.log(batchPrompt(batch));
+    for (const batch of batchesFor(pending)) console.log(batchPrompt(batch, flags['reroll-note'] ?? ''));
     return;
   }
   const work = await externalWork(flags.work ?? resolve(tmpdir(), 'kottu-art'));
@@ -48,9 +48,9 @@ async function main() {
         const index = next++, batch = batches[index];
         const directory = resolve(work, `batch-${batch[0].family}-${String(index + 1).padStart(2, '0')}-${Date.now().toString(36)}`);
         mkdirSync(directory, { recursive: true });
-        const brief = batchPrompt(batch), startedAt = new Date().toISOString();
+        const brief = batchPrompt(batch, flags['reroll-note'] ?? ''), startedAt = new Date().toISOString();
         writeFileSync(resolve(directory, 'brief.txt'), brief);
-        writeJson(resolve(directory, 'batch.json'), { model, pass, startedAt, ids: batch.map((asset) => asset.id) });
+        writeJson(resolve(directory, 'batch.json'), { model, pass, startedAt, correction: flags['reroll-note'] ?? '', ids: batch.map((asset) => asset.id) });
         const code = await command('codex', ['exec', '-m', model, '--skip-git-repo-check', '--sandbox', 'workspace-write', '-C', directory, brief], directory, resolve(directory, 'run.log'), 45 * 60 * 1000);
         const found = batch.filter((asset) => existsSync(resolve(directory, `${asset.id}.png`))).map((asset) => asset.id);
         const result = { pass, directory, code, ids: batch.map((asset) => asset.id), found };

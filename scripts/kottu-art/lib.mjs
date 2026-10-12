@@ -73,9 +73,9 @@ export function idsSource() {
     return `export type ${type} =\n${catalogue.assets.filter((a) => a.family === family).map((a) => `  | '${a.id}'`).join('\n')};`;
   }).join('\n\n') + '\n';
 }
-export function batchPrompt(assets) {
+export function batchPrompt(assets, correction = '') {
   const family = catalogue.families[assets[0].family];
-  return `You are producing artwork for a personal website. Use your built-in image generation tool with the newest image\nmodel available (ChatGPT Image 2.5 or newer). For EACH item below, generate exactly one image and save it\nin the current working directory under the file name given, as a PNG with a transparent background (if\nyour tool cannot make a transparent background, use the flat magenta background the style lock describes).\nWork through the list in order, one image at a time; if one fails, retry it once and move on. Do not write\nany other files, do not read or change anything else, and do not ask questions. At the end, list the files\nyou wrote. Never use sleep.\n\n${family.lock}\n\nITEMS:\n${assets.map((asset, i) => `${i + 1}. File \`${asset.id}.png\`: ${asset.subject}${i ? ' Match the style of the earlier images in this batch.' : ''}`).join('\n')}\n`;
+  return `You are producing artwork for a personal website. Use your built-in image generation tool with the newest image\nmodel available (ChatGPT Image 2.5 or newer). For EACH item below, generate exactly one image and save it\nin the current working directory under the file name given, as a PNG with a transparent background (if\nyour tool cannot make a transparent background, use the flat magenta background the style lock describes).\nWork through the list in order, one image at a time; if one fails, retry it once and move on. Do not write\nany other files, do not read or change anything else, and do not ask questions. At the end, list the files\nyou wrote. Never use sleep.\n\n${family.lock}\n\nITEMS:\n${assets.map((asset, i) => `${i + 1}. File \`${asset.id}.png\`: ${asset.subject}${correction ? ` Correction for this re-roll: ${correction}` : ''}${i ? ' Match the style of the earlier images in this batch.' : ''}`).join('\n')}\n`;
 }
 export function alphaFraction(data) {
   let transparent = 0;
