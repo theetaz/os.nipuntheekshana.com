@@ -15,13 +15,13 @@ const context = (): MenuStateContext => ({ desktop: createDesktopState(), theme:
 afterEach(() => vi.unstubAllGlobals());
 describe('menu builders', () => {
   it('matches the island menu including separators and the settings shortcut', () => {
-    expect(labels(islandMenu())).toEqual(['About Serendib', 'separator', 'System Settings…', 'Simple view',
-      'Keyboard shortcuts', 'separator', 'Sleep', 'Restart…', 'Shut down…']);
-    expect(islandMenu()[2]).toMatchObject({ command: 'os.settings', shortcut: { code: 'Comma', alt: true } });
+    expect(labels(islandMenu())).toEqual(['About Kottu OS', 'Settings…', 'Simple view',
+      'Keyboard shortcuts', 'separator', 'Suspend', 'Reboot…', 'Power off…']);
+    expect(islandMenu()[1]).toMatchObject({ command: 'os.settings', shortcut: { code: 'Comma', alt: true } });
   });
   it('builds desktop menus and every specified desktop View item', () => {
-    expect(desktopMenus().map(menu => menu.label)).toEqual(['Serendib', 'File', 'View', 'Go', 'Window', 'Help']);
-    expect(labels(viewMenu())).toEqual(['Wallpaper', 'Show widgets', 'Show Mochi', 'Clean up icons', 'separator', 'Light', 'Dark', 'Automatic']);
+    expect(desktopMenus().map(menu => menu.label)).toEqual(['Kottu OS', 'File', 'View', 'Go', 'Window', 'Help']);
+    expect(labels(viewMenu())).toEqual(['Wallpaper', 'Show Mochi', 'Clean up desktop', 'separator', 'Light', 'Dark', 'Automatic']);
     const wallpaper = viewMenu()[0]; expect(wallpaper?.kind).toBe('submenu');
     if (wallpaper?.kind === 'submenu') expect(labels(wallpaper.items)).toEqual(['Kottu', 'Galle Face', 'Pettah', 'Paper']);
   });
@@ -38,7 +38,7 @@ describe('menu builders', () => {
   it('matches Go, Window and Help and keeps region jumps out of Go', () => {
     expect(labels(goMenu())).toEqual(['Projects', 'Writing', 'About', 'CV', 'Now', 'Activity', 'Island', 'Terminal', 'Messages', 'Postcards', 'separator', 'Pin the city', 'Kooda']);
     expect(goMenu().some(item => item.kind === 'item' && item.shortcut)).toBe(false);
-    expect(labels(windowMenu())).toEqual(['Minimise', 'Zoom', 'Snap left', 'Snap right', 'Move & resize with keyboard',
+    expect(labels(windowMenu())).toEqual(['Minimise', 'Maximise', 'Snap left', 'Snap right', 'Move & resize with keyboard',
       'separator', 'Next window', 'Previous window', 'Bring all to front', 'separator', 'windows']);
     expect(labels(helpMenu())).toEqual(['Read me', 'Keyboard shortcuts', 'Simple view', 'separator', 'View source on GitHub ↗', 'Report a problem ↗']);
   });
@@ -72,9 +72,9 @@ describe('menu builders', () => {
     const menus = desktopMenus(); const widths = [90, 45, 55, 40, 80, 50];
     expect(overflowMenus(menus, widths, 500, 55)).toBe(menus);
     const collapsed = overflowMenus(menus, widths, 210, 55);
-    expect(collapsed.map(menu => menu.label)).toEqual(['Serendib', 'File', 'More']);
+    expect(collapsed.map(menu => menu.label)).toEqual(['Kottu OS', 'File', 'More']);
     expect(labels(collapsed.at(-1)!.items)).toEqual(['View', 'Go', 'Window', 'Help']);
-    expect(overflowMenus(menus, widths, 0, 55).map(menu => menu.label)).toEqual(['Serendib', 'More']);
+    expect(overflowMenus(menus, widths, 0, 55).map(menu => menu.label)).toEqual(['Kottu OS', 'More']);
   });
 });
 describe('clock and shortcut labels', () => {

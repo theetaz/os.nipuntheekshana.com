@@ -196,7 +196,7 @@ const seo = seoFor({ path: '/', title: 'Power verification', description: 'Power
   });
   async function openFixture(page: Page) { await page.goto(origin); await hydrated(page); await expect(page.locator('html')).toHaveAttribute('data-power-probe', 'ready'); }
   async function command(page: Page, name: string) {
-    const island = page.getByRole('menubar').getByRole('menuitem', { name: 'Island menu', exact: true });
+    const island = page.getByRole('menubar').getByRole('menuitem', { name: 'Kottu menu', exact: true });
     if (await island.isVisible()) {
       await island.click(); await page.getByRole('menuitem', { name, exact: true }).click();
     } else {
@@ -227,7 +227,7 @@ const seo = seoFor({ path: '/', title: 'Power verification', description: 'Power
     expect(await page.evaluate(() => (window as unknown as { powerFixture: { spotlight(): boolean } }).powerFixture.spotlight())).toBe(false);
     await expect(page.getByRole('dialog', { name: 'Starting Serendib' })).toBeVisible(); await page.keyboard.press('Escape');
     await expect(page.locator('.boot-screen')).toHaveCount(0); await expect(page.locator('[data-shell="desktop"]')).not.toHaveAttribute('inert');
-    await expect(page.getByRole('menubar').getByRole('menuitem', { name: 'Island menu', exact: true })).toBeFocused();
+    await expect(page.getByRole('menubar').getByRole('menuitem', { name: 'Kottu menu', exact: true })).toBeFocused();
     expect(await page.locator('[data-shell="desktop"]').evaluate(element => !!element.closest('[inert]'))).toBe(false);
   });
   test('close guards cancel a power operation', async ({ page }) => {
@@ -254,7 +254,7 @@ const seo = seoFor({ path: '/', title: 'Power verification', description: 'Power
     await page.keyboard.press('Control+k'); await expect(saver).toHaveCount(0); await expect(page.locator('[data-window-id]')).toHaveCount(1);
     expect(await page.evaluate(() => (window as unknown as { powerFixture: { overlay(): string } }).powerFixture.overlay())).toBe('none');
     expect(await page.evaluate(() => (window as unknown as { powerFixture: { spotlight(): boolean } }).powerFixture.spotlight())).toBe(false);
-    await expect(page.getByRole('menubar').getByRole('menuitem', { name: 'Island menu', exact: true })).toBeFocused();
+    await expect(page.getByRole('menubar').getByRole('menuitem', { name: 'Kottu menu', exact: true })).toBeFocused();
     await command(page, 'Sleep'); await page.getByRole('button', { name: 'Press any key or tap to wake.' }).dispatchEvent('click');
     await expect(saver).toHaveCount(0);
     await command(page, 'Sleep'); await saver.dispatchEvent('pointerdown', { pointerType: 'touch' }); await expect(saver).toHaveCount(0);

@@ -62,7 +62,7 @@ function SpotlightPanel() {
   let row = 0;
   const content = <m.div className="os-modal-layer os-spotlight-layer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.1 }}
     onPointerDown={event => { if (event.target === event.currentTarget) close(); }}>
-    <m.div ref={panel} className="os-spotlight" role="dialog" aria-modal="true" aria-label="Spotlight search" tabIndex={-1} inert={!present || !!alerts.length}
+    <m.div ref={panel} className="os-spotlight" role="dialog" aria-modal="true" aria-label="Search" tabIndex={-1} inert={!present || !!alerts.length}
       initial={reduce || mobile ? { opacity: 0 } : { opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
       transition={reduce ? { duration: 0.1 } : springs.popover}
       onKeyDown={event => {
@@ -74,13 +74,13 @@ function SpotlightPanel() {
         } else if (event.target === input.current && event.key === 'Enter' && selected) { event.preventDefault(); void activate(selected); }
       }}>
       <div className="os-spotlight-input">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
+        <span className="os-search-prompt" aria-hidden="true">$</span>
         <input ref={input} data-autofocus data-os-shortcuts="allow" role="combobox" aria-label="Search projects, writing, apps" aria-autocomplete="list"
           aria-expanded="true" aria-controls={listId} aria-activedescendant={selected ? `${id}-option-${active}` : undefined}
-          autoComplete="off" spellCheck={false} placeholder="Search projects, writing, apps…" value={query}
+          autoComplete="off" spellCheck={false} placeholder="search apps, projects, writing…" value={query}
           onChange={event => { setQuery(event.target.value); setActive(0); }} />
         {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(''); setActive(0); input.current?.focus(); }}>×</button>}
-        <button type="button" className="os-spotlight-close" aria-label="Close Spotlight" onClick={close}>×</button>
+        <button type="button" className="os-spotlight-close" aria-label="Close Search" onClick={close}>×</button>
       </div>
       <div id={listId} role="listbox" aria-label="Search results" aria-busy={!data && !error} className="os-spotlight-results">
         {groups.map((group, groupIndex) => <div key={group.label} role="group" aria-labelledby={`${id}-group-${groupIndex}`}>

@@ -1,3 +1,4 @@
+import './p2-8-overlays.css';
 import type { RefObject } from 'react';
 import type { DesktopProps } from '../Desktop';
 import { openApp } from '../wm/commands';

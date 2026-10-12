@@ -16,7 +16,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
     aria-checked={kind !== 'item' ? !!checked : undefined} aria-haspopup={submenu ? 'menu' : undefined}
     aria-disabled={disabled || undefined} data-accent-filled={highlighted || undefined}
     onClick={event => { if (disabled) { event.preventDefault(); return; } props.onClick?.(event); }}
-    className={`relative flex min-h-6 w-full items-center gap-3 rounded-menu-item py-0 pl-6 pr-2.5 text-left text-ui ${highlighted ? 'bg-accent text-on-accent' : disabled ? 'text-ink-3' : 'text-ink'} ${className}`}>
+    className={`os-menu-item relative flex min-h-6 w-full items-center gap-3 rounded-menu-item py-0 pl-6 pr-2.5 text-left text-ui ${highlighted ? 'bg-accent text-on-accent' : disabled ? 'text-ink-3' : 'text-ink'} ${className}`}>
     {checked && <span aria-hidden="true" className="absolute left-2">{kind === 'radio' ? '•' : '✓'}</span>}
     <span className="flex-1">{children}</span>
     {shortcut && <span aria-hidden="true" className={`text-caption-2 ${highlighted ? 'text-on-accent' : 'text-ink-3'}`}>{shortcut}</span>}

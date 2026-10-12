@@ -1,18 +1,39 @@
-.static-menubar.mb-bar { height:32px; padding:0 10px; gap:0; border-bottom:1px solid var(--glass-edge); box-shadow:inset 0 1px 0 var(--glass-border); -webkit-backdrop-filter:var(--glass-filter); }
-.mb-bar nav.mb-nav { display:flex; align-items:center; gap:0; min-width:0; flex:1; }
-.mb-menus { display:flex; align-items:center; margin:0; padding:0; list-style:none; white-space:nowrap; min-width:0; }
-.mb-trigger { display:flex; align-items:center; justify-content:center; height:24px; padding:0 10px; border:0; border-radius:6px; color:var(--os-ink); font:450 13px/18px var(--font-ui); white-space:nowrap; cursor:default; }
+.static-menubar.mb-bar { height:32px; padding:3px 8px 0; align-items:flex-start; gap:6px; background:transparent; border:0; box-shadow:none; backdrop-filter:none; pointer-events:none; }
+.mb-bar .mb-module { height:26px; padding:0 4px; border:var(--k-bw-chrome); border-radius:var(--r-module); background:var(--k-cream); color:var(--os-ink); box-shadow:var(--k-shadow-1); pointer-events:auto; }
+.mb-bar nav.mb-nav { display:flex; align-items:center; gap:0; min-width:0; max-width:calc(50% - 100px); flex:0 1 auto; }
+.mb-menus, .mb-app-menus { display:flex; align-items:center; gap:6px; margin:0; padding:0; list-style:none; white-space:nowrap; min-width:0; }
+.mb-app-menus { gap:0; }
+.mb-brand-module { flex:none; }
+.mb-bar .mb-brand-module { background:var(--k-yellow); color:var(--k-ink); }
+.mb-trigger { display:flex; align-items:center; justify-content:center; min-width:24px; height:24px; margin-top:-1px; padding:0 8px; border:0; border-radius:6px; color:inherit; font:450 13px/18px var(--font-ui); white-space:nowrap; cursor:default; }
+.mb-trigger:hover, .mb-status-button:hover { background:var(--os-hover); }
 .mb-trigger[aria-expanded="true"], .mb-status-button[aria-expanded="true"] { background:var(--os-pressed); }
-.mb-trigger.mb-app { font-weight:600; max-width:150px; overflow:hidden; text-overflow:ellipsis; display:block; }
-.mb-status { margin-left:auto; display:flex; align-items:center; gap:2px; flex-shrink:0; }
-.mb-status-button { display:grid; place-items:center; width:24px; height:24px; border-radius:6px; color:var(--os-ink); }
-.mb-now-dot { width:7px; height:7px; border-radius:50%; background:var(--os-success); box-shadow:0 0 0 3px color-mix(in oklch, var(--os-success) 22%, transparent); animation:mb-now-pulse 2.4s ease-in-out infinite; }
-@keyframes mb-now-pulse { 50% { box-shadow:0 0 0 5px color-mix(in oklch, var(--os-success) 0%, transparent); } }
-@media (prefers-reduced-motion:reduce) { .mb-now-dot { animation:none; } }
-html[data-motion="reduce"] .mb-now-dot { animation:none; }
-.mb-clock { font-variant-numeric:tabular-nums; min-width:11em; padding:0 8px 0 10px; }
+.mb-trigger.mb-app { font-weight:650; max-width:150px; overflow:hidden; text-overflow:ellipsis; display:block; }
+.mb-brand { gap:6px; color:var(--k-ink); }
+.mb-brand span { font:400 16px/18px var(--font-display); font-synthesis:none; }
+.mb-status { margin-left:auto; display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.mb-system { display:flex; align-items:center; }
+.mb-status-button { display:flex; align-items:center; justify-content:center; min-width:24px; height:24px; border-radius:6px; color:inherit; }
+.mb-now { gap:6px; }
+.mb-now-label { max-width:22ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:450 13px/18px var(--font-ui); }
+.mb-now-dot { flex:none; width:8px; height:8px; border:2px solid var(--k-hard); border-radius:50%; background:var(--k-green); animation:mb-now-pulse 2.4s ease-in-out infinite; }
+@keyframes mb-now-pulse { 50% { opacity:.65; } }
+.mb-bar .mb-clock { width:188px; margin:0; font:450 12px/18px var(--font-mono); font-stretch:87.5%; font-variant-numeric:tabular-nums; }
 .mb-clock time { white-space:pre; }
 .mb-measure { position:absolute; visibility:hidden; pointer-events:none; display:flex; white-space:nowrap; }
-.mb-bar .simple-entry { margin:0 8px; flex-shrink:0; }
-@media (max-width:759px), (pointer:coarse) { .static-menubar.mb-bar { height:calc(52px + env(safe-area-inset-top)); padding:env(safe-area-inset-top) 16px 0; } .mb-bar nav.mb-nav, .mb-status, .mb-measure, .mb-bar .simple-entry { display:none; } .mb-bar .mb-pocket-brand { display:flex; } }
-@media (min-width:760px) and (pointer:fine) { .mb-pocket-brand { display:none; } }
+.mb-bar .simple-entry { position:absolute; left:8px; top:36px; clip-path:inset(50%); pointer-events:auto; }
+.mb-bar .simple-entry:focus { clip-path:none; background:var(--k-cream); border:var(--k-bw-chrome); border-radius:var(--r-pill); padding:4px 8px; }
+.mb-bar nav.mb-workspaces { position:absolute; left:50vw; translate:-50% 0; display:flex; align-items:center; gap:0; }
+.mb-workspaces button { display:grid; place-items:center; width:24px; height:24px; border-radius:var(--r-pill); }
+.mb-workspaces button span { display:grid; place-items:center; width:12px; height:12px; border:2px solid currentColor; border-radius:var(--r-pill); font:600 10px/12px var(--font-mono); color:transparent; transition:width 300ms var(--ease-pop), background 300ms var(--ease-pop); }
+.mb-workspaces button:not([aria-current="true"]) span { border-color:var(--os-ink); }
+.mb-workspaces button:hover span { background:var(--k-pink); }
+.mb-workspaces button[aria-current="true"] { width:38px; }
+.mb-workspaces button[aria-current="true"] span { width:34px; height:16px; background:var(--k-yellow); color:var(--k-ink); }
+#ws-desktop { scroll-margin-top:40px; }
+@media (max-width:1279px) { .mb-now-label { display:none; } }
+@media (max-width:1179px) { .mb-bar nav.mb-nav { max-width:none; flex:1 1 auto; } .mb-bar nav.mb-workspaces { position:static; translate:none; flex:none; } }
+@media (prefers-reduced-motion:reduce) { html:not([data-motion="full"]) .mb-now-dot { animation:none; } html:not([data-motion="full"]) .mb-workspaces button span { transition:none; } }
+html[data-motion="reduce"] .mb-now-dot { animation:none; }
+html[data-motion="reduce"] .mb-workspaces button span { transition:none; }
+@media (forced-colors:active) { .mb-bar .mb-module { border:1px solid CanvasText; background:Canvas; color:CanvasText; box-shadow:none; } .mb-workspaces button[aria-current="true"] span { background:Highlight; color:HighlightText; } }

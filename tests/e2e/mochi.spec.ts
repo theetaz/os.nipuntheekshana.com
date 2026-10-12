@@ -77,7 +77,7 @@ test('keyboard pets, context-menu navigation, tea, sleep, wake and hide are usab
   await menuAction(page, 'Put to sleep'); await expect(root(page)).toHaveAttribute('data-mood', 'sleep');
   await menuAction(page, 'Wake up'); await expect(bubble(page)).toHaveText("Oh. I wasn't sleeping. Promise.");
   await menuAction(page, 'Hide Mochi'); await expect(root(page)).toBeHidden(); expect((await prefs(page)).visible).toBe(false);
-  await page.getByRole('menuitem', { name: 'View', exact: true }).click();
+  await page.getByRole('menubar', { name: 'Application menus' }).getByRole('menuitem', { name: 'View', exact: true }).click();
   await page.getByRole('menuitemcheckbox', { name: 'Show Mochi', exact: true }).click(); await expect(pet(page)).toBeVisible();
 });
 

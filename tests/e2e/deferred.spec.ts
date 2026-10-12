@@ -4,11 +4,11 @@ import { resolve } from 'node:path';
 import { test, expect } from './fixtures';
 
 const cases = [
-  { name: 'menu', trigger: '[aria-label="Island menu"]', chunk: 'MenuHost', result: '[role="menu"][aria-label="Island menu"]', event: 'click' },
+  { name: 'menu', trigger: '[aria-label="Kottu menu"]', chunk: 'MenuHost', result: '[role="menu"][aria-label="Kottu menu"]', event: 'click' },
   { name: 'window', trigger: '.os-dock a[aria-label="Projects"]', chunk: 'WindowLayer', result: '[data-window-id="projects"]', event: 'click' },
   { name: 'clock', trigger: '.mb-clock', chunk: 'StatusPopovers', result: '#clock-popover', event: 'click' },
-  { name: 'Now', trigger: '[aria-label="What Nipun\'s up to"]', chunk: 'StatusPopovers', result: '#now-popover', event: 'click' },
-  { name: 'Spotlight', trigger: 'button[aria-label="Spotlight"], [data-shell="mobile"] [aria-label="Spotlight"]', chunk: 'Spotlight', result: '[role="combobox"][aria-label="Search projects, writing, apps"]', event: 'click' },
+  { name: 'Now', trigger: '[aria-label^="What Nipun\'s up to:"]', chunk: 'StatusPopovers', result: '#now-popover', event: 'click' },
+  { name: 'Spotlight', trigger: 'button[aria-label="Search"], [data-shell="mobile"] [aria-label="Spotlight"]', chunk: 'Spotlight', result: '[role="combobox"][aria-label="Search projects, writing, apps"]', event: 'click' },
   { name: 'context menu', trigger: '[data-desktop-icon="projects"]', chunk: 'ContextMenuHost', result: '[role="menu"][aria-label="desktop:projects context menu"]', event: 'contextmenu' },
 ] as const;
 const chunks = (JSON.parse(readFileSync('dist/client/.css-scope.json', 'utf8')) as { chunks: Record<string, { imports: string[]; css: string[] }> }).chunks;

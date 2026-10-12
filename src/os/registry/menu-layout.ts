@@ -3,7 +3,7 @@ import type { ShellMenu } from './menus';
 
 /** The first paint needs menu labels and widths; dropdown commands load with MenuHost. */
 export function menuOutline(meta?: AppMeta, menus: AppMenus = {}): readonly ShellMenu[] {
-  return [{ id: 'app', label: meta?.name ?? 'Serendib', strong: true, items: [] },
+  return [{ id: 'app', label: meta?.name ?? 'Kottu OS', strong: true, items: [] },
     { id: 'file', label: 'File', items: [] }, { id: 'view', label: 'View', items: [] },
     ...(menus.extra ?? []).map((menu, index) => ({ ...menu, id: `extra-${index}` })),
     { id: 'go', label: 'Go', items: [] }, { id: 'window', label: 'Window', items: [] },
