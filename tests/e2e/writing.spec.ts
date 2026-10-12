@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { test, expect, openApp, openMenu } from './fixtures';
+import { expectAccessibleSheet, expectNoHorizontalOverflow, expectTapTargets, openFromHome, phoneOnly } from './phone-sheet-checks';
 
 const island = 'an-island-made-of-points';
 const win = (page: Page) => page.locator('[data-window-id="writing"]');
@@ -13,33 +14,50 @@ async function writing(page: Page, route = '') {
   await expect(win(page)).not.toHaveAttribute('data-adopting');
   return win(page);
 }
+const isPhone = async (page: Page) => await page.locator('html').getAttribute('data-mode') === 'mobile';
+/** Chooses a folder or tag. Phones reach them one level up from the list, through "‹ Folders". */
+async function pick(page: Page, name: string, exact = false) {
+  if (await isPhone(page)) await win(page).getByRole('button', { name: 'Folders', exact: true }).click();
+  await win(page).getByRole('navigation', { name: 'Writing folders' }).getByRole('button', { name, exact }).click();
+}
 async function viewMenu(page: Page) {
   await openMenu(page, 'View');
   return page.getByRole('menu', { name: 'View', exact: true });
 }
 
 test('Engineering has one post and selection opens the real article @smoke', async ({ page }) => {
-  const app = await writing(page);
+  const app = await writing(page); const phone = await isPhone(page);
   await expect(posts(page)).toHaveCount(2);
+  if (phone) await app.getByRole('button', { name: 'Folders', exact: true }).click();
   await expect(app.getByRole('navigation', { name: 'Writing folders' }).getByRole('button', { name: 'Engineering 1' })).toBeVisible();
   await app.getByRole('button', { name: 'Engineering 1' }).click();
   await expect(posts(page)).toHaveCount(1);
+  if (phone) {
+    // The single column returns to the list, titled with its folder, and keeps focus there.
+    await expect(app.getByRole('navigation', { name: 'Writing folders' })).toBeHidden();
+    await expect(app.getByRole('heading', { level: 1 })).toHaveText('Writing · Engineering');
+    await expect(app.getByRole('button', { name: 'Folders', exact: true })).toBeFocused();
+  }
   await posts(page).first().click();
   await expect(page).toHaveURL(new RegExp(`/writing/${island}$`));
   await expect(app.getByRole('heading', { name: 'The outline is real, and tiny' })).toBeVisible();
   await expect(app.getByRole('heading', { level: 1 })).toHaveText('An island made of points');
   await expect(app.getByRole('heading', { level: 1 })).toBeFocused();
-  await expect(posts(page).first()).toHaveAttribute('aria-current', 'page');
+  if (phone) {
+    await expect(app.locator('.writing-post-list')).toBeHidden();
+    await app.getByRole('link', { name: 'Back to Writing', exact: true }).click();
+    await expect(page).toHaveURL(/\/writing$/); await expect(posts(page)).toHaveCount(1);
+  } else await expect(posts(page).first()).toHaveAttribute('aria-current', 'page');
 });
 
 test('folders, tags and search filter with honest empty states', async ({ page }) => {
   const app = await writing(page);
-  await app.getByRole('button', { name: 'Life 0' }).click();
+  await pick(page, 'Life 0');
   await expect(app.getByRole('heading', { name: 'Nothing in Life yet. Soon.' })).toBeVisible();
-  await app.getByRole('button', { name: 'Notes 1' }).click();
+  await pick(page, 'Notes 1');
   await expect(posts(page)).toHaveCount(1); await expect(posts(page)).toContainText('Hello, world');
-  await app.getByRole('button', { name: 'All 2' }).click();
-  await app.getByRole('button', { name: 'meta', exact: true }).click();
+  await pick(page, 'All 2');
+  await pick(page, 'meta', true);
   await expect(posts(page)).toHaveCount(1); await expect(posts(page)).toContainText('Hello, world');
   await app.getByRole('button', { name: 'Clear tag meta' }).click();
   const search = app.getByRole('searchbox', { name: 'Search writing' });
@@ -100,7 +118,8 @@ test('780/560 container breakpoints and 520 px back flow preserve filters', asyn
   await expect(app.locator('.writing-post-list')).toBeHidden();
   await expect(app.locator('.writing-reader')).toBeVisible();
   await expect(app.getByRole('heading', { name: 'An island made of points', exact: true })).toBeVisible();
-  await app.getByRole('link', { name: 'All writing', exact: true }).click();
+  // Phone sheets drop the in-content link: the sheet header owns "‹ Writing".
+  await app.getByRole('link', { name: await isPhone(page) ? 'Back to Writing' : 'All writing', exact: true }).click();
   await expect(page).toHaveURL(/\/writing$/); await expect(posts(page)).toHaveCount(1);
   expect(await app.locator('.writing-view').evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
 });
@@ -126,8 +145,12 @@ test('post data failures can retry without losing the list', async ({ page }) =>
   await page.route(`**/data/writing/${island}.json`, route => fail ? route.fulfill({ status: 503, contentType: 'application/json', body: '{}' }) : route.continue());
   const app = await writing(page);
   await posts(page).first().click(); await expect(app.getByRole('heading', { name: "Couldn't load this post." })).toBeVisible();
-  await expect(posts(page)).toHaveCount(2); fail = false; await app.getByRole('button', { name: 'Retry', exact: true }).click();
+  // Phones show one column: the list waits one level up while the reader retries.
+  const phone = await isPhone(page);
+  if (phone) await expect(app.locator('.writing-post-list')).toBeHidden(); else await expect(posts(page)).toHaveCount(2);
+  fail = false; await app.getByRole('button', { name: 'Retry', exact: true }).click();
   await expect(app.getByRole('heading', { name: 'The outline is real, and tiny' })).toBeVisible();
+  if (phone) { await app.getByRole('link', { name: 'Back to Writing', exact: true }).click(); await expect(posts(page)).toHaveCount(2); }
 });
 
 test('index data failures retry and unknown post routes are validated before fetching', async ({ page }) => {
@@ -218,6 +241,34 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     });
   }
 }
+
+test('@mobile Writing opens from home as one column: folders → list → post, at 360 px', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Phone sheets are covered by the mobile projects.');
+  await page.setViewportSize({ width: 360, height: 780 });
+  const app = await openFromHome(page, '/writing');
+  await expect(app).toHaveAttribute('data-app', 'writing');
+  await expect(posts(page)).toHaveCount(2);
+  // One column: no folder sidebar, no folder select and no reader beside the list.
+  for (const hidden of [app.getByRole('navigation', { name: 'Writing folders' }), app.getByRole('combobox', { name: 'Writing folder' }), app.locator('.writing-reader')])
+    await expect(hidden).toBeHidden();
+  expect((await app.locator('.writing-post-list').boundingBox())!.width).toBeCloseTo((await app.boundingBox())!.width, 0);
+  await expectNoHorizontalOverflow(app); await expectTapTargets(app); await expectAccessibleSheet(page);
+  await app.getByRole('button', { name: 'Folders', exact: true }).tap();
+  const folders = app.getByRole('navigation', { name: 'Writing folders' });
+  await expect(folders).toBeVisible(); await expect(app.locator('.writing-post-list')).toBeHidden();
+  await expect(folders.getByRole('button', { name: 'All 2' })).toBeFocused();
+  await expectNoHorizontalOverflow(app); await expectTapTargets(app); await expectAccessibleSheet(page);
+  await folders.getByRole('button', { name: 'webgl', exact: true }).tap();
+  await expect(posts(page)).toHaveCount(1); await expect(app.getByRole('button', { name: 'Clear tag webgl' })).toBeVisible();
+  await posts(page).first().tap();
+  await expect(page).toHaveURL(new RegExp(`/writing/${island}$`));
+  await expect(app.getByRole('heading', { level: 1 })).toHaveText('An island made of points');
+  await expect(app.locator('.writing-post-list')).toBeHidden();
+  await expect(app.getByRole('link', { name: 'All writing', exact: true })).toBeHidden();
+  await expectNoHorizontalOverflow(app); await expectTapTargets(app); await expectAccessibleSheet(page);
+  await app.getByRole('link', { name: 'Back to Writing', exact: true }).tap();
+  await expect(page).toHaveURL(/\/writing$/); await expect(posts(page)).toHaveCount(1);
+});
 
 test.describe('crawlable static articles', () => {
   test.use({ javaScriptEnabled: false });

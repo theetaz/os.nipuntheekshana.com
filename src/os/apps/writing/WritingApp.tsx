@@ -19,6 +19,8 @@ export default function WritingApp(props: AppProps) {
   const [folder, setFolder] = useState<Folder>('all');
   const [tag, setTag] = useState<string | null>(null); const [search, setSearch] = useState('');
   const [showFolders, setShowFolders] = useState(true);
+  // Phone navigation level for the index: folders → list. Wider containers ignore it.
+  const [pane, setPane] = useState<'folders' | 'list'>('list');
   const calledReady = useRef(false); const focusAfterNavigation = useRef(false);
   const changeSize = useCallback((delta: -2 | 2) => setSize(value => Math.max(15, Math.min(19, value + delta)) as TextSize), [setSize]);
   const copyLink = useCallback(() => { void copyWindowLink(windowId); }, [windowId]);
@@ -47,11 +49,11 @@ export default function WritingApp(props: AppProps) {
   }, [ready, scrollRootRef]);
   const select = (slug: string) => { focusAfterNavigation.current = true; props.navigate(slug, { title: 'Writing' }); };
   const back = () => { focusAfterNavigation.current = true; props.navigate('', { title: 'Writing' }); };
-  const selectFolder = (next: Folder) => { setFolder(next); setTag(null); if (route) back(); };
-  const selectTag = (next: string | null) => { setTag(next); setFolder('all'); if (route) back(); };
-  const shared = { posts: posts.data ?? [], route, focused: props.focused, folder, tag, search, size, showFolders,
+  const selectFolder = (next: Folder) => { setFolder(next); setTag(null); setPane('list'); if (route) back(); };
+  const selectTag = (next: string | null) => { setTag(next); setFolder('all'); setPane('list'); if (route) back(); };
+  const shared = { posts: posts.data ?? [], route, focused: props.focused, folder, tag, search, size, showFolders, pane,
     error: posts.error, scrollRootRef, onSelect: select, onBack: back, onFolderChange: selectFolder,
-    onTagChange: selectTag, onSearchChange: setSearch, onTextSize: changeSize, onCopyLink: copyLink, onRetry: posts.retry,
+    onTagChange: selectTag, onShowFolders: () => setPane('folders'), onSearchChange: setSearch, onTextSize: changeSize, onCopyLink: copyLink, onRetry: posts.retry,
     onLinkClick: (url: URL) => {
       const target = matchRoute(url.pathname);
       if (!target) return false;

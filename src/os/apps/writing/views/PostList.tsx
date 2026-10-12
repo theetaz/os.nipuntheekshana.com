@@ -1,5 +1,5 @@
 import type { MouseEvent, RefObject } from 'react';
-import { SearchX } from 'lucide-react';
+import { ChevronLeft, SearchX } from 'lucide-react';
 import { SearchField } from '../../../ui/SearchField';
 import { EmptyState } from '../../../ui/EmptyState';
 import { Chip } from '../../../ui/Chip';
@@ -13,13 +13,17 @@ function navigateClick(event: MouseEvent<HTMLAnchorElement>, slug: string, onSel
 export interface PostListProps {
   posts: readonly ClientPostSummary[]; route: string; folder: Folder; tag: string | null; search: string;
   scrollRootRef?: RefObject<HTMLElement | null>;
-  onSelect?: (slug: string) => void; onFolderChange?: (folder: Folder) => void;
+  onSelect?: (slug: string) => void; onFolderChange?: (folder: Folder) => void; onShowFolders?: () => void;
   onSearchChange?: (value: string) => void; onTagChange?: (tag: string | null) => void;
 }
-export function PostList({ posts, route, folder, tag, search, scrollRootRef, onSelect, onFolderChange, onSearchChange, onTagChange }: PostListProps) {
+export function PostList({ posts, route, folder, tag, search, scrollRootRef, onSelect, onFolderChange, onShowFolders, onSearchChange, onTagChange }: PostListProps) {
+  const scope = folder === 'all' ? null : FOLDERS.find(item => item.id === folder)?.label;
   return <section className="writing-post-list" aria-label="Post list">
     <div className="writing-list-controls">
-      {!route && <h1 className="writing-list-title">Writing</h1>}
+      <button type="button" className="writing-folders-back js-only" onClick={onShowFolders}>
+        <ChevronLeft size={18} aria-hidden="true" />Folders
+      </button>
+      {!route && <h1 className="writing-list-title">Writing{scope && <span className="writing-list-scope"> · {scope}</span>}</h1>}
       <label className="writing-folder-select js-only"><span className="sr-only">Writing folder</span>
         <select value={folder} onChange={event => onFolderChange?.(event.target.value as Folder)}>
           {FOLDERS.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}

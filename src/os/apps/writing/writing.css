@@ -52,6 +52,7 @@
 .writing-post-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .writing-rule { width: 48px; height: 1px; background: var(--os-line-strong); margin: 24px 0; }
 .writing-back { display: none; align-items: center; gap: 4px; color: var(--os-accent-ink); text-decoration: none; }
+.writing-folders-back, .writing-list-scope { display: none; }
 .writing-reader-empty { margin-top: 80px; }
 .writing-data-error { display: flex; align-items: center; gap: 12px; padding: 8px 16px; color: var(--os-danger); background: color-mix(in srgb, var(--os-danger) 8%, var(--os-window)); }
 .writing-view[data-folders="false"] .writing-panes { grid-template-columns: 280px minmax(0, 1fr); }
@@ -82,6 +83,18 @@
   .writing-toolbar { gap: 0; right: 8px; }
   .writing-post-tags button, .writing-active-tag { min-height: 44px; }
   .writing-static-window .static-titlebar > span, .managed-window[data-app="writing"] .window-title { max-width: calc(100cqw - 300px); }
+  /* One column, three levels: folders → list → post. The list is the entry level;
+     "‹ Folders" steps up to the folder and tag picker. */
+  .writing-view .writing-folder-select { display: none; }
+  .writing-folders-back { display: inline-flex; align-items: center; gap: 2px; align-self: start; min-height: 44px; margin: -10px 0 -6px -8px; padding: 0 12px 0 4px; border-radius: var(--r-control); color: var(--os-accent-ink); font: 500 13px/18px var(--font-ui); }
+  .writing-folders-back:hover { background: var(--os-hover); }
+  .writing-view[data-folders="false"] .writing-folders-back { display: none; }
+  .writing-list-scope { display: inline; color: var(--os-ink-2); }
+  .writing-view[data-pane="folders"][data-reader-open="false"][data-folders="true"] .writing-post-list { display: none; }
+  .writing-view[data-pane="folders"][data-reader-open="false"][data-folders="true"] .writing-folders { display: flex; width: auto; min-width: 0; border: 0; padding: 4px 12px 16px; }
+  .writing-folders :is(button, .writing-rss) { min-height: 44px; }
+  :is(.writing-folder-tags, .writing-post-tags) button, .writing-active-tag { min-width: 44px; }
+  .writing-folders .writing-rss { margin-top: 12px; padding-top: 0; }
 }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
   .writing-static-window > .static-titlebar { padding-left: 80px; flex-basis: calc(52px + env(safe-area-inset-top)); min-height: calc(52px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); }
@@ -94,6 +107,8 @@
   .writing-toolbar { top: -52px; }
   .writing-panes { border-radius: 0; }
   .writing-reader { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  /* The sheet header already offers "‹ Writing"; static and managed sheets drop the duplicate. */
+  html:not([data-view="simple"]):not(:has(#simple:target)) :is(.writing-static-window, .managed-window[data-sheet]) .writing-back { display: none; }
 }
 html.no-js .writing-static-folder { display: flex; }
 html.no-js .writing-static-tag { display: inline-block; }
