@@ -17,7 +17,7 @@ describe('Jotai history adapter', () => {
     store.set(desktopAtom, { type: 'OPEN', appId: 'projects' });
     expect(port.history.pushState).toHaveBeenCalledWith({ preserved: true }, '', '/projects#keep');
     expect(port.window.document.title).toBe('Projects — Nipun Theekshana'); port.pop('/#keep');
-    expect(store.get(desktopAtom).order).toEqual([]); expect(port.window.document.title).toBe('Nipun Theekshana — Serendib OS');
+    expect(store.get(desktopAtom).order).toEqual([]); expect(port.window.document.title).toBe('Nipun Theekshana — Kottu OS');
     cleanup(); store.set(desktopAtom, { type: 'OPEN', appId: 'writing' }); expect(port.history.pushState).toHaveBeenCalledTimes(1);
     port.pop('/'); expect(store.get(desktopAtom).order).toEqual(['writing']);
   });

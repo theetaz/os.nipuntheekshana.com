@@ -92,7 +92,7 @@ test('free-text hello offers the exact email hand-off and copies its text', asyn
   await composer.fill('hello'); await composer.press('Enter');
   await expect(win.getByRole('status', { name: 'Nipun is typing' })).toBeVisible();
   const email = win.getByRole('link', { name: 'Open email' });
-  await expect(email).toHaveAttribute('href', /^mailto:theekshana2@gmail.com\?subject=Hello%20from%20Serendib/);
+  await expect(email).toHaveAttribute('href', /^mailto:theekshana2@gmail.com\?subject=Hello%20from%20Kottu%20OS/);
   const params = new URLSearchParams((await email.getAttribute('href'))!.split('?')[1]);
   expect(params.get('body')).toBe('hello\n\n— sent from os.nipuntheekshana.com');
   await win.getByRole('button', { name: 'Copy text' }).click();
@@ -145,7 +145,10 @@ test('Mochi pet count reaches the shared Settings preference and persists once',
   await expect(page.locator('[data-mochi]')).toHaveAttribute('data-mood', 'happy');
   await expect(page.locator('[data-mochi-bubble]')).toHaveText('Ceylon tea. My favourite.');
   await expect(win.locator('.messages-bubble--assistant').last()).toContainText('Tea received');
-  await openApp(page, 'Settings');
+  if (await page.locator('html').getAttribute('data-mode') === 'mobile') {
+    await win.getByRole('button', { name: 'App commands', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Settings…', exact: true }).click();
+  } else await openApp(page, 'Settings');
   const settings = page.locator('[data-window-id="settings"]');
   await expect(settings).toBeVisible();
   await settings.getByRole('button', { name: 'Mochi', exact: true }).click();

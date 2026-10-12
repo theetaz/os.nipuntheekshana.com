@@ -3,6 +3,7 @@ import { CANONICAL_MODE, canonicalFor, isIndexable } from './seo-routes.mjs';
 
 const OS_ORIGIN = 'https://os.nipuntheekshana.com';
 const PERSON_ID = `${site.url}/#person`;
+export const HOME_DESCRIPTION = 'The desktop of Nipun Theekshana, an engineer from Colombo building open data, tiny-screen hardware and the odd browser game. Drag the tuk-tuk, open the projects, leave a note on the board.';
 // The P0 placeholder has no parameters; the final helper accepts a path.
 const routeIsIndexable: (path: string) => boolean = isIndexable;
 
@@ -91,7 +92,7 @@ export function seoFor({ path, title, description, kind, project, post }: SeoOpt
     jsonLd.push({
       '@context': 'https://schema.org',
       '@type': 'WebSite',
-      name: 'Serendib OS',
+      name: 'Kottu OS',
       url: canonical,
       inLanguage: 'en',
       author,
@@ -123,8 +124,8 @@ export function seoFor({ path, title, description, kind, project, post }: SeoOpt
   }
 
   return {
-    title: kind === 'home' ? `${site.name} — Serendib OS` : `${title} — ${site.name}`,
-    description,
+    title: kind === 'home' ? `${site.name} — Kottu OS` : `${title} — ${site.name}`,
+    description: kind === 'home' ? HOME_DESCRIPTION : description,
     canonical,
     noindex: !routeIsIndexable(route) || ['/settings', '/kooda', '/404', '/404.html', '/og'].includes(route),
     jsonLd,

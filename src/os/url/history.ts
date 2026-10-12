@@ -2,7 +2,7 @@ import { APP_META } from '../registry/meta';
 import type { DesktopState, HistoryMode, WMAction, WMFeatures } from '../wm/types';
 import { parseLocation, serializeLocation } from './url';
 
-export const HOME_TITLE = 'Nipun Theekshana — Serendib OS';
+export const HOME_TITLE = 'Nipun Theekshana — Kottu OS';
 
 /** Requested policy. Rejected reducer actions retain their previous state's history. */
 export function historyForAction(action: WMAction, before: DesktopState): HistoryMode {

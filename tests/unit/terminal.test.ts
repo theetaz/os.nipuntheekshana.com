@@ -12,7 +12,7 @@ const data: TerminalData = {
   profile: {
     site: { email: 'nipun@example.com', careerStart: 2016, location: 'Colombo, Sri Lanka', coordinates: { lat: 6.9271, lon: 79.8612 } },
     summary: 'Engineer from Sri Lanka. Building tools for people.',
-    now: { updated: '2026-10-11', items: ['Shipping Serendib.', 'Drinking tea.'] },
+    now: { updated: '2026-10-11', items: ['Shipping Kottu OS.', 'Drinking tea.'] },
     links: { github: 'https://github.com/theetaz', linkedin: 'https://linkedin.com/in/nipun', prabhava: 'https://prabhava.io' },
   } as ClientProfile,
   projects: [
@@ -25,7 +25,7 @@ function context(): ShellContext {
   return {
     cwd: HOME, columns: 80, history: ['ls', 'whoami'], data: vi.fn(async () => data),
     activity: vi.fn(async () => ({ available: true, total: 1234 } as const) as never),
-    system: () => ({ theme: 'light', appearance: 'auto', wallpaper: 'kottu', accent: 'thambili', sound: false, kernel: 'Astro 7.3 + React 19.3' }),
+    system: () => ({ theme: 'light', appearance: 'auto', wallpaper: 'kottu', accent: 'thambili', sound: false, kernel: 'Astro 7 + React 19' }),
     now: () => new Date('2026-10-11T17:41:00Z'), run: vi.fn(), open: vi.fn(), external: vi.fn(), close: vi.fn(),
     mochi: { pet: vi.fn(), give: vi.fn(), setMood: vi.fn(), say: vi.fn(), sleep: vi.fn(), wake: vi.fn(), wave: vi.fn(), hide: vi.fn(), show: vi.fn(), getState: () => ({ mood: 'happy', pets: 3, visible: true }) },
   };
@@ -75,7 +75,7 @@ describe('Terminal tokenizer and parser', () => {
 describe('Terminal VFS', () => {
   it.each([
     ['~', HOME], ['~/projects/../now.txt', HOME + '/now.txt'], ['.', HOME], ['..', '/home'],
-    ['../../../../etc//serendib-release', '/etc/serendib-release'], ['/../../', '/'], ['projects/./salli.md', HOME + '/projects/salli.md'],
+    ['../../../../etc//kottu-release', '/etc/kottu-release'], ['/../../', '/'], ['projects/./salli.md', HOME + '/projects/salli.md'],
   ])('resolves %s to %s', (input, expected) => expect(resolvePath(input)).toBe(expected));
   it('displays home only on an actual path boundary', () => {
     expect(displayPath(HOME)).toBe('~'); expect(displayPath(HOME + '/projects')).toBe('~/projects'); expect(displayPath(HOME + '2')).toBe(HOME + '2');
@@ -84,7 +84,7 @@ describe('Terminal VFS', () => {
     const vfs = buildVfs(data);
     expect(vfs.get(HOME + '/cv.pdf')?.kind).toBe('binary');
     expect(outputText(vfs.get(HOME + '/about.md')!.lines)).toBe(data.profile.summary);
-    expect(outputText(vfs.get(HOME + '/now.txt')!.lines)).toBe('1. Shipping Serendib.\n2. Drinking tea.\nUpdated 2026-10-11');
+    expect(outputText(vfs.get(HOME + '/now.txt')!.lines)).toBe('1. Shipping Kottu OS.\n2. Drinking tea.\nUpdated 2026-10-11');
     expect(outputText(vfs.get(HOME + '/projects/salli.md')!.lines)).toBe('Salli\nMoney, thoughtfully.\nactive · 2026 · apps\nStack: Go, React\nA personal finance app.\nlive: https://salli.app\nrepo: https://github.com/theetaz/salli\nstory: /projects/salli\nopen projects/salli for the full page');
     expect(outputText(vfs.get(HOME + '/writing/hello-world.md')!.lines)).toBe('Hello world\n2026-10-01\nAn island made of words.\nopen writing/hello-world to read it');
     expect(listDirectory(vfs, HOME).map(e => e.name)).toEqual(['about.md', 'contact.txt', 'cv.pdf', 'now.txt', 'projects', 'writing']);
@@ -101,14 +101,14 @@ describe('Terminal command outputs and effects', () => {
   it.each([
     ['help', HELP], ['help cat', 'Usage: cat <file>\nExample: cat now.txt'],
     ['whoami', 'nipun — engineer from Sri Lanka. Co-founder & CTO at PerfectUs, founder of Prabhava Labs.'],
-    ['pwd', HOME], ['now', '1. Shipping Serendib.\n2. Drinking tea.\nUpdated 2026-10-11'],
-    ['cat now.txt', '1. Shipping Serendib.\n2. Drinking tea.\nUpdated 2026-10-11'],
+    ['pwd', HOME], ['now', '1. Shipping Kottu OS.\n2. Drinking tea.\nUpdated 2026-10-11'],
+    ['cat now.txt', '1. Shipping Kottu OS.\n2. Drinking tea.\nUpdated 2026-10-11'],
     ['cat .mochirc', 'mood=content\nfavourite_snack=kiribath\nnap_after=45s'],
     ['cat .secrets', 'Tea powers the build.\nMochi runs the help desk.\nThere are no secrets in a read-only archive.'],
     ['cat cv.pdf', 'cat: cv.pdf: binary file. Try: open cv'], ['cat projects', 'cat: projects: Is a directory'],
     ['cat missing', 'cat: missing: No such file or directory'], ['ls missing', 'ls: missing: No such file or directory'],
     ['cd now.txt', 'cd: now.txt: Not a directory'], ['cd missing', 'cd: missing: No such file or directory'],
-    ['cat /etc/serendib-release', 'Serendib 2.0 "Pettah"\nShell: nsh 1.0'],
+    ['cat /etc/kottu-release', 'Kottu OS 2.0 "Pettah"\nShell: nsh 1.0'],
     ['writing', '2026-10-01  hello-world  Hello world'], ['theme', 'auto'], ['theme dark', 'dark'],
     ['wallpaper', 'kottu'], ['wallpaper pettah', 'pettah'], ['accent', 'thambili'], ['accent lagoon', 'lagoon'],
     ['accent list', 'thambili\nlagoon\nlotus\ntea'], ['sound', 'on'], ['sound on', 'on'], ['sound off', 'off'],
@@ -120,7 +120,7 @@ describe('Terminal command outputs and effects', () => {
     ['vim', 'No editors here. This file system is read-only, like a good archive.'],
     ['nano', 'No editors here. This file system is read-only, like a good archive.'],
     ['emacs', 'No editors here. This file system is read-only, like a good archive.'],
-    ['ssh serendib', 'ssh: connect to host: connection refused. Try contact instead.'],
+    ['ssh kottu', 'ssh: connect to host: connection refused. Try contact instead.'],
     ['ayubowan', 'ආයුබෝවන්. (Sinhala: "may you live long" — the everyday greeting.)'],
     ['mochi', 'Mochi: happy. 3 pets.'], ['pin', 'Opening Pin the city.'], ['sleep', ''],
     ['unknown', 'nsh: command not found: unknown. Try help.'], ['clear', ''], ['exit', ''],
@@ -173,8 +173,8 @@ describe('Terminal command outputs and effects', () => {
     await dispatch('pin', ctx); expect(ctx.open).toHaveBeenCalledWith('maps', { route: 'play' });
   });
   it('neofetch uses live counts, theme, career and build activity', async () => {
-    const text = await runText('neofetch'); expect(text.split('\n')).toHaveLength(ISLAND.length);
-    for (const expected of ['2 projects, 1 posts', '10 years (shipping since 2016)', 'Kottu (light), accent Thambili', '1,234 GitHub contributions this year', '6.9271°N 79.8612°E', 'Astro 7.3 + React 19.3']) expect(text).toContain(expected);
+    const text = await runText('neofetch'); expect(text.split('\n')).toHaveLength(ISLAND.length + 1);
+    for (const expected of ['Kottu OS 2.0 "Pettah"', 'nipun@kottu', 'Hyprland-ish (in your browser)', '2 projects, 1 posts', '10 years (shipping since 2016)', 'Kottu (light), accent Thambili', '1,234 GitHub contributions this year', '6.9271°N 79.8612°E', 'Astro 7 + React 19']) expect(text).toContain(expected);
     const ctx = context(); ctx.activity = async () => { throw new Error('offline'); }; expect(await runText('neofetch', ctx)).toContain('GitHub contributions unavailable');
   });
   it.each(['ls -z', 'cat', 'cat a b', 'cd a b', 'pwd x', 'projects --status archived', 'projects --category', 'projects --bogus data', 'projects --category data --category ai', 'writing x', 'theme sepia', 'accent orange', 'wallpaper random', 'sound maybe', 'mochi run', 'mochi say', 'make coffee', 'open', 'exit x', 'clear x', 'sleep x'])('validates usage for %s without side effects', async source => {
@@ -202,7 +202,7 @@ describe('Terminal completion', () => {
   it('supports nested cwd, parent/absolute paths, mid-line cursor and command completion without VFS', () => {
     expect(completion('cat sa', HOME + '/projects').value).toBe('cat salli.md ');
     expect(completion('cat ../no', HOME + '/projects').value).toBe('cat ../now.txt ');
-    expect(completion('cat /etc/ser').value).toBe('cat /etc/serendib-release ');
+    expect(completion('cat /etc/kot').value).toBe('cat /etc/kottu-release ');
     expect(complete('neo && pwd', 3, HOME).value).toBe('neofetch && pwd');
     expect(complete('neoBROKEN && pwd', 3, HOME).value).toBe('neofetch && pwd');
     expect(complete('cat "now.txt" && pwd', 7, HOME, vfs).value).toBe('cat "now.txt" && pwd');

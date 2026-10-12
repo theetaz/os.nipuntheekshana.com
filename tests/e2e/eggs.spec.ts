@@ -119,7 +119,7 @@ test('desktop typing and the Terminal greeting make Mochi wave with the Sinhala 
 });
 
 test('seven avatar clicks unlock persisted Developer mode and working controls', async ({ page }) => {
-  const actions: string[] = []; page.on('console', message => { if (message.type() === 'debug' && message.text().startsWith('[Serendib] Window actions')) actions.push(message.text()); });
+  const actions: string[] = []; page.on('console', message => { if (message.type() === 'debug' && message.text().startsWith('[Kottu] Window actions')) actions.push(message.text()); });
   await ready(page, '/about'); const avatar = page.locator('[data-window-id="about"]').getByRole('button', { name: "Nipun Theekshana's portrait" });
   for (let i = 0; i < 6; i++) await avatar.click(); await expect(fps(page)).toHaveCount(0); await avatar.click();
   await expect(page.getByText('You are now a developer. Again.', { exact: true })).toBeVisible();

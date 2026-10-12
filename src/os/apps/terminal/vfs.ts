@@ -53,7 +53,7 @@ export function buildVfs(data: TerminalData): Vfs {
   add(`${HOME}/cv.pdf`, 'binary', [], '/cv');
   add(`${HOME}/.secrets`, 'text', textLines('Tea powers the build.\nMochi runs the help desk.\nThere are no secrets in a read-only archive.'));
   add(`${HOME}/.mochirc`, 'text', textLines('mood=content\nfavourite_snack=kiribath\nnap_after=45s'));
-  add('/etc/serendib-release', 'text', textLines(`Serendib ${VERSION} "${CODENAME}"\nShell: nsh 1.0`));
+  add('/etc/kottu-release', 'text', textLines(`Kottu OS ${VERSION} "${CODENAME}"\nShell: nsh 1.0`));
   for (const project of data.projects) {
     const target = `/projects/${project.slug}`;
     const lines = textLines([project.title, project.tagline, `${project.status} · ${project.year} · ${project.category}`,
