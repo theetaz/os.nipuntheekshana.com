@@ -269,30 +269,30 @@ export function initTerrain(root: HTMLElement, options: TerrainOptions = {}): Te
 
   let palette = {
     side: 0.6,
-    plate: [24, 24, 26] as Rgb,
-    zero: [32, 32, 34] as Rgb,
-    lo: [44, 44, 46] as Rgb,
-    hi: [232, 231, 226] as Rgb,
-    accent: [255, 180, 84] as Rgb,
-    highlight: [238, 237, 232] as Rgb,
-    label: 'rgb(128 127 121)',
-    pill: [238, 237, 232] as Rgb,
-    pillInk: [9, 9, 10] as Rgb,
+    plate: [36, 28, 61] as Rgb,
+    zero: [58, 48, 96] as Rgb,
+    lo: [74, 64, 96] as Rgb,
+    hi: [255, 156, 88] as Rgb,
+    accent: [255, 138, 61] as Rgb,
+    highlight: [255, 244, 224] as Rgb,
+    label: 'rgb(210 200 232)',
+    pill: [255, 244, 224] as Rgb,
+    pillInk: [36, 28, 61] as Rgb,
     font: 'ui-monospace, monospace',
   };
 
   function readTheme() {
     const s = getComputedStyle(root);
-    const bg = parseHex(s.getPropertyValue('--os-window'), [9, 9, 10]);
-    const elev = parseHex(s.getPropertyValue('--os-raised'), [17, 17, 18]);
-    const fg = parseHex(s.getPropertyValue('--os-ink'), [238, 237, 232]);
-    const muted = parseHex(s.getPropertyValue('--os-ink-2'), [128, 127, 121]);
+    const bg = parseHex(s.getPropertyValue('--os-window'), [36, 28, 61]);
+    const elev = parseHex(s.getPropertyValue('--os-raised'), [58, 48, 96]);
+    const fg = parseHex(s.getPropertyValue('--os-ink'), [255, 244, 224]);
+    const muted = parseHex(s.getPropertyValue('--os-ink-2'), [210, 200, 232]);
     // Busy days climb from a faint tint of the site accent to the accent
     // itself; empty days stay neutral. On a light page the sides shade more
     // gently so the tall columns do not turn muddy.
     const light = bg[0] + bg[1] + bg[2] > 384;
     const accent = parseHex(typeof options.accent === 'string' ? options.accent
-      : options.accent === false ? '#ffb454' : s.getPropertyValue('--os-accent'), [255, 180, 84]);
+      : options.accent === false ? '#FF8A3D' : s.getPropertyValue('--os-accent'), [255, 138, 61]);
     palette = {
       plate: mix(bg, elev, 0.35),
       zero: mix(elev, fg, light ? 0.06 : 0.08),
