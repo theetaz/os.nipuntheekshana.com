@@ -76,6 +76,17 @@ test('a completed first drag is replayed when its cold runtime arrives', async (
   } finally { release(); }
 });
 
+test('desktop greeting keys retain their order while the runtime is cold', async ({ page }) => {
+  let release!: () => void; const hold = new Promise<void>(done => { release = done; });
+  await page.route('**/props-runtime.*.js', async route => { await hold; await route.continue(); });
+  try {
+    await desktop(page); await expect(page.locator('[data-mochi]')).toBeVisible();
+    await page.mouse.click(700, 640); await page.keyboard.type('ayubowan'); release();
+    await expect(page.locator('[data-mochi-bubble]')).toHaveText('ආයුබෝවන්!');
+    await expect(page.locator('[data-mochi]')).toHaveAttribute('data-mood', 'wave');
+  } finally { release(); }
+});
+
 test('keyboard focus, spatial arrows, context menu, move, cancel and Enter work', async ({ page }) => {
   await desktop(page); await page.keyboard.press('Alt+Digit2'); await expect(prop(page, 'lantern')).toBeFocused();
   await page.keyboard.press('ArrowRight'); await expect(prop(page, 'crbook')).toBeFocused();
