@@ -1,0 +1,578 @@
+[
+  {
+    "id": "prop-tuktuk",
+    "family": "prop",
+    "sha256OfMaster": "0822675e470f8433d83c6326ac1d7a9afd1af67b1b2770050de44cd41f606651",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A die-cast toy model of a classic Sri Lankan three-wheeler tuk-tuk (auto-rickshaw) with exactly three wheels: glossy tuk-tuk yellow body, a temple red stripe along the side, a peacock teal canvas roof, chrome trim, black tyres, front three-quarter view. Number plate blank.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-thinkpad",
+    "family": "prop",
+    "sha256OfMaster": "1034024b5f8e1415a913d4a57f4dfe0392804cfb18574cf5aba3637d8686f23a",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A black business laptop with a red pointing-stick nub in the middle of the keyboard, lid open at 110 degrees. The screen shows a dark aubergine terminal with neat rows of colourful text-like bars (pink, yellow, green) and, on the left, an abstract blue triangle made of text characters. No readable words, no logos.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-lotus-tower",
+    "family": "prop",
+    "sha256OfMaster": "f178b11deb849eb1c963bb6d2f0a36b5016d849b90c76786432d1bb1d6165a73",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A souvenir miniature model of Colombo's Lotus Tower: a slim white tower with teal bands, topped by a large lotus bud in pink and leaf green, standing on a small round teal base.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-cricket-bat",
+    "family": "prop",
+    "sha256OfMaster": "ffac0cd15e99958baa866bad056f4e5f42983b95eba54f6a549d9e281719ebee",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A real willow cricket bat lying horizontally, with a lotus pink striped rubber grip on the handle, and a red leather cricket ball with a white seam resting against the bottom of the blade. No stickers or text on the bat.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-thambili",
+    "family": "prop",
+    "sha256OfMaster": "f5fe0ee879e7571a7fcf10cc7c5d87a6b070d27aa89fb15e4f4fb16d570fcdb8",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A whole king coconut (thambili) with bright orange husk, the top sliced open showing cream flesh, a red-and-white striped paper straw standing in it, and one small green leaf tied at the base.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-tea",
+    "family": "prop",
+    "sha256OfMaster": "9bda95a294b6a5a469d0b624566b2a58b05eed1f5eef7bb42346f54a168d2449",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A cup of Ceylon tea in a temple red enamel cup with a white rim, on a matching saucer, a small silver teaspoon on the saucer, gentle white steam curling above. Tea is amber-brown.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-radio",
+    "family": "prop",
+    "sha256OfMaster": "ca93f9192fc5718b08989b415a7f254cf23614b0e8aa986d6f4e8cbbd05715a9",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A vintage peacock teal transistor radio with a cream round speaker grille, a tuk-tuk yellow tuning window with a red needle (no numbers on the dial), two lotus pink knobs, a chrome carry handle and an extended antenna.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-lantern",
+    "family": "prop",
+    "sha256OfMaster": "cbd3af243bce1543e5c74f489ca2a7b1dcdb4ea193f819ca6178a8e283381c77",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A traditional Sri Lankan Vesak lantern (vesak kooduwa): an eight-pointed paper star lantern in tuk-tuk yellow, lotus pink and peacock teal paper panels on a thin bamboo frame, with long temple red paper tassels hanging from the bottom points and a short string loop at the top.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-ola",
+    "family": "prop",
+    "sha256OfMaster": "5a5ab6c76c8e81041bcffb220862e62e613751a971cfc22dde1690dca8398744",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A bundle of ancient ola-leaf (palm-leaf) manuscripts: long golden-tan leaves stacked between two carved dark wooden covers, tied with a temple red string through the holes. The incised script is a faint, unreadable texture.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-crbook",
+    "family": "prop",
+    "sha256OfMaster": "43255d97742f9790c1a7655dad2e40dd51a4375ac22aa1accd139f11d3ddc943",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A Sri Lankan CR exercise book standing slightly open: leaf green cloth-textured cover with a temple red cloth spine and a blank cream rectangular label on the front.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "prop-postbox",
+    "family": "prop",
+    "sha256OfMaster": "4906d61d43279502039798da8f5e7fda336bb437407af8a889be8122aefe34aa",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU PHOTO-STICKER: A miniature red Sri Lankan pillar post box (cylindrical, domed top, black horizontal letter slot, a blank cream plate below the slot), standing on a small black base.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-lanka-data-layer",
+    "family": "sticker",
+    "sha256OfMaster": "53f024323d03f42a8a5ab805d0ed28fe3f97c0235cb286e37f7d480af7c3cd80",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A friendly baby elephant carrying a neat stack of three map tiles (yellow, pink, green) on its back, a red location pin balanced on the tip of its raised trunk",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-lanka-price-lens",
+    "family": "sticker",
+    "sha256OfMaster": "e5051f425fdadd54335fe439a8e5dd85abc708c587007234bb7c8fd4f9825d5a",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A cheerful woven market basket overflowing with vegetables (green chillies, a pink eggplant, an orange carrot), peering through a big round magnifying glass like a monocle, a small blank price tag fluttering from the handle",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-salli",
+    "family": "sticker",
+    "sha256OfMaster": "2ab44628f2064ef06b347393af8f5f49054124d6f575e6fff1fc31f47fc4c7d3",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A happy red clay coin-saving pot with a smiling face, a yellow coin dropping into its slot and a small green phone-message bubble floating beside it",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-agentmeter",
+    "family": "sticker",
+    "sha256OfMaster": "9108c17d6b0ccff7d1ee74fef0baa0f351f2e8ee3f183d978c3198c5767d12ad",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A tiny round desk gadget with legs: an aubergine body, a glowing teal round screen showing a needle gauge for a face, proudly holding up a green battery like a trophy",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-colombo-atlas",
+    "family": "sticker",
+    "sha256OfMaster": "16016c68d2eda7061d0c93def38e8c3569b6deb8c8ffe98448600cf98ccf0a0e",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A mischievous Colombo crow wearing tiny pink sunglasses, flying while carrying a low-poly city block with three buildings (orange, yellow, teal) in its talons",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-geopop",
+    "family": "sticker",
+    "sha256OfMaster": "721660d9fca7403cdf04a0864ad8465e44b4b7473c0524c8f2f12bc3d518232c",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A red-and-cream striped map-pin-shaped popcorn bucket with tiny happy people popping out of the top like popcorn",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-vidura",
+    "family": "sticker",
+    "sha256OfMaster": "57b1a16d713838f33594d999126dfb35609f69912b6de8271f376b74e8f3d5f0",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A wise orange owl wearing big teal headphones, with a red play-button badge on its chest and a small speech bubble with three dots",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-mochi",
+    "family": "sticker",
+    "sha256OfMaster": "7edb9e4e687e283be1c1ad6e271591574aeeb1eaabf4ff992249a742a49f1144",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A squishy round cream rice-cake blob character with pink blushing cheeks and happy closed eyes, peeking over the edge of a tiny round screen mounted on a small green circuit board",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-gridpulse",
+    "family": "sticker",
+    "sha256OfMaster": "bae79f4383893b6928aed6aa925bfcada1b2f57f3316b441f73c073ed312e137",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A yellow lightning-bolt character with wide eyes holding a teal torch (flashlight) and a small pink candle during a power cut, little radio waves above its head",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-opentreasury",
+    "family": "sticker",
+    "sha256OfMaster": "1162cf39bfb4367aa94a3f911248f77262741c57285f3246ccf177135e8d01b3",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: An open orange wooden treasure chest full of yellow coins, a teal magnifying glass leaning on it and a green tick badge on its lid",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-colombo-delivery",
+    "family": "sticker",
+    "sha256OfMaster": "6d506cdc340711661e38f9b670d2d4b6484b7545dfd37046a49f00fc43f3d112",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A cheerful delivery rider in a pink jacket on a red scooter speeding with motion lines, a big yellow parcel box strapped on the back, scarf flying",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-attendly",
+    "family": "sticker",
+    "sha256OfMaster": "cb6ff6aa18906021b9254152405ca72900cd88b6a27c0d68830731001f21a766",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A cheerful teal classroom door with a big smile, a yellow pencil tucked behind its handle and a green tick badge on it",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-terrarun",
+    "family": "sticker",
+    "sha256OfMaster": "180348b6cc06b542b44e0daa6094abb08c787a6db5515a7bf015e6a43aa3e0af",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A pink running shoe character with yellow laces and little legs, planting a small red flag on top of a green hill, a dotted loop trail behind it",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-goyama",
+    "family": "sticker",
+    "sha256OfMaster": "6f4e24fc19b68f86fccf3e59003c1781d58a1d2952c1ac2579fa9bb9792c7df0",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A bundle of golden paddy stalks with a happy face, wearing a woven orange farmer's hat and holding an open teal book",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-mansariya",
+    "family": "sticker",
+    "sha256OfMaster": "e98d8922019a64457deb77f1fc81334e2d9149642dd945d1f4600968f82d7923",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A cheerful red-and-yellow Sri Lankan bus with big eyes on its windscreen and a teal location-pin antenna on its roof, motion lines behind it. No route number.",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-ceylon-hub",
+    "family": "sticker",
+    "sha256OfMaster": "e17c9532167914135d5681b74ce11a56eb289fb8f64b9a7a04cd555c47ad827d",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A friendly folded paper map character in cream with teal and green regions, an orange compass-rose face, and three map pins (pink, yellow, red) stuck in its top like hair",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-mendlog",
+    "family": "sticker",
+    "sha256OfMaster": "4933710c6715a126744d559a69b7dd18dd77af1b5dff331301ad69c7a55e1ea5",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A teal steel wrench character singing into a pink microphone, a yellow clipboard flying away behind it",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-open-pay",
+    "family": "sticker",
+    "sha256OfMaster": "f59c4a8899ac09f15cba7909a90d858ab4574868953abdcf3263597681cbce8a",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: Two coins high-fiving with little arms: one yellow coin with a simple circuit pattern, one cream coin with a teal lotus emblem, pink sparkles between them",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-pin-the-city",
+    "family": "sticker",
+    "sha256OfMaster": "b0717499e714fc2434fd6804c102038c45388abcc8e476f2117f5d4936d01295",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A cream postcard with a big red map pin stabbed into it, a teal dotted route line and an orange stamp in the corner showing a small lotus",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "sticker-kottu",
+    "family": "sticker",
+    "sha256OfMaster": "737240cc488d0abfac4981eb418206a43b3d89d8bef766c03f5a83dee689c5e4",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU MASCOT STICKER: A steaming teal-rimmed plate of chopped kottu roti (orange and yellow pieces with green leeks and red chilli flecks), two flat steel kottu blades crossed above it, a happy face hidden in the kottu",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "badge-lotus-tower",
+    "family": "badge",
+    "sha256OfMaster": "24bf682b0f85d58d93fb03ffe23b50b746252b91a2ffa57cf7f6df94993d394e",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU INLINE BADGE: A tiny chunky Lotus Tower: white tower, pink lotus bud",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "badge-pin",
+    "family": "badge",
+    "sha256OfMaster": "1278ccaf56561fe9cb9efbafcb70d45c091354cb76a2ea8672b43dc094ae75d0",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU INLINE BADGE: A chunky temple red map pin with a white dot",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "badge-chip",
+    "family": "badge",
+    "sha256OfMaster": "dd4095ccae8aac2b1a1c7e7867729d32635b9ec6bcfa4a458bc2a4ad70837be7",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU INLINE BADGE: A chunky leaf green microchip with yellow pins and a tiny smile",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "badge-gamepad",
+    "family": "badge",
+    "sha256OfMaster": "a11b5b435123534b708b745e66ecf0d4eda519ecc1c12ffa0b26f3f0a3aab40d",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU INLINE BADGE: A chunky lotus pink game controller with yellow buttons",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  },
+  {
+    "id": "badge-tea",
+    "family": "badge",
+    "sha256OfMaster": "ace6fb9abdf8181339be1c3cfa0f5fb6c8eba3278ff4e1d1b8b71cfc1d72ec58",
+    "sourceFile": null,
+    "model": null,
+    "batch": null,
+    "generatedAt": null,
+    "prompt": "KOTTU INLINE BADGE: A small glass of milky Ceylon tea with a curl of steam",
+    "quality": {
+      "avif": 50,
+      "webp": 78
+    },
+    "approved": false,
+    "placeholder": true
+  }
+]

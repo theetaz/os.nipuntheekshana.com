@@ -1,0 +1,634 @@
+{
+  "families": {
+    "prop": {
+      "dir": "props",
+      "lockName": "KOTTU PHOTO-STICKER",
+      "lock": "STYLE LOCK — KOTTU PHOTO-STICKER (use exactly this for every prop)\nSubject: ONE real-world object, isolated, described in the item line.\nRendering: a premium die-cut PHOTO sticker. A crisp studio product photograph of the real object — true\nmaterials, real textures, accurate proportions — cut out cleanly along its silhouette, with a continuous,\neven, pure white (#FFFFFF) border about 3% of the image width all the way around the object, and a thin\ndark aubergine (#1B1530) keyline (about 0.5% of the width) around the outside of the white border.\nLighting: soft studio key light from the top-left, gentle fill from the right, no harsh specular\nhotspots. The whole object is in sharp focus; no depth-of-field blur.\nCamera: three-quarter view from slightly above (about 25 degrees above the object's horizon), object\nturned about 20 degrees to the left, like a toy sitting on a desk.\nColour: natural materials; painted or plastic parts pushed toward this street palette where the object\nallows it: tuk-tuk yellow #FFC93C, temple red #E8453C, peacock teal #0FA3A3, lotus pink #FF7EB6,\nthambili orange #FF8A3D, leaf green #3DBE6B.\nComposition: the object is centred and fills about 80% of a square canvas; the whole object and its\nwhite border are visible; nothing is cropped.\nBackground: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat,\nuniform pure magenta (#FF00FF) background with no gradient, no vignette and no texture.\nText: none. No letters, numbers, labels, logos or brand names anywhere on the object or the image.\nNever: cast shadow, contact shadow, reflection, ground plane, table, background props, scenery, people,\nhands, watermarks, signatures, frames, or any border other than the die-cut border.\nOutput: 1024 x 1024 PNG.",
+      "masterBox": null,
+      "widths": null,
+      "batchSize": 6,
+      "caps": {
+        "avif": [
+          18000,
+          48000
+        ],
+        "webp": [
+          32000,
+          90000
+        ]
+      }
+    },
+    "sticker": {
+      "dir": "stickers",
+      "lockName": "KOTTU MASCOT STICKER",
+      "lock": "STYLE LOCK — KOTTU MASCOT STICKER (use exactly this for every sticker)\nSubject: ONE cartoon mascot, isolated, described in the item line.\nRendering: a die-cut vinyl sticker. Flat 2D vector-style cartoon illustration with bold, uniform dark\naubergine (#1B1530) outlines (about 2.5% of the image width for the silhouette, about 1.5% for inner\ndetails). Flat saturated fills from this palette only: tuk-tuk yellow #FFC93C, temple red #E8453C,\npeacock teal #0FA3A3, lotus pink #FF7EB6, thambili orange #FF8A3D, leaf green #3DBE6B, plus cream\n#FFF7E8, white and aubergine #1B1530.\nShading: exactly one hard-edged cel-shadow tone per colour (a darker shade of the same hue) and one small\nwhite gloss highlight. No gradients, no airbrush, no texture, no noise.\nCharacter: friendly and a little mischievous; big round eyes with white catchlights and an open happy\nsmile when the subject has a face; chunky rounded proportions; a dynamic pose with a slight tilt.\nSri Lankan details are drawn from real life and treated with respect.\nDie-cut: a thick, continuous pure white (#FFFFFF) border about 5% of the image width around the whole\nsilhouette (small parts join the main shape inside the white border), then a thin aubergine (#1B1530)\nkeyline around the outside of the white border.\nComposition: centred; the sticker fills about 82% of a square canvas; nothing is cropped.\nBackground: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat\npure magenta (#FF00FF) background with no gradient.\nText: none. No letters, numbers, logos or brand marks anywhere.\nNever: drop shadow, glow, background scenery, photographic rendering, 3D render look, watermarks,\nsignatures.\nOutput: 1024 x 1024 PNG.",
+      "masterBox": [
+        440,
+        440
+      ],
+      "widths": [
+        88,
+        140,
+        200
+      ],
+      "batchSize": 7,
+      "caps": {
+        "avif": [
+          10000,
+          24000
+        ],
+        "webp": [
+          18000,
+          44000
+        ]
+      }
+    },
+    "badge": {
+      "dir": "badges",
+      "lockName": "KOTTU INLINE BADGE",
+      "lock": "STYLE LOCK — KOTTU INLINE BADGE (use exactly this for every badge)\nIdentical to KOTTU MASCOT STICKER, simplified for a 48-pixel display: ONE simple object; at most four\nflat colours plus the outline; very thick outlines (about 4% of the image width); no small details; no\nface unless the item line asks for one; white die-cut border about 6% of the width with the aubergine\nkeyline. Transparent background (or flat pure magenta #FF00FF). No text. Output: 1024 x 1024 PNG.",
+      "masterBox": [
+        112,
+        112
+      ],
+      "widths": [
+        56
+      ],
+      "batchSize": 7,
+      "caps": {
+        "avif": [
+          3000,
+          6000
+        ],
+        "webp": [
+          5000,
+          10000
+        ]
+      }
+    }
+  },
+  "assets": [
+    {
+      "id": "prop-tuktuk",
+      "family": "prop",
+      "W": 300,
+      "maxH": 240,
+      "subject": "A die-cast toy model of a classic Sri Lankan three-wheeler tuk-tuk (auto-rickshaw) with exactly three wheels: glossy tuk-tuk yellow body, a temple red stripe along the side, a peacock teal canvas roof, chrome trim, black tyres, front three-quarter view. Number plate blank.",
+      "alt": "",
+      "opens": "Projects",
+      "placement": {
+        "x": 48,
+        "y": 300,
+        "note": "X 48, Y 300; phone mini 96"
+      },
+      "colours": [
+        "#FFC93C"
+      ]
+    },
+    {
+      "id": "prop-thinkpad",
+      "family": "prop",
+      "W": 264,
+      "maxH": 230,
+      "subject": "A black business laptop with a red pointing-stick nub in the middle of the keyboard, lid open at 110 degrees. The screen shows a dark aubergine terminal with neat rows of colourful text-like bars (pink, yellow, green) and, on the left, an abstract blue triangle made of text characters. No readable words, no logos.",
+      "alt": "",
+      "opens": "Terminal",
+      "placement": {
+        "x": 76,
+        "y": 566,
+        "note": "X 76, Y 566 (Mochi sits on it)"
+      },
+      "colours": [
+        "#1B1530"
+      ]
+    },
+    {
+      "id": "prop-lotus-tower",
+      "family": "prop",
+      "W": 116,
+      "maxH": 340,
+      "subject": "A souvenir miniature model of Colombo's Lotus Tower: a slim white tower with teal bands, topped by a large lotus bud in pink and leaf green, standing on a small round teal base.",
+      "alt": "",
+      "opens": "Island",
+      "placement": {
+        "x": 1236,
+        "y": 40,
+        "note": "X 1236, Y 40; phone mini 40 × 110"
+      },
+      "colours": [
+        "#FF7EB6"
+      ]
+    },
+    {
+      "id": "prop-cricket-bat",
+      "family": "prop",
+      "W": 250,
+      "maxH": 90,
+      "subject": "A real willow cricket bat lying horizontally, with a lotus pink striped rubber grip on the handle, and a red leather cricket ball with a white seam resting against the bottom of the blade. No stickers or text on the bat.",
+      "alt": "",
+      "opens": "Activity",
+      "placement": {
+        "x": 372,
+        "y": 668,
+        "note": "X 372, Y 668, CSS rotation −18° (the art is drawn horizontal)"
+      },
+      "colours": [
+        "#FFF7E8"
+      ]
+    },
+    {
+      "id": "prop-thambili",
+      "family": "prop",
+      "W": 124,
+      "maxH": 170,
+      "subject": "A whole king coconut (thambili) with bright orange husk, the top sliced open showing cream flesh, a red-and-white striped paper straw standing in it, and one small green leaf tied at the base.",
+      "alt": "",
+      "opens": "Read me",
+      "placement": {
+        "x": 1112,
+        "y": 330,
+        "note": "X 1112, Y 330"
+      },
+      "colours": [
+        "#FF8A3D"
+      ]
+    },
+    {
+      "id": "prop-tea",
+      "family": "prop",
+      "W": 128,
+      "maxH": 110,
+      "subject": "A cup of Ceylon tea in a temple red enamel cup with a white rim, on a matching saucer, a small silver teaspoon on the saucer, gentle white steam curling above. Tea is amber-brown.",
+      "alt": "",
+      "opens": "Messages",
+      "placement": {
+        "x": 404,
+        "y": 96,
+        "note": "X 404, Y 96; phone mini 56"
+      },
+      "colours": [
+        "#E8453C"
+      ]
+    },
+    {
+      "id": "prop-radio",
+      "family": "prop",
+      "W": 216,
+      "maxH": 170,
+      "subject": "A vintage peacock teal transistor radio with a cream round speaker grille, a tuk-tuk yellow tuning window with a red needle (no numbers on the dial), two lotus pink knobs, a chrome carry handle and an extended antenna.",
+      "alt": "",
+      "opens": "Now",
+      "placement": {
+        "x": 1130,
+        "y": 596,
+        "note": "X 1130, Y 596; phone mini 72"
+      },
+      "colours": [
+        "#0FA3A3"
+      ]
+    },
+    {
+      "id": "prop-lantern",
+      "family": "prop",
+      "W": 112,
+      "maxH": 200,
+      "subject": "A traditional Sri Lankan Vesak lantern (vesak kooduwa): an eight-pointed paper star lantern in tuk-tuk yellow, lotus pink and peacock teal paper panels on a thin bamboo frame, with long temple red paper tassels hanging from the bottom points and a short string loop at the top.",
+      "alt": "",
+      "opens": "Settings",
+      "placement": {
+        "x": 70,
+        "y": 52,
+        "note": "X 70, Y 52, hanging on a CSS string"
+      },
+      "colours": [
+        "#FFC93C"
+      ]
+    },
+    {
+      "id": "prop-ola",
+      "family": "prop",
+      "W": 182,
+      "maxH": 110,
+      "subject": "A bundle of ancient ola-leaf (palm-leaf) manuscripts: long golden-tan leaves stacked between two carved dark wooden covers, tied with a temple red string through the holes. The incised script is a faint, unreadable texture.",
+      "alt": "",
+      "opens": "Writing",
+      "placement": {
+        "x": 652,
+        "y": 660,
+        "note": "X 652, Y 660"
+      },
+      "colours": [
+        "#FFF7E8"
+      ]
+    },
+    {
+      "id": "prop-crbook",
+      "family": "prop",
+      "W": 124,
+      "maxH": 165,
+      "subject": "A Sri Lankan CR exercise book standing slightly open: leaf green cloth-textured cover with a temple red cloth spine and a blank cream rectangular label on the front.",
+      "alt": "",
+      "opens": "CV",
+      "placement": {
+        "x": 226,
+        "y": 118,
+        "note": "X 226, Y 118, CSS rotation −9°"
+      },
+      "colours": [
+        "#3DBE6B"
+      ]
+    },
+    {
+      "id": "prop-postbox",
+      "family": "prop",
+      "W": 100,
+      "maxH": 190,
+      "subject": "A miniature red Sri Lankan pillar post box (cylindrical, domed top, black horizontal letter slot, a blank cream plate below the slot), standing on a small black base.",
+      "alt": "",
+      "opens": "Board",
+      "placement": {
+        "x": 904,
+        "y": 628,
+        "note": "X 904, Y 628"
+      },
+      "colours": [
+        "#E8453C"
+      ]
+    },
+    {
+      "id": "sticker-lanka-data-layer",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A friendly baby elephant carrying a neat stack of three map tiles (yellow, pink, green) on its back, a red location pin balanced on the tip of its raised trunk",
+      "alt": "",
+      "project": "Lanka Data Layer",
+      "placement": "project card or footer",
+      "colours": [
+        "#0FA3A3",
+        "#FFC93C",
+        "#FF7EB6",
+        "#3DBE6B",
+        "#E8453C"
+      ]
+    },
+    {
+      "id": "sticker-lanka-price-lens",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A cheerful woven market basket overflowing with vegetables (green chillies, a pink eggplant, an orange carrot), peering through a big round magnifying glass like a monocle, a small blank price tag fluttering from the handle",
+      "alt": "",
+      "project": "Lanka PriceLens",
+      "placement": "project card or footer",
+      "colours": [
+        "#FF8A3D",
+        "#3DBE6B",
+        "#FF7EB6",
+        "#0FA3A3"
+      ]
+    },
+    {
+      "id": "sticker-salli",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A happy red clay coin-saving pot with a smiling face, a yellow coin dropping into its slot and a small green phone-message bubble floating beside it",
+      "alt": "",
+      "project": "Salli",
+      "placement": "project card or footer",
+      "colours": [
+        "#E8453C",
+        "#FFC93C",
+        "#3DBE6B"
+      ]
+    },
+    {
+      "id": "sticker-agentmeter",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A tiny round desk gadget with legs: an aubergine body, a glowing teal round screen showing a needle gauge for a face, proudly holding up a green battery like a trophy",
+      "alt": "",
+      "project": "AgentMeter",
+      "placement": "project card or footer",
+      "colours": [
+        "#1B1530",
+        "#0FA3A3",
+        "#3DBE6B",
+        "#FFC93C"
+      ]
+    },
+    {
+      "id": "sticker-colombo-atlas",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A mischievous Colombo crow wearing tiny pink sunglasses, flying while carrying a low-poly city block with three buildings (orange, yellow, teal) in its talons",
+      "alt": "",
+      "project": "Colombo Atlas",
+      "placement": "project card or footer",
+      "colours": [
+        "#1B1530",
+        "#FF7EB6",
+        "#FF8A3D",
+        "#FFC93C",
+        "#0FA3A3"
+      ]
+    },
+    {
+      "id": "sticker-geopop",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A red-and-cream striped map-pin-shaped popcorn bucket with tiny happy people popping out of the top like popcorn",
+      "alt": "",
+      "project": "GeoPop",
+      "placement": "project card or footer",
+      "colours": [
+        "#E8453C",
+        "#FFF7E8",
+        "#FFC93C",
+        "#FF7EB6"
+      ]
+    },
+    {
+      "id": "sticker-vidura",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A wise orange owl wearing big teal headphones, with a red play-button badge on its chest and a small speech bubble with three dots",
+      "alt": "",
+      "project": "Vidura",
+      "placement": "project card or footer",
+      "colours": [
+        "#FF8A3D",
+        "#0FA3A3",
+        "#E8453C"
+      ]
+    },
+    {
+      "id": "sticker-mochi",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A squishy round cream rice-cake blob character with pink blushing cheeks and happy closed eyes, peeking over the edge of a tiny round screen mounted on a small green circuit board",
+      "alt": "",
+      "project": "Mochi",
+      "placement": "project card or footer",
+      "colours": [
+        "#FFF7E8",
+        "#FF7EB6",
+        "#3DBE6B",
+        "#1B1530"
+      ]
+    },
+    {
+      "id": "sticker-gridpulse",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A yellow lightning-bolt character with wide eyes holding a teal torch (flashlight) and a small pink candle during a power cut, little radio waves above its head",
+      "alt": "",
+      "project": "GridPulse",
+      "placement": "project card or footer",
+      "colours": [
+        "#FFC93C",
+        "#0FA3A3",
+        "#FF7EB6"
+      ]
+    },
+    {
+      "id": "sticker-opentreasury",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "An open orange wooden treasure chest full of yellow coins, a teal magnifying glass leaning on it and a green tick badge on its lid",
+      "alt": "",
+      "project": "OpenTreasury",
+      "placement": "project card or footer",
+      "colours": [
+        "#FF8A3D",
+        "#FFC93C",
+        "#0FA3A3",
+        "#3DBE6B"
+      ]
+    },
+    {
+      "id": "sticker-colombo-delivery",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A cheerful delivery rider in a pink jacket on a red scooter speeding with motion lines, a big yellow parcel box strapped on the back, scarf flying",
+      "alt": "",
+      "project": "Colombo Delivery",
+      "placement": "project card or footer",
+      "colours": [
+        "#FF7EB6",
+        "#E8453C",
+        "#FFC93C"
+      ]
+    },
+    {
+      "id": "sticker-attendly",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A cheerful teal classroom door with a big smile, a yellow pencil tucked behind its handle and a green tick badge on it",
+      "alt": "",
+      "project": "Attendly",
+      "placement": "project card or footer",
+      "colours": [
+        "#0FA3A3",
+        "#FFC93C",
+        "#3DBE6B"
+      ]
+    },
+    {
+      "id": "sticker-terrarun",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A pink running shoe character with yellow laces and little legs, planting a small red flag on top of a green hill, a dotted loop trail behind it",
+      "alt": "",
+      "project": "TerraRun",
+      "placement": "project card or footer",
+      "colours": [
+        "#FF7EB6",
+        "#FFC93C",
+        "#3DBE6B",
+        "#E8453C"
+      ]
+    },
+    {
+      "id": "sticker-goyama",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A bundle of golden paddy stalks with a happy face, wearing a woven orange farmer's hat and holding an open teal book",
+      "alt": "",
+      "project": "Goyama",
+      "placement": "project card or footer",
+      "colours": [
+        "#FFC93C",
+        "#FF8A3D",
+        "#0FA3A3"
+      ]
+    },
+    {
+      "id": "sticker-mansariya",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A cheerful red-and-yellow Sri Lankan bus with big eyes on its windscreen and a teal location-pin antenna on its roof, motion lines behind it. No route number.",
+      "alt": "",
+      "project": "Mansariya",
+      "placement": "project card or footer",
+      "colours": [
+        "#E8453C",
+        "#FFC93C",
+        "#0FA3A3"
+      ]
+    },
+    {
+      "id": "sticker-ceylon-hub",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A friendly folded paper map character in cream with teal and green regions, an orange compass-rose face, and three map pins (pink, yellow, red) stuck in its top like hair",
+      "alt": "",
+      "project": "Ceylon Hub",
+      "placement": "project card or footer",
+      "colours": [
+        "#FFF7E8",
+        "#0FA3A3",
+        "#3DBE6B",
+        "#FF8A3D"
+      ]
+    },
+    {
+      "id": "sticker-mendlog",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A teal steel wrench character singing into a pink microphone, a yellow clipboard flying away behind it",
+      "alt": "",
+      "project": "MendLog",
+      "placement": "project card or footer",
+      "colours": [
+        "#0FA3A3",
+        "#FF7EB6",
+        "#FFC93C"
+      ]
+    },
+    {
+      "id": "sticker-open-pay",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "Two coins high-fiving with little arms: one yellow coin with a simple circuit pattern, one cream coin with a teal lotus emblem, pink sparkles between them",
+      "alt": "",
+      "project": "OpenPay",
+      "placement": "project card or footer",
+      "colours": [
+        "#FFC93C",
+        "#FFF7E8",
+        "#0FA3A3",
+        "#FF7EB6"
+      ]
+    },
+    {
+      "id": "sticker-pin-the-city",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A cream postcard with a big red map pin stabbed into it, a teal dotted route line and an orange stamp in the corner showing a small lotus",
+      "alt": "",
+      "project": "Pin the city (card)",
+      "placement": "project card or footer",
+      "colours": [
+        "#FFF7E8",
+        "#E8453C",
+        "#0FA3A3",
+        "#FF8A3D"
+      ]
+    },
+    {
+      "id": "sticker-kottu",
+      "family": "sticker",
+      "W": 200,
+      "maxH": 200,
+      "subject": "A steaming teal-rimmed plate of chopped kottu roti (orange and yellow pieces with green leeks and red chilli flecks), two flat steel kottu blades crossed above it, a happy face hidden in the kottu",
+      "alt": "",
+      "project": "Kottu OS brand (footer, boot, 404)",
+      "placement": "project card or footer",
+      "colours": [
+        "#0FA3A3",
+        "#FF8A3D",
+        "#FFC93C",
+        "#3DBE6B",
+        "#E8453C"
+      ]
+    },
+    {
+      "id": "badge-lotus-tower",
+      "family": "badge",
+      "W": 56,
+      "maxH": 56,
+      "subject": "A tiny chunky Lotus Tower: white tower, pink lotus bud",
+      "alt": "tiny Lotus Tower sticker",
+      "placement": "intro sentence",
+      "colours": [
+        "#FF7EB6"
+      ]
+    },
+    {
+      "id": "badge-pin",
+      "family": "badge",
+      "W": 56,
+      "maxH": 56,
+      "subject": "A chunky temple red map pin with a white dot",
+      "alt": "map pin sticker",
+      "placement": "intro sentence",
+      "colours": [
+        "#E8453C"
+      ]
+    },
+    {
+      "id": "badge-chip",
+      "family": "badge",
+      "W": 56,
+      "maxH": 56,
+      "subject": "A chunky leaf green microchip with yellow pins and a tiny smile",
+      "alt": "smiling microchip sticker",
+      "placement": "intro sentence",
+      "colours": [
+        "#3DBE6B"
+      ]
+    },
+    {
+      "id": "badge-gamepad",
+      "family": "badge",
+      "W": 56,
+      "maxH": 56,
+      "subject": "A chunky lotus pink game controller with yellow buttons",
+      "alt": "game controller sticker",
+      "placement": "intro sentence",
+      "colours": [
+        "#FF7EB6"
+      ]
+    },
+    {
+      "id": "badge-tea",
+      "family": "badge",
+      "W": 56,
+      "maxH": 56,
+      "subject": "A small glass of milky Ceylon tea with a curl of steam",
+      "alt": "glass of tea sticker",
+      "placement": "intro sentence",
+      "colours": [
+        "#FF8A3D"
+      ]
+    }
+  ]
+}
