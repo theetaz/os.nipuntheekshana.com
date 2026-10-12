@@ -7,6 +7,7 @@ import { ScreensStrip } from './ScreensStrip';
 import { InfoCard } from './InfoCard';
 import { ProjectsToolbar, type ProjectsToolbarProps } from './ProjectsToolbar';
 import '../projects.css';
+import '../projects-detail.css';
 
 export function ProjectDetailView({ project, work, next, onPreview, onNavigate, scrollRef, workError, onRetry, ...toolbar }: ProjectData & ProjectsToolbarProps & {
   onPreview?: (index: number, element: HTMLElement) => void; onNavigate?: (slug: string) => void;

@@ -10,8 +10,6 @@ import Wallpaper from '../components/static/Wallpaper.astro';
 import SimpleChrome from '../components/static/SimpleChrome.astro';
 import Desktop from '../os/Desktop';
 import { HomeScreen } from '../os/mobile/HomeScreen';
-import phoneHomeCss from '../os/mobile/phone-home.css?inline';
-import appSheetCss from '../os/mobile/app-sheet.css?inline';
 import type { AppId } from '../os/types/apps';
 import { CODENAME, VERSION } from '../os/config';
 import { links, now } from '../data/profile';
@@ -95,7 +93,6 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
     <Font cssVariable="--font-fraunces" />
     <HeroPreloads />
     <Font cssVariable="--font-martian" />
-    <style is:inline set:html={phoneHomeCss + appSheetCss} />
     {seo.jsonLd?.map((entry) => <script is:inline type="application/ld+json" set:html={serializeJsonLd(entry)} />)}
   </head>
   <body>

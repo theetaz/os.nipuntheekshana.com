@@ -1,0 +1,6 @@
+/* Loading placeholders only render after the interactive app loads. */
+.projects-loading { flex-direction: row; padding: 20px; gap: 28px; }.projects-loading-sidebar { width: 160px; flex: none; }.projects-loading-sidebar i { display: block; height: 12px; background: var(--os-sunken); margin-bottom: 24px; border-radius: 6px; }
+.projects-loading-grid { display: grid; grid-template-columns: repeat(auto-fill, 112px); grid-auto-rows: 116px; justify-items: center; gap: 20px; flex: 1; align-content: start; }.projects-loading-grid i { position: relative; width: 64px; height: 64px; border-radius: 14px; background: var(--os-sunken); }
+.projects-loading-grid i::after { content: ''; position: absolute; top: 76px; left: -8px; width: 80px; height: 8px; border-radius: 4px; background: var(--os-sunken); box-shadow: 0 12px 0 var(--os-sunken); }
+@container window (max-width: 559px) {.projects-loading-sidebar { display: none; }
+}

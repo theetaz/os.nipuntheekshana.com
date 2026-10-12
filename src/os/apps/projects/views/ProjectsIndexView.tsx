@@ -13,6 +13,7 @@ import { ArchiveView } from './ArchiveView';
 import type { ProjectSelectionProps } from './ProjectTile';
 import { ProjectsToolbar, type ProjectsToolbarProps } from './ProjectsToolbar';
 import '../projects.css';
+import '../projects-index.css';
 
 const categoryIcons = { data: Layers, apps: Smartphone, hardware: Cpu, worlds: Box, ai: Mic };
 export interface ProjectsIndexProps extends ProjectSelectionProps, ProjectsToolbarProps {
