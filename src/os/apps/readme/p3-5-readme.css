@@ -1,8 +1,8 @@
 .readme-scroll { position: relative; overflow: auto; overscroll-behavior: contain; background: var(--os-window); color: var(--os-ink); }
 #static-window[data-app="readme"] .static-document { padding: 0; max-width: none; }
 .readme-document { padding: 32px 36px; font: 400 15px/24px var(--font-ui); overflow-wrap: anywhere; }
-.readme-document h1 { margin: 0 0 16px; font: 450 32px/38px var(--font-display); letter-spacing: -.015em; }
-.readme-document h2 { margin: 28px 0 12px; font: 500 20px/26px var(--font-display); letter-spacing: -.005em; scroll-margin-top: 20px; }
+.readme-document h1 { margin: 0 0 16px; font: 400 32px/38px var(--font-display); font-synthesis: none; letter-spacing: -.015em; }
+.readme-document h2 { margin: 28px 0 12px; font: 700 20px/26px var(--font-ui); letter-spacing: -.005em; scroll-margin-top: 20px; }
 .readme-document p { margin: 0 0 16px; }
 .readme-document nav { display: flex; flex-wrap: wrap; gap: 4px 16px; font: 450 12px/16px var(--font-ui); }
 .readme-document a { color: var(--os-accent-ink); text-decoration: underline; text-underline-offset: 3px; }
