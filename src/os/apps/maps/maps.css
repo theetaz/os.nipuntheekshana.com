@@ -101,6 +101,42 @@
   .maps-places { grid-template-columns: 1fr; }
   .static-window[data-app="maps"] .static-titlebar { height: 52px; width: 80px; }
 }
+/* Pocket sheets (D§13.3): the sheet header owns the top edge, so nothing
+   reserves traffic-light room. In a portrait sheet the island fills the space
+   above a docked bottom sheet that carries the game card, or the info card and
+   legend while exploring. A grid keeps the overlays in the map's cell, so the
+   stage never sits under a card and no part of the view scrolls. */
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  .managed-window[data-app="maps"] .maps-view { min-height: 0; }
+  .managed-window[data-app="maps"] .maps-toolbar { left: 16px; }
+  .managed-window[data-app="maps"] .maps-view :is(.maps-modes button, .maps-tools button, .maps-info button, .maps-game button, .maps-fallback button) { min-height: 44px; }
+  .managed-window[data-app="maps"] .maps-game header button { width: 44px; height: 44px; }
+  .managed-window[data-app="maps"] .maps-view a { display: inline-flex; align-items: center; min-height: 44px; }
+  @container window (max-width: 480px) {
+    .managed-window[data-app="maps"] .maps-view { display: grid; grid-template: "map" minmax(0, 1fr) "dock" auto "legend" auto / minmax(0, 1fr); overflow: hidden; }
+    .managed-window[data-app="maps"] .maps-view::after { content: none; }
+    .managed-window[data-app="maps"] :is(.maps-stage, .maps-toolbar, .maps-readout, .maps-fallback, .maps-info, .maps-game, .maps-legend) { position: relative; inset: auto; width: auto; max-width: none; }
+    .managed-window[data-app="maps"] .maps-stage { grid-area: map; height: auto; min-height: 0; }
+    .managed-window[data-app="maps"] .maps-toolbar { grid-area: map; align-self: start; margin: 8px 12px 0; justify-content: space-between; flex-wrap: wrap; }
+    .managed-window[data-app="maps"] .maps-tools { position: static; }
+    .managed-window[data-app="maps"] [data-maps-layers] { position: relative; }
+    .managed-window[data-app="maps"] .maps-layers { top: calc(100% + 4px); right: 0; }
+    .managed-window[data-app="maps"] .maps-readout { grid-area: map; align-self: end; justify-self: start; margin: 0 0 12px 12px; padding: 4px 8px; font-size: 10px; }
+    .managed-window[data-app="maps"] .maps-fallback { grid-area: map; align-self: end; margin: 0 12px 48px; font-size: 11px; }
+    .managed-window[data-app="maps"] :is(.maps-info, .maps-game) { grid-area: dock; border-width: 1px 0 0; border-radius: 16px 16px 0 0; box-shadow: 0 -8px 24px rgb(0 0 0 / .08); padding: 12px 16px; }
+    /* Reserve the tallest (reveal) card so tapping a guess never resizes the map under the pin. */
+    .managed-window[data-app="maps"] .maps-game { min-height: calc(260px + env(safe-area-inset-bottom)); max-height: 60cqh; overflow-y: auto; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+    .managed-window[data-app="maps"] .maps-legend { grid-area: legend; border-width: 0; border-radius: 0; padding: 0 16px calc(12px + env(safe-area-inset-bottom)); box-shadow: none; }
+    .managed-window[data-app="maps"] .maps-legend p { display: inline; margin-right: 4px; }
+    .managed-window[data-app="maps"] .maps-info p { margin-bottom: 2px; }
+    .managed-window[data-app="maps"] .maps-game header { margin-bottom: 0; }
+    .managed-window[data-app="maps"] .maps-game header button { margin-right: -12px; }
+    .managed-window[data-app="maps"] .maps-game h2 { font-size: 26px; line-height: 32px; margin-top: 8px; }
+    .managed-window[data-app="maps"] .maps-game p { margin: 6px 0; }
+  }
+}
+/* Touch players tap the map; the keyboard crosshair hint stays for screen readers. */
+@media (hover: none) and (pointer: coarse) { .managed-window[data-app="maps"] .maps-game-keys { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); } }
 html[data-motion="reduce"] :is(.maps-poster, .maps-stage > canvas, .maps-svg-pulse) { animation: none; transition: none; }
 @media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) :is(.maps-poster, .maps-stage > canvas, .maps-svg-pulse) { animation: none; transition: none; } }
 html[data-transparency="reduce"] .maps-glass { background: var(--os-window); backdrop-filter: none; }

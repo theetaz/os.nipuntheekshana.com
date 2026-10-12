@@ -4,6 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 import type { Page, Locator } from '@playwright/test';
 import type { ClientActivity } from '../../src/os/types/content';
 import { test, expect, openApp, openMenu, closeApp } from './fixtures';
+import { NARROW_PHONE, expectPhoneSheetFits, expectSheetAccessible, openFromHome, phoneOnly } from './phone-sheet';
 
 const counts = Array.from({ length: 371 }, (_, index) => index === 0 || index === 370 ? -1 : index % 5 === 0 ? 0 : (index * 7) % 42);
 const activity: Extract<ClientActivity, { available: true }> = {
@@ -331,4 +332,24 @@ test('all accents and themes update the terrain; screenshots and accessibility s
   await page.emulateMedia({ colorScheme: 'light' }); await frames(page);
   await page.screenshot({ path: resolve('.astro/p3-8-artifacts/activity-mobile-light.png') });
   expect(errors).toEqual([]);
+});
+
+test('Activity opens from home with two-column tiles and the narrow terrain at 360 px @mobile', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Pocket sheets are covered by the mobile projects.');
+  await page.setViewportSize(NARROW_PHONE);
+  const sheet = await openFromHome(page, 'Activity', 'activity');
+  const tiles = await sheet.locator('.activity-stat').evaluateAll(els => els.map(el => { const box = el.getBoundingClientRect(); return { x: Math.round(box.x), y: Math.round(box.y), w: Math.round(box.width) }; }));
+  expect(tiles.length).toBeGreaterThanOrEqual(3);
+  expect(new Set(tiles.map(tile => tile.x)).size).toBe(2); expect(tiles[0]!.y).toBe(tiles[1]!.y); expect(tiles[2]!.x).toBe(tiles[0]!.x);
+  expect(Math.abs(tiles[0]!.w - tiles[1]!.w)).toBeLessThanOrEqual(1);
+  // The terrain chooses its narrow pose below a 560 px layout width.
+  const canvas = sheet.locator('.activity-terrain-stage canvas'); await expect(sheet.locator('.activity-view')).toHaveClass(/is-ready/);
+  expect(await canvas.evaluate(el => el.clientWidth)).toBeLessThan(560);
+  await expectPhoneSheetFits(sheet, '3D'); await expectSheetAccessible(page, '3D');
+  await sheet.getByRole('button', { name: 'Calendar', exact: true }).tap();
+  await expect(sheet.locator('.activity-view')).toHaveAttribute('data-view', 'top');
+  await expect(sheet.getByRole('button', { name: 'Calendar', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expectPhoneSheetFits(sheet, 'Calendar'); await expectSheetAccessible(page, 'Calendar');
+  await sheet.getByRole('button', { name: '3D', exact: true }).tap();
+  await expect(sheet.locator('.activity-view')).toHaveAttribute('data-view', 'perspective');
 });

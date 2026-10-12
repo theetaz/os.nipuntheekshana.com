@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect, openMenu, closeApp } from './fixtures';
 import { items } from '../../src/os/apps/trash/items';
+import { NARROW_PHONE, expectPhoneSheetFits, expectSheetAccessible, openFromHome, phoneOnly } from './phone-sheet';
 
 const managed = '[data-window-id="trash"]';
 const artifactDir = resolve('.astro/p3-11-artifacts');
@@ -210,4 +211,21 @@ test('desktop and phone content are responsive and produce light/dark artifacts 
       await page.screenshot({ path: resolve(artifactDir, `${mode}-${theme}-empty.png`) });
     }
   }
+});
+
+test('Kooda opens from home; a tapped item opens and closes its note at 360 px @mobile', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Pocket sheets are covered by the mobile projects.');
+  await page.setViewportSize(NARROW_PHONE);
+  const sheet = await openFromHome(page, 'Kooda', 'trash');
+  await expect(sheet.locator('.kooda-tile')).toHaveCount(items.length);
+  await expectPhoneSheetFits(sheet); await expectSheetAccessible(page);
+  const item = items[0]!; await sheet.getByRole('button', { name: item.name, exact: true }).tap();
+  const card = page.getByRole('dialog', { name: item.name, exact: true }); await expect(card.locator('p')).toHaveText(item.note);
+  const close = card.getByRole('button', { name: 'Close note' });
+  // Measure once the note has finished scaling in.
+  await expect.poll(async () => (await close.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  expect((await close.boundingBox())!.width).toBeGreaterThanOrEqual(44);
+  const box = (await card.boundingBox())!; expect(box.x).toBeGreaterThanOrEqual(0); expect(box.x + box.width).toBeLessThanOrEqual(NARROW_PHONE.width);
+  await expectSheetAccessible(page, 'note');
+  await close.tap(); await expect(card).toHaveCount(0);
 });

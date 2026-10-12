@@ -37,7 +37,8 @@ test('effects remain lazy until their trigger', async ({ page }) => {
     if (/\/(?:rain|confetti|ayubowan|devmode)\.[^/]+\.js$/.test(new URL(request.url()).pathname)) loaded.push(request.url());
   });
   await ready(page); await expect(page.locator('[data-mochi]')).toBeVisible();
-  await openApp(page, 'Settings'); await expect(settings(page).getByRole('heading', { name: 'Appearance' })).toBeVisible();
+  // Phone sheets open Settings on its section list; desktop shows Appearance beside it.
+  await openApp(page, 'Settings'); await expect(settings(page).getByRole('navigation', { name: 'Settings sections' })).toBeVisible();
   expect(loaded).toEqual([]); await expect(page.locator('[data-egg]')).toHaveCount(0);
 });
 

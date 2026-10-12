@@ -3,15 +3,21 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { test, expect, openMenu, openApp, closeApp } from './fixtures';
+import { NARROW_PHONE, expectPhoneSheetFits, expectSheetAccessible, openFromHome, phoneOnly } from './phone-sheet';
 
 const app = (page: Page) => page.locator('[data-window-id="settings"]');
+const phone = async (page: Page) => await page.locator('html').getAttribute('data-mode') === 'mobile';
+const back = (page: Page) => app(page).getByRole('button', { name: 'Back to Settings', exact: true });
 async function settings(page: Page) {
   await page.goto('/settings');
-  await expect(app(page).getByRole('radiogroup', { name: 'Theme', exact: true })).toBeVisible();
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
+  // Phone sheets open on the section list (D§13.3); desktop opens on Appearance.
+  if (await phone(page)) await section(page, 'Appearance');
+  await expect(app(page).getByRole('radiogroup', { name: 'Theme', exact: true })).toBeVisible();
   return app(page);
 }
 async function section(page: Page, name: string) {
+  if (await phone(page) && await back(page).isVisible()) await back(page).click();
   await app(page).getByRole('navigation', { name: 'Settings sections' }).getByRole('button', { name, exact: true }).click();
   await expect(app(page).getByRole('region', { name, exact: true })).toBeVisible();
 }
@@ -41,6 +47,7 @@ test('Dark applies live and persists before scripts load, without a theme flash'
     await expect(page.locator('#static-window')).not.toHaveAttribute('hidden');
   } finally { release(); }
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
+  if (await phone(page)) await section(page, 'Appearance');
   await expect(app(page).getByRole('radio', { name: 'Dark', exact: true })).toHaveAttribute('aria-checked', 'true');
   expect(await page.evaluate(() => (window as unknown as { settingsThemes: string[] }).settingsThemes.every(theme => theme === 'dark'))).toBe(true);
 });
@@ -225,10 +232,13 @@ test('Settings adoption preserves geometry and first content at zero CLS', async
   try {
     await page.goto('/settings', { waitUntil: 'domcontentloaded' }); await expect(app(page)).toHaveAttribute('data-adopting', '');
     const before = await page.locator('#static-window').boundingBox();
-    const preview = await page.locator('#static-window .settings-theme-preview').first().boundingBox();
+    // A phone sheet opens on the list, which leads the static page too; desktop opens on Appearance.
+    const listed = await phone(page);
+    const preview = await page.locator(listed ? '#static-window .settings-nav-appearance' : '#static-window .settings-theme-preview').first().boundingBox();
     release(); await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
     await page.evaluate(async () => { await document.fonts.ready; });
-    const after = await app(page).boundingBox(); const livePreview = await app(page).locator('.settings-theme-preview').first().boundingBox();
+    const after = await app(page).boundingBox();
+    const livePreview = await (listed ? app(page).getByRole('navigation', { name: 'Settings sections' }).getByRole('button', { name: 'Appearance', exact: true }) : app(page).locator('.settings-theme-preview').first()).boundingBox();
     for (const key of ['x', 'y', 'width', 'height'] as const) {
       expect(Math.abs(before![key] - after![key])).toBeLessThanOrEqual(1);
       expect(Math.abs(preview![key] - livePreview![key])).toBeLessThanOrEqual(1);
@@ -253,3 +263,32 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     });
   }
 }
+
+test('Settings opens from home as a section list; each section is a detail with Back, at 360 px @mobile', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Pocket sheets are covered by the mobile projects.');
+  await page.setViewportSize(NARROW_PHONE);
+  const sheet = await openFromHome(page, 'Settings', 'settings');
+  const nav = sheet.getByRole('navigation', { name: 'Settings sections' });
+  await expect(sheet.locator('.sheet-title')).toHaveText('Settings'); await expect(page).toHaveURL(/\/settings$/);
+  await expect(nav.getByRole('button')).toHaveCount(7); await expect(sheet.getByRole('region')).toHaveCount(0);
+  const rows = await nav.getByRole('button').evaluateAll(buttons => buttons.map(button => button.getBoundingClientRect().width));
+  expect(new Set(rows.map(Math.round)).size).toBe(1);
+  await expectPhoneSheetFits(sheet, 'list'); await expectSheetAccessible(page, 'list');
+  // List → detail is a history entry, so the system Back gesture returns to the list.
+  await nav.getByRole('button', { name: 'Wallpaper', exact: true }).tap();
+  await expect(sheet.getByRole('region', { name: 'Wallpaper', exact: true })).toBeVisible(); await expect(nav).toBeHidden();
+  await expect(page).toHaveURL(/\/settings\?section=wallpaper$/); await expect(sheet.locator('.sheet-title')).toHaveText('Wallpaper');
+  await expect(back(page)).toBeFocused();
+  await page.goBack(); await expect(page).toHaveURL(/\/settings$/); await expect(nav).toBeVisible(); await expect(sheet.getByRole('region')).toHaveCount(0);
+  for (const name of ['Appearance', 'Wallpaper', 'Accessibility', 'Sound', 'Mochi', 'Desktop', 'About']) {
+    await nav.getByRole('button', { name, exact: true }).tap();
+    await expect(sheet.getByRole('region', { name, exact: true })).toBeVisible();
+    await expectPhoneSheetFits(sheet, name); await expectSheetAccessible(page, name);
+    // The in-content Back returns to the list and to the row that was chosen.
+    await back(page).tap(); await expect(nav.getByRole('button', { name, exact: true })).toBeFocused();
+    await expect(page).toHaveURL(/\/settings$/);
+  }
+  await nav.getByRole('button', { name: 'Appearance', exact: true }).tap();
+  await sheet.getByRole('radio', { name: 'Dark', exact: true }).tap();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark'); await expectSheetAccessible(page, 'dark');
+});

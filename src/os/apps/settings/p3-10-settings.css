@@ -92,16 +92,24 @@ html[data-motion="full"] .settings-app .settings-wallpaper[data-preview="monsoon
 .settings-static:has(#settings-static-mochi:target) .settings-nav-mochi,
 .settings-static:has(#settings-static-desktop:target) .settings-nav-desktop,
 .settings-static:has(#settings-static-about:target) .settings-nav-about { background: var(--os-accent-soft); }
+.settings-back { display: none; }
+/* Narrow sheets (D§13.3): sections as a list → detail. The fixed desktop
+   window never reaches this width. Static pages keep the list above every section. */
 @container window (max-width: 560px) {
   .settings-app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; align-content: start; }
-  .settings-app .settings-sidebar { position: static; display: flex; flex-wrap: wrap; gap: 4px; min-height: 0; border-right: 0; border-bottom: 1px solid var(--os-line); padding: 12px; }
-  .settings-app .settings-sidebar-title { width: 100%; margin: 0 8px 8px; }
-  .settings-sidebar > button, .settings-app .settings-static-nav { width: auto; min-height: 44px; padding: 8px 12px; margin: 0; }
-  .settings-app .settings-panel { padding: 24px 20px; }
+  .settings-app .settings-sidebar { position: static; min-height: 0; border-right: 0; border-bottom: 1px solid var(--os-line); padding: 12px; }
+  .settings-app .settings-sidebar-title { margin: 4px 8px 8px; }
+  .settings-sidebar > button, .settings-app .settings-static-nav { min-height: 44px; padding: 0 12px; margin: 0; }
+  .settings-app[data-detail] .settings-sidebar, .settings-app:not(.settings-static):not([data-detail]) .settings-panels { display: none; }
+  .settings-app:not(.settings-static):not([data-detail]) .settings-sidebar { min-height: 100%; border-bottom: 0; }
+  .settings-app .settings-back { display: flex; align-items: center; min-height: 44px; padding: 0 20px; color: var(--os-accent-ink); font: 500 13px/18px var(--font-ui); }
+  .settings-app .settings-panel { padding: 8px 20px 24px; }
+  .settings-static .settings-panel { padding-top: 24px; }
   .settings-app .settings-wallpapers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
-  .settings-app button, .settings-app input[type="range"] { min-height: 44px; }
+  /* Shared buttons size themselves inline; phones need 44 px targets. */
+  .settings-app button, .settings-app input[type="range"] { min-height: 44px !important; }
   .settings-app [role="radio"] { min-width: 44px; }
-  .settings-app .settings-links > a { display: inline-flex; align-items: center; min-height: 44px; }
+  .settings-app .settings-links > a, .settings-app .settings-panel > a { display: inline-flex; align-items: center; min-height: 44px; }
 }
 html:is([data-view="simple"], :has(#simple:target)) .settings-static .settings-panel { display: block; }
 @media (forced-colors: active) {

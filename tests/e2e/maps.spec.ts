@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { test, expect, openApp, openMenu, closeApp } from './fixtures';
+import { NARROW_PHONE, expectPhoneSheetFits, expectSheetAccessible, openFromHome, phoneOnly } from './phone-sheet';
 // Headless Chromium needs an explicit software-GPU opt-in on this shared Mac.
 test.use({ launchOptions: { args: ['--enable-unsafe-swiftshader'] } });
 const app = (page: Page) => page.locator('[data-window-id="maps"]');
@@ -215,9 +216,43 @@ test('light and dark desktop and phone layouts produce artifacts with zero adopt
   }
 });
 
-test('a short phone window scrolls to the game controls without horizontal overflow', async ({ page }) => {
+test('a short phone sheet keeps the docked game card and map in view without scrolling', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 600 }); await disableWebGL(page); await ready(page, '/maps/play');
-  expect(await view(page).evaluate(el => el.scrollHeight > el.clientHeight && el.scrollWidth <= el.clientWidth)).toBe(true);
+  expect(await view(page).evaluate(el => el.scrollHeight <= el.clientHeight && el.scrollWidth <= el.clientWidth)).toBe(true);
+  const card = (await app(page).locator('.maps-game').boundingBox())!; const sheet = (await app(page).boundingBox())!;
+  expect(Math.abs(card.y + card.height - (sheet.y + sheet.height))).toBeLessThanOrEqual(1);
   await finishGame(page); await app(page).getByRole('button', { name: 'Play again', exact: true }).click();
   await expect(app(page).getByText('Round 1 / 5', { exact: true })).toBeVisible();
+});
+
+test('Island opens from home; the game card docks as a bottom sheet and taps place pins at 360 px @mobile', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Pocket sheets are covered by the mobile projects.');
+  await page.setViewportSize(NARROW_PHONE); await disableWebGL(page);
+  const sheet = await openFromHome(page, 'Island', 'maps');
+  // Exploring: the info card and legend share the bottom dock; the map fills the rest.
+  const stage = sheet.locator('.maps-stage'); const infoCard = sheet.locator('.maps-info');
+  await expect(infoCard).toBeVisible(); await expect(sheet.locator('.maps-legend')).toBeVisible();
+  expect((await stage.boundingBox())!.y + (await stage.boundingBox())!.height).toBeLessThanOrEqual((await infoCard.boundingBox())!.y + 1);
+  await expectPhoneSheetFits(sheet, 'explore'); await expectSheetAccessible(page, 'explore');
+  await sheet.getByRole('button', { name: 'Play', exact: true }).tap();
+  await expect(page).toHaveURL(/\/maps\/play$/);
+  const card = sheet.locator('.maps-game'); await expect(card).toBeVisible();
+  const frame = (await sheet.boundingBox())!; const docked = (await card.boundingBox())!;
+  // Full sheet width, flush with its bottom edge, below the whole map.
+  expect(docked.x).toBeCloseTo(frame.x, 0); expect(docked.width).toBeCloseTo(frame.width, 0);
+  expect(Math.abs(docked.y + docked.height - (frame.y + frame.height))).toBeLessThanOrEqual(1);
+  const map = (await stage.boundingBox())!; expect(map.y + map.height).toBeLessThanOrEqual(docked.y + 1);
+  await expect(card.locator('.maps-game-keys')).toHaveCSS('position', 'absolute');
+  await expectPhoneSheetFits(sheet, 'play'); await expectSheetAccessible(page, 'play');
+  // A tap on the island is the guess; the map keeps its size when the card reveals the answer.
+  await expect(stage.locator('.maps-crosshair')).toBeVisible();
+  await page.touchscreen.tap(map.x + map.width / 2, map.y + map.height / 2);
+  await expect(card.getByText(/ · (?:<1|\d+) km$/)).toBeVisible();
+  const after = (await stage.boundingBox())!; expect(Math.abs(after.height - map.height)).toBeLessThanOrEqual(1);
+  await expect(card.getByRole('button', { name: 'Next city', exact: true })).toBeFocused();
+  await expectPhoneSheetFits(sheet, 'reveal'); await expectSheetAccessible(page, 'reveal');
+  await card.getByRole('button', { name: 'Next city', exact: true }).tap();
+  await expect(card.getByText('Round 2 / 5', { exact: true })).toBeVisible();
+  await card.getByRole('button', { name: 'Leave game', exact: true }).tap();
+  await expect(page).toHaveURL(/\/maps$/); await expect(sheet.locator('.maps-info')).toBeVisible();
 });

@@ -19,4 +19,9 @@
   .readme-document { padding: 24px 20px; }
   .readme-document th:first-child, .readme-document td:first-child { width: 120px; padding-right: 12px; }
 }
-@media (pointer: coarse) { .readme-document nav a { min-height: 44px; } }
+/* Touch targets reach 44 px; paragraph links grow their hit area without
+   moving the text around them. */
+@media (pointer: coarse) {
+  .readme-document nav a { min-height: 44px; min-width: 44px; justify-content: center; }
+  .readme-document p > a { display: inline-block; padding-block: 10px; margin-block: -10px; }
+}
