@@ -53,9 +53,9 @@ test.describe('boot opt-in', () => {
 test('app helpers use accessible dock and window names @smoke', async ({ page }) => {
   await page.goto('/');
   await page.setContent(`
-    <nav aria-label="Dock"><div role="toolbar" aria-label="Apps">
-      <button onclick="document.querySelector('[role=dialog]').hidden=false">Projects</button>
-    </div></nav>
+    <nav class="static-dock os-dock" aria-label="Dock"><ul role="toolbar" aria-label="Apps">
+      <li role="presentation"><a class="os-dock-link" data-dock-item data-dock-app="projects" href="/projects" aria-label="Projects" onclick="event.preventDefault();document.querySelector('[role=dialog]').hidden=false">Projects</a></li>
+    </ul></nav>
     <section role="dialog" aria-label="Projects" hidden>App content</section>
   `);
   await openApp(page, 'Projects');

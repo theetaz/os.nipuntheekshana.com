@@ -63,15 +63,16 @@ test('Lotus changes the accent token and radio groups support arrow keys', async
   expect(await stored(page, 'accent')).toBe('"lotus"');
 });
 
-test('Reduce motion stops live dock magnification and transparency becomes solid', async ({ page }) => {
+test('Reduce motion stops live dock hops and transparency stays solid', async ({ page }) => {
   await settings(page); const dock = page.locator('[data-shell="desktop"] .os-dock');
   const projects = dock.locator('[data-dock-app="projects"]'); await projects.hover();
-  await expect.poll(() => projects.evaluate(el => el.getBoundingClientRect().width)).toBeGreaterThanOrEqual(71);
+  await expect.poll(() => projects.evaluate(el => getComputedStyle(el).translate)).toBe('0px -7px');
   await section(page, 'Accessibility');
   await app(page).getByRole('radiogroup', { name: 'Motion', exact: true }).getByRole('radio', { name: 'Reduce', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduce');
   await expect(dock).toHaveAttribute('data-reduced-motion', 'true'); await projects.hover();
-  expect(await projects.evaluate(el => el.getBoundingClientRect().width)).toBe(48);
+  expect(await projects.evaluate(el => getComputedStyle(el).width)).toBe('40px');
+  expect(await projects.evaluate(el => getComputedStyle(el).translate)).toBe('none');
   await app(page).getByRole('radiogroup', { name: 'Transparency', exact: true }).getByRole('radio', { name: 'Reduce', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-transparency', 'reduce');
   expect(await stored(page, 'motion')).toBe('"reduce"'); expect(await stored(page, 'transparency')).toBe('"reduce"');

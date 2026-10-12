@@ -113,7 +113,7 @@ export function DockItem({ app, tabIndex = -1 }: { app: AppMeta; tabIndex?: numb
         else focusWindow(windows[1]!.id);
       } else focusWindow(top.id);
     }}>
-    <svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href={`#${app.id === 'trash' ? empty ? 'app-trash' : 'app-trash-full' : app.icon}`} /></svg>
+    <svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href={`#${app.id === 'trash' ? empty ? 'app-trash' : 'app-trash-full' : app.icon}`} /></svg>
     {running && <><span className="os-dock-indicator" aria-hidden="true" data-minimized={running.allMinimized} />
       <span className="sr-only" id={statusId}>{running.allMinimized ? 'Minimised' : 'Running'}</span></>}
     <span className="os-dock-tooltip" role="tooltip" id={tooltipId}>{app.name}</span>
@@ -123,10 +123,10 @@ export function DockItem({ app, tabIndex = -1 }: { app: AppMeta; tabIndex?: numb
 export function DockExternalItem({ link }: { link: DockLink }) {
   const tooltipId = useId();
   return <a className="os-dock-link" data-dock-item href={link.href} aria-label={link.label} tabIndex={-1}
-    target="_blank" rel="noopener noreferrer" aria-describedby={tooltipId}
+    target="_blank" rel="noopener" aria-describedby={tooltipId}
     onClick={event => { if (event.button === 0 && event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey) { event.preventDefault(); void copyLink(link); } }}
     onContextMenu={event => context(event, `dock:link:${link.id}`, [item('Open', `dock.linkOpen.${link.id}`), item('Copy link', `dock.linkCopy.${link.id}`)])}>
-    <svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href={`#${link.icon}`} /></svg>
+    <svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href={`#${link.icon}`} /></svg>
     <svg className="os-dock-external" viewBox="0 0 9 9" aria-hidden="true" focusable="false"><path d="M2 7 7 2M2 2h5v5" stroke="currentColor" strokeWidth="1.2" fill="none" /></svg>
     <span className="os-dock-tooltip" role="tooltip" id={tooltipId}>{link.label}</span>
   </a>;

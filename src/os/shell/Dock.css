@@ -1,24 +1,36 @@
-.os-dock { contain: layout style; }
-.os-dock::before { content: ''; position: absolute; inset: -24px 0 auto; height: 24px; }
-.os-dock[data-dock-mode="desktop"] ul { height: 64px; align-items: flex-end; }
-.os-dock li { flex-shrink: 0; }
-.os-dock .dock-divider { align-self: center; }
-.os-dock .os-dock-link { position: relative; width: 48px; height: 48px; text-decoration: none; }
-.os-dock-link > svg { width: 100%; height: 100%; }
-.os-dock-link:active { box-shadow: inset 0 0 0 1px var(--os-accent); }
-.os-dock[data-reduced-motion="true"] .os-dock-link:hover { outline: 1px solid var(--os-accent); outline-offset: 1px; }
-.os-dock-indicator { position: absolute; left: 50%; bottom: -7px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--os-ink); opacity: .7; }
+.static-dock.k-launcher { left: 50vw; bottom: 12px; contain: layout style; }
+.static-dock.k-launcher > ul { display: flex; align-items: center; gap: 8px; height: 60px; margin: 0; padding: 0 12px; list-style: none; border: var(--k-bw-chrome); border-radius: var(--r-pill); background: var(--k-cream); backdrop-filter: none; box-shadow: var(--k-shadow-2); }
+.k-launcher li { flex-shrink: 0; }
+.static-dock.k-launcher .dock-divider { align-self: center; width: 2px; height: 30px; margin: 0; border-radius: 2px; background: rgb(27 21 48 / .3); }
+.k-launcher .os-dock-link { position: relative; display: block; width: 40px; height: 40px; border: var(--k-bw-chrome); border-radius: 11px; background: var(--k-cream); box-shadow: var(--k-shadow-1); text-decoration: none; transition: translate 350ms var(--ease-pop), rotate 350ms var(--ease-pop); }
+.k-launcher .os-dock-link > svg { width: 100%; height: 100%; border-radius: 9px; filter: none; }
+.os-dock-link:active { box-shadow: none; }
+.os-dock-indicator { position: absolute; left: 50%; bottom: -9px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--os-ink); }
 .os-dock-indicator[data-minimized="true"] { background: transparent; border: 1px solid var(--os-ink); }
-.os-dock-tooltip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: var(--z-menus); width: max-content; max-width: 240px; padding: 3px 8px; border-radius: 6px; font: 500 11px/14px var(--font-ui); letter-spacing: .01em; color: var(--os-ink); background: var(--menu-bg); backdrop-filter: var(--menu-filter); box-shadow: var(--shadow-menu); pointer-events: none; visibility: hidden; }
+.os-dock-tooltip { position: absolute; bottom: 52px; left: 50%; translate: -50% 0; rotate: 6deg; z-index: var(--z-menus); width: max-content; max-width: 240px; padding: 2px 9px; border-radius: var(--r-pill); font: 600 12px/18px var(--font-ui); color: #FFF7E8; background: #1B1530; pointer-events: none; visibility: hidden; }
 .os-dock-link:hover .os-dock-tooltip { visibility: visible; transition: visibility 0s 300ms !important; }
 .os-dock-link:focus-visible .os-dock-tooltip { visibility: visible; transition: none !important; }
 .os-dock-link[data-tooltip-dismissed] .os-dock-tooltip { visibility: hidden; transition: none !important; }
-.os-dock .os-dock-external { position: absolute; top: 0; right: 0; width: 9px; height: 9px; filter: none; visibility: hidden; color: var(--os-ink); background: var(--glass-bg); border-radius: 2px; }
+.k-launcher .os-dock-external { position: absolute; top: 0; right: 0; width: 9px; height: 9px; visibility: hidden; color: #1B1530; background: #FFF7E8; border-radius: 2px; }
 .os-dock-link:is(:hover, :focus-visible) .os-dock-external { visibility: visible; }
 .os-dock-link[data-kooda-over="true"] { outline: 2px solid var(--os-accent); outline-offset: 2px; }
-.os-dock[data-reduced-motion="false"] .os-dock-link[data-kooda-over="true"] > svg { transform: scale(1.1); }
-@supports not (backdrop-filter: blur(1px)) { .os-dock ul { background: var(--os-titlebar); } .os-dock-tooltip { background: var(--os-raised); } }
-html[data-transparency="reduce"] .os-dock ul { background: var(--os-titlebar); backdrop-filter: none; }
-html[data-transparency="reduce"] .os-dock-tooltip { background: var(--os-raised); backdrop-filter: none; }
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) { .os-dock ul { background: var(--os-titlebar); backdrop-filter: none; } .os-dock-tooltip { background: var(--os-raised); backdrop-filter: none; } }
-@media (forced-colors: active) { .os-dock ul, .os-dock-tooltip { background: Canvas; border: 1px solid CanvasText; } .os-dock-indicator { background: CanvasText; } .os-dock-indicator[data-minimized="true"] { background: Canvas; border-color: CanvasText; } }
+.k-launcher[data-reduced-motion="false"] .os-dock-link[data-kooda-over="true"] > svg { transform: scale(1.1); }
+html[data-theme="dark"] .static-dock.k-launcher .dock-divider { background: rgb(255 244 224 / .25); }
+@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) .static-dock.k-launcher .dock-divider { background: rgb(255 244 224 / .25); } }
+@media (hover: hover) and (pointer: fine) {
+  .k-launcher .os-dock-link:hover { translate: 0 -7px; rotate: -6deg; }
+}
+html[data-motion="reduce"] .k-launcher .os-dock-link, .k-launcher[data-reduced-motion="true"] .os-dock-link { translate: none; rotate: none; transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .k-launcher .os-dock-link { translate: none; rotate: none; transition: none; }
+}
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  .static-dock.k-launcher { bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .static-dock.k-launcher > ul { height: 84px; padding: 18px 24px; gap: 24px; border-radius: 28px; }
+  .k-launcher .os-dock-link { width: 48px; height: 48px; }
+}
+@media (forced-colors: active) {
+  .static-dock.k-launcher > ul, .k-launcher .os-dock-link, .os-dock-tooltip { background: Canvas; color: CanvasText; border: 1px solid CanvasText; box-shadow: none; }
+  .static-dock.k-launcher .dock-divider, .os-dock-indicator { background: CanvasText; }
+  .os-dock-indicator[data-minimized="true"] { background: Canvas; border-color: CanvasText; }
+}

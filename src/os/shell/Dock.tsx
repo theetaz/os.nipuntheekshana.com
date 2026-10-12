@@ -1,7 +1,6 @@
 import './Dock.css';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
-import { postcardsAvailableAtom } from '../state/features';
 import { APP_META, DOCK_LINKS } from '../registry/meta';
 import { reducedMotionAtom } from '../state/atoms';
 import { nextFocusIndex } from '../lib/focus';
@@ -9,35 +8,11 @@ import { DockItem, DockExternalItem } from './DockItem';
 
 
 export function Dock({ mode = 'desktop' }: { mode?: 'desktop' | 'mobile' }) {
-  const root = useRef<HTMLElement>(null); const toolbar = useRef<HTMLUListElement>(null);
-  const postcards = useAtomValue(postcardsAvailableAtom);
+  const toolbar = useRef<HTMLUListElement>(null);
   const reducedMotion = useAtomValue(reducedMotionAtom);
   const typeahead = useRef({ text: '', at: 0 });
-  const apps = Object.values(APP_META).filter(app => app.phase === 'v1' && (app.id !== 'guestbook' || postcards) && (mode === 'mobile' ? app.mobile.dockOrder !== null : app.dockOrder !== null && app.id !== 'trash'))
+  const apps = Object.values(APP_META).filter(app => app.phase === 'v1' && app.id !== 'guestbook' && (mode === 'mobile' ? app.mobile.dockOrder !== null : app.dockOrder !== null && app.id !== 'trash'))
     .sort((a, b) => (mode === 'mobile' ? a.mobile.dockOrder! - b.mobile.dockOrder! : a.dockOrder! - b.dockOrder!));
-
-  useLayoutEffect(() => {
-    const nav = root.current; const list = toolbar.current;
-    if (!nav || !list || mode !== 'desktop' || reducedMotion) return;
-    let disposed = false; let cleanup: (() => void) | undefined; let loading = false; let x = 0; let inside = false;
-    const load = () => {
-      if (loading) return; loading = true;
-      void import('./dock-magnification').then(module => {
-        if (!disposed) cleanup = module.magnifyDock(nav, list, inside ? x : NaN);
-      }).catch(() => { loading = false; });
-    };
-    const enter = (event: PointerEvent) => {
-      if (event.pointerType === 'touch' || !matchMedia('(pointer: fine)').matches) return;
-      x = event.clientX; inside = true; load();
-    };
-    const move = (event: PointerEvent) => { x = event.clientX; if (!loading) enter(event); };
-    const leave = () => { inside = false; };
-    nav.addEventListener('pointerenter', enter); nav.addEventListener('pointermove', move); nav.addEventListener('pointerleave', leave);
-    // Install input before the shell is revealed and warm this small controller
-    // for fine pointers; cold module latency must not consume the hover spring.
-    if (matchMedia('(pointer: fine)').matches) load();
-    return () => { disposed = true; cleanup?.(); nav.removeEventListener('pointerenter', enter); nav.removeEventListener('pointermove', move); nav.removeEventListener('pointerleave', leave); };
-  }, [mode, reducedMotion]);
 
   useEffect(() => {
     const dismiss = (event: KeyboardEvent) => {
@@ -47,7 +22,7 @@ export function Dock({ mode = 'desktop' }: { mode?: 'desktop' | 'mobile' }) {
     return () => document.removeEventListener('keydown', dismiss);
   }, []);
 
-  return <><nav ref={root} className="static-dock os-dock os-chrome" aria-label="Dock"
+  return <nav className="static-dock os-dock os-chrome k-launcher" aria-label="Dock"
     data-dock-mode={mode} data-reduced-motion={reducedMotion}>
     <ul ref={toolbar} role="toolbar" aria-label="Apps" aria-orientation="horizontal"
       onFocusCapture={event => {
@@ -81,5 +56,5 @@ export function Dock({ mode = 'desktop' }: { mode?: 'desktop' | 'mobile' }) {
         {DOCK_LINKS.map(link => <li role="presentation" key={link.id}><DockExternalItem link={link} /></li>)}
         <li role="presentation" className="dock-divider" aria-hidden="true" /><li role="presentation"><DockItem app={APP_META.trash} /></li></>}
     </ul>
-  </nav></>;
+  </nav>;
 }

@@ -1,145 +1,109 @@
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { test, expect } from './fixtures';
 
 const dock = (page: Page) => page.locator('.os-dock:visible');
 const link = (page: Page, name: string) => dock(page).getByRole('link', { name, exact: true });
+const artifacts = resolve('.astro/k5-artifacts/screenshots');
+const frames = (page: Page) => page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+const translate = (page: Page) => link(page, 'Projects').evaluate(element => getComputedStyle(element).translate);
 async function ready(page: Page) {
+  const health = page.waitForResponse(response => response.url().endsWith('/api/health'));
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  test.skip(await page.locator('html').getAttribute('data-mode') === 'mobile', 'Desktop Dock magnification and window controls are desktop-only.');
-  await expect(page.locator('[data-shell="mobile"]')).toHaveCount(0);
-  await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+  await (await health).finished();
+  await expect(page.locator('html')).toHaveAttribute('data-mode', 'desktop');
+  await frames(page);
 }
-async function width(page: Page, name: string) { return link(page, name).evaluate(element => element.getBoundingClientRect().width); }
 
 let consoleErrors: string[];
 test.beforeEach(async ({ page }) => {
+  // Exercise desktop chrome in each engine; phone shells have separate coverage.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.addInitScript(() => localStorage.setItem('serendib:booted', 'true'));
   consoleErrors = [];
   page.on('pageerror', error => consoleErrors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
 });
 test.afterEach(({}, info) => { if (info.expectedStatus !== 'skipped') expect(consoleErrors).toEqual([]); });
 
-test('the first revealed Dock retains pointer intent while its controller loads', async ({ page }) => {
-  let release!: () => void; const held = new Promise<void>(done => { release = done; });
-  await page.route('**/dock-magnification.*.js', async route => { await held; await route.continue(); });
-  await page.addInitScript(() => {
-    const observer = new MutationObserver(() => {
-      const nav = document.querySelector<HTMLElement>('.os-dock'); const icon = nav?.querySelector<HTMLElement>('[data-dock-app="projects"]');
-      if (!nav || !icon || !document.documentElement.classList.contains('os-ready')) return;
-      observer.disconnect(); const rect = icon.getBoundingClientRect();
-      nav.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse', clientX: rect.x + rect.width / 2, clientY: rect.y + rect.height / 2 }));
-      Object.assign(window, { earlyDockHover: true });
-    });
-    observer.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
-  });
-  try {
-    await ready(page); await expect.poll(() => page.evaluate(() => (window as unknown as { earlyDockHover?: boolean }).earlyDockHover)).toBe(true);
-    expect(await width(page, 'Projects')).toBe(48); release();
-    await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
-  } finally { release(); }
+test('launcher geometry, order, flat tiles and secure external links match the static replacement', async ({ page }) => {
+  await ready(page);
+  const rect = await dock(page).boundingBox();
+  expect(rect!.height).toBeCloseTo(60, 0);
+  expect(rect!.y + rect!.height).toBeCloseTo(888, 0);
+  expect(rect!.x + rect!.width / 2).toBeCloseTo(720, 0);
+  await expect(dock(page).getByRole('toolbar', { name: 'Apps' })).toBeVisible();
+  const items = dock(page).locator('[data-dock-item]'); await expect(items).toHaveCount(13);
+  expect(await items.evaluateAll(elements => elements.map(element => element.getAttribute('aria-label')))).toEqual([
+    'Projects', 'About', 'Writing', 'Messages', 'Terminal', 'Island', 'Activity', 'CV', 'Settings', 'GitHub', 'LinkedIn', 'Prabhava Labs', 'Kooda',
+  ]);
+  expect(await items.evaluateAll(elements => elements.map(element => {
+    const css = getComputedStyle(element); return [css.width, css.height, css.borderRadius, css.borderTopWidth];
+  }))).toEqual(Array(13).fill(['40px', '40px', '11px', '2px']));
+  expect(await dock(page).locator('.dock-divider').evaluateAll(elements => elements.map(element => {
+    const rect = element.getBoundingClientRect(); return [rect.width, rect.height];
+  }))).toEqual([[2, 30], [2, 30]]);
+  const externals = dock(page).locator('a[target="_blank"]'); await expect(externals).toHaveCount(3);
+  for (const external of await externals.all()) await expect(external).toHaveAttribute('rel', 'noopener');
+  expect(readdirSync('dist/client/_astro').filter(file => /dock-magnification|magnify[.]/.test(file))).toEqual([]);
 });
 
-test('resting dock exactly replaces the static dock with zero hydration CLS', async ({ page }) => {
+test('static-to-island launcher replacement preserves all bounds and produces zero CLS', async ({ page }) => {
   let release!: () => void; const hold = new Promise<void>(done => { release = done; });
   await page.route('**/Desktop.*.js', async route => { await hold; await route.continue(); });
   await page.addInitScript(() => {
-    Object.assign(window, { dockCls: 0 });
+    const supported = PerformanceObserver.supportedEntryTypes.includes('layout-shift');
+    Object.assign(window, { dockCls: supported ? 0 : null });
+    if (!supported) return;
     new PerformanceObserver(list => { for (const entry of list.getEntries()) {
       const shift = entry as PerformanceEntry & { value: number; hadRecentInput: boolean };
       if (!shift.hadRecentInput) (window as unknown as { dockCls: number }).dockCls += shift.value;
     } }).observe({ type: 'layout-shift', buffered: true });
   });
+  const bounds = (selector: string) => page.locator(selector).evaluateAll(elements => elements.map(element => {
+    const rect = element.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  }));
   try {
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    const before = await page.locator('body > .static-dock').boundingBox();
-    const icons = await page.locator('body > .static-dock a').evaluateAll(elements => elements.map(element => {
-      const rect = element.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-    }));
+    await page.goto('/', { waitUntil: 'domcontentloaded' }); await frames(page);
+    const before = await bounds('body > .static-dock, body > .static-dock [data-dock-item]');
     release(); await expect(page.locator('html')).toHaveClass(/os-ready/);
-    const after = await dock(page).boundingBox();
-    for (const key of ['x', 'y', 'width', 'height'] as const) expect(after![key]).toBe(before![key]);
-    expect(after!.height).toBe(64); expect(after!.y + after!.height).toBe(890);
-    expect(await dock(page).locator('[data-dock-item]').evaluateAll(elements => elements.map(element => {
-      const rect = element.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-    }))).toEqual(icons);
-    await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
-    expect(await page.evaluate(() => (window as unknown as { dockCls: number }).dockCls)).toBe(0);
-    const projects = await link(page, 'Projects').boundingBox();
-    await page.mouse.move(projects!.x + 24, projects!.y + 24);
-    // Default polling backs off past the deadline; sample the spring each frame.
-    await expect.poll(() => width(page, 'Projects'), { timeout: 500, intervals: [16] }).toBeGreaterThanOrEqual(71);
+    expect(await bounds('.os-dock:visible, .os-dock:visible [data-dock-item]')).toEqual(before);
+    await page.evaluate(() => document.fonts.ready); await frames(page);
+    const cls = await page.evaluate(() => (window as unknown as { dockCls: number | null }).dockCls);
+    if (cls === null) test.info().annotations.push({ type: 'CLS', description: 'Layout-shift API unavailable; exact replacement bounds verified.' });
+    else { expect(cls).toBe(0); test.info().annotations.push({ type: 'CLS', description: String(cls) }); }
   } finally { release(); }
 });
 
-test('magnifies to 72 px within 500 ms without React commits and settles on leave', async ({ page }) => {
-  await page.addInitScript(() => {
-    type Fiber = { memoizedProps?: Record<string, unknown>; child?: Fiber; sibling?: Fiber };
-    const state = { commits: 0 }; let previous: Record<string, unknown> | undefined;
-    const dockProps = (fiber: Fiber | undefined): Record<string, unknown> | undefined => {
-      if (!fiber) return;
-      if (fiber.memoizedProps?.['data-dock-mode'] === 'desktop') return fiber.memoizedProps;
-      return dockProps(fiber.child) ?? dockProps(fiber.sibling);
-    };
-    Object.assign(window, { dockReact: state, __REACT_DEVTOOLS_GLOBAL_HOOK__: {
-      supportsFiber: true, inject: () => 1,
-      onCommitFiberRoot: (_id: number, root: { current: Fiber }) => {
-        // LazyMotion and the clock can commit elsewhere; magnification must never render Dock.
-        const props = dockProps(root.current);
-        if (props && props !== previous) state.commits++;
-        previous = props;
-      }, onCommitFiberUnmount: () => {},
-    } });
+test('Projects hops within 400 ms without changing tile or launcher width', async ({ page }) => {
+  await ready(page); test.skip(!await page.evaluate(() => matchMedia('(hover: hover) and (pointer: fine)').matches), 'Hover hop is for fine pointers.');
+  const before = await dock(page).boundingBox();
+  await link(page, 'Projects').evaluate(element => {
+    element.addEventListener('pointerenter', () => {
+      const started = performance.now();
+      const sample = () => {
+        if (parseFloat(getComputedStyle(element).translate.split(' ')[1] ?? '0') < 0) Object.assign(window, { launcherHopMs: performance.now() - started });
+        else requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    }, { once: true });
   });
-  await ready(page);
-  const commits = await page.evaluate(() => (window as unknown as { dockReact: { commits: number } }).dockReact.commits);
-  expect(commits).toBeGreaterThan(0);
-  const box = await link(page, 'Projects').boundingBox();
-  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
-  await expect.poll(() => width(page, 'Projects'), { timeout: 500, intervals: [16] }).toBeGreaterThanOrEqual(71);
-  expect(await width(page, 'Projects')).toBeLessThanOrEqual(73);
-  expect(await page.evaluate(() => (window as unknown as { dockReact: { commits: number } }).dockReact.commits)).toBe(commits);
-  const expanded = await dock(page).boundingBox(); expect(expanded!.height).toBe(64); expect(expanded!.width).toBeGreaterThan(788);
-  await page.mouse.move(100, 100);
-  await expect.poll(() => width(page, 'Projects')).toBe(48);
+  await link(page, 'Projects').hover();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { launcherHopMs?: number }).launcherHopMs)).toBeDefined();
+  const elapsed = await page.evaluate(() => (window as unknown as { launcherHopMs: number }).launcherHopMs);
+  expect(elapsed).toBeLessThanOrEqual(400);
+  test.info().annotations.push({ type: 'launcher-hop-ms', description: String(elapsed) });
+  await expect.poll(() => translate(page)).toBe('0px -7px');
+  expect(await link(page, 'Projects').evaluate(element => getComputedStyle(element).width)).toBe('40px');
+  expect(await dock(page).boundingBox()).toEqual(before);
+  expect(await link(page, 'Projects').evaluate(element => getComputedStyle(element).rotate)).toBe('-6deg');
+  await page.mouse.move(0, 0); await expect.poll(() => translate(page)).toBe('none');
 });
 
-test('the 24 px slack above the resting dock still magnifies icons', async ({ page }) => {
-  await ready(page); const box = await link(page, 'Projects').boundingBox(); const nav = await dock(page).boundingBox();
-  await page.mouse.move(box!.x + 24, nav!.y - 12);
-  await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
-});
-
-test('magnification shifts only dock nodes and keeps windows fixed', async ({ page }) => {
-  await ready(page); await link(page, 'Terminal').click();
-  await page.mouse.move(0, 0);
-  await expect(page.locator('[data-window-id="terminal"]')).toBeVisible();
-  await expect(page.locator('[data-window-id="terminal"]')).not.toHaveAttribute('data-transition');
-  const terminal = await page.locator('[data-window-id="terminal"]').boundingBox();
-  await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(788);
-  await page.evaluate(() => {
-    const state = { outside: [] as string[] };
-    Object.assign(window, { dockShifts: state });
-    new PerformanceObserver(list => { for (const entry of list.getEntries()) {
-      const shift = entry as PerformanceEntry & { sources: { node?: Node }[] };
-      for (const source of shift.sources) {
-        const element = source.node instanceof Element ? source.node : source.node?.parentElement;
-        if (element && !element.closest('.os-dock')) state.outside.push(element.tagName);
-      }
-    } }).observe({ type: 'layout-shift' });
-  });
-  await link(page, 'Projects').hover(); await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
-  await link(page, 'Kooda').hover(); await page.mouse.move(0, 0); await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(788);
-  expect(await page.locator('[data-window-id="terminal"]').boundingBox()).toEqual(terminal);
-  expect(await page.evaluate(() => (window as unknown as { dockShifts: { outside: string[] } }).dockShifts.outside)).toEqual([]);
-});
-
-test('reduced motion disables magnification and bounce while preserving tooltips', async ({ page }) => {
+test('reduced motion disables the hop and bounce, preserving instant focus tooltips and the running blink', async ({ page }) => {
   await page.addInitScript(() => {
-    const animate = Element.prototype.animate;
-    Object.assign(window, { dockBlinks: [] });
+    const animate = Element.prototype.animate; Object.assign(window, { dockBlinks: [] });
     Element.prototype.animate = function (frames, options) {
       if (this.classList.contains('os-dock-indicator')) (window as unknown as { dockBlinks: unknown[] }).dockBlinks.push({ frames, options });
       return animate.call(this, frames, options);
@@ -147,31 +111,34 @@ test('reduced motion disables magnification and bounce while preserving tooltips
   });
   await page.emulateMedia({ reducedMotion: 'reduce' }); await ready(page);
   await expect(dock(page)).toHaveAttribute('data-reduced-motion', 'true');
-  await link(page, 'Projects').hover(); await expect(link(page, 'Projects').getByRole('tooltip')).toBeVisible();
-  expect(await dock(page).locator('[data-dock-item]').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().width))).toEqual(Array(14).fill(48));
-  await link(page, 'Terminal').dispatchEvent('click', { button: 0 }); await expect(page.getByRole('dialog', { name: 'Terminal', exact: true })).toBeVisible();
+  await link(page, 'Projects').focus(); await expect(link(page, 'Projects').getByRole('tooltip')).toBeVisible();
+  await link(page, 'Projects').hover(); expect(await translate(page)).toBe('none');
+  expect(await link(page, 'Projects').evaluate(element => getComputedStyle(element).rotate)).toBe('none');
+  await link(page, 'Terminal').dispatchEvent('click', { button: 0 });
+  await expect(page.getByRole('dialog', { name: 'Terminal', exact: true })).toBeVisible();
   expect(await link(page, 'Terminal').locator('svg').evaluate(element => element.getAnimations().length)).toBe(0);
   expect(await page.evaluate(() => (window as unknown as { dockBlinks: unknown[] }).dockBlinks)).toEqual([
     { frames: [{ opacity: .7 }, { opacity: .2 }, { opacity: .7 }], options: { duration: 120 } },
   ]);
 });
 
-test('motion overrides respond live and force full motion over a system reduction', async ({ page }) => {
+test('motion preferences update live and full motion overrides system reduction', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(() => localStorage.setItem('serendib:motion', '"full"')); await ready(page);
   await expect(dock(page)).toHaveAttribute('data-reduced-motion', 'false');
-  await link(page, 'Projects').hover(); await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
+  await link(page, 'Projects').hover();
+  if (await page.evaluate(() => matchMedia('(pointer: fine)').matches)) await expect.poll(() => translate(page)).toBe('0px -7px');
   await page.evaluate(() => window.dispatchEvent(new StorageEvent('storage', { key: 'serendib:motion', newValue: '"reduce"', storageArea: localStorage })));
-  await expect(dock(page)).toHaveAttribute('data-reduced-motion', 'true'); expect(await width(page, 'Projects')).toBe(48);
+  await expect(dock(page)).toHaveAttribute('data-reduced-motion', 'true'); expect(await translate(page)).toBe('none');
 });
 
-test('coarse pointers keep every icon at its resting size', async ({ browser, baseURL }) => {
+test('coarse pointers retain the resting tile without a hop', async ({ browser, baseURL }) => {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, hasTouch: true });
   try {
     await context.addInitScript(() => localStorage.setItem('serendib:booted', 'true'));
     const page = await context.newPage(); await page.goto(baseURL!); await expect(page.locator('html')).toHaveClass(/os-ready/);
-    await link(page, 'Projects').hover(); await expect(link(page, 'Projects').getByRole('tooltip')).toBeVisible();
-    expect(await width(page, 'Projects')).toBe(48);
+    await link(page, 'Projects').hover(); expect(await translate(page)).toBe('none');
+    expect(await link(page, 'Projects').evaluate(element => getComputedStyle(element).width)).toBe('40px');
   } finally { await context.close(); }
 });
 
@@ -255,7 +222,9 @@ test('middle-click and platform-modified click retain native browser navigation'
     // including on a plain HTML control page. Assert that native navigation.
     if (browserName === 'webkit' && 'button' in options) {
       await page.evaluate(() => Object.assign(window, { nativeNavigationMarker: true }));
+      const health = page.waitForResponse(response => response.url().endsWith('/api/health'));
       await link(page, 'Terminal').click(options); await expect(page).toHaveURL(/\/terminal$/);
+      await (await health).finished();
       expect(await page.evaluate(() => 'nativeNavigationMarker' in window)).toBe(false);
       await ready(page);
       continue;
@@ -295,23 +264,62 @@ test('dock links still navigate with JavaScript disabled', async ({ browser, bas
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
   try {
     const page = await context.newPage(); await page.goto(baseURL!);
-    const nav = page.getByRole('navigation', { name: 'Dock', exact: true }); await expect(nav.getByRole('link')).toHaveCount(14);
+    const nav = page.getByRole('navigation', { name: 'Dock', exact: true }); await expect(nav.getByRole('link')).toHaveCount(13);
     await nav.getByRole('link', { name: 'Projects', exact: true }).click(); await expect(page).toHaveURL(/\/projects$/);
     await expect(page.locator('#static-window')).toBeVisible();
   } finally { await context.close(); }
 });
 
-test('captures light, dark and mobile docks and checks dock accessibility @visual @a11y', async ({ page }) => {
-  const artifacts = resolve('.astro/p2-6-artifacts'); mkdirSync(artifacts, { recursive: true });
-  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
-    await page.setViewportSize(viewport);
-    for (const theme of ['light', 'dark'] as const) {
-      await page.emulateMedia({ colorScheme: theme }); await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-      await page.mouse.move(0, 0); await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
-      const result = await new AxeBuilder({ page }).include(viewport.width===390?'.phone-dock':'.os-dock').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
-      expect(result.violations).toEqual([]);
-      if (viewport.width === 390) await expect(page.locator('[data-shell="mobile"] .phone-dock [data-phone-icon]')).toHaveCount(4);
-      await page.screenshot({ path: resolve(artifacts, `${theme}-${viewport.width}x${viewport.height}.png`) });
-    }
+test('light, dark, hover, running and minimised launcher states pass axe and retain opaque material @visual @a11y', async ({ page }, info) => {
+  mkdirSync(artifacts, { recursive: true });
+  for (const theme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme: theme }); await ready(page); await page.mouse.move(0, 0);
+    await page.evaluate(() => document.fonts.ready); await frames(page);
+    expect(await dock(page).locator('ul').evaluate(element => getComputedStyle(element).backgroundColor)).toBe(theme === 'light' ? 'rgb(255, 247, 232)' : 'rgb(36, 28, 61)');
+    expect(await dock(page).locator('ul').evaluate(element => getComputedStyle(element).backdropFilter)).toBe('none');
+    const result = await new AxeBuilder({ page }).include('.os-dock').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(result.violations).toEqual([]);
+    if (info.project.name === 'chromium') await page.screenshot({ path: resolve(artifacts, `launcher-${theme}-1440x900.png`) });
+  }
+  await page.emulateMedia({ colorScheme: 'light' }); await ready(page);
+  await link(page, 'Projects').hover();
+  if (await page.evaluate(() => matchMedia('(pointer: fine)').matches)) await expect.poll(() => translate(page)).toBe('0px -7px');
+  if (info.project.name === 'chromium') await page.screenshot({ path: resolve(artifacts, 'launcher-hover-1440x900.png') });
+  await link(page, 'Terminal').click(); await page.mouse.move(0, 0);
+  await expect(page.getByRole('dialog', { name: 'Terminal', exact: true })).toBeVisible();
+  await expect(link(page, 'Terminal')).not.toHaveAttribute('data-bouncing');
+  if (info.project.name === 'chromium') await page.screenshot({ path: resolve(artifacts, 'launcher-running-1440x900.png') });
+  await link(page, 'Terminal').click(); await page.mouse.move(0, 0);
+  await expect(link(page, 'Terminal').locator('.os-dock-indicator')).toHaveAttribute('data-minimized', 'true');
+  if (info.project.name === 'chromium') await page.screenshot({ path: resolve(artifacts, 'launcher-minimised-1440x900.png') });
+  await page.evaluate(() => document.documentElement.dataset.transparency = 'reduce');
+  expect(await dock(page).locator('ul').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(255, 247, 232)');
+  await page.emulateMedia({ forcedColors: 'active' });
+  if (await page.evaluate(() => matchMedia('(forced-colors: active)').matches)) {
+    expect(await dock(page).locator('ul').evaluate(element => getComputedStyle(element).borderTopWidth)).toBe('1px');
+    await page.keyboard.press('Tab'); await link(page, 'Projects').focus();
+    expect(await link(page, 'Projects').evaluate(element => getComputedStyle(element).outlineStyle)).not.toBe('none');
+  }
+});
+
+test('the complete 21-symbol sheet renders at 16, 40 and 60 pixels @visual', async ({ page }, info) => {
+  await ready(page); mkdirSync(artifacts, { recursive: true });
+  for (const size of [16, 40, 60]) {
+    await page.evaluate(size => {
+      document.getElementById('k5-icon-sheet')?.remove();
+      const sheet = document.createElement('section'); sheet.id = 'k5-icon-sheet'; sheet.setAttribute('aria-label', 'App icon sheet');
+      Object.assign(sheet.style, { position: 'fixed', zIndex: '120', inset: '40px 40px auto', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '20px', padding: '24px', background: '#FFF7E8', color: '#1B1530' });
+      for (const symbol of document.querySelectorAll('symbol[id^="app-"], symbol[id^="folder-"], symbol[id="doc-cv"], symbol[id^="link-"]')) {
+        const cell = document.createElement('div'); cell.style.textAlign = 'center';
+        const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        icon.setAttribute('viewBox', '0 0 64 64'); icon.setAttribute('width', String(size)); icon.setAttribute('height', String(size));
+        const use = document.createElementNS('http://www.w3.org/2000/svg', 'use'); use.setAttribute('href', '#' + symbol.id); icon.append(use);
+        const label = document.createElement('p'); label.textContent = symbol.id; label.style.font = '12px var(--font-ui)'; cell.append(icon, label); sheet.append(cell);
+      }
+      document.body.append(sheet);
+    }, size);
+    await page.evaluate(() => document.fonts.ready); await frames(page);
+    await expect(page.locator('#k5-icon-sheet svg')).toHaveCount(21);
+    if (info.project.name === 'chromium') await page.locator('#k5-icon-sheet').screenshot({ path: resolve(artifacts, `icons-${size}px.png`) });
   }
 });

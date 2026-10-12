@@ -1,11 +1,12 @@
 ---
 import { APP_META, DOCK_LINKS } from '../../os/registry/meta';
-const apps = Object.values(APP_META).filter(app => app.phase === 'v1' && (app.id !== 'guestbook' || !!import.meta.env.PUBLIC_TURNSTILE_SITE_KEY));
-const dockApps = apps.filter(app => app.dockOrder !== null && app.id !== 'trash').sort((a, b) => a.dockOrder! - b.dockOrder!);
+import '../../os/shell/Dock.css';
+const dockApps = Object.values(APP_META).filter(app => app.phase === 'v1' && app.dockOrder !== null && app.id !== 'trash' && app.id !== 'guestbook')
+  .sort((a, b) => a.dockOrder! - b.dockOrder!);
 ---
-<nav class="static-dock os-chrome" aria-label="Dock"><ul>
-  {dockApps.map((app) => <li class:list={[{ 'desktop-only': app.mobile.dockOrder === null }]}><a href={app.basePath} aria-label={app.name}><svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true"><use href={`#${app.icon}`} /></svg></a></li>)}
-  <li class="dock-divider desktop-only" aria-hidden="true"></li>
-  {DOCK_LINKS.map((link) => <li class="desktop-only"><a href={link.href} aria-label={link.label}><svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true"><use href={`#${link.icon}`} /></svg></a></li>)}
-  <li class="dock-divider desktop-only" aria-hidden="true"></li><li class="desktop-only"><a href="/kooda" aria-label="Kooda"><svg width="48" height="48" viewBox="0 0 64 64" aria-hidden="true"><use href="#app-trash" /></svg></a></li>
+<nav class="static-dock os-dock os-chrome k-launcher" aria-label="Dock"><ul role="toolbar" aria-label="Apps" aria-orientation="horizontal">
+  {dockApps.map((app) => <li role="presentation" class:list={[{ 'desktop-only': app.mobile.dockOrder === null }]}><a class="os-dock-link" data-dock-item data-dock-app={app.id} href={app.basePath} aria-label={app.name}><svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href={`#${app.icon}`} /></svg><span class="os-dock-tooltip" role="tooltip">{app.name}</span></a></li>)}
+  <li role="presentation" class="dock-divider desktop-only" aria-hidden="true"></li>
+  {DOCK_LINKS.map((link) => <li role="presentation" class="desktop-only"><a class="os-dock-link" data-dock-item href={link.href} aria-label={link.label} target="_blank" rel="noopener"><svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href={`#${link.icon}`} /></svg><svg class="os-dock-external" viewBox="0 0 9 9" aria-hidden="true" focusable="false"><path d="M2 7 7 2M2 2h5v5" stroke="currentColor" stroke-width="1.2" fill="none" /></svg><span class="os-dock-tooltip" role="tooltip">{link.label}</span></a></li>)}
+  <li role="presentation" class="dock-divider desktop-only" aria-hidden="true"></li><li role="presentation" class="desktop-only"><a class="os-dock-link" data-dock-item data-dock-app="trash" href="/kooda" aria-label="Kooda"><svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href="#app-trash-full" /></svg><span class="os-dock-tooltip" role="tooltip">Kooda</span></a></li>
 </ul></nav>

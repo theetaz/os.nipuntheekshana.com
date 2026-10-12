@@ -19,6 +19,9 @@ test('home has one visible h1 and working desktop and dock links @smoke', async 
   await expect(page.locator('#app-projects')).toHaveCount(1);
   await expect(page.locator('#os-initial-data')).toHaveCount(1);
   await expect(page.locator('.boot-screen')).toBeHidden();
+  const launcher = page.locator('body > nav.static-dock.os-dock.k-launcher[aria-label="Dock"] > ul[role="toolbar"][aria-label="Apps"]');
+  await expect(launcher.locator('a.os-dock-link[data-dock-item]')).toHaveCount(13);
+  await expect(launcher.locator('a[target="_blank"][rel="noopener"]')).toHaveCount(3);
   const hrefs = await page.locator('nav[aria-label="Dock"] a, nav[aria-label="Desktop"] a').evaluateAll((links) => links.map((link) => link.getAttribute('href')!));
   expect(hrefs).toContain('/projects');
   expect(hrefs).toContain('/maps/play');

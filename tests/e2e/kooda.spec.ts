@@ -63,7 +63,7 @@ test('Empty Kooda confirms, cancels, updates dock, survives reopen, and resets o
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
   const win = page.locator(managed);
   const empty = win.getByRole('button', { name: 'Empty Kooda', exact: true });
-  const dockIcon = page.locator('[data-shell="desktop"] [data-dock-app="trash"] use');
+  const dockIcon = page.locator('[data-shell="desktop"] .os-dock-link[data-dock-app="trash"] use');
   await expect(dockIcon).toHaveAttribute('href', '#app-trash-full');
   await empty.focus();
   await page.keyboard.press('Enter');
@@ -83,7 +83,7 @@ test('Empty Kooda confirms, cancels, updates dock, survives reopen, and resets o
   await expect(dockIcon).toHaveAttribute('href', '#app-trash');
   await closeApp(page, 'Kooda');
   await expect(win).toHaveCount(0);
-  await page.locator('[data-shell="desktop"] [data-dock-app="trash"]').click();
+  await page.locator('[data-shell="desktop"] .os-dock-link[data-dock-app="trash"]').click();
   await expect(win.getByRole('heading', { name: 'Kooda is empty.' })).toBeVisible();
   await page.reload();
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
@@ -99,7 +99,7 @@ test('File menu owns Empty Kooda state and dock emptying updates the open app', 
   await expect(page.getByRole('alertdialog')).toBeVisible();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(page.getByRole('alertdialog')).toHaveCount(0);
-  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await openMenu(page,'File');await page.getByRole('menuitem',{name:'Empty Kooda…',exact:true}).click();}else{await page.locator('[data-shell="desktop"] [data-dock-app="trash"]').click({button:'right'});await page.getByRole('menuitem',{name:'Empty Kooda',exact:true}).click();}
+  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await openMenu(page,'File');await page.getByRole('menuitem',{name:'Empty Kooda…',exact:true}).click();}else{await page.locator('[data-shell="desktop"] .os-dock-link[data-dock-app="trash"]').click({button:'right'});await page.getByRole('menuitem',{name:'Empty Kooda',exact:true}).click();}
   await page.getByRole('button', { name: 'Empty', exact: true }).click();
   await expect(page.locator(managed).getByRole('heading', { name: 'Kooda is empty.' })).toBeVisible();
   await expect(page.getByRole('alertdialog')).toHaveCount(0);
