@@ -1,8 +1,44 @@
 ---
 import type { StoryProject, StorySectionId } from '../../lib/story-projects';
+import { stickerArt } from '../../lib/kottu-art';
+import '../../styles/cards.css';
 interface Props { project: StoryProject; variant: 'highlight' | 'standard'; section: StorySectionId }
 const { project, variant, section } = Astro.props;
+const size = variant === 'highlight' ? 200 : 140;
+const [sticker, compact] = await Promise.all([stickerArt(project.sticker, size), stickerArt(project.sticker, variant === 'highlight' ? 140 : 88)]);
+const command = (project.repo ?? project.live)?.replace(/^https?:\/\//, '') ?? project.href;
+const at640 = (srcset: string) => srcset.split(', ').filter(src => src.endsWith(' 640w')).join(', ') || srcset;
+const shot = project.cover ? JSON.stringify({ ...project.cover, avif: at640(project.cover.avif), webp: at640(project.cover.webp) }) : undefined;
+const colours = ['#FFC93C', '#FF7EB6', '#3DBE6B', '#D2F1F0'];
 ---
-<article class="k-card" data-k-card={project.slug} data-variant={variant} data-section={section}>
-  <a href={project.href}>{project.title}</a>
+<article class="k-card" data-k-card={project.slug} data-slug={project.slug} data-variant={variant} data-section={section}
+  data-repo={command} data-shot={shot} data-shot-alt={project.cover?.alt} style={`--tilt:${project.tilt}deg`}>
+  <div class="k-card-turn">
+    <div class:list={["k-card-front relative grid items-center gap-3 [backface-visibility:hidden]", variant === "highlight" ? "min-h-[290px] grid-cols-[minmax(0,1fr)_200px] px-7 pt-11 pb-7 max-lg:min-h-[360px] max-lg:grid-cols-[minmax(0,1fr)_120px] max-lg:px-[22px] max-lg:pt-10 max-lg:pb-[22px]" : "min-h-[360px] grid-cols-1 px-[22px] pt-10 pb-[22px] max-lg:min-h-[252px] max-lg:px-3.5 max-lg:pt-8 max-lg:pb-3.5"]}>
+      <span class="k-tab absolute left-[18px] -top-4 rounded-lg bg-[#1B1530] px-3 py-1 font-mono text-[11px]/4 font-semibold tracking-[.06em] text-[#FFF4E0] uppercase [font-stretch:87.5%] [rotate:-3deg] max-lg:px-2 max-lg:text-[10px]/[14px]"><i class:list={["mr-2 inline-block size-2 rounded-full", project.status === 'incubating' ? "bg-[#FFC93C]" : "bg-[#55D184]"]} aria-hidden="true"></i>{project.slug === 'pin-the-city' ? 'game · on this desktop' : `${project.status} · ${project.year}`}</span>
+      <div class="k-card-copy">
+        <h3 class:list={["m-0 font-display font-normal [font-synthesis:none] [overflow-wrap:anywhere]", variant === "highlight" ? "text-[34px]/[1.05] max-lg:text-[26px]" : "text-[26px]/[1.1] max-lg:text-[20px]/[1.15]"]}><a class="k-card-link" href={project.href}>{project.title}</a></h3>
+        {project.native && <span class="k-native text-ink-2 text-[16px]/[22px] font-medium" lang="si">{project.native}</span>}
+        <p class:list={["k-tagline mt-2.5 mb-[18px] max-w-[34ch] line-clamp-3 text-ink-2 font-[450]", variant === "highlight" ? "text-[16px]/6" : "text-[15px]/[22px] max-lg:text-[13px]/[18px] max-lg:line-clamp-2"]}>{project.tagline}</p>
+        <ul class="k-chips m-0 flex list-none gap-1.5 p-0 max-lg:flex-wrap max-lg:[--deck:0_0] max-lg:[--angle:0deg]" aria-label="Stack">{project.stack.slice(0, variant === 'highlight' ? 4 : 3).map((item, i) => <li class="shrink-0 rounded-full border-2 border-[#1B1530] bg-[var(--c)] px-2.5 py-[3px] text-[12px]/[18px] font-semibold text-[#1B1530]" style={`--i:${i};--c:${colours[i % colours.length]}`}>{item}</li>)}</ul>
+      </div>
+      <picture class:list={["k-sticker [transform-origin:50%_80%]", variant === "highlight" ? "w-[200px] justify-self-end max-lg:w-[120px]" : "row-start-1 w-[140px] justify-self-center max-lg:w-[88px] max-lg:justify-self-end"]} aria-hidden="true">
+        <source media="(max-width: 1023px)" type="image/avif" srcset={compact.avif} sizes={variant === 'highlight' ? '120px' : '88px'} />
+        <source media="(max-width: 1023px)" type="image/webp" srcset={compact.webp} sizes={variant === 'highlight' ? '120px' : '88px'} />
+        <source type="image/avif" srcset={sticker.avif} sizes={`${size}px`} />
+        <source type="image/webp" srcset={sticker.webp} sizes={`${size}px`} />
+        <img src={sticker.src} width={sticker.width} height={sticker.height} alt="" loading="lazy" decoding="async" class="block h-auto w-full" />
+      </picture>
+      <span class="k-peel" aria-hidden="true"></span>
+    </div>
+    <div class="k-card-back absolute inset-0 flex-col gap-2 overflow-auto rounded-[var(--r-card)] bg-[var(--k-paper)] p-3.5 [backface-visibility:hidden]" inert aria-hidden="true">
+      <div class="k-shot relative aspect-[16/10] shrink-0 overflow-hidden rounded-lg border-2 border-[#2E2550] bg-[#2E2550] text-[#F4EEFF]"></div>
+      <p class="k-command m-0 shrink-0 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12px]/[19px] font-medium"><span class="k-ps1">$ </span><span class="k-typed"></span></p>
+      <ul class="k-chips m-0 flex list-none gap-1.5 p-0" aria-label="Stack">{project.stack.map((item, i) => <li class="shrink-0 rounded-full border-2 border-[#1B1530] bg-[var(--c)] px-2.5 py-[3px] text-[12px]/[18px] font-semibold text-[#1B1530]" style={`--c:${colours[i % colours.length]}`}>{item}</li>)}</ul>
+      <div class="k-card-actions mt-auto flex gap-1.5">
+        <a class="k-card-open" href={project.href}>Open project</a>
+        {project.repo && <a class="k-card-source" href={project.repo} target="_blank" rel="noopener noreferrer">Source ↗</a>}
+      </div>
+    </div>
+  </div>
 </article>
