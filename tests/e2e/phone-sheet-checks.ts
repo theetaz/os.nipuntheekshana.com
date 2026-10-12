@@ -84,7 +84,9 @@ export async function hideKeyboard(page: Page) {
 }
 /** The element is fully inside the sheet's visible area above the simulated keyboard. */
 export async function expectAboveKeyboard(target: Locator, keyboardTop: number) {
-  const box = (await target.boundingBox())!;
-  expect(box.y).toBeGreaterThanOrEqual(0);
-  expect(box.y + box.height).toBeLessThanOrEqual(keyboardTop + .5);
+  // The sheet applies visualViewport changes on the next animation frame; let layout settle under load.
+  await expect.poll(async () => {
+    const box = (await target.boundingBox())!;
+    return box.y >= 0 && box.y + box.height <= keyboardTop + .5;
+  }).toBe(true);
 }
