@@ -1,3 +1,5 @@
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { test, expect, openApp } from './fixtures';
 
 test('60-step window drag has bounded commits, frame intervals and no long tasks @perf', async ({ page }, info) => {
@@ -47,4 +49,66 @@ test('60-step window drag has bounded commits, frame intervals and no long tasks
   expect(result.frames).toBeGreaterThanOrEqual(60); expect(result.commits).toBeLessThanOrEqual(2);
   expect(result.loaf.filter(duration => duration > 50)).toEqual([]); expect(result.tasks).toEqual([]);
   expect(result.p95).toBeLessThanOrEqual(process.env.CI ? 34 : 20);
+});
+
+test('idle focused ring rotates on the compositor without painting the window @perf', async ({ page }, info) => {
+  test.skip(info.project.name !== 'chromium', 'Chromium provides the Performance trace protocol.');
+  await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/); await openApp(page, 'Projects');
+  const win = page.locator('[data-window-id="projects"]'); await expect(win.locator('h1')).toHaveText('Projects');
+  await expect.poll(() => win.evaluate(el => el.getAnimations().length)).toBe(0);
+  await page.waitForLoadState('networkidle');
+  await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
+  const ring = win.locator('.k-ring > i');
+  expect(await ring.evaluate(el => el.getAnimations()[0]?.playState)).toBe('running');
+  const client = await page.context().newCDPSession(page);
+  await client.send('DOM.enable'); await client.send('LayerTree.enable');
+  const { root } = await client.send('DOM.getDocument', { depth: -1, pierce: true });
+  const windowNodes = new Set<number>();
+  function collect(node: { backendNodeId: number; attributes?: string[]; children?: typeof root.children }, inside = false) {
+    inside ||= node.attributes?.some((value, index) => index % 2 === 0 && value === 'data-window-id') ?? false;
+    if (inside) windowNodes.add(node.backendNodeId);
+    node.children?.forEach(child => collect(child, inside));
+  }
+  collect(root);
+  const windowLayers = new Set<string>();
+  const paintedLayers: string[] = [];
+  client.on('LayerTree.layerPainted', ({ layerId }) => { paintedLayers.push(layerId); });
+  client.on('LayerTree.layerTreeDidChange', ({ layers }) => {
+    for (const layer of layers ?? []) if (layer.backendNodeId && windowNodes.has(layer.backendNodeId)) windowLayers.add(layer.layerId);
+  });
+  await client.send('Tracing.start', { categories: 'devtools.timeline,disabled-by-default-devtools.timeline,disabled-by-default-devtools.timeline.layers', transferMode: 'ReturnAsStream' });
+  const sample = await ring.evaluate(async el => {
+    const animation = el.getAnimations()[0]!;
+    const start = Number(animation.currentTime); const frames: number[] = []; let previous = 0;
+    for (let i = 0; i < 180; i++) {
+      const time = await new Promise<number>(done => requestAnimationFrame(done));
+      if (previous) frames.push(time - previous); previous = time;
+    }
+    return { start, end: Number(animation.currentTime), frames, transform: getComputedStyle(el).transform };
+  });
+  const completed = new Promise<{ stream?: string }>(done => client.once('Tracing.tracingComplete', done));
+  await client.send('Tracing.end'); const { stream } = await completed; expect(stream).toBeTruthy();
+  let body = '';
+  while (true) {
+    const chunk = await client.send('IO.read', { handle: stream! });
+    body += chunk.base64Encoded ? Buffer.from(chunk.data, 'base64').toString('utf8') : chunk.data;
+    if (chunk.eof) break;
+  }
+  await client.send('IO.close', { handle: stream! }); await client.detach();
+  const trace = JSON.parse(body) as { traceEvents: { name: string; args?: { data?: { nodeId?: number; nodeName?: string; layerId?: string } } }[] };
+  const paints = trace.traceEvents.filter(event => event.name === 'Paint');
+  const windowPaints = paints.filter(event => windowNodes.has(event.args?.data?.nodeId ?? -1) || windowLayers.has(String(event.args?.data?.layerId)));
+  const frames = [...sample.frames].sort((a, b) => a - b);
+  const result = { frames: sample.frames.length, elapsed: sample.end - sample.start, p95: frames[Math.ceil(frames.length * .95) - 1],
+    totalPaints: paints.length, windowPaints: windowPaints.length, windowLayerPaints: paintedLayers.filter(id => windowLayers.has(id)).length,
+    paintSources: [...new Set(paints.map(event => event.args?.data?.nodeName))],
+    paintedLayers: [...new Set(paintedLayers)], windowNodes: windowNodes.size, windowLayers: [...windowLayers], transform: sample.transform };
+  mkdirSync(resolve('.astro/k6-artifacts'), { recursive: true });
+  writeFileSync(resolve('.astro/k6-artifacts/ring-performance.trace.json'), body);
+  writeFileSync(resolve('.astro/k6-artifacts/ring-performance.json'), JSON.stringify(result, null, 2));
+  await info.attach('ring-performance', { body: JSON.stringify(result, null, 2), contentType: 'application/json' });
+  console.log(`K6 ring: ${JSON.stringify(result)}`);
+  expect(sample.end - sample.start).toBeGreaterThanOrEqual(2500); expect(sample.transform).not.toBe('none');
+  expect(windowNodes.size).toBeGreaterThan(0); expect(windowLayers.size).toBeGreaterThan(0);
+  expect(windowPaints).toEqual([]); expect(result.windowLayerPaints).toBe(0);
 });

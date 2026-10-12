@@ -36,7 +36,7 @@ for (const [path, title] of routes) {
     await expect(page.locator('#static-window')).toHaveAttribute('data-query', '{}');
     await expect(page.locator('#static-window [data-scroll-root]')).toBeVisible();
     await expect(page.locator('#os-initial-data')).toHaveCount(1);
-    for (const control of await page.locator('.traffic-light.js-only').all()) await expect(control).toBeHidden();
+    for (const control of await page.locator('.k-winbtn.js-only').all()) await expect(control).toBeHidden();
   });
 }
 
@@ -53,10 +53,18 @@ test('every generated project and post has content and matching initial data', a
   }
 });
 
-test('Salli includes the case study, canonical, and a working close link @smoke', async ({ page }) => {
+test('Salli includes the case study, canonical, and a working close link @smoke', async ({ page }, info) => {
   await page.goto('/projects/salli');
   await expect(page.locator('#static-window [data-scroll-root]')).toContainText('The intelligence comes to the phone.');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://nipuntheekshana.com/work/salli');
+  const close = page.getByRole('link', { name: 'Close (back to the desktop)', includeHidden: true });
+  await expect(close).toHaveAttribute('href', '/');
+  await expect(page.locator('.k-winbtn.js-only')).toHaveCount(2);
+  for (const control of await page.locator('.k-winbtn.js-only').all()) await expect(control).toBeHidden();
+  for (const theme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme: theme });
+    await page.screenshot({ path: `.astro/k6-artifacts/screenshots/static-nojs-${theme}-${info.project.name}.png` });
+  }
   await (await page.locator('.sheet-header').isVisible()?page.locator('.sheet-header a'):page.getByRole('link',{name:'Close (back to the desktop)'})).click();
   await expect(page).toHaveURL(await page.locator('.sheet-header').count() && await page.locator('html').evaluate(()=>matchMedia('(max-width:1023px)').matches)?/\/projects$/:/\/$/);
 });

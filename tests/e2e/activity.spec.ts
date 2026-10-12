@@ -154,7 +154,7 @@ test('terrain uses layout pixels when initialized during a scale, then survives 
     await check();
     await stage(page).evaluate(node => { node.style.transform = ''; });
     await check();
-    if(await page.locator('html').getAttribute('data-mode')==='mobile')await page.setViewportSize({width:412,height:915});else await app(page).getByRole('button',{name:'Zoom Activity',exact:true}).click();
+    if(await page.locator('html').getAttribute('data-mode')==='mobile')await page.setViewportSize({width:412,height:915});else await app(page).getByRole('button',{name:'Maximise Activity',exact:true}).click();
     await frames(page, 12); await check();
     await page.evaluate(() => {
       Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 2 });

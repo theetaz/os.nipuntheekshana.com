@@ -54,7 +54,7 @@ test('Now opens from Go with the five items, date and paper surface', async ({ p
   const window = managed(page, 'now');
   await expect(window.getByRole('listitem')).toHaveCount(5);
   await expect(window.locator('footer')).toContainText('Updated 28 September 2026 · Colombo');
-  if(await page.locator('html').getAttribute('data-mode')==='desktop') await expect(window.getByRole('button', { name: 'Zoom Now' })).toHaveAttribute('aria-disabled', 'true');
+  if(await page.locator('html').getAttribute('data-mode')==='desktop') await expect(window.getByRole('button', { name: 'Maximise Now' })).toHaveAttribute('aria-disabled', 'true');
   expect(await window.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(255, 226, 122)');
   expect(errors).toEqual([]);
 });
