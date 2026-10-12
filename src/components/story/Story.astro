@@ -1,0 +1,14 @@
+---
+import StoryIntro from './StoryIntro.astro';
+import StorySkills from './StorySkills.astro';
+import StoryBio from './StoryBio.astro';
+import StoryWork from './StoryWork.astro';
+import StoryProjects from './StoryProjects.astro';
+import StoryOpenSource from './StoryOpenSource.astro';
+import StoryBoard from './StoryBoard.astro';
+import StoryFooter from './StoryFooter.astro';
+import '../../styles/story.css';
+interface Props { nosnippet?: boolean }
+const { nosnippet = false } = Astro.props;
+---
+<div id="story" data-nosnippet={nosnippet ? '' : undefined}><StoryIntro /><StorySkills /><StoryBio /><StoryWork /><StoryProjects /><StoryOpenSource /><StoryBoard /><StoryFooter /></div>

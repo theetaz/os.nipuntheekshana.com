@@ -1,0 +1,18 @@
+---
+import ProjectCard from './ProjectCard.astro';
+import { storyProjects, type StorySectionId } from '../../lib/story-projects';
+const projects = await storyProjects();
+const sections: { id: string; section: StorySectionId; title: string; command: string }[] = [
+  { id: 'ws-projects', section: 'highlights', title: 'Highlights', command: 'ls --highlights' },
+  { id: 'k-side', section: 'side', title: 'Side projects', command: 'ls side-projects/' },
+  { id: 'k-fun', section: 'fun', title: 'Fun stuff', command: 'ls fun/' },
+];
+---
+{sections.map(({ id, section, title, command }) => <section id={id} class="k-sec" data-sec={section} aria-labelledby={`${id}-title`}>
+  <div class="k-sec-inner">
+    <p class="k-prompt">nipun@kottu:~/projects$ {command}</p>
+    <h2 id={`${id}-title`}>{title}</h2>
+    <div class="k-sec-content" data-k-cards={section}>{projects[section].map(project => <ProjectCard project={project} variant={section === 'highlights' ? 'highlight' : 'standard'} section={section} />)}</div>
+    <div class="k-sec-shape" aria-hidden="true"></div>
+  </div>
+</section>)}

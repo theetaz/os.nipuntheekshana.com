@@ -1,0 +1,8 @@
+---
+import type { StoryProject, StorySectionId } from '../../lib/story-projects';
+interface Props { project: StoryProject; variant: 'highlight' | 'standard'; section: StorySectionId }
+const { project, variant, section } = Astro.props;
+---
+<article class="k-card" data-k-card={project.slug} data-variant={variant} data-section={section}>
+  <a href={project.href}>{project.title}</a>
+</article>

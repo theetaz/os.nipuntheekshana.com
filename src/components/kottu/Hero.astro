@@ -1,0 +1,15 @@
+---
+interface Props { home?: boolean }
+const { home = false } = Astro.props;
+const Name = home ? 'h1' : 'p';
+---
+<section id="ws-desktop" class="k-hero" aria-label="Desktop">
+  <Name class="k-name">Nipun Theekshana</Name>
+</section>
+<style>
+  .k-hero { position: absolute; inset: 0 0 auto; height: var(--k-hero-h); display: grid; place-items: center; pointer-events: none; --u: clamp(.68px, min(100vw / 1440, 100svh / 900), 1.25px); }
+  .k-name { margin: 0; font: 400 44px/1.1 var(--font-ui); color: var(--os-ink); }
+  html[data-mode="mobile"] .k-hero { display: none; }
+  @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) { .k-hero { display: none; } }
+  html:is([data-view="simple"], :has(#simple:target)) .k-hero { position: relative; height: auto; min-height: 160px; display: grid; background: var(--os-window); }
+</style>
