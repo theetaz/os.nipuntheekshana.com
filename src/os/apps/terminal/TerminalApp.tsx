@@ -96,11 +96,19 @@ export default function TerminalApp(props: AppProps) {
     };
     // Output read to its end stays there when the body shrinks (an on-screen keyboard) or when
     // wrapped lines finish laying out after the commit that scrolled to them.
-    let atEnd = false;
-    const track = () => { atEnd = element.scrollHeight - element.clientHeight - element.scrollTop < 20; };
+    // The scroll event from re-anchoring arrives asynchronously; content may grow again before it
+    // does (late fonts or wrapping), so that event must not clear the anchor.
+    let atEnd = false; let anchoring = false;
+    const track = () => {
+      if (anchoring) { anchoring = false; return; }
+      atEnd = element.scrollHeight - element.clientHeight - element.scrollTop < 20;
+    };
     track();
     const observer = new ResizeObserver(entries => {
-      if (atEnd) element.scrollTop = element.scrollHeight;
+      if (atEnd) {
+        const before = element.scrollTop; element.scrollTop = element.scrollHeight;
+        if (element.scrollTop !== before) anchoring = true;
+      }
       if (entries.some(entry => entry.target === element)) measure();
     });
     observer.observe(element); if (element.firstElementChild) observer.observe(element.firstElementChild);
