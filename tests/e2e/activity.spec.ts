@@ -218,6 +218,8 @@ test('a missing 2D context retains an accessible calendar', async ({ page }) => 
   await page.addInitScript(() => { HTMLCanvasElement.prototype.getContext = () => null; });
   await openFixture(page);
   await expect(app(page).locator('.activity-calendar')).toBeVisible();
+  if (await page.locator('html').getAttribute('data-mode') === 'mobile')
+    await expectPhoneSheetFits(app(page), 'Activity without a canvas context');
   await stage(page).focus(); await page.keyboard.press('ArrowDown');
   await expect(app(page).locator('[data-terrain-live]')).toHaveText('Monday, Oct 6, 2025: 7 contributions');
   await expect(app(page).locator('.activity-day-focused')).toHaveCount(1);

@@ -82,6 +82,7 @@ html.no-js .activity-segmented { visibility: hidden; }
 /* Pocket sheets (D§13.3): touch-sized view controls and link. The tiles'
    two columns and the terrain's narrow pose follow the window container. */
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  .activity-calendar { min-width: 0; }
   .activity-segmented button { min-height: 44px; min-width: 44px; }
   .activity-toolbar { padding-block: 4px; }
   .activity-toolbar > a { display: inline-flex; align-items: center; min-height: 44px; }
