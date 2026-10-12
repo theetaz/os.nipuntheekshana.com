@@ -3,7 +3,7 @@ import { APP_META, DOCK_LINKS } from '../../os/registry/meta';
 import { pathFor } from '../../os/url/routes';
 import { ISLAND_PATH, ISLAND_VIEWBOX } from '../../os/icons/island-glyph';
 import '../../styles/simple-view.css';
-const apps = Object.values(APP_META).filter((app) => app.phase === 'v1');
+const apps = Object.values(APP_META).filter((app) => app.phase === 'v1' && (app.id !== 'guestbook' || !!import.meta.env.PUBLIC_TURNSTILE_SITE_KEY));
 const desktopIcons = apps.filter((app) => app.desktopIcon).sort((a, b) => a.desktopIcon!.order - b.desktopIcon!.order);
 const dockApps = apps.filter((app) => app.dockOrder !== null && app.id !== 'trash').sort((a, b) => a.dockOrder! - b.dockOrder!);
 ---

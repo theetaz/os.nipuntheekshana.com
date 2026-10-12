@@ -12,6 +12,7 @@ import { windowLink } from '../url/url';
 import { placeWindow } from './placement';
 import type { Point, Rect, SnapZone, WindowId, WMAction } from './types';
 import type { SoundName } from '../lib/sound';
+import { postcardsAvailableAtom } from '../state/features';
 import { FEATURES } from '../config';
 import { runDockCommand } from '../shell/DockItem';
 
@@ -35,6 +36,7 @@ export function playSound(name: SoundName): void {
 }
 export function openApp(appId: AppId, opts: { route?: string; query?: Record<string, string>; origin?: Point; newInstance?: boolean } = {}): void {
   const store = getStore();
+  if (appId === 'guestbook' && !store.get(postcardsAvailableAtom)) return;
   const before = store.get(desktopAtom);
   store.set(desktopAtom, { type: 'OPEN', appId, ...opts,
     rect: placeWindow(APP_META[appId], before, store.get(geometryAtom)[appId] ?? null) });

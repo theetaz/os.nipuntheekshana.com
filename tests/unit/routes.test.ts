@@ -32,7 +32,7 @@ describe('route table', () => {
     expect(matchRoute('/')).toBeNull();
   });
 
-  it('describes every app once, including the later guestbook', () => {
+  it('describes every app once, including Postcards', () => {
     expect(ROUTES).toHaveLength(13);
     expect(new Set(ROUTES.map(({ appId }) => appId)).size).toBe(13);
     expect(ROUTES.map(({ basePath }) => basePath).sort()).toEqual([
@@ -124,14 +124,14 @@ describe('app metadata', () => {
     expect(APP_META.guestbook.name).toBe('Postcards');
   });
 
-  it('keeps only Terminal multi-instance, Postcards later, and Settings/Kooda noindex', () => {
+  it('keeps only Terminal multi-instance, Postcards enabled, and Settings/Kooda noindex', () => {
     const apps = Object.values(APP_META);
     expect(apps.filter(({ multiInstance }) => multiInstance).map(({ id }) => id)).toEqual(['terminal']);
-    expect(apps.filter(({ phase }) => phase === 'later').map(({ id }) => id)).toEqual(['guestbook']);
-    expect(apps.filter(({ phase }) => phase === 'v1')).toHaveLength(12);
+    expect(apps.filter(({ phase }) => phase === 'later').map(({ id }) => id)).toEqual([]);
+    expect(apps.filter(({ phase }) => phase === 'v1')).toHaveLength(13);
     expect(apps.filter(({ indexable }) => !indexable).map(({ id }) => id).sort()).toEqual(['settings', 'trash']);
     expect(APP_META.guestbook).toMatchObject({
-      dockOrder: null, desktopIcon: null, mobile: { gridOrder: null, dockOrder: null },
+      dockOrder: 4.5, desktopIcon: { order: 6, label: 'Postcards', icon: 'app-guestbook' }, mobile: { gridOrder: null, dockOrder: null },
     });
   });
 
@@ -140,7 +140,7 @@ describe('app metadata', () => {
       .filter((meta) => meta.dockOrder !== null)
       .sort((a, b) => a.dockOrder! - b.dockOrder!);
     expect(apps.map(({ id, dockOrder }) => [id, dockOrder])).toEqual([
-      ['projects', 1], ['about', 2], ['writing', 3], ['messages', 4], ['terminal', 5],
+      ['projects', 1], ['about', 2], ['writing', 3], ['messages', 4], ['guestbook', 4.5], ['terminal', 5],
       ['maps', 6], ['activity', 7], ['cv', 8], ['settings', 9], ['trash', 99],
     ]);
     expect(DOCK_LINKS).toEqual([
@@ -159,6 +159,7 @@ describe('app metadata', () => {
       { order: 3, label: 'Writing', icon: 'folder-writing' },
       { order: 4, label: 'CV.pdf', icon: 'doc-cv' },
       { order: 5, label: 'Pin the city', icon: 'app-pin', route: 'play' },
+      { order: 6, label: 'Postcards', icon: 'app-guestbook' },
     ]);
     expect(pathFor('maps', APP_META.maps.desktopIcon!.route!)).toBe('/maps/play');
   });

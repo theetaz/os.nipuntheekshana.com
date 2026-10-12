@@ -36,7 +36,7 @@ describe('menu builders', () => {
     expect(menus[2]!.items).toBe(extra); expect(viewMenu([])).toEqual([]);
   });
   it('matches Go, Window and Help and keeps region jumps out of Go', () => {
-    expect(labels(goMenu())).toEqual(['Projects', 'Writing', 'About', 'CV', 'Now', 'Activity', 'Island', 'Terminal', 'Messages', 'separator', 'Pin the city', 'Kooda']);
+    expect(labels(goMenu())).toEqual(['Projects', 'Writing', 'About', 'CV', 'Now', 'Activity', 'Island', 'Terminal', 'Messages', 'Postcards', 'separator', 'Pin the city', 'Kooda']);
     expect(goMenu().some(item => item.kind === 'item' && item.shortcut)).toBe(false);
     expect(labels(windowMenu())).toEqual(['Minimise', 'Zoom', 'Snap left', 'Snap right', 'Move & resize with keyboard',
       'separator', 'Next window', 'Previous window', 'Bring all to front', 'separator', 'windows']);
@@ -52,6 +52,8 @@ describe('menu builders', () => {
     expect(labels(windowItems(desktop))).toEqual(['Terminal 2']);
   });
   it('resolves preference checks, window capabilities and focused app flags', () => {
+    expect(getItemState('go.guestbook', context())).toEqual({ disabled: true });
+    expect(getItemState('go.guestbook', { ...context(), postcards: true })).toEqual({ disabled: false });
     expect(getItemState('window.close', context())).toEqual({ disabled: true });
     expect(getItemState('window.next', context())).toEqual({ disabled: true });
     expect(getItemState('theme.auto', context())).toEqual({ checked: true });

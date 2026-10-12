@@ -41,7 +41,7 @@ test('arrows, Home, End and Enter provide roving selection and launch', async ({
   await desktop(page); await icon(page, 'Read me.txt').focus(); await page.keyboard.press('ArrowDown');
   await expect(icon(page, 'Projects')).toBeFocused(); await expect(icon(page, 'Projects')).toHaveAttribute('aria-selected', 'true');
   await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowUp'); await expect(icon(page, 'Projects')).toBeFocused();
-  await page.keyboard.press('End'); await expect(icon(page, 'Pin the city')).toBeFocused();
+  await page.keyboard.press('End'); await expect(icon(page, 'Postcards')).toBeFocused();
   await page.keyboard.press('Home'); await expect(icon(page, 'Read me.txt')).toBeFocused();
   await page.keyboard.press('Enter'); await expect(page.locator('[data-window-id="readme"]')).toBeVisible();
 });

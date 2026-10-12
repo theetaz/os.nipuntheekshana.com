@@ -7,7 +7,7 @@ import { openApp } from '../wm/commands';
 import { matchRoute } from './routes';
 import { queryFor } from './url';
 import type { AppId } from '../types/apps';
-import { FEATURES } from '../config';
+import { postcardsAvailableAtom } from '../state/features';
 
 export interface LinkEvent {
   defaultPrevented: boolean; button: number; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean;
@@ -18,7 +18,7 @@ export interface LinkAnchor {
 }
 export type LinkDecision = { kind: 'native' } | { kind: 'simple'; href: string }
   | { kind: 'external'; href: string } | { kind: 'app'; appId: AppId; route: string; query: Record<string, string> };
-export function classifyLink(event: LinkEvent, anchor: LinkAnchor, location: URL): LinkDecision {
+export function classifyLink(event: LinkEvent, anchor: LinkAnchor, location: URL, postcards = false): LinkDecision {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
     || anchor.hasAttribute('download') || (anchor.getAttribute('target') && anchor.getAttribute('target') !== '_self')
     || /(?:^|\s)external(?:\s|$)/i.test(anchor.getAttribute('rel') ?? '')) return { kind: 'native' };
@@ -29,7 +29,7 @@ export function classifyLink(event: LinkEvent, anchor: LinkAnchor, location: URL
     ? { kind: 'external', href: url.href } : { kind: 'native' };
   if (url.hash === '#simple') return { kind: 'simple', href: url.href };
   const matched = matchRoute(url.pathname);
-  if (!matched || (APP_META[matched.appId].phase !== 'v1' && !(matched.appId === 'guestbook' && FEATURES.postcards))) return { kind: 'native' };
+  if (!matched || (matched.appId === 'guestbook' ? !postcards : APP_META[matched.appId].phase !== 'v1')) return { kind: 'native' };
   // Same-document anchors remain useful inside prose and long documents.
   if (url.pathname === location.pathname && url.search === location.search && url.hash) return { kind: 'native' };
   return { kind: 'app', ...matched, query: queryFor(matched.appId, Object.fromEntries(url.searchParams)) };
@@ -53,7 +53,7 @@ export function interceptLinks(document: Document, window: Window): () => void {
       getStore().set(viewAtom, RESET);
       return;
     }
-    const decision = classifyLink(event, anchor, new URL(window.location.href));
+    const decision = classifyLink(event, anchor, new URL(window.location.href), getStore().get(postcardsAvailableAtom));
     if (decision.kind === 'native') return;
     if (decision.kind === 'simple') {
       getStore().set(viewAtom, 'simple');
@@ -68,7 +68,7 @@ export function interceptLinks(document: Document, window: Window): () => void {
   const intent = (event: Event) => {
     const anchor = anchorFor(event.target); if (!anchor || anchor === hovered) return;
     clear();
-    const decision = classifyLink({ defaultPrevented: false, button: 0, metaKey: false, ctrlKey: false, shiftKey: false, altKey: false }, anchor, new URL(window.location.href));
+    const decision = classifyLink({ defaultPrevented: false, button: 0, metaKey: false, ctrlKey: false, shiftKey: false, altKey: false }, anchor, new URL(window.location.href), getStore().get(postcardsAvailableAtom));
     if (decision.kind !== 'app') return;
     hovered = anchor;
     timer = setTimeout(() => prefetchApp(decision.appId), 80);

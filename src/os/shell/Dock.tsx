@@ -1,6 +1,7 @@
 import './Dock.css';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
+import { postcardsAvailableAtom } from '../state/features';
 import { APP_META, DOCK_LINKS } from '../registry/meta';
 import { reducedMotionAtom } from '../state/atoms';
 import { nextFocusIndex } from '../lib/focus';
@@ -9,9 +10,10 @@ import { DockItem, DockExternalItem } from './DockItem';
 
 export function Dock({ mode = 'desktop' }: { mode?: 'desktop' | 'mobile' }) {
   const root = useRef<HTMLElement>(null); const toolbar = useRef<HTMLUListElement>(null);
+  const postcards = useAtomValue(postcardsAvailableAtom);
   const reducedMotion = useAtomValue(reducedMotionAtom);
   const typeahead = useRef({ text: '', at: 0 });
-  const apps = Object.values(APP_META).filter(app => app.phase === 'v1' && (mode === 'mobile' ? app.mobile.dockOrder !== null : app.dockOrder !== null && app.id !== 'trash'))
+  const apps = Object.values(APP_META).filter(app => app.phase === 'v1' && (app.id !== 'guestbook' || postcards) && (mode === 'mobile' ? app.mobile.dockOrder !== null : app.dockOrder !== null && app.id !== 'trash'))
     .sort((a, b) => (mode === 'mobile' ? a.mobile.dockOrder! - b.mobile.dockOrder! : a.dockOrder! - b.dockOrder!));
 
   useLayoutEffect(() => {

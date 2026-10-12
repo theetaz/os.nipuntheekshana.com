@@ -1,3 +1,4 @@
+import { postcardsAvailableAtom } from '../state/features';
 import { useEffect, useRef, type KeyboardEvent } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { desktopAtom, menuStateAtom, mochiPrefsAtom, openMenuAtom, showWidgetsAtom, themePrefAtom, wallpaperAtom } from '../state/atoms';
@@ -21,6 +22,7 @@ function routeMenuCommand(command: string): void {
   runCommand(command, 'menu');
 }
 export function MenuHost() {
+  const postcards = useAtomValue(postcardsAvailableAtom);
   const hosts = useAtomValue(hostsAtom); const spec = Array.from(hosts.values()).at(-1);
   const open = useAtomValue(openMenuAtom); const setOpen = useSetAtom(openMenuAtom);
   const desktop = useAtomValue(desktopAtom); const states = useAtomValue(menuStateAtom);
@@ -41,7 +43,7 @@ export function MenuHost() {
   if (!shown) return null;
   const anchor = shown.spec.anchors.get(shown.menu.id);
   const state = (command: string) => getItemState(command, { desktop, appState: win ? states[win.id] : undefined,
-    theme, wallpaper, widgets, mochi: mochi.visible, zoomable: meta?.window.zoomable ?? false,
+    theme, wallpaper, widgets, postcards, mochi: mochi.visible, zoomable: meta?.window.zoomable ?? false,
     resizable: meta?.window.resizable ?? false });
   const horizontal = (event: KeyboardEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest('[role="menu"]') !== event.currentTarget) return;

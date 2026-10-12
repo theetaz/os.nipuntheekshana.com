@@ -9,7 +9,7 @@ import type {
 } from '../../src/os/types/content';
 import { compareProjects } from '../../src/lib/client-data';
 
-const dist = resolve('dist');
+const dist = resolve('dist/client');
 const data = resolve(dist, 'data');
 type Validator = (value: unknown) => void;
 type Schema<T> = { [K in keyof Required<T>]: Validator };
@@ -175,14 +175,14 @@ describe.skipIf(!existsSync(dist))('built JSON contracts', () => {
     const entries = read<SearchEntry[]>('search.json');
     array(search)(entries);
     expect(new Set(entries.map((entry) => entry.id)).size).toBe(entries.length);
-    expect(entries.filter((entry) => entry.kind === 'app')).toHaveLength(12);
+    expect(entries.filter((entry) => entry.kind === 'app')).toHaveLength(13);
     expect(entries.filter((entry) => entry.kind === 'project')).toHaveLength(18);
     expect(entries.filter((entry) => entry.kind === 'post')).toHaveLength(2);
     expect(entries.filter((entry) => entry.kind === 'action').map((entry) => entry.title)).toEqual([
       'Toggle dark appearance', 'Copy email address', 'Download CV (PDF)', 'Play Pin the city',
       'Wake Mochi', 'Change wallpaper…', 'Simple view', 'Empty Kooda',
     ]);
-    expect(entries.some((entry) => entry.id === 'app:guestbook')).toBe(false);
+    expect(entries.some((entry) => entry.id === 'app:guestbook')).toBe(true);
     for (const entry of entries) expect(entry.icon).toMatch(/^(app-|project:)/);
     expect(entries.find((entry) => entry.id === 'project:salli')?.keywords).toContain('සල්ලි');
     expect(entries.find((entry) => entry.id === 'action:simple')?.target).toEqual({ type: 'action', action: 'simple' });

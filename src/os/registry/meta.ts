@@ -1,3 +1,4 @@
+import { FEATURES } from '../config';
 import type { AppId, AppMeta } from '../types/apps';
 
 export const APP_META: Readonly<Record<AppId, AppMeta>> = {
@@ -216,10 +217,10 @@ export const APP_META: Readonly<Record<AppId, AppMeta>> = {
     window: { width: 960, height: 680, minWidth: 600, minHeight: 460, resizable: true, zoomable: true, titleBar: 'unified' },
     skeleton: 'sidebar-grid',
     multiInstance: false,
-    dockOrder: null,
-    desktopIcon: null,
+    dockOrder: 4.5,
+    desktopIcon: { order: 6, label: 'Postcards', icon: 'app-guestbook' },
     mobile: { gridOrder: null, dockOrder: null },
-    phase: 'later',
+    phase: FEATURES.postcards ? 'v1' : 'later',
     indexable: true,
   },
 };

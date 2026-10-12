@@ -1,4 +1,5 @@
 import type { AppId } from '../types/apps';
+import { postcardsAvailableAtom } from '../state/features';
 import { appLoadAtom } from '../state/atoms';
 import { getStore, type OsStore } from '../state/store';
 import { APPS, type AppModule } from './apps';
@@ -26,5 +27,5 @@ export function canPrefetch(connection = typeof navigator === 'undefined' ? unde
   return !connection?.saveData && !/(^|-)2g$/.test(connection?.effectiveType ?? '');
 }
 export function prefetchApp(id: AppId, store: OsStore = getStore()): void {
-  if (canPrefetch() && APPS[id].phase === 'v1') void loadApp(id, store).catch(() => {});
+  if (canPrefetch() && APPS[id].phase === 'v1' && (id !== 'guestbook' || store.get(postcardsAvailableAtom))) void loadApp(id, store).catch(() => {});
 }

@@ -101,7 +101,7 @@ test('magnifies to 72 px within 500 ms without React commits and settles on leav
   await expect.poll(() => width(page, 'Projects'), { timeout: 500, intervals: [16] }).toBeGreaterThanOrEqual(71);
   expect(await width(page, 'Projects')).toBeLessThanOrEqual(73);
   expect(await page.evaluate(() => (window as unknown as { dockReact: { commits: number } }).dockReact.commits)).toBe(commits);
-  const expanded = await dock(page).boundingBox(); expect(expanded!.height).toBe(64); expect(expanded!.width).toBeGreaterThan(734);
+  const expanded = await dock(page).boundingBox(); expect(expanded!.height).toBe(64); expect(expanded!.width).toBeGreaterThan(788);
   await page.mouse.move(100, 100);
   await expect.poll(() => width(page, 'Projects')).toBe(48);
 });
@@ -118,7 +118,7 @@ test('magnification shifts only dock nodes and keeps widgets and windows fixed',
   await expect(page.locator('[data-window-id="terminal"]')).toBeVisible();
   await expect(page.locator('[data-window-id="terminal"]')).not.toHaveAttribute('data-transition');
   const ticket = await page.locator('.ticket-wrap').boundingBox(); const terminal = await page.locator('[data-window-id="terminal"]').boundingBox();
-  await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(734);
+  await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(788);
   await page.evaluate(() => {
     const state = { outside: [] as string[] };
     Object.assign(window, { dockShifts: state });
@@ -131,7 +131,7 @@ test('magnification shifts only dock nodes and keeps widgets and windows fixed',
     } }).observe({ type: 'layout-shift' });
   });
   await link(page, 'Projects').hover(); await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
-  await link(page, 'Kooda').hover(); await page.mouse.move(0, 0); await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(734);
+  await link(page, 'Kooda').hover(); await page.mouse.move(0, 0); await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(788);
   expect(await page.locator('.ticket-wrap').boundingBox()).toEqual(ticket);
   expect(await page.locator('[data-window-id="terminal"]').boundingBox()).toEqual(terminal);
   expect(await page.evaluate(() => (window as unknown as { dockShifts: { outside: string[] } }).dockShifts.outside)).toEqual([]);
@@ -149,7 +149,7 @@ test('reduced motion disables magnification and bounce while preserving tooltips
   await page.emulateMedia({ reducedMotion: 'reduce' }); await ready(page);
   await expect(dock(page)).toHaveAttribute('data-reduced-motion', 'true');
   await link(page, 'Projects').hover(); await expect(link(page, 'Projects').getByRole('tooltip')).toBeVisible();
-  expect(await dock(page).locator('[data-dock-item]').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().width))).toEqual(Array(13).fill(48));
+  expect(await dock(page).locator('[data-dock-item]').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().width))).toEqual(Array(14).fill(48));
   await link(page, 'Terminal').dispatchEvent('click', { button: 0 }); await expect(page.getByRole('dialog', { name: 'Terminal', exact: true })).toBeVisible();
   expect(await link(page, 'Terminal').locator('svg').evaluate(element => element.getAnimations().length)).toBe(0);
   expect(await page.evaluate(() => (window as unknown as { dockBlinks: unknown[] }).dockBlinks)).toEqual([
@@ -296,7 +296,7 @@ test('dock links still navigate with JavaScript disabled', async ({ browser, bas
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
   try {
     const page = await context.newPage(); await page.goto(baseURL!);
-    const nav = page.getByRole('navigation', { name: 'Dock', exact: true }); await expect(nav.getByRole('link')).toHaveCount(13);
+    const nav = page.getByRole('navigation', { name: 'Dock', exact: true }); await expect(nav.getByRole('link')).toHaveCount(14);
     await nav.getByRole('link', { name: 'Projects', exact: true }).click(); await expect(page).toHaveURL(/\/projects$/);
     await expect(page.locator('#static-window')).toBeVisible();
   } finally { await context.close(); }

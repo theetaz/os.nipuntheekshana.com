@@ -13,7 +13,7 @@ export const QUERY_SECTIONS: Partial<Record<AppId, readonly string[]>> = {
 };
 
 function enabled(appId: AppId, features: WMFeatures): boolean {
-  return APP_META[appId].phase === 'v1' || (appId === 'guestbook' && features.postcards === true);
+  return appId === 'guestbook' ? features.postcards === true : APP_META[appId].phase === 'v1';
 }
 
 /** Validate with the shared route policy; malformed external links never escape as RangeError. */

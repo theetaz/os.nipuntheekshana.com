@@ -33,6 +33,7 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
 <html lang="en" class="no-js" data-mode="desktop">
   <head>
     <meta charset="UTF-8" />
+    <meta name="turnstile-site-key" content={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? ''} />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <script is:inline>
       (function () {

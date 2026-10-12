@@ -19,7 +19,7 @@ function sameRect(a: Rect, b: Rect): boolean {
 function validRoute(appId: AppId, route: string, features: WMFeatures): boolean {
   if (!Object.hasOwn(APP_META, appId)) return false;
   const meta = APP_META[appId];
-  if (!meta || (meta.phase === 'later' && !(appId === 'guestbook' && features.postcards))) return false;
+  if (!meta || (appId === 'guestbook' ? !features.postcards : meta.phase === 'later')) return false;
   return route === '' || (meta.subRoutes === 'slug' ? !/[^a-z0-9-]/.test(route)
     : meta.subRoutes !== 'none' && meta.subRoutes.includes(route));
 }

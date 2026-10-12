@@ -1,6 +1,7 @@
 import './DesktopIcons.css';
 import { atom, useAtom, useAtomValue, useStore } from 'jotai';
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { postcardsAvailableAtom } from '../state/features';
 import { APP_META } from '../registry/meta';
 import { alertsAtom, contextMenuAtom, desktopAtom, focusedIdAtom, iconPositionsAtom, openMenuAtom, overlayAtom, reducedMotionAtom, spotlightOpenAtom } from '../state/atoms';
 import { pathFor } from '../url/routes';
@@ -10,7 +11,7 @@ import type { Point } from '../wm/types';
 import { deferredPointer } from '../lib/deferred-pointer';
 import { canPrefetch } from '../registry/loader';
 
-const apps = Object.values(APP_META).filter(app => app.phase === 'v1' && app.desktopIcon)
+const allApps = Object.values(APP_META).filter(app => app.phase === 'v1' && app.desktopIcon)
   .sort((a, b) => a.desktopIcon!.order - b.desktopIcon!.order);
 import { desktopSelectionAtom } from './desktop-selection';
 export { desktopSelectionAtom } from './desktop-selection';
@@ -18,6 +19,8 @@ const viewportAtom = atom(get => get(desktopAtom).viewport);
 
 
 export function DesktopIcons() {
+  const postcards = useAtomValue(postcardsAvailableAtom);
+  const apps = allApps.filter(app => app.id !== 'guestbook' || postcards);
   const store = useStore(); const [selected, setSelected] = useAtom(desktopSelectionAtom);
   const positions = useAtomValue(iconPositionsAtom); const viewport = useAtomValue(viewportAtom);
   const [active, setActive] = useState<AppId>(apps[0]!.id);
@@ -80,7 +83,7 @@ export function DesktopIcons() {
     };
     document.addEventListener('keydown', keydown);
     return () => document.removeEventListener('keydown', keydown);
-  }, [store, active]);
+  }, [store, active, postcards]);
   return <nav aria-label="Desktop icons" className="os-chrome"><div className="desktop-icons" role="listbox" aria-label="Desktop" aria-multiselectable="true">
     <ul role="presentation">{apps.map(app => {
       const position = positions[app.id];

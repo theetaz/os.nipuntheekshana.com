@@ -37,7 +37,7 @@ export function viewMenu(items: readonly MenuItemSpec[] = defaultView): readonly
 export function goMenu(): readonly MenuItemSpec[] {
   return [item('Projects', 'go.projects'), item('Writing', 'go.writing'), item('About', 'go.about'), item('CV', 'go.cv'),
     item('Now', 'go.now'), item('Activity', 'go.activity'), item('Island', 'go.maps'), item('Terminal', 'go.terminal'),
-    item('Messages', 'go.messages'), separator, item('Pin the city', 'go.pin'), item('Kooda', 'go.trash')];
+    item('Messages', 'go.messages'), item('Postcards', 'go.guestbook'), separator, item('Pin the city', 'go.pin'), item('Kooda', 'go.trash')];
 }
 export function windowMenu(): readonly MenuItemSpec[] {
   return [item('Minimise', 'window.minimize', alt('KeyM')), item('Zoom', 'window.zoom', alt('KeyZ')),
@@ -72,9 +72,10 @@ export function windowItems(desktop: DesktopState): readonly MenuItemSpec[] {
 }
 export interface MenuStateContext {
   desktop: DesktopState; appState?: AppMenuState; theme: 'light' | 'dark' | 'auto'; wallpaper: string;
-  widgets: boolean; mochi: boolean; zoomable: boolean; resizable: boolean;
+  widgets: boolean; mochi: boolean; postcards?: boolean; zoomable: boolean; resizable: boolean;
 }
 export function getItemState(command: string, context: MenuStateContext): { disabled?: boolean; checked?: boolean } {
+  if (command === 'go.guestbook') return { disabled: !context.postcards };
   const { desktop } = context;
   const win = desktop.focusedId ? desktop.windows[desktop.focusedId] : undefined;
   if (command.startsWith('window.focus:')) return { checked: command.slice(13) === desktop.focusedId };
