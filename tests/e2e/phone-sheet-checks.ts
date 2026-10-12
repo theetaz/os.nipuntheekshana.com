@@ -13,6 +13,7 @@ export const phoneSizes = [
   { width: 390, height: 844, theme: 'light' },
   { width: 390, height: 844, theme: 'dark' },
   { width: 360, height: 780, theme: 'light' },
+  { width: 412, height: 915, theme: 'light' },
 ] as const;
 export type PhoneSize = typeof phoneSizes[number];
 
