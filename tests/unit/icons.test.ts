@@ -4,7 +4,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 import { APP_ICON_SYMBOLS, AppIcon, AppIconSymbols } from '../../src/os/icons/app-icons';
-import { ISLAND_PATH, ISLAND_VIEWBOX } from '../../src/os/icons/island-glyph';
+import { ISLAND_PATH } from '../../src/os/icons/island-glyph';
+import { BRAND_BLADE_PATH, BRAND_VIEWBOX } from '../../src/os/icons/brand-glyph';
 
 const expectedIds = [
   'app-projects', 'app-about', 'app-writing', 'app-messages', 'app-terminal', 'app-maps',
@@ -87,14 +88,14 @@ describe('app icon sprite contract', () => {
 });
 
 describe('favicon and install assets', () => {
-  it('uses the shared outline and both colour-scheme accents on a transparent SVG', () => {
+  it('uses the shared crossed blades on the yellow squircle', () => {
     const svg = readFileSync(new URL('../../public/favicon.svg', import.meta.url), 'utf8');
-    expect(svg).toContain(`d="${ISLAND_PATH}"`);
-    expect(svg).toContain(`viewBox="${ISLAND_VIEWBOX}"`);
-    expect(svg).toContain('#E8722A');
-    expect(svg).toContain('@media(prefers-color-scheme:dark)');
-    expect(svg).toContain('#FF9A4D');
-    expect(svg).not.toContain('<rect');
+    expect(svg.match(new RegExp(`d="${BRAND_BLADE_PATH}"`, 'g'))).toHaveLength(2);
+    expect(svg).toContain(`viewBox="${BRAND_VIEWBOX}"`);
+    expect(svg).toContain('transform="rotate(45 32 32)" fill="#FFFDF8"');
+    expect(svg).toContain('transform="rotate(-45 32 32)" fill="#E8453C"');
+    expect(svg).toContain('rx="14" fill="#FFC93C" stroke="#1B1530" stroke-width="2"');
+    expect(svg).not.toContain(ISLAND_PATH);
   });
 
   it.each([
@@ -107,12 +108,18 @@ describe('favicon and install assets', () => {
   it('declares the specified standalone app and existing 192/512 icons', () => {
     const manifest = JSON.parse(readFileSync(new URL('../../public/site.webmanifest', import.meta.url), 'utf8'));
     expect(manifest).toMatchObject({
-      name: 'Serendib OS — Nipun Theekshana', short_name: 'Serendib', display: 'standalone',
-      background_color: '#F4E3CC', theme_color: '#E8722A', start_url: '/',
+      name: 'Kottu OS — Nipun Theekshana', short_name: 'Kottu OS', display: 'standalone',
+      background_color: '#0FA3A3', theme_color: '#FFC93C', start_url: '/',
     });
     expect(manifest.icons).toEqual([
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
     ]);
+  });
+
+  it('ships the social preview at 1200 × 630 within 300 KB', async () => {
+    const png = readFileSync(new URL('../../public/og.png', import.meta.url));
+    expect(png.byteLength).toBeLessThanOrEqual(300_000);
+    expect(await sharp(png).metadata()).toMatchObject({ format: 'png', width: 1200, height: 630 });
   });
 });

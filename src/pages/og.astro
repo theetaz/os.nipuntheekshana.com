@@ -1,0 +1,88 @@
+---
+import { Font, getImage } from 'astro:assets';
+import avatar from '../assets/me/avatar.png';
+import { propArt, type PropId } from '../lib/kottu-art';
+import { BRAND_BLADE_PATH, BRAND_VIEWBOX } from '../os/icons/brand-glyph';
+
+const props: { id: PropId; x: number; y: number; w: number; r: number }[] = [
+  { id: 'prop-lantern', x: 70, y: 52, w: 112, r: -4 },
+  { id: 'prop-crbook', x: 226, y: 118, w: 124, r: -9 },
+  { id: 'prop-tea', x: 404, y: 96, w: 128, r: 5 },
+  { id: 'prop-lotus-tower', x: 1236, y: 40, w: 116, r: 3 },
+  { id: 'prop-tuktuk', x: 48, y: 300, w: 300, r: -3 },
+  { id: 'prop-thambili', x: 1112, y: 330, w: 124, r: -8 },
+  { id: 'prop-thinkpad', x: 76, y: 566, w: 264, r: 2 },
+  { id: 'prop-cricket-bat', x: 372, y: 780, w: 250, r: -18 },
+  { id: 'prop-ola', x: 652, y: 820, w: 182, r: 3 },
+  { id: 'prop-postbox', x: 904, y: 760, w: 100, r: -4 },
+  { id: 'prop-radio', x: 1130, y: 596, w: 216, r: 6 },
+];
+const art = await Promise.all(props.map(async prop => ({ ...prop, image: await propArt(prop.id) })));
+const portrait = await getImage({ src: avatar, width: 256, height: 256, format: 'webp' });
+---
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1200" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Kottu OS — social preview</title>
+    <Font cssVariable="--font-instrument" preload />
+    <Font cssVariable="--font-shrikhand" preload />
+    <Font cssVariable="--font-kalam" />
+  </head>
+  <body>
+    <main class="og-stage" aria-label="Kottu OS social preview">
+      <header>
+        <svg width="30" height="30" viewBox={BRAND_VIEWBOX} aria-hidden="true">
+          <rect x="1" y="1" width="62" height="62" rx="14" fill="#FFC93C" stroke="#1B1530" stroke-width="2" />
+          <g stroke="#1B1530" stroke-width="2">
+            <path d={BRAND_BLADE_PATH} transform="rotate(45 32 32)" fill="#FFFDF8" />
+            <path d={BRAND_BLADE_PATH} transform="rotate(-45 32 32)" fill="#E8453C" />
+          </g>
+        </svg><span class="og-wordmark">kottu</span><span class="og-version">OS 2.0 “Pettah”</span>
+      </header>
+      {art.map(({ id, image, x, y, w, r }) => <picture class="og-prop" data-prop={id}
+        style={`--x:${x};--y:${y};--w:${w};--r:${r}deg`}>
+        <source type="image/avif" srcset={image.avif} sizes={`${w * .84}px`} />
+        <source type="image/webp" srcset={image.webp} sizes={`${w * .84}px`} />
+        <img src={image.src} width={image.width} height={image.height} alt="" decoding="async" />
+      </picture>)}
+      <figure class="og-polaroid"><img src={portrait.src} width="256" height="256" alt="Nipun Theekshana" /><figcaption>it's me!</figcaption></figure>
+      <div class="og-name-block">
+        <p class="og-greeting"><span lang="si" title="Ayubowan: may you live long">ආයුබෝවන්!</span> I'm</p>
+        <h1><span>Nipun</span><br /><span>Theekshana</span></h1>
+        <p class="og-native" lang="si">නිපුන් තීක්ෂණ</p>
+      </div>
+      <p class="og-tag og-cto">Co-founder &amp; CTO · PerfectUs</p>
+      <p class="og-tag og-founder">Founder · Prabhava Labs</p>
+      <footer><span>Freshly chopped since 2016.</span><span>os.nipuntheekshana.com</span></footer>
+    </main>
+  </body>
+</html>
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(html) { scrollbar-gutter: auto; background: #0FA3A3; }
+  :global(body) { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  .og-stage { --u: .84px; --font-ui: var(--font-instrument), system-ui, sans-serif; --font-display: var(--font-shrikhand), serif; --font-hand: var(--font-kalam), cursive; --font-sinhala: 'Noto Sans Sinhala', 'Sinhala Sangam MN', 'Sinhala MN', sans-serif; position: relative; width: 1200px; height: 630px; overflow: hidden; background: #0FA3A3; color: #1B1530; }
+  .og-stage::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, #1B1530 1px, transparent 1.5px) 0 0 / 22px 22px; opacity: .1; }
+  header { position: absolute; top: 16px; left: 20px; z-index: 3; display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px; background: #FFC93C; border: 2px solid #1B1530; border-radius: 10px; box-shadow: 3px 3px #1B1530; }
+  .og-wordmark { font: 400 26px/1 var(--font-display); font-synthesis: none; }
+  .og-version { font: 600 14px/1 var(--font-ui); }
+  .og-prop { position: absolute; left: calc(var(--x) * var(--u)); top: calc(var(--y) * .61px); width: calc(var(--w) * var(--u)); rotate: var(--r); filter: drop-shadow(4px 5px rgb(27 21 48 / .32)); }
+  .og-prop img { display: block; width: 100%; height: auto; }
+  .og-polaroid { position: absolute; left: 842px; top: 52px; width: 108px; margin: 0; padding: 8px 8px 5px; background: #FFFDF8; border: 2px solid #1B1530; rotate: 8deg; box-shadow: 4px 5px #1B1530; }
+  .og-polaroid img { width: 100%; height: 92px; object-fit: cover; }
+  figcaption { text-align: center; font: 700 18px/1.3 var(--font-hand); }
+  .og-name-block { position: absolute; top: 165px; left: 300px; width: 600px; text-align: center; }
+  .og-greeting { margin: 0 0 16px -250px; font: 700 29px/1.3 var(--font-hand); rotate: -6deg; }
+  .og-greeting [lang="si"] { font-family: var(--font-sinhala); }
+  h1 { margin: 0; font: 400 calc(104 * var(--u))/.94 var(--font-display); font-synthesis: none; -webkit-text-stroke: 5px #1B1530; paint-order: stroke fill; text-shadow: 4px 4px #E8453C, 8px 8px #1B1530; rotate: -4deg; }
+  h1 span:first-child { margin-left: -118px; color: #FFC93C; }
+  h1 span:last-child { margin-left: -5px; color: #FF7EB6; }
+  .og-native { display: inline-block; margin: 25px 0 0; padding: 3px 16px; background: #FFFDF8; border: 2px solid #1B1530; border-radius: 24px; box-shadow: 2px 2px #1B1530; font: 500 19px/1.36 var(--font-sinhala); rotate: 2deg; }
+  .og-tag { position: absolute; top: 460px; margin: 0; padding: 8px 14px; border: 2px solid #1B1530; border-radius: 12px; box-shadow: 3px 3px #1B1530; font: 600 14px/1.3 var(--font-ui); }
+  .og-cto { left: 356px; background: #FFFDF8; rotate: -4deg; }
+  .og-founder { left: 635px; background: #FFC93C; rotate: 4deg; }
+  footer { position: absolute; inset: auto 20px 14px; display: flex; justify-content: space-between; font: 600 14px/1.4 var(--font-ui); }
+</style>
