@@ -52,6 +52,7 @@ test('route pages do not log errors and reduced motion skips the boot @smoke', a
   await page.goto('/');
   await expect(page.locator('html')).not.toHaveAttribute('data-boot');
   await expect(page.locator('.boot-screen')).toBeHidden();
+  await expect(page.getByRole('dialog', { name: 'Starting Kottu OS' })).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
