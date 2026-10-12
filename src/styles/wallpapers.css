@@ -1,171 +1,34 @@
-.wallpaper,
-.wallpaper .wp-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: var(--z-wallpaper, 0);
-}
+.wallpaper { position: absolute; inset: 0 0 auto; height: var(--k-hero-h); overflow: hidden; pointer-events: none; z-index: 0; --wp-bg: #0FA3A3; --wp-glows: linear-gradient(transparent,transparent); --wp-dot: rgb(27 21 48 / .13); --wp-paper: #FFF7E8; --wp-paper-dot: rgb(27 21 48 / .10); --wp-awning: repeating-linear-gradient(115deg,#FFC93C 0 44px,#FFF7E8 44px 88px); --wp-sky: var(--k-grad-sunset); --wp-sea: #0FA3A3; --wp-building: #1B1530; --wp-lights: none; --wp-sun: #FFF7E8; }
+.wallpaper .wp-layer { position: absolute; inset: 0; display: none; }
+.wallpaper .wp-sky { display: block; background: var(--wp-bg); }
+.wallpaper .wp-rays { left: 50%; top: 46%; width: 2400px; height: 2400px; translate: -50% -50%; background: var(--k-rays); mask: radial-gradient(circle,#000 0 22%,transparent 48%); }
+.wallpaper .wp-dots { background: radial-gradient(circle,var(--wp-dot) 1.4px,transparent 1.7px) 0 0 / 18px 18px; mask: linear-gradient(#000,transparent 30%,transparent 70%,#000); }
+html[data-wallpaper="kottu"] .wallpaper:not([data-preview]) :is(.wp-rays,.wp-dots), .wallpaper[data-preview="kottu"] :is(.wp-rays,.wp-dots) { display: block; }
+html[data-wallpaper="kottu"] .wallpaper:not([data-preview]) .wp-sky, .wallpaper[data-preview="kottu"] .wp-sky { background: var(--wp-glows),var(--wp-bg); }
+html[data-wallpaper="galle-face"] .wallpaper:not([data-preview]) .wp-sky, .wallpaper[data-preview="galle-face"] .wp-sky { background: var(--wp-sky); }
+html[data-wallpaper="galle-face"] .wallpaper:not([data-preview]) :is(.wp-sun,.wp-sea,.wp-skyline), .wallpaper[data-preview="galle-face"] :is(.wp-sun,.wp-sea,.wp-skyline) { display: block; }
+.wallpaper .wp-sun { inset: 14% 16% auto auto; width: 7%; aspect-ratio: 1; border-radius: 50%; background: var(--wp-sun); }
+.wallpaper .wp-sea { top: 72%; background: repeating-linear-gradient(180deg,rgb(255 255 255 / .14) 0 1px,transparent 1px 7px),var(--wp-sea); }
+.wp-skyline > svg { position: absolute; left: 30%; bottom: 28%; width: 44%; height: auto; }.wp-buildings,.wp-lotus { fill: var(--wp-building); }.wp-windows { display: var(--wp-lights); }
+html[data-wallpaper="pettah"] .wallpaper:not([data-preview]) .wp-sky, .wallpaper[data-preview="pettah"] .wp-sky { background: radial-gradient(circle,rgb(232 69 60 / .10) 1.4px,transparent 1.7px) 0 0 / 18px 18px,var(--wp-awning); }
+html[data-wallpaper="paper"] .wallpaper:not([data-preview]) .wp-sky, .wallpaper[data-preview="paper"] .wp-sky { background: radial-gradient(circle,var(--wp-paper-dot) 1.4px,transparent 1.7px) 0 0 / 24px 24px,var(--wp-paper); }
+html[data-theme="dark"] .wallpaper { --wp-bg: #1B1530; --wp-glows: radial-gradient(420px 320px at 12% 18%,rgb(255 138 61 / .28),transparent 70%),radial-gradient(380px 300px at 88% 22%,rgb(255 126 182 / .24),transparent 70%),radial-gradient(520px 360px at 50% 92%,rgb(15 163 163 / .22),transparent 70%); --wp-dot: rgb(255 244 224 / .16); --wp-paper: #1B1530; --wp-paper-dot: rgb(255 244 224 / .08); --wp-awning: repeating-linear-gradient(115deg,#3B2E32 0 44px,#241C3D 44px 88px); --wp-sky: linear-gradient(135deg,#1B1530,#3B2745); --wp-sea: #123A4A; --wp-building: #0B0716; --wp-lights: block; --wp-sun: #FFF4E0; }
+html[data-theme="dark"] .wallpaper:not([data-preview]) .wp-rays { display: none; }html[data-theme="dark"] .wallpaper .wp-dots { background: radial-gradient(circle,var(--wp-dot) 1px,transparent 1.4px) 0 0 / 22px 22px; mask: none; }
+@media (prefers-color-scheme: dark) { html.no-js .wallpaper { --wp-bg: #1B1530; --wp-glows: radial-gradient(420px 320px at 12% 18%,rgb(255 138 61 / .28),transparent 70%),radial-gradient(380px 300px at 88% 22%,rgb(255 126 182 / .24),transparent 70%),radial-gradient(520px 360px at 50% 92%,rgb(15 163 163 / .22),transparent 70%); --wp-dot: rgb(255 244 224 / .16); }html.no-js .wallpaper:not([data-preview]) .wp-rays { display: none; }html.no-js .wallpaper .wp-dots { background-size: 22px 22px; mask: none; } }
+html[data-transparency="reduce"] .wallpaper { --wp-glows: linear-gradient(transparent,transparent); }@media (prefers-reduced-transparency: reduce) { html[data-theme] .wallpaper { --wp-glows: linear-gradient(transparent,transparent); } }
+@media (prefers-contrast: more) { .wallpaper :is(.wp-rays,.wp-dots) { display: none !important; } }@media (forced-colors: active) { .wallpaper { display: none !important; } }
 
-.wallpaper {
-  --wp-sky: linear-gradient(180deg, #bfddeb 0%, #dce6e4 34%, #f4e3cc 58%, #f7cfa6 70%, #f2a877 78%);
-  --wp-sun: radial-gradient(circle at 80% 78%, #ffe3b8 0 3.2vmin, rgb(255 184 110 / .55) 3.4vmin, rgb(255 184 110 / 0) 28vmin);
-  --wp-sea: radial-gradient(ellipse 5vmin 38% at 80% 0%, rgb(255 214 150 / .55), transparent 70%), repeating-linear-gradient(180deg, rgb(255 255 255 / .10) 0 1px, transparent 1px 7px), linear-gradient(180deg, #6e9fb8 0%, #4d7f9c 100%);
-  --wp-building: #3e4a5a;
-  --wp-building-opacity: .85;
-  --wp-grain-opacity: .035;
-  --wp-grain-blend: multiply;
-  --wp-stars-display: none;
-  --wp-windows-display: none;
-  --wp-lotus: #3e4a5a;
-  --wp-lotus-opacity: .85;
-  --wp-lotus-glow: none;
-  --wp-monsoon: linear-gradient(180deg, #8fa6ae 0%, #b8c6c6 55%, #c9d3d1 100%);
-  --wp-rain-ink: rgb(255 255 255 / .16);
-  --wp-contour-paper: #efe6d6;
-  --wp-contour-ink: #8a7a5e;
-  --wp-contour-opacity: .45;
-  --wp-island-sea: #dce9ee;
-  --wp-island-ink: #2c5d7a;
-  --wp-paper: #f4f1ea;
-  --wp-paper-dot: rgb(0 0 0 / .10);
-  --wp-veil: #fcfbf8;
-}
-
-/* The no-JS palette follows the OS even though the server sets light defaults. */
-@media (prefers-color-scheme: dark) {
-  html.no-js .wallpaper {
-    --wp-sky: radial-gradient(120% 30% at 30% 78%, rgb(199 116 58 / .22), transparent 70%), linear-gradient(180deg, #0b1520 0%, #13283a 62%, #1e3446 76%, #2a3a44 78%);
-    --wp-sun: radial-gradient(circle at 76% 22%, #f4efe2 0 2.4vmin, rgb(244 239 226 / .25) 2.6vmin, transparent 14vmin);
-    --wp-sea: radial-gradient(ellipse 4vmin 40% at 76% 0%, rgb(244 239 226 / .30), transparent 70%), repeating-linear-gradient(180deg, rgb(255 255 255 / .04) 0 1px, transparent 1px 7px), linear-gradient(180deg, #0f2130 0%, #0a1822 100%);
-    --wp-building: #060b10;
-    --wp-building-opacity: 1;
-    --wp-grain-opacity: .05;
-    --wp-grain-blend: screen;
-    --wp-stars-display: block;
-    --wp-windows-display: block;
-    --wp-lotus: #d59aeb;
-    --wp-lotus-opacity: .9;
-    --wp-lotus-glow: drop-shadow(0 0 12px #d59aeb);
-    --wp-monsoon: linear-gradient(180deg, #0d171c 0%, #1b2a30 100%);
-    --wp-rain-ink: rgb(255 255 255 / .08);
-    --wp-contour-paper: #14130f;
-    --wp-contour-ink: #bab2a6;
-    --wp-contour-opacity: .18;
-    --wp-island-sea: #0b1822;
-    --wp-island-ink: #ffb070;
-    --wp-paper: #121110;
-    --wp-paper-dot: rgb(255 255 255 / .08);
-    --wp-veil: #1c1a17;
-  }
-}
-
-html[data-theme="dark"] .wallpaper {
-  --wp-sky: radial-gradient(120% 30% at 30% 78%, rgb(199 116 58 / .22), transparent 70%), linear-gradient(180deg, #0b1520 0%, #13283a 62%, #1e3446 76%, #2a3a44 78%);
-  --wp-sun: radial-gradient(circle at 76% 22%, #f4efe2 0 2.4vmin, rgb(244 239 226 / .25) 2.6vmin, transparent 14vmin);
-  --wp-sea: radial-gradient(ellipse 4vmin 40% at 76% 0%, rgb(244 239 226 / .30), transparent 70%), repeating-linear-gradient(180deg, rgb(255 255 255 / .04) 0 1px, transparent 1px 7px), linear-gradient(180deg, #0f2130 0%, #0a1822 100%);
-  --wp-building: #060b10;
-  --wp-building-opacity: 1;
-  --wp-grain-opacity: .05;
-  --wp-grain-blend: screen;
-  --wp-stars-display: block;
-  --wp-windows-display: block;
-  --wp-lotus: #d59aeb;
-  --wp-lotus-opacity: .9;
-  --wp-lotus-glow: drop-shadow(0 0 12px #d59aeb);
-  --wp-monsoon: linear-gradient(180deg, #0d171c 0%, #1b2a30 100%);
-  --wp-rain-ink: rgb(255 255 255 / .08);
-  --wp-contour-paper: #14130f;
-  --wp-contour-ink: #bab2a6;
-  --wp-contour-opacity: .18;
-  --wp-island-sea: #0b1822;
-  --wp-island-ink: #ffb070;
-  --wp-paper: #121110;
-  --wp-paper-dot: rgb(255 255 255 / .08);
-  --wp-veil: #1c1a17;
-}
-
-.wp-sky { background: var(--wp-sky); }
-.wp-sun { background: var(--wp-sun); }
-.wallpaper .wp-sea { top: 78%; background: var(--wp-sea); }
-.wp-stars {
-  display: var(--wp-stars-display);
-  background: radial-gradient(1px 1px at 20px 30px, rgb(255 255 255 / .7), transparent), radial-gradient(1px 1px at 90px 70px, rgb(255 255 255 / .45), transparent);
-  background-size: 140px 120px, 210px 170px;
-  mask-image: linear-gradient(#000 0 50%, transparent 70%);
-}
-.wp-skyline > svg {
-  position: absolute;
-  left: 30vw;
-  bottom: 22%;
-  width: min(44vw, 640px);
-  height: auto;
-  overflow: visible;
-}
-.wp-buildings { fill: var(--wp-building); fill-opacity: var(--wp-building-opacity); }
-.wp-lotus { fill: var(--wp-lotus); fill-opacity: var(--wp-lotus-opacity); filter: var(--wp-lotus-glow); }
-.wp-windows { display: var(--wp-windows-display); }
-.wp-grain {
-  opacity: var(--wp-grain-opacity);
-  mix-blend-mode: var(--wp-grain-blend);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 160px 160px;
-}
-.wp-rain, .wp-contours, .wp-island { display: none; }
-
-html[data-wallpaper]:not([data-wallpaper="galle-face"]) :is(.wp-sun, .wp-stars, .wp-sea, .wp-skyline, .wp-grain) { display: none; }
-html[data-wallpaper="monsoon"] .wp-sky { background: var(--wp-monsoon); }
-html[data-wallpaper="monsoon"] .wp-rain {
-  display: block;
-  background: repeating-linear-gradient(100deg, var(--wp-rain-ink) 0 1px, transparent 1px 9px);
-}
-
-@keyframes wp-monsoon-drift {
-  from { background-position: 0 0; }
-  to { background-position: -90px 600px; }
-}
-/* Motion preference selectors mirror the global motion-ok variant. */
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion="reduce"])[data-wallpaper="monsoon"] .wp-rain { animation: wp-monsoon-drift 1.2s linear infinite; }
-}
-html[data-motion="full"][data-wallpaper="monsoon"] .wp-rain { animation: wp-monsoon-drift 1.2s linear infinite; }
-
-html[data-wallpaper="contours"] .wp-sky { background: var(--wp-contour-paper); }
-html[data-wallpaper="contours"] .wp-contours {
-  display: block;
-  background: var(--wp-contour-ink);
-  opacity: var(--wp-contour-opacity);
-  /* SVG currentColor defaults to black in an image. Alpha masking lets CSS
-     colour the strokes correctly in both themes, with one conditional request. */
-  mask: url('../assets/wallpapers/contours.svg?no-inline') center / cover no-repeat;
-}
-
-html:is([data-wallpaper="island"], [data-wallpaper="island-live"]) .wp-sky { background: var(--wp-island-sea); }
-html:is([data-wallpaper="island"], [data-wallpaper="island-live"]) .wp-island { display: block; }
-.wp-island::before, .wp-island::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  mask: var(--wp-island-mask) 68% 52% / auto 74vh no-repeat;
-}
-.wp-island::before { background: radial-gradient(circle, var(--wp-island-ink) 1.4px, transparent 1.6px) 0 0 / 9px 9px; }
-.wp-island::after {
-  mask-image: var(--wp-island-outline);
-  background: var(--wp-island-ink);
-  opacity: .25;
-}
-
-html[data-wallpaper="paper"] .wp-sky { background: radial-gradient(var(--wp-paper-dot) 1px, transparent 1px) 0 0 / 24px 24px, var(--wp-paper); }
-
-@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
-  .wallpaper::after {
-    content: '';
-    position: fixed;
-    inset: 0 0 60%;
-    background: var(--os-window, var(--wp-veil));
-    opacity: .6;
-  }
-}
-
-@media (forced-colors: active) {
-  .wallpaper { display: none; }
-}
+/* Settings scales the same layers, preserving the 240 × 150 thumbnail ratio. */
+.settings-app [role="radiogroup"].settings-wallpapers { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.settings-app .settings-wallpapers .settings-wallpaper-frame { max-width: 240px; aspect-ratio: 240 / 150; }
+.settings-app .wallpaper.settings-wallpaper[data-preview] { --wp-sun: #FFF7E8; }
+html[data-theme="dark"] .settings-app .wallpaper.settings-wallpaper[data-preview] { --wp-sun: #FFF4E0; }
+.settings-app .wallpaper.settings-wallpaper[data-preview="kottu"] :is(.wp-rays,.wp-dots) { display: block; }
+html[data-theme="dark"] .settings-app .wallpaper.settings-wallpaper[data-preview] .wp-rays { display: none; }
+.settings-app .wallpaper.settings-wallpaper[data-preview="kottu"] .wp-sky { background: var(--wp-glows),var(--wp-bg); }
+.settings-app .wallpaper.settings-wallpaper[data-preview="pettah"] .wp-sky { background: radial-gradient(circle,rgb(232 69 60 / .10) 1.4px,transparent 1.7px) 0 0 / 18px 18px,var(--wp-awning); }
+.settings-app .wallpaper.settings-wallpaper[data-preview="galle-face"] .wp-sea { top: 72%; }
+.settings-app .wallpaper.settings-wallpaper[data-preview] .wp-rays { inset: auto; left: 50%; top: 46%; width: 1600px; height: 1600px; }
+.settings-app .wallpaper.settings-wallpaper[data-preview] .wp-sun { inset: 14% 16% auto auto; width: 7%; }
+.settings-app .wallpaper.settings-wallpaper[data-preview="paper"] .wp-sky { background: radial-gradient(circle,var(--wp-paper-dot) 1.4px,transparent 1.7px) 0 0 / 24px 24px,var(--wp-paper); }
+.settings-app .settings-wallpapers .settings-wallpaper::after { display: none; }

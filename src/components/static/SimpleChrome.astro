@@ -1,16 +1,13 @@
 ---
 import { APP_META } from '../../os/registry/meta';
-import { pathFor } from '../../os/url/routes';
 import StaticTopBar from './StaticTopBar.astro';
 import StaticLauncher from './StaticLauncher.astro';
 import '../../styles/simple-view.css';
 const apps = Object.values(APP_META).filter((app) => app.phase === 'v1' && (app.id !== 'guestbook' || !!import.meta.env.PUBLIC_TURNSTILE_SITE_KEY));
-const desktopIcons = apps.filter((app) => app.desktopIcon).sort((a, b) => a.desktopIcon!.order - b.desktopIcon!.order);
 ---
 <StaticTopBar />
 <header class="simple-header simple-only"><a class="simple-wordmark" href="/#simple">serendib</a><a href={Astro.url.pathname} data-simple-back>Back to the desktop</a></header>
 <slot />
-<nav class="desktop-icons os-chrome" aria-label="Desktop"><ul>{desktopIcons.map((app) => <li><a href={pathFor(app.id, app.desktopIcon!.route ?? '')}><svg width="56" height="56" viewBox="0 0 64 64" aria-hidden="true"><use href={`#${app.desktopIcon!.icon}`} /></svg><span>{app.desktopIcon!.label}</span></a></li>)}</ul></nav>
 
 <StaticLauncher />
 <footer class="simple-footer simple-only"><nav aria-label="All sections"><a href="/#simple">Home</a>{apps.map((app) => <a href={`${app.basePath}#simple`}>{app.name}</a>)}<a href="/maps/play#simple">Pin the city</a></nav><p>Made in Colombo, Sri Lanka.</p></footer>

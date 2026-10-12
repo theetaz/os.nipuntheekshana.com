@@ -17,3 +17,12 @@ describe('wallpaper assets', () => {
     expect(svg).not.toMatch(/<(?:image|script|foreignObject)\b|(?:href|src)="https?:/i);
   });
 });
+
+describe('Kottu wallpaper contract', () => {
+  it('shares four wallpaper classes with Settings and retires the contour import', () => {
+    const css = readFileSync(join(root, 'src/styles/wallpapers.css'), 'utf8');
+    for (const id of ['kottu', 'galle-face', 'pettah', 'paper']) expect(css).toContain(`data-preview="${id}"`);
+    expect(css).not.toMatch(/contours|monsoon|island-live|position: fixed/);
+    expect(readFileSync(join(root, 'src/components/static/Wallpaper.astro'), 'utf8')).not.toMatch(/island-mask|contours|rain/);
+  });
+});

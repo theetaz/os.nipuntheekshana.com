@@ -8,9 +8,9 @@ export interface Body extends Point {
 }
 export interface Sample extends Point { t: number }
 export const restingBody = (point: Point, surface: string | null = null): Body => ({ ...point, vx: 0, vy: 0, mode: 'rest', surface });
-export function clampPosition(point: Point, area: Rect): Point {
-  return { x: Math.max(area.x, Math.min(area.x + Math.max(0, area.w - MOCHI_SIZE), point.x)),
-    y: Math.max(area.y, Math.min(area.y + Math.max(0, area.h - MOCHI_SIZE), point.y)) };
+export function clampPosition(point: Point, area: Rect, size = MOCHI_SIZE): Point {
+  return { x: Math.max(area.x, Math.min(area.x + Math.max(0, area.w - size), point.x)),
+    y: Math.max(area.y, Math.min(area.y + Math.max(0, area.h - size), point.y)) };
 }
 export function trackVelocity(samples: Sample[], sample: Sample): Sample[] {
   return [...samples.filter(previous => sample.t - previous.t <= 80), sample].slice(-12);
@@ -22,44 +22,44 @@ export function releaseVelocity(samples: readonly Sample[], now: number): Point 
   return { x: Math.max(-8000, Math.min(8000, (last.x - first.x) / seconds)),
     y: Math.max(-8000, Math.min(8000, (last.y - first.y) / seconds)) };
 }
-export function surfaceAt(point: Point, surfaces: readonly Surface[]): Surface | undefined {
-  return surfaces.find(surface => Math.abs(point.y + MOCHI_SIZE - surface.y) <= 4
-    && point.x + MOCHI_SIZE / 2 >= surface.x && point.x + MOCHI_SIZE / 2 <= surface.x + surface.w);
+export function surfaceAt(point: Point, surfaces: readonly Surface[], size = MOCHI_SIZE): Surface | undefined {
+  return surfaces.find(surface => Math.abs(point.y + size - surface.y) <= 4
+    && point.x + size / 2 >= surface.x && point.x + size / 2 <= surface.x + surface.w);
 }
 
 /** Fixed 60 Hz substeps make 0.92 decay and 0.5 restitution refresh-rate independent. */
-export function stepPhysics(body: Body, elapsed: number, area: Rect, surfaces: readonly Surface[] = []): Body {
+export function stepPhysics(body: Body, elapsed: number, area: Rect, surfaces: readonly Surface[] = [], size = MOCHI_SIZE): Body {
   if (body.mode === 'rest' || body.mode === 'drag') return body;
   let next = { ...body };
   let remaining = Math.max(0, Math.min(elapsed, 0.05));
   while (remaining > 0.00001 && next.mode !== 'rest') {
     const dt = Math.min(1 / 60, remaining); remaining -= dt;
-    const floor = area.y + Math.max(0, area.h - MOCHI_SIZE);
-    const right = area.x + Math.max(0, area.w - MOCHI_SIZE);
+    const floor = area.y + Math.max(0, area.h - size);
+    const right = area.x + Math.max(0, area.w - size);
     if (next.mode === 'return') {
-      const home = clampPosition(next.home ?? next, area);
+      const home = clampPosition(next.home ?? next, area, size);
       next.vx += (170 * (home.x - next.x) - 11 * next.vx) * dt;
       next.vy += (170 * (home.y - next.y) - 11 * next.vy) * dt;
       next.x += next.vx * dt; next.y += next.vy * dt;
-      if (Math.hypot(home.x - next.x, home.y - next.y) < 0.3 && Math.hypot(next.vx, next.vy) < 8) return restingBody(home, surfaceAt(home, surfaces)?.id ?? null);
+      if (Math.hypot(home.x - next.x, home.y - next.y) < 0.3 && Math.hypot(next.vx, next.vy) < 8) return restingBody(home, surfaceAt(home, surfaces, size)?.id ?? null);
     } else if (next.mode === 'walk') {
       const surface = surfaces.find(candidate => candidate.id === next.surface);
       next.x += next.vx * dt;
-      if (surface && next.x + MOCHI_SIZE / 2 >= surface.x && next.x + MOCHI_SIZE / 2 <= surface.x + surface.w) {
-        next.y = surface.y - MOCHI_SIZE;
+      if (surface && next.x + size / 2 >= surface.x && next.x + size / 2 <= surface.x + surface.w) {
+        next.y = surface.y - size;
       } else { next.mode = 'fall'; next.surface = null; }
     } else {
-      const previousBottom = next.y + MOCHI_SIZE;
+      const previousBottom = next.y + size;
       if (next.mode === 'fall') next.vy += 1200 * dt;
       next.x += next.vx * dt; next.y += next.vy * dt;
       const decay = Math.pow(0.92, dt * 60);
       next.vx *= decay;
       if (next.mode === 'fling') next.vy *= decay;
       if (next.mode === 'fall' && next.vy >= 0) {
-        const landing = surfaces.filter(surface => previousBottom <= surface.y + 1 && next.y + MOCHI_SIZE >= surface.y
-          && next.x + MOCHI_SIZE / 2 >= surface.x && next.x + MOCHI_SIZE / 2 <= surface.x + surface.w)
+        const landing = surfaces.filter(surface => previousBottom <= surface.y + 1 && next.y + size >= surface.y
+          && next.x + size / 2 >= surface.x && next.x + size / 2 <= surface.x + surface.w)
           .sort((a, b) => a.y - b.y)[0];
-        if (landing) return restingBody(clampPosition({ x: next.x, y: landing.y - MOCHI_SIZE }, area), landing.id);
+        if (landing) return restingBody(clampPosition({ x: next.x, y: landing.y - size }, area, size), landing.id);
       }
     }
     if (next.x < area.x || next.x > right) { next.x = Math.max(area.x, Math.min(right, next.x)); next.vx *= -0.5; }

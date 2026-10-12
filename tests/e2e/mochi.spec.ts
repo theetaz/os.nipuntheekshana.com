@@ -81,9 +81,21 @@ test('keyboard pets, context-menu navigation, tea, sleep, wake and hide are usab
   await page.getByRole('menuitemcheckbox', { name: 'Show Mochi', exact: true }).click(); await expect(pet(page)).toBeVisible();
 });
 
+test('Mochi starts on the ThinkPad and scrolls away with the hero', async ({ page }) => {
+  await ready(page);
+  const point = await root(page).evaluate(el => {
+    const hero = document.querySelector('.k-hero')!; const rect = hero.getBoundingClientRect();
+    const u = parseFloat(getComputedStyle(hero).getPropertyValue('--u')); const matrix = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+    return { x: matrix.m41, y: matrix.m42, w: parseFloat(getComputedStyle(el).width), expectedX: rect.width/2+(236-720)*u, expectedY: rect.height/2+(538-450)*u };
+  });
+  expect(Math.abs(point.x-point.expectedX)).toBeLessThanOrEqual(2); expect(Math.abs(point.y-point.expectedY)).toBeLessThanOrEqual(2); expect(point.w).toBe(70);
+  const before = (await root(page).boundingBox())!; await page.evaluate(() => scrollTo(0,500));
+  const after = (await root(page).boundingBox())!; expect(after.y).toBeCloseTo(before.y-500,1);
+});
+
 test('a slow drag stays put, persists across reload, and never increments pets', async ({ page }) => {
   await ready(page); await slowDrag(page, 650, 500); await expect(root(page)).toHaveAttribute('data-physics', 'rest');
-  const point = (await prefs(page)).pos; expect(point.x).toBeCloseTo(618, 0); expect(point.y).toBeCloseTo(468, 0); expect((await prefs(page)).pets ?? 0).toBe(0);
+  const point = (await prefs(page)).pos; expect(point.x).toBeCloseTo(615, 0); expect(point.y).toBeCloseTo(465, 0); expect((await prefs(page)).pets ?? 0).toBe(0);
   await page.reload(); await expect(pet(page)).toBeVisible();
   const box = (await pet(page).boundingBox())!; expect(box.x).toBeCloseTo(point.x, 1); expect(box.y).toBeCloseTo(point.y, 1);
 });
@@ -93,7 +105,7 @@ test('a fast fling becomes dizzy, bounces, and settles within the work area', as
   // Control pointer timestamps: a loaded machine must not turn this fast gesture into a held release.
   await page.clock.install(); await page.clock.pauseAt(await page.evaluate(() => Date.now() + 20));
   const box = (await pet(page).boundingBox())!;
-  await page.mouse.move(box.x + 32, box.y + 32); await page.mouse.down();
+  await page.mouse.move(box.x + 35, box.y + 35); await page.mouse.down();
   for (let step = 1; step <= 4; step++) {
     await page.clock.runFor(12); await page.mouse.move(500 + 125 * step, 450 - 30 * step);
   }
@@ -108,15 +120,15 @@ test('a fast fling becomes dizzy, bounces, and settles within the work area', as
   }));
   await page.clock.runFor(500); expect(await bounced).toBe(true);
   await page.clock.runFor(3000); await expect(root(page)).toHaveAttribute('data-physics', 'rest');
-  const final = (await pet(page).boundingBox())!; expect(final.x).toBeGreaterThanOrEqual(8); expect(final.y).toBeGreaterThanOrEqual(40);
-  expect(final.x + final.width).toBeLessThanOrEqual(1432); expect(final.y + final.height).toBeLessThanOrEqual(816);
+  const final = (await pet(page).boundingBox())!; expect(final.x).toBeGreaterThanOrEqual(40); expect(final.y).toBeGreaterThanOrEqual(40);
+  expect(final.x + final.width).toBeLessThanOrEqual(1400); expect(final.y + final.height).toBeLessThanOrEqual(860);
   expect((await prefs(page)).pos.x).toBeCloseTo(final.x, 1);
 });
 
 test('Kooda highlights during drag and returns Mochi to its previous position', async ({ page }) => {
   await ready(page); await slowDrag(page, 500, 450); const previous = (await prefs(page)).pos;
   const box = (await pet(page).boundingBox())!; const trash = page.locator('.os-dock [data-dock-app="trash"]'); const target = (await trash.boundingBox())!;
-  await page.mouse.move(box.x + 32, box.y + 32); await page.mouse.down(); await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 12 });
+  await page.mouse.move(box.x + 35, box.y + 35); await page.mouse.down(); await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 12 });
   await expect(trash).toHaveAttribute('data-kooda-over', 'true'); await page.mouse.up();
   await expect(bubble(page)).toHaveText("Hey. I'm not rubbish."); await expect(trash).not.toHaveAttribute('data-kooda-over', 'true');
   expect((await prefs(page)).pos).toEqual(previous); await expect(root(page)).toHaveAttribute('data-physics', 'rest');
@@ -125,9 +137,9 @@ test('Kooda highlights during drag and returns Mochi to its previous position', 
 test('reduced motion has no body animations, hearts or fling, while drag still works', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' }); await ready(page); await pet(page).click();
   expect(await pet(page).evaluate(element => element.getAnimations({ subtree: true }).length)).toBe(0); await expect(page.locator('.mochi-heart:visible')).toHaveCount(0);
-  const box = (await pet(page).boundingBox())!; await page.mouse.move(box.x + 32, box.y + 32); await page.mouse.down();
+  const box = (await pet(page).boundingBox())!; await page.mouse.move(box.x + 35, box.y + 35); await page.mouse.down();
   await page.mouse.move(800, 400, { steps: 2 }); await page.mouse.up(); await expect(root(page)).toHaveAttribute('data-physics', 'rest');
-  expect((await prefs(page)).pos).toEqual({ x: 768, y: 368 }); expect(await pet(page).evaluate(element => element.getAnimations({ subtree: true }).length)).toBe(0);
+  expect((await prefs(page)).pos).toEqual({ x: 765, y: 365 }); expect(await pet(page).evaluate(element => element.getAnimations({ subtree: true }).length)).toBe(0);
 });
 
 test('naps after 45 seconds, respects the nap preference, and starts asleep in Colombo at night', async ({ page }) => {

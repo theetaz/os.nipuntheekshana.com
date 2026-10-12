@@ -1,0 +1,12 @@
+---
+interface Props { home?: boolean }
+const Name = Astro.props.home ? 'h1' : 'p';
+---
+<div class="k-hello">
+  <p class="k-greeting"><span lang="si">ආයුබෝවන්!</span> I'm <span class="sr-only">(may you live long)</span><svg width="56" height="36" viewBox="0 0 56 36" fill="none" aria-hidden="true"><path d="M3 8Q28-3 49 28M37 24L49 28L51 15" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg></p>
+  <Name class="k-name"><span>Nipun</span><br /><span> Theekshana</span></Name>
+  <p class="k-native" lang="si">නිපුන් තීක්ෂණ</p>
+</div>
+<p class="k-tag k-tag-cto"><i aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V3h8v4M3 12h18M10 12v3h4v-3" /></svg></i>Co-founder &amp; CTO · PerfectUs</p>
+<p class="k-tag k-tag-founder"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22V12M12 16C4 16 2 10 3 5c6 0 9 3 9 7M12 12c0-6 4-10 9-10 1 6-2 10-9 10" /></svg></i>Founder · Prabhava Labs</p>
+<p class="k-tag k-tag-colombo"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg></i>Colombo, Sri Lanka</p>

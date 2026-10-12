@@ -1,221 +1,181 @@
-import { mkdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page, Locator } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
 import { test, expect } from './fixtures';
+import { desktopMenus } from '../../src/os/registry/menus';
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
-const artifacts = resolve(root, '.astro/p2-7-artifacts');
+const menuLabel = (command: string) => desktopMenus().flatMap(menu => menu.items)
+  .flatMap(item => item.kind === 'item' && item.command === command ? [item.label] : [])[0]!;
+
+const prop = (page: Page, id: string) => page.locator(`[data-prop="${id}"]`);
 async function desktop(page: Page) {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  test.skip(await page.locator('html').getAttribute('data-mode') === 'mobile', 'Desktop icon selection, drag and marquee are desktop-only.');
-  await expect(page.getByRole('listbox', { name: 'Desktop', exact: true })).toBeVisible();
+  await expect(page.locator('[data-k-props]')).toBeVisible();
 }
-const icon = (page: Page, name: string) => page.getByRole('option', { name, exact: true });
-async function dragInput(page: Page, target: Locator, dx: number, dy: number) {
-  const box = (await target.boundingBox())!; const x = box.x + box.width / 2; const y = box.y + 28;
-  await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + dx, y + dy, { steps: 8 }); await page.mouse.up();
+async function drag(page: Page, target: Locator, dx: number, dy: number, release = true) {
+  const box = (await target.boundingBox())!; const x = box.x + box.width / 2; const y = box.y + box.height / 2;
+  await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + dx, y + dy, { steps: 8 });
+  if (release) await page.mouse.up();
 }
-async function drag(page: Page, target: Locator, dx: number, dy: number) {
-  await dragInput(page, target, dx, dy);
-  await expect(target).toHaveAttribute('data-positioned', '');
-  await expect(target).not.toHaveAttribute('data-dragging');
-  await target.evaluate(async node => { await Promise.all(node.getAnimations().map(animation => animation.finished)); });
-}
+const saved = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getItem('serendib:props:v1') ?? '{}'));
 
-test('single click selects an accent pill; double-click opens without navigating the document', async ({ page }) => {
-  await desktop(page); const projects = icon(page, 'Projects'); await projects.click();
-  await expect(projects).toHaveAttribute('aria-selected', 'true'); await expect(page.locator('[data-window-id]')).toHaveCount(0);
-  expect(await projects.locator('span').evaluate(node => {
-    const expected = document.createElement('span'); expected.style.backgroundColor = 'var(--os-accent)'; document.body.append(expected);
-    const matches = getComputedStyle(node).backgroundColor === getComputedStyle(expected).backgroundColor; expected.remove(); return matches;
-  })).toBe(true);
-  await projects.dblclick(); await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
-  await expect(page).toHaveURL(/\/projects$/); expect(await page.evaluate(() => performance.getEntriesByType('navigation').length)).toBe(1);
+test('hover shows Projects and a single click opens from the tuk-tuk', async ({ page }) => {
+  await page.addInitScript(() => document.addEventListener('click', event => {
+    if ((event.target as Element).closest('[data-prop]')) Object.assign(window, { propOrigin: { x: event.clientX, y: event.clientY } });
+  }, true));
+  await desktop(page); const target = prop(page, 'tuktuk'); await target.hover();
+  await expect(target.locator('.k-prop-label')).toHaveCSS('opacity', '1'); await expect(target.locator('.k-prop-label')).toHaveText('Projects');
+  const box = (await target.boundingBox())!; await target.click();
+  await expect(page.locator('[data-window-id="projects"]')).toBeVisible(); await expect(page).toHaveURL(/\/projects$/);
+  expect(await page.evaluate(() => performance.getEntriesByType('navigation').length)).toBe(1);
+  const origin = await page.evaluate(() => (window as unknown as { propOrigin: { x: number; y: number } }).propOrigin);
+  expect(origin.x).toBeGreaterThanOrEqual(box.x); expect(origin.x).toBeLessThanOrEqual(box.x+box.width);
+  expect(origin.y).toBeGreaterThanOrEqual(box.y); expect(origin.y).toBeLessThanOrEqual(box.y+box.height);
 });
-test('Ctrl and Command toggle selection; Shift extends the anchored range', async ({ page }) => {
-  await desktop(page); await icon(page, 'Read me.txt').click(); await icon(page, 'Projects').click({ modifiers: ['Control'] });
-  await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(2);
-  await icon(page, 'Read me.txt').click({ modifiers: ['Meta'] }); await expect(icon(page, 'Read me.txt')).toHaveAttribute('aria-selected', 'false');
-  await icon(page, 'CV.pdf').click({ modifiers: ['Shift'] });
-  for (const name of ['Read me.txt', 'Projects', 'Writing', 'CV.pdf']) await expect(icon(page, name)).toHaveAttribute('aria-selected', 'true');
-});
-test('arrows, Home, End and Enter provide roving selection and launch', async ({ page }) => {
-  await desktop(page); await icon(page, 'Read me.txt').focus(); await page.keyboard.press('ArrowDown');
-  await expect(icon(page, 'Projects')).toBeFocused(); await expect(icon(page, 'Projects')).toHaveAttribute('aria-selected', 'true');
-  await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowUp'); await expect(icon(page, 'Projects')).toBeFocused();
-  await page.keyboard.press('End'); await expect(icon(page, 'Postcards')).toBeFocused();
-  await page.keyboard.press('Home'); await expect(icon(page, 'Read me.txt')).toBeFocused();
-  await page.keyboard.press('Enter'); await expect(page.locator('[data-window-id="readme"]')).toBeVisible();
-});
-test('Shift-arrow extends selection and Ctrl-arrow moves focus without changing it', async ({ page }) => {
-  await desktop(page); await icon(page, 'Read me.txt').click(); await page.keyboard.press('Shift+ArrowDown');
-  await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(2);
-  await page.keyboard.press('Control+ArrowDown'); await expect(icon(page, 'Writing')).toBeFocused();
-  await expect(icon(page, 'Writing')).toHaveAttribute('aria-selected', 'false');
-});
-test('Pin the city opens Island in Play mode', async ({ page }) => {
-  await desktop(page); await icon(page, 'Pin the city').dblclick(); await expect(page).toHaveURL(/\/maps\/play$/);
-});
-test('static desktop icon links remain clickable with JavaScript disabled', async ({ browser, baseURL }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
-  try {
-    const page = await context.newPage(); await page.goto(baseURL!);
-    await page.locator('body > .desktop-icons').getByRole('link', { name: 'Projects', exact: true }).click();
-    await expect(page).toHaveURL(/\/projects$/); await expect(page.locator('#static-window')).toBeVisible();
-  } finally { await context.close(); }
-});
-test('drag snaps to a 96 × 104 grid, persists through reload, and cleans up', async ({ page }) => {
-  await desktop(page); const readme = icon(page, 'Read me.txt'); await drag(page, readme, -120, 130);
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:icons:v1')!))).toEqual({ readme: { x: 96, y: 104 } });
-  const expectedX = await page.evaluate(() => document.documentElement.getBoundingClientRect().width - 24 - 84 - 96);
-  let box = (await readme.boundingBox())!; expect(box.x).toBe(expectedX); expect(box.y).toBe(152);
-  await page.reload(); await expect(page.locator('html')).toHaveClass(/os-ready/); box = (await readme.boundingBox())!;
-  expect(box.x).toBe(expectedX); expect(box.y).toBe(152);
-  await desktop(page);
-  await page.mouse.click(900, 650, { button: 'right' }); await page.getByRole('menuitem', { name: 'Clean up icons' }).click();
-  await expect(readme).not.toHaveAttribute('data-positioned'); expect((await readme.boundingBox())!.y).toBe(48);
-  expect(await page.evaluate(() => localStorage.getItem('serendib:icons:v1'))).toBe('{}');
-});
-test('selected icons drag together; cancellation keeps stored positions and clears capture', async ({ page }) => {
-  await desktop(page); await icon(page, 'Read me.txt').click(); await icon(page, 'Projects').click({ modifiers: ['Control'] });
-  await drag(page, icon(page, 'Read me.txt'), -96, 104);
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:icons:v1')!))).toEqual({ readme: { x: 96, y: 104 }, projects: { x: 96, y: 208 } });
-  const readme = icon(page, 'Read me.txt'); const box = (await readme.boundingBox())!;
-  await page.mouse.move(box.x + 42, box.y + 28); await page.mouse.down(); await page.mouse.move(box.x - 200, box.y + 160);
-  await page.keyboard.press('Escape'); await page.mouse.up(); await expect(readme).not.toHaveAttribute('data-dragging');
-  expect(await readme.evaluate(node => node.style.willChange)).toBe('');
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:icons:v1')!).readme)).toEqual({ x: 96, y: 104 });
-});
-test('rubber band selects two touched icons and additive marquee retains another', async ({ page }) => {
-  await desktop(page); await page.mouse.move(1300, 40); await page.mouse.down(); await page.mouse.move(1430, 235, { steps: 8 });
-  await expect(page.locator('[data-desktop-marquee]')).toBeVisible(); await page.mouse.up();
-  await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(2); await expect(page.locator('[data-desktop-marquee]')).toBeHidden();
-  await icon(page, 'CV.pdf').click({ modifiers: ['Control'] }); await page.keyboard.down('Shift');
-  await page.mouse.move(1300, 40); await page.mouse.down(); await page.mouse.move(1430, 235, { steps: 8 }); await page.mouse.up(); await page.keyboard.up('Shift');
-  await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(3);
-});
-test('empty desktop clears selection and blurs a window without minimizing it', async ({ page }) => {
-  await desktop(page); await icon(page, 'Projects').dblclick();
-  await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
-  // The real Projects window occupies the old (900, 780) stub-era point.
-  const empty = { x: 1250, y: 700 };
-  expect(await page.evaluate(point => !!document.elementFromPoint(point.x, point.y)?.closest('.desktop-surface'), empty)).toBe(true);
-  await page.mouse.click(empty.x, empty.y);
-  await expect(page.locator('[data-desktop-icon][aria-selected="true"]')).toHaveCount(0);
-  await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
-  await expect(page.locator('[data-window-id="projects"]')).toHaveAttribute('data-focused', 'false');
-});
-test('desktop right-click menu provides the specified actions and checkbox state', async ({ page }) => {
-  await desktop(page); await page.mouse.click(900, 650, { button: 'right' });
-  await expect(page.getByRole('menu', { name: 'desktop context menu' })).toBeVisible();
-  for (const name of ['New Terminal window', 'Change wallpaper…', 'Clean up icons', 'About Serendib']) await expect(page.getByRole('menuitem', { name, exact: true })).toBeVisible();
-  await expect(page.getByRole('menuitemcheckbox', { name: 'Show widgets' })).toHaveAttribute('aria-checked', 'true');
-  await expect(page.getByRole('menuitemcheckbox', { name: 'Show Mochi' })).toHaveAttribute('aria-checked', 'true');
-  await page.getByRole('menuitemcheckbox', { name: 'Show widgets' }).click(); await expect(page.getByRole('menu', { name: 'desktop context menu' })).toBeHidden();
-  await page.mouse.click(900, 650, { button: 'right' }); await expect(page.getByRole('menuitemcheckbox', { name: 'Show widgets' })).toHaveAttribute('aria-checked', 'false');
-  await page.getByRole('menuitemcheckbox', { name: 'Show widgets' }).click(); await expect(page.getByRole('menu', { name: 'desktop context menu' })).toBeHidden();
-  await page.mouse.click(900, 650, { button: 'right' }); await page.getByRole('menuitem', { name: 'Change wallpaper…' }).click();
-  await expect(page.locator('[data-window-id="settings"]')).toBeVisible();
-  // Settings is a Phase 3 stub. commands.test.ts asserts its wallpaper section
-  // query; here the production host must open the actual Settings window.
-  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
-});
-test('icon right-click and keyboard context menus hand off their Open action', async ({ page }) => {
-  await desktop(page); const projects = icon(page, 'Projects'); await projects.click({ button: 'right' });
-  await expect(projects).toHaveAttribute('aria-selected', 'true'); await expect(page.getByRole('menu', { name: 'desktop:projects context menu' })).toBeVisible();
-  await page.keyboard.press('Escape'); await projects.focus(); await page.keyboard.press('Shift+F10');
-  await page.getByRole('menuitem', { name: 'Open', exact: true }).click(); await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
-});
-test('type-ahead selects icons and ayubowan dispatches once only on the desktop', async ({ page }) => {
-  await desktop(page); await page.evaluate(() => { Object.assign(window, { desktopEggs: 0 }); document.addEventListener('ayubowan', () => { (window as unknown as { desktopEggs: number }).desktopEggs++; }); });
-  await page.mouse.click(900, 780); await page.keyboard.type('wr'); await expect(icon(page, 'Writing')).toHaveAttribute('aria-selected', 'true');
-  await page.keyboard.type('ayubowan'); expect(await page.evaluate(() => (window as unknown as { desktopEggs: number }).desktopEggs)).toBe(1);
-  await icon(page, 'Projects').dblclick(); await page.keyboard.type('ayubowan');
-  expect(await page.evaluate(() => (window as unknown as { desktopEggs: number }).desktopEggs)).toBe(1);
-});
-test('reduced motion suppresses icon lift and drag settling; selection passes axe', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' }); await desktop(page); await icon(page, 'Read me.txt').hover();
-  await expect(icon(page, 'Read me.txt').locator('svg')).toHaveCSS('transform', 'none');
-  await drag(page, icon(page, 'Read me.txt'), -96, 104); expect(await icon(page, 'Read me.txt').evaluate(node => node.getAnimations().length)).toBe(0);
-  await icon(page, 'Read me.txt').click(); expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-});
-test('hydration preserves static icon positions, mobile widget flow, CLS 0 and console cleanliness @visual', async ({ page }) => {
-  await mkdir(artifacts, { recursive: true }); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+
+test('drag persists stage offsets before paint on reload, never opens, and resets', async ({ page }) => {
+  await desktop(page); await drag(page, prop(page, 'tuktuk'), 120, 60);
+  await expect.poll(() => saved(page)).toEqual({ tuktuk: { dx: 120, dy: 60 } });
+  await expect(page.locator('[data-window-id]')).toHaveCount(0);
   await page.addInitScript(() => {
-    Object.assign(window, { desktopCLS: 0 });
-    if (!PerformanceObserver.supportedEntryTypes.includes('layout-shift')) return;
-    new PerformanceObserver(list => { for (const entry of list.getEntries()) {
-      const shift = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
-      if (!shift.hadRecentInput) (window as unknown as { desktopCLS: number }).desktopCLS += shift.value;
-    } }).observe({ type: 'layout-shift', buffered: true });
+    Object.assign(window, { propBeforePaint: '', propShift: 0 });
+    new PerformanceObserver(list => {
+      for (const entry of list.getEntries()) {
+        const shift = entry as PerformanceEntry & { value: number; hadRecentInput: boolean };
+        if (!shift.hadRecentInput) (window as unknown as { propShift: number }).propShift += shift.value;
+      }
+    }).observe({ type: 'layout-shift', buffered: true });
+    requestAnimationFrame(() => { (window as unknown as { propBeforePaint: string }).propBeforePaint = document.documentElement.style.getPropertyValue('--k-dx-tuktuk'); });
   });
-  for (const [mode, width, height] of [['desktop', 1440, 900], ['mobile', 390, 844]] as const) {
-    await page.setViewportSize({ width, height });
-    for (const theme of ['light', 'dark'] as const) {
-      await page.emulateMedia({ colorScheme: theme }); let release!: () => void; const held = new Promise<void>(done => { release = done; });
-      await page.route('**/Desktop.*.js', async route => { await held; await route.continue(); });
-      try {
-        await page.goto('/', { waitUntil: 'domcontentloaded' });
-        // WebKit's fonts.ready also waits for the held module/load event.
-        // Load the rendered faces directly before measuring static geometry.
-        await page.evaluate(async () => {
-          const text = document.body.innerText;
-          const fonts = new Set(Array.from(document.querySelectorAll('*'), node => getComputedStyle(node).font));
-          await Promise.all(Array.from(fonts).filter(Boolean).map(font => document.fonts.load(font, text)));
-          await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
-        });
-        const icons = await page.locator('body > .desktop-icons svg').evaluateAll(nodes => nodes.map(node => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y }; }));
-        release(); await expect(page.locator('html')).toHaveClass(/os-ready/);
-        await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
-        if (mode === 'desktop') expect(await page.locator('[data-shell="desktop"] .desktop-icons svg').evaluateAll(nodes => nodes.map(node => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y }; }))).toEqual(icons);
-        if (await page.evaluate(() => PerformanceObserver.supportedEntryTypes.includes('layout-shift'))) {
-          expect(await page.evaluate(() => (window as unknown as { desktopCLS: number }).desktopCLS)).toBe(0);
-        }
-        await page.screenshot({ path: resolve(artifacts, `${mode}-${theme}.png`) });
-      } finally { release(); await page.unroute('**/Desktop.*.js'); }
-    }
-  }
-  expect(errors).toEqual([]);
+  await page.reload(); await expect(page.locator('html')).toHaveClass(/os-ready/);
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => (window as unknown as { propBeforePaint: string }).propBeforePaint)).toBe('120');
+  expect(await page.evaluate(() => (window as unknown as { propShift: number }).propShift)).toBe(0);
+  await page.mouse.click(700, 640, { button: 'right' });
+  await page.getByRole('menuitem', { name: menuLabel('desktop.cleanUp'), exact: true }).click();
+  await expect.poll(() => saved(page)).toEqual({});
+  await expect.poll(() => prop(page, 'tuktuk').evaluate(el => getComputedStyle(el).translate)).toBe('0px');
 });
 
-test('a cold icon controller retains a completed first drag', async ({ page }) => {
-  let release!: () => void; const held = new Promise<void>(done => { release = done; });
-  await page.route('**/desktop-icon-drag.*.js', async route => { await held; await route.continue(); });
+test('Escape restores a drag and clears pointer capture', async ({ page }) => {
+  await desktop(page); await drag(page, prop(page, 'tuktuk'), 120, 60, false);
+  await expect(prop(page, 'tuktuk')).toHaveAttribute('data-dragging', '');
+  await page.keyboard.press('Escape'); await page.mouse.up();
+  await expect(prop(page, 'tuktuk')).not.toHaveAttribute('data-dragging'); expect(await saved(page)).toEqual({});
+  expect(await prop(page, 'tuktuk').evaluate(el => el.style.willChange)).toBe(''); await expect(page.locator('[data-window-id]')).toHaveCount(0);
+});
+
+test('a completed first drag is replayed when its cold runtime arrives', async ({ page }) => {
+  let release!: () => void; const hold = new Promise<void>(done => { release = done; });
+  await page.route('**/props-runtime.*.js', async route => { await hold; await route.continue(); });
   try {
-    await desktop(page); await dragInput(page, icon(page, 'Read me.txt'), -120, 130);
-    await expect(icon(page, 'Read me.txt')).not.toHaveAttribute('data-positioned');
-    release();
-    await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('serendib:icons:v1')!))).toEqual({ readme: { x: 96, y: 104 } });
-    await expect(icon(page, 'Read me.txt')).not.toHaveAttribute('data-dragging');
+    await desktop(page); await drag(page, prop(page, 'tuktuk'), 120, 0);
+    expect(await saved(page)).toEqual({}); release();
+    await expect.poll(() => saved(page)).toEqual({ tuktuk: { dx: 120, dy: 0 } });
     await expect(page.locator('[data-window-id]')).toHaveCount(0);
   } finally { release(); }
 });
 
-test('a cold marquee controller retains a completed first selection', async ({ page }) => {
-  let release!: () => void; const held = new Promise<void>(done => { release = done; });
-  await page.route('**/desktop-marquee.*.js', async route => { await held; await route.continue(); });
+test('desktop greeting keys retain their order while the runtime is cold', async ({ page }) => {
+  let release!: () => void; const hold = new Promise<void>(done => { release = done; });
+  await page.route('**/props-runtime.*.js', async route => { await hold; await route.continue(); });
   try {
-    await desktop(page);
-    await page.mouse.move(1300, 40); await page.mouse.down(); await page.mouse.move(1430, 235, { steps: 8 }); await page.mouse.up();
-    release(); await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(2);
-    await expect(page.locator('[data-desktop-marquee]')).toBeHidden();
+    await desktop(page); await expect(page.locator('[data-mochi]')).toBeVisible();
+    await page.mouse.click(700, 640); await page.keyboard.type('ayubowan'); release();
+    await expect(page.locator('[data-mochi-bubble]')).toHaveText('ආයුබෝවන්!');
+    await expect(page.locator('[data-mochi]')).toHaveAttribute('data-mood', 'wave');
   } finally { release(); }
 });
 
-test('Escape cancels a cold marquee before its controller arrives', async ({ page }) => {
-  let release!: () => void; const held = new Promise<void>(done => { release = done; });
-  await page.route('**/desktop-marquee.*.js', async route => { await held; await route.continue(); });
+test('keyboard focus, spatial arrows, context menu, move, cancel and Enter work', async ({ page }) => {
+  await desktop(page); await page.keyboard.press('Alt+Digit2'); await expect(prop(page, 'lantern')).toBeFocused();
+  await page.keyboard.press('ArrowRight'); await expect(prop(page, 'crbook')).toBeFocused();
+  await page.keyboard.press('End'); await expect(prop(page, 'radio')).toBeFocused();
+  await page.keyboard.press('Home'); await expect(prop(page, 'lantern')).toBeFocused();
+  await prop(page, 'tuktuk').focus(); await page.keyboard.press('Shift+F10');
+  await expect(page.getByRole('menu', { name: 'desktop:prop:tuktuk context menu' })).toBeVisible();
+  await page.getByRole('menuitem', { name: 'Move with keyboard' }).click();
+  await expect(prop(page, 'tuktuk')).toHaveAttribute('data-keyboard-move', '');
+  await page.keyboard.press('ArrowRight'); await page.keyboard.press('Shift+ArrowDown'); await page.keyboard.press('Enter');
+  await expect.poll(() => saved(page)).toEqual({ tuktuk: { dx: 8, dy: 32 } });
+  await page.keyboard.press('Shift+F10'); await page.getByRole('menuitem', { name: 'Move with keyboard' }).click();
+  await expect(prop(page, 'tuktuk')).toHaveAttribute('data-keyboard-move', '');
+  await page.keyboard.press('ArrowRight'); await page.keyboard.press('Escape');
+  expect(await saved(page)).toEqual({ tuktuk: { dx: 8, dy: 32 } });
+  await page.keyboard.press('Enter'); await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
+});
+
+test('post box scrolls to the board and story right-click is left to the browser', async ({ page }) => {
+  await desktop(page); await prop(page, 'postbox').click(); await expect(page).toHaveURL(/#ws-board$/);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(900);
+  await page.locator('#ws-board').click({ button: 'right' }); await expect(page.getByRole('menu')).toHaveCount(0);
+});
+
+test('Tab exits the props and cancels an uncommitted keyboard move', async ({ page }) => {
+  await desktop(page); const target = prop(page, 'tuktuk'); await target.focus();
+  await page.keyboard.press('Shift+F10'); await page.getByRole('menuitem', { name: 'Move with keyboard' }).click();
+  await expect(target).toHaveAttribute('data-keyboard-move', '');
+  await page.keyboard.press('ArrowRight'); await expect(target).toHaveAttribute('data-keyboard-move', '');
+  await page.keyboard.press('Tab'); await expect(target).not.toBeFocused();
+  await expect(target).not.toHaveAttribute('data-keyboard-move'); expect(await saved(page)).toEqual({});
+  await expect.poll(() => target.evaluate(el => getComputedStyle(el).translate)).toBe('0px');
+});
+
+test('a modified prop click preserves native new-tab navigation', async ({ page, context }) => {
+  await desktop(page);
+  const popup = context.waitForEvent('page'); await prop(page, 'tuktuk').click({ modifiers: ['ControlOrMeta'] });
+  const opened = await popup; await opened.waitForURL('**/projects');
+  await expect(page.locator('[data-window-id]')).toHaveCount(0); await expect(page).toHaveURL(/\/$/); await opened.close();
+});
+
+test('Escape cancels a first gesture while the prop runtime is still loading', async ({ page }) => {
+  let release!: () => void; const hold = new Promise<void>(done => { release = done; });
+  await page.route('**/props-runtime.*.js', async route => { await hold; await route.continue(); });
   try {
-    await desktop(page); await icon(page, 'CV.pdf').click();
-    await page.mouse.move(1300, 40); await page.mouse.down(); await page.mouse.move(1430, 235);
-    await page.keyboard.press('Escape'); await page.mouse.up();
-    const downloaded = page.waitForEvent('requestfinished', { predicate: request => /desktop-marquee\..*\.js/.test(request.url()) });
-    release(); await downloaded; await page.evaluate(() => new Promise(done => requestAnimationFrame(done)));
-    await expect(icon(page, 'CV.pdf')).toHaveAttribute('aria-selected', 'true');
-    await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(1);
-    await expect(page.locator('[data-desktop-marquee]')).toBeHidden();
+    await desktop(page); await drag(page, prop(page, 'tuktuk'), 120, 0, false);
+    await page.keyboard.press('Escape'); await page.mouse.up(); release();
+    await prop(page, 'tuktuk').focus(); await page.keyboard.press('ArrowRight'); await expect(prop(page, 'crbook')).toBeFocused();
+    expect(await saved(page)).toEqual({}); await expect(page.locator('[data-window-id]')).toHaveCount(0);
   } finally { release(); }
+});
+
+test('empty hero menu uses Kottu labels and no widgets or marquee', async ({ page }) => {
+  await desktop(page); await page.mouse.click(700, 640, { button: 'right' });
+  for (const name of ['New Terminal window', 'Change wallpaper…', menuLabel('desktop.cleanUp'), menuLabel('os.about')]) await expect(page.getByRole('menuitem', { name, exact: true })).toBeVisible();
+  await expect(page.getByRole('menuitemcheckbox', { name: 'Show Mochi' })).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByRole('menuitemcheckbox', { name: 'Show widgets' })).toHaveCount(0); await expect(page.locator('[data-desktop-marquee]')).toHaveCount(0);
+});
+
+test('reduced motion, forced colours and the hero accessibility contract', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' }); await desktop(page); await prop(page, 'tuktuk').hover();
+  await expect(prop(page, 'tuktuk')).toHaveCSS('transform', 'none');
+  expect(await page.locator('.k-scroll-cue b').evaluate(el => el.getAnimations().length)).toBe(0);
+  await drag(page, prop(page, 'tuktuk'), 80, 0); expect(await prop(page, 'tuktuk').evaluate(el => el.getAnimations().length)).toBe(0);
+  expect((await new AxeBuilder({ page }).include('.k-hero').analyze()).violations).toEqual([]);
+  await page.emulateMedia({ forcedColors: 'active' }); await expect(page.locator('body > .wallpaper')).toBeHidden();
+  await expect(prop(page, 'tuktuk').locator('.k-prop-label')).toHaveCSS('opacity', '1');
+});
+
+test('drag clamps to retain at least forty percent of the prop', async ({ page }) => {
+  await desktop(page); const target = prop(page, 'tuktuk'); const box = (await target.boundingBox())!;
+  await page.mouse.move(box.x+box.width/2,box.y+box.height/2); await page.mouse.down();
+  await expect.poll(() => page.evaluate(() => performance.getEntriesByType('resource').some(entry => /props-runtime.*\.js/.test(entry.name)))).toBe(true);
+  await page.locator('[data-k-props]').dispatchEvent('pointermove', { pointerId: 1, clientX: -1000, clientY: -1000, pointerType: 'mouse' });
+  await expect(target).toHaveAttribute('data-dragging', '');
+  await page.locator('[data-k-props]').dispatchEvent('pointerup', { pointerId: 1, clientX: -1000, clientY: -1000, pointerType: 'mouse' });
+  await page.mouse.up();
+  const geometry = await prop(page, 'tuktuk').evaluate(el => {
+    const css = getComputedStyle(el); const translate = css.translate.split(' ').map(parseFloat);
+    return { x: parseFloat(css.left) + translate[0]!, y: parseFloat(css.top) + (translate[1] ?? 0), w: el.clientWidth, h: el.clientHeight };
+  });
+  expect(geometry.x + geometry.w).toBeGreaterThanOrEqual(geometry.w * .4 - 1);
+  expect(geometry.y + geometry.h).toBeGreaterThanOrEqual(geometry.h * .4 - 1);
+});
+
+test('hover and mid-drag screenshots @visual', async ({ page }) => {
+  mkdirSync('.astro/k7-artifacts/screenshots', { recursive: true }); await desktop(page);
+  await prop(page, 'tuktuk').hover(); await expect(prop(page, 'tuktuk').locator('.k-prop-label')).toHaveCSS('opacity', '1');
+  await page.screenshot({ path: '.astro/k7-artifacts/screenshots/prop-hover.png' });
+  await drag(page, prop(page, 'tuktuk'), 120, 40, false); await expect(prop(page, 'tuktuk')).toHaveAttribute('data-dragging', '');
+  await page.screenshot({ path: '.astro/k7-artifacts/screenshots/prop-mid-drag.png' }); await page.keyboard.press('Escape'); await page.mouse.up();
 });

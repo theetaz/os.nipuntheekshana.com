@@ -109,7 +109,7 @@ test('retriggering monsoon replaces it; motion changes switch the active effect 
 });
 
 test('desktop typing and the Terminal greeting make Mochi wave with the Sinhala bubble', async ({ page }) => {
-  await ready(page); await page.getByRole('region', { name: 'Desktop surface' }).click({ position: { x: 850, y: 560 } });
+  await ready(page); await page.getByRole('region', { name: 'Desktop surface' }).click({ position: { x: 700, y: 640 } });
   await page.keyboard.type('ayubowan'); await expect(page.locator('[data-mochi-bubble]')).toHaveText('ආයුබෝවන්!');
   await expect(page.locator('[data-mochi]')).toHaveAttribute('data-mood', 'wave');
   await openApp(page, 'Terminal'); const input = page.getByRole('textbox', { name: 'Terminal command' });

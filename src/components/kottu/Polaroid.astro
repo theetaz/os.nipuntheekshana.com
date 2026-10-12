@@ -1,0 +1,14 @@
+---
+import { getImage } from 'astro:assets';
+import avatar from '../../assets/me/avatar.png';
+const variants = await Promise.all((['avif', 'webp'] as const).map(async format => {
+  const images = await Promise.all([128, 256].map(width => getImage({ src: avatar, width, format })));
+  return { src: images[0]!.src, set: images.map((image, i) => `${image.src} ${128 * (i + 1)}w`).join(', ') };
+}));
+---
+<a class="k-prop k-polaroid" href="/about" data-prop="polaroid" aria-label="Polaroid of Nipun: open About" draggable="false"
+  style="--x:1004;--y:66;--w:128;--r:8deg;--dx:var(--k-dx-polaroid,0);--dy:var(--k-dy-polaroid,0)">
+  <picture><source type="image/avif" srcset={variants[0]!.set} sizes="128px" /><source type="image/webp" srcset={variants[1]!.set} sizes="128px" />
+    <img src={variants[1]!.src} width="128" height={Math.round(avatar.height * 128 / avatar.width)} alt="" loading="lazy" decoding="async" draggable="false" /></picture>
+  <span class="k-polaroid-caption" aria-hidden="true">it's me!</span><span class="k-prop-label" aria-hidden="true">About</span>
+</a>

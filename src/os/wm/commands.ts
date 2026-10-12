@@ -4,7 +4,7 @@ import { APP_META } from '../registry/meta';
 import { loadApp } from '../registry/loader';
 import { getStore, type OsStore } from '../state/store';
 import { accentAtom, alertsAtom, announceAtom, bootPhaseAtom, contextMenuAtom, desktopAtom, geometryAtom,
-  iconPositionsAtom, menuStateAtom, mochiPrefsAtom, openMenuAtom, overlayAtom, quickLookAtom, showWidgetsAtom,
+  propsAtom, menuStateAtom, mochiPrefsAtom, openMenuAtom, overlayAtom, quickLookAtom,
   reducedMotionAtom, soundAtom, spotlightOpenAtom, themePrefAtom, toastsAtom, viewAtom, wallpaperAtom, WALLPAPERS,
   type AlertSpec, type AppMenuState, type Toast } from '../state/atoms';
 import type { AppId, MenuItemSpec } from '../types/apps';
@@ -172,6 +172,7 @@ async function power(action: 'restart' | 'shutdown'): Promise<void> {
   else store.set(overlayAtom, 'shutdown');
 }
 export function runCommand(command: string, _source: CommandSource): void {
+  if (command.startsWith('prop.')) { const [action, value] = command.slice(5).split(':'); document.dispatchEvent(new CustomEvent('kottu:prop', { detail: { action, value } })); return; }
   if (command.startsWith('dock.')) { runDockCommand(command); return; }
   const store = getStore(); const desktop = store.get(desktopAtom);
   const win = desktop.focusedId ? desktop.windows[desktop.focusedId] : undefined;
@@ -191,9 +192,8 @@ export function runCommand(command: string, _source: CommandSource): void {
     case 'app.hide': if (win) for (const value of Object.values(desktop.windows)) if (value.appId === win.appId) minimizeWindow(value.id); return;
     case 'app.about': if (win) void alert({ title: `About ${APP_META[win.appId].name}`, body: APP_META[win.appId].description, primary: 'OK' }); return;
     case 'desktop.show': showDesktop(); return;
-    case 'desktop.cleanUp': store.set(iconPositionsAtom, {}); return;
+    case 'desktop.cleanUp': store.set(propsAtom, {}); if (typeof document !== 'undefined') void import('../shell/props-runtime').then(module => module.reset()); return;
     case 'desktop.wallpaper': openApp('settings', { query: { section: 'wallpaper' } }); return;
-    case 'desktop.widgets': store.set(showWidgetsAtom, value => !value); return;
     case 'desktop.mochi': store.set(mochiPrefsAtom, value => ({ ...value, visible: !value.visible })); return;
     case 'os.spotlight': store.set(spotlightOpenAtom, true); return;
     case 'os.settings': openApp('settings'); return;
@@ -213,7 +213,7 @@ export function runCommand(command: string, _source: CommandSource): void {
       else if (store.get(overlayAtom) !== 'none') store.set(overlayAtom, 'none');
       return;
     case 'focus.menuBar': focusRegion('[data-shell="desktop"] [aria-label="Menu bar"]'); return;
-    case 'focus.desktop': focusRegion('[data-shell="desktop"] [aria-label="Desktop"]'); return;
+    case 'focus.desktop': focusRegion('[data-k-props]'); return;
     case 'focus.dock': focusRegion('[data-shell] [aria-label="Dock"]'); return;
     case 'focus.window': if (win) focusRegion(`[data-window-id="${CSS.escape(win.id)}"]`); return;
     case 'focus.next': case 'focus.prev': return; // Window focus containment owns Tab.
