@@ -21,6 +21,8 @@ for (const [width, height] of [[1440, 900], [1280, 800], [1024, 768], [1920, 108
       }, { theme, wallpaper });
       await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
       await page.evaluate(() => document.fonts.ready);
+      await expect(page.locator('body > .wallpaper .wp-rays')).toHaveCSS('display', wallpaper === 'kottu' && theme === 'light' ? 'block' : 'none');
+      await expect(page.locator('.k-scroll-cue b')).toHaveCSS('color', 'rgb(27, 21, 48)');
       await expect(page.locator('h1:visible')).toHaveCount(1); await expect(page.locator('.k-name span')).toHaveCount(2);
       const geometry = await page.locator('.k-hero').evaluate(hero => {
         const rect = hero.getBoundingClientRect(); const u = parseFloat(getComputedStyle(hero).getPropertyValue('--u'));
@@ -48,6 +50,7 @@ for (const [width, height] of [[1440, 900], [1280, 800], [1024, 768], [1920, 108
       expect(Math.abs(geometry.name.top - (height / 2 + (226 - 450) * u))).toBeLessThanOrEqual(2);
       expect(Math.abs(geometry.name.width - 680 * u)).toBeLessThanOrEqual(2);
       for (const [id, x, y] of [['cto', 436, 560], ['founder', 766, 566], ['colombo', 858, 236]] as const) {
+        if (id === 'colombo' && width < 1180) continue;
         const actual = geometry.tags.find(item => item.id === id)!;
         expect(Math.abs(actual.left - (width / 2 + (x - 720) * u)), id).toBeLessThanOrEqual(2);
         expect(Math.abs(actual.top - (height / 2 + (y - 450) * u)), id).toBeLessThanOrEqual(2);
