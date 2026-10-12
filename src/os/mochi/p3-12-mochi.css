@@ -1,11 +1,12 @@
 /* Character and mood CSS ported from nipuntheekshana.com/src/components/Mochi.astro @ 3b4f92d. */
-.mochi { position: fixed; top: 0; left: 0; z-index: var(--z-mochi); width: 64px; height: 64px; touch-action: none; }
+.mochi { position: absolute; top: 0; left: 0; z-index: 18; width: var(--mochi-size, 64px); height: var(--mochi-size, 64px); touch-action: none; }
 .mochi[hidden] { display: none; }
-.mochi[data-dragging], .mochi[data-physics="fling"], .mochi[data-physics="return"] { z-index: calc(var(--z-menubar) + 1); }
-.mochi__body { position: relative; display: block; width: 64px; height: 64px; padding: 0; border: 0; background: transparent; cursor: grab; -webkit-tap-highlight-color: transparent; }
+.mochi[data-dragging], .mochi[data-physics="fling"], .mochi[data-physics="return"] { z-index: 18; }
+.mochi__body { position: relative; display: block; width: var(--mochi-size, 64px); height: var(--mochi-size, 64px); padding: 0; border: 0; background: transparent; cursor: grab; -webkit-tap-highlight-color: transparent; }
 .mochi[data-dragging] .mochi__body { cursor: grabbing; }
 .mochi__body:focus-visible { outline: 2px solid var(--os-accent); outline-offset: 4px; border-radius: 16px; }
 .mochi__motion { display: block; width: 100%; height: 100%; transform-origin: 50% 90%; }
+.mochi[data-variant="desktop"] .mochi__motion { rotate: -4deg; }
 .mochi svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .mochi__shadow { fill: rgb(0 0 0 / .35); }
 [data-theme="light"] .mochi__shadow { fill: rgb(0 0 0 / .14); }
@@ -64,3 +65,5 @@ html[data-transparency="reduce"] .mochi__bubble { background: var(--os-window); 
 @media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) .mochi * { animation: none !important; transition: none !important; } }
 @media (forced-colors: active) { .mochi__bubble, .mochi[data-variant="widget"] { color: CanvasText; background: Canvas; border-color: CanvasText; } .mochi__blob { fill: Canvas; stroke: CanvasText; } .mochi__eye { fill: CanvasText; } }
 @media print { .mochi { display: none !important; } }
+
+.mochi[data-variant="desktop"] .mochi__motion { rotate: -4deg; transform-origin: center; }

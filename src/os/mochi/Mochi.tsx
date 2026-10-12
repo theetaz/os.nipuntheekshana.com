@@ -5,14 +5,14 @@ import { mochiPrefsAtom } from '../state/prefs';
 import { colomboNow } from '../lib/colombo-time';
 import { preloadMotionFeatures } from '../lib/motion-loader';
 import { isOverKooda } from '../shell/dock-anchors';
-import { workArea } from '../wm/geometry';
+
 import type { Point } from '../wm/types';
 import type { MenuItemSpec } from '../types/apps';
 import { Menu } from '../ui/Menu';
 import { MochiSvg } from './MochiSvg';
 import { api } from './api';
 import { brainAtom, mochiTime, nextBrainDeadline, pauseBrain, transitionBrain, type BrainEvent } from './brain';
-import { clampPosition, FLING_THRESHOLD, MOCHI_SIZE, releaseVelocity, restingBody, squash, stepPhysics,
+import { clampPosition, FLING_THRESHOLD, releaseVelocity, restingBody, squash, stepPhysics,
   surfaceAt, trackVelocity, type Body, type Sample, type Surface } from './physics';
 import './p3-12-mochi.css';
 
@@ -37,8 +37,20 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
   useEffect(() => {
     const el = root.current; const bodyButton = button.current;
     if (!el || !bodyButton) return;
-    let area = workArea(store.get(desktopAtom).viewport); let surfaces: Surface[] = [];
-    let body: Body = restingBody({ x: 40, y: area.y + area.h - MOCHI_SIZE });
+    const hero = document.querySelector<HTMLElement>('.k-hero');
+    let u = 1; let size = 64;
+    const heroArea = () => {
+      const rect = hero?.getBoundingClientRect() ?? { x: 0, y: 0, width: innerWidth, height: innerHeight };
+      u = hero ? parseFloat(getComputedStyle(hero).getPropertyValue('--u')) : 1;
+      size = variant === 'desktop' ? 70 * u : 64;
+      el.style.setProperty('--mochi-size', `${size}px`);
+      const margin = 40 * u;
+      return { x: rect.x + scrollX + margin, y: rect.y + scrollY + margin, w: rect.width - 2 * margin, h: rect.height - 2 * margin };
+    };
+    let area = heroArea(); let surfaces: Surface[] = [];
+    const home = () => ({ x: area.x + (area.w + 80 * u) / 2 + (236 - 720 - 40) * u,
+      y: area.y + (area.h + 80 * u) / 2 + (538 - 450 - 40) * u });
+    let body: Body = restingBody(home(), 'thinkpad');
     let frame = 0; let previousFrame = 0; let eyeFrame = 0; let deadlineTimer = 0; let walkTimer = 0;
     let longPress = 0; let walkUntil = 0; let active = false; let pausedAt: number | null = null;
     let lastInput = -Infinity; let direction = 1; let suppressClick = false;
@@ -87,7 +99,7 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
       frame = 0;
       if (!active || still() || drag) return;
       const dt = previousFrame ? (time - previousFrame) / 1000 : 1 / 60; previousFrame = time;
-      body = stepPhysics(body, dt, area, surfaces);
+      body = stepPhysics(body, dt, area, surfaces, size);
       if (body.mode === 'walk' && time >= walkUntil) body = restingBody(body, body.surface);
       paint();
       if (body.mode !== 'rest') frame = requestAnimationFrame(animate);
@@ -95,12 +107,14 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
     };
     const startFrame = () => { if (!frame && active && !still() && !drag && body.mode !== 'rest') frame = requestAnimationFrame(animate); };
     const readSurfaces = () => {
-      area = workArea(store.get(desktopAtom).viewport);
+      area = heroArea();
       const dock = document.querySelector<HTMLElement>('.os-dock[data-dock-mode="desktop"]');
       const rect = dock?.getBoundingClientRect();
-      const next: Surface[] = rect ? [{ id: 'dock', x: rect.x, y: Math.min(rect.y, area.y + area.h), w: rect.width }] : [];
+      const spot = home();
+      const next: Surface[] = [{ id: 'thinkpad', x: spot.x - 100 * u, y: spot.y + size, w: 200 * u }];
+      if (rect && rect.y + scrollY <= area.y + area.h) next.push({ id: 'dock', x: rect.x + scrollX, y: rect.y + scrollY, w: rect.width });
       for (const win of Object.values(store.get(desktopAtom).windows)) {
-        if (!win.minimized && !win.closing && win.rect.y >= area.y + MOCHI_SIZE) next.push({ id: win.id, x: win.rect.x, y: win.rect.y, w: win.rect.w });
+        if (!win.minimized && !win.closing) next.push({ id: win.id, x: win.rect.x + scrollX, y: win.rect.y + scrollY, w: win.rect.w });
       }
       surfaces = next;
     };
@@ -143,7 +157,7 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
     };
     const lookAt = (point: Point) => {
       if (!active || still() || !eyes) return;
-      const center = variant === 'widget' ? bodyButton.getBoundingClientRect() : { left: body.x, top: body.y, width: 64, height: 64 };
+      const center = variant === 'widget' ? bodyButton.getBoundingClientRect() : { left: body.x, top: body.y, width: size, height: size };
       const dx = point.x - center.left - center.width / 2; const dy = point.y - center.top - center.height * 0.55;
       const distance = Math.hypot(dx, dy) || 1; const reach = Math.min(1, distance / 300) * 3.2;
       eyes.style.transform = `translate(${dx / distance * reach}px, ${dy / distance * reach}px)`;
@@ -155,7 +169,7 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
     const pointer = (event: PointerEvent) => {
       if (!active) return; input();
       if (still() || drag || eyeFrame || store.get(brainAtom).mood !== 'idle') return;
-      const point = { x: event.clientX, y: event.clientY };
+      const point = { x: variant === 'desktop' ? event.pageX : event.clientX, y: variant === 'desktop' ? event.pageY : event.clientY };
       eyeFrame = requestAnimationFrame(() => { eyeFrame = 0; lookAt(point); });
     };
     const openMenu = () => {
@@ -170,23 +184,23 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
         if (!active || event.button !== 0) return;
         stopFrame(); suppressClick = false; input(); readSurfaces();
         body = restingBody(body, body.surface);
-        drag = { id: event.pointerId, start: { x: event.clientX, y: event.clientY }, origin: { ...body },
-          samples: [{ x: event.clientX, y: event.clientY, t: mochiTime() }], moved: false };
+        drag = { id: event.pointerId, start: { x: variant === 'desktop' ? event.pageX : event.clientX, y: variant === 'desktop' ? event.pageY : event.clientY }, origin: { ...body },
+          samples: [{ x: event.pageX, y: event.pageY, t: mochiTime() }], moved: false };
         bodyButton.setPointerCapture(event.pointerId);
         if (variant === 'widget') longPress = window.setTimeout(() => { openMenu(); suppressClick = true; }, 550);
       },
       move(event) {
         if (!drag || drag.id !== event.pointerId) return;
-        const dx = event.clientX - drag.start.x; const dy = event.clientY - drag.start.y;
+        const dx = event.pageX - drag.start.x; const dy = event.pageY - drag.start.y;
         if (Math.hypot(dx, dy) > 6) {
           clearTimeout(longPress);
           if (variant === 'widget') { suppressClick = true; return; }
           if (!drag.moved) { drag.moved = true; send({ type: 'mood', mood: 'surprised', duration: 0 }); el.dataset.dragging = 'true'; }
-          drag.samples = trackVelocity(drag.samples, { x: event.clientX, y: event.clientY, t: mochiTime() });
+          drag.samples = trackVelocity(drag.samples, { x: event.pageX, y: event.pageY, t: mochiTime() });
           body = { ...body, x: drag.origin.x + dx, y: drag.origin.y + dy, mode: 'drag', surface: null };
           // Pointer dragging may cross the dock; clamp only on release so Kooda is reachable.
-          body.x = Math.max(area.x, Math.min(area.x + area.w - 64, body.x));
-          body.y = Math.max(area.y, Math.min(window.innerHeight - 64, body.y));
+          body.x = Math.max(area.x, Math.min(area.x + area.w - size, body.x));
+          body.y = Math.max(area.y, Math.min(area.y + area.h - size, body.y));
           trash()?.toggleAttribute('data-kooda-over', false);
           if (isOverKooda({ x: event.clientX, y: event.clientY })) trash()?.setAttribute('data-kooda-over', 'true');
           paint();
@@ -200,13 +214,13 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
         trash()?.removeAttribute('data-kooda-over'); suppressClick ||= release.moved;
         if (release.moved) {
           if (isOverKooda({ x: event.clientX, y: event.clientY })) {
-            const home = clampPosition(release.origin, area);
+            const home = clampPosition(release.origin, area, size);
             body = still() ? restingBody(home, release.origin.surface)
-              : { ...restingBody(clampPosition(body, area)), mode: 'return', home };
+              : { ...restingBody(clampPosition(body, area, size)), mode: 'return', home };
             api.setMood('surprised'); api.say("Hey. I'm not rubbish.");
           } else {
             const velocity = releaseVelocity(release.samples, mochiTime()); const speed = Math.hypot(velocity.x, velocity.y);
-            body = restingBody(clampPosition(body, area)); body.surface = surfaceAt(body, surfaces)?.id ?? null;
+            body = restingBody(clampPosition(body, area, size)); body.surface = surfaceAt(body, surfaces, size)?.id ?? null;
             if (!still() && speed > FLING_THRESHOLD) {
               body = { ...body, vx: velocity.x, vy: velocity.y, mode: 'fling', surface: null };
               api.setMood(speed > 2500 ? 'dizzy' : 'happy'); api.say('Wheee.');
@@ -227,16 +241,16 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
       if (!drag && variant === 'desktop') {
         const support = surfaces.find(surface => surface.id === body.surface);
         const oldSupport = oldSurfaces.find(surface => surface.id === body.surface);
-        if (support && oldSupport) body = { ...body, x: body.x + support.x - oldSupport.x, y: support.y - 64 };
+        if (support && oldSupport) body = { ...body, x: body.x + support.x - oldSupport.x, y: support.y - size };
         else if (body.surface) body = still() ? restingBody(body) : { ...body, mode: 'fall', surface: null, vx: 0, vy: 0 };
-        body = { ...body, ...clampPosition(body, area) }; paint(); startFrame(); scheduleWalk();
+        body = { ...body, ...clampPosition(body, area, size) }; paint(); startFrame(); scheduleWalk();
       }
     };
     const prefsChanged = () => {
       const next = store.get(mochiPrefsAtom).pos;
       if (next !== storedPosition && variant === 'desktop') {
         storedPosition = next;
-        if (next) { stopFrame(); body = restingBody(clampPosition(next, area)); body.surface = surfaceAt(body, surfaces)?.id ?? null; paint(); }
+        if (next) { stopFrame(); body = restingBody(clampPosition(next, area, size)); body.surface = surfaceAt(body, surfaces, size)?.id ?? null; paint(); }
       }
       syncActive(); scheduleBrain(); scheduleWalk();
     };
@@ -248,7 +262,7 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
     };
     const motionChanged = () => {
       cancelAnimationFrame(eyeFrame); eyeFrame = 0;
-      if (still()) { stopFrame(); if (!drag) { body = restingBody(clampPosition(body, area), body.surface); persist(); } if (eyes) eyes.style.transform = ''; }
+      if (still()) { stopFrame(); if (!drag) { body = restingBody(clampPosition(body, area, size), body.surface); persist(); } if (eyes) eyes.style.transform = ''; }
       paint(); paintBrain(); scheduleWalk();
     };
     const scrollPositions = new WeakMap<Element, { y: number; t: number }>(); let lastSurprise = -Infinity;
@@ -261,7 +275,8 @@ export function Mochi({ variant = 'desktop' }: { variant?: 'desktop' | 'widget' 
         && !['happy', 'sleep'].includes(store.get(brainAtom).mood)) { lastSurprise = now; api.setMood('surprised'); }
     };
     readSurfaces();
-    if (storedPosition) body = restingBody(clampPosition(storedPosition, area), surfaceAt(storedPosition, surfaces)?.id ?? null);
+    body = restingBody(home(), 'thinkpad');
+    if (storedPosition) body = restingBody(clampPosition(storedPosition, area, size), surfaceAt(storedPosition, surfaces, size)?.id ?? null);
     paint(); const hour = colomboNow().hour; send({ type: 'init', night: hour >= 23 || hour < 5 }); paintBrain(); syncActive();
     const cleanups = [store.sub(desktopAtom, desktopChanged), store.sub(mochiPrefsAtom, prefsChanged), store.sub(brainAtom, brainChanged),
       store.sub(reducedMotionAtom, motionChanged), ...[viewAtom, overlayAtom, bootPhaseAtom].map(atom => store.sub(atom, syncActive))];
