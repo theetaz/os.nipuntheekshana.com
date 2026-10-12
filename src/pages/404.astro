@@ -5,7 +5,7 @@ import InitialData from '../components/static/InitialData.astro';
 import { seoFor } from '../lib/seo';
 const seo = seoFor({ path: '/404', title: 'Lost at sea', description: 'The page you wanted is not here, or it moved. Return to the desktop of Nipun Theekshana.', kind: 'page' });
 ---
-<OsLayout seo={seo} initial={null}>
+<OsLayout story={false} seo={seo} initial={null}>
   <StaticWindow app="about" title="Lost at sea" adoptable={false}>
     <h1>Lost at sea</h1><p class="lede">You’ve drifted off the coast — <span id="ocean-coordinates">5.2140°N 79.1022°E</span> is open ocean. The page you wanted isn’t here, or it moved.</p>
     <p><a href="/">Back to the desktop</a> · <a href="/projects">Explore projects</a></p>

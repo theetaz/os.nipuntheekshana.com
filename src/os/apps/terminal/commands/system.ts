@@ -1,12 +1,12 @@
 import { CODENAME, VERSION } from '../../../config';
 import { formatColombo } from '../../../lib/colombo-time';
-import { WALLPAPERS } from '../../../state/prefs';
+import { WALLPAPERS, WALLPAPER_NAMES, type WallpaperId } from '../../../state/prefs';
 import { ISLAND } from '../ascii';
 import { segment, success, type CommandHandler, type Line } from '../types';
 import { usageError } from './help';
 
 export const ACCENTS = ['thambili', 'lagoon', 'lotus', 'tea'] as const;
-export const wallpaperName = (id: string) => id === 'galle-face' ? 'Galle Face' : id === 'island-live' ? 'Island live' : id[0]!.toUpperCase() + id.slice(1);
+export const wallpaperName = (id: string) => WALLPAPER_NAMES[id as WallpaperId] ?? (id[0]?.toUpperCase() ?? '') + id.slice(1);
 export function dateText(date: Date): string {
   const day = formatColombo(date, { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }).replaceAll(',', '');
   const time = formatColombo(date, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });

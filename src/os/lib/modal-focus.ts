@@ -11,6 +11,7 @@ export function isolateModal(panel: HTMLElement, focus: () => void, portals?: st
     const stack: Modal[] = [];
     const covered = new Map<HTMLElement, boolean>();
     const cover = () => {
+      document.documentElement.classList.toggle('k-scroll-lock', stack.length > 0);
       const next = new Set<HTMLElement>();
       let current = stack.at(-1)?.panel;
       while (current?.parentElement) {

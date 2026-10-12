@@ -1,3 +1,4 @@
+import { WALLPAPERS, WALLPAPER_NAMES } from '../../../state/prefs';
 import { useId } from 'react';
 import { Segmented } from '../../../ui/Segmented';
 import type { SectionProps } from '../settings';
@@ -5,11 +6,7 @@ import skyline from '../../../../assets/wallpapers/skyline.svg?raw';
 import islandMask from '../../../../assets/wallpapers/island-mask.svg?raw';
 import islandOutline from '../../../../assets/wallpapers/island-outline.svg?raw';
 
-const wallpapers = [
-  { value: 'galle-face', label: 'Galle Face' }, { value: 'monsoon', label: 'Monsoon' },
-  { value: 'contours', label: 'Contours' }, { value: 'island', label: 'Island' },
-  { value: 'paper', label: 'Paper' }, { value: 'island-live', label: 'Island (live)' },
-] as const;
+const wallpapers = WALLPAPERS.map(value => ({ value, label: WALLPAPER_NAMES[value] }));
 const svgUrl = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg.trim())}")`;
 function WallpaperPreview({ id }: { id: string }) {
   const prefix = useId().replace(/:/g, '');
@@ -27,16 +24,14 @@ function WallpaperPreview({ id }: { id: string }) {
     </span>
   </span>;
 }
-export function Wallpaper({ preferences, actions, liveUnavailable }: SectionProps & { liveUnavailable: string | null }) {
+export function Wallpaper({ preferences, actions }: SectionProps & { liveUnavailable: string | null }) {
   return <>
     <h2>Wallpaper</h2><p className="settings-description">A little piece of the island.</p>
     <Segmented label="Wallpaper" className="settings-wallpapers" value={preferences.wallpaper}
       options={wallpapers.map(wallpaper => ({ value: wallpaper.value,
-        disabled: !actions || (wallpaper.value === 'island-live' && liveUnavailable !== null),
-        label: <><WallpaperPreview id={wallpaper.value} /><span>{wallpaper.label}</span>
-          {wallpaper.value === 'island-live' && <span className="settings-wallpaper-note">Uses WebGL · ≈135 KB</span>}</>,
+        disabled: !actions,
+        label: <><WallpaperPreview id={wallpaper.value} /><span>{wallpaper.label}</span></>,
       }))} onChange={value => { const wallpaper = wallpapers.find(item => item.value === value); if (wallpaper) actions?.wallpaper(wallpaper.value); }} />
-    {liveUnavailable && <p className="settings-hint">Island (live): {liveUnavailable}</p>}
     <p className="settings-hint">Each wallpaper follows the light or dark theme.</p>
   </>;
 }

@@ -1,3 +1,4 @@
+import { WALLPAPERS, WALLPAPER_NAMES } from '../state/prefs';
 import type { AppMenus, AppMeta, MenuItemSpec, Shortcut } from '../types/apps';
 import type { DesktopState } from '../wm/types';
 import type { AppMenuState } from '../state/atoms';
@@ -23,11 +24,7 @@ export function fileMenu(meta?: AppMeta, extra: readonly MenuItemSpec[] = []): r
     item('Copy link to window', 'window.copyLink'), item('Close window', 'window.close', alt('KeyW'))];
 }
 export const defaultView: readonly MenuItemSpec[] = [
-  { kind: 'submenu', label: 'Wallpaper', items: [
-    item('Galle Face', 'wallpaper.galle-face', undefined, 'radio'), item('Island', 'wallpaper.island', undefined, 'radio'),
-    item('Contours', 'wallpaper.contours', undefined, 'radio'), item('Monsoon', 'wallpaper.monsoon', undefined, 'radio'),
-    item('Paper', 'wallpaper.paper', undefined, 'radio'), item('Island live', 'wallpaper.island-live', undefined, 'radio'),
-  ] },
+  { kind: 'submenu', label: 'Wallpaper', items: WALLPAPERS.map(id => item(WALLPAPER_NAMES[id], `wallpaper.${id}`, undefined, 'radio')) },
   item('Show widgets', 'desktop.widgets', undefined, 'checkbox'), item('Show Mochi', 'desktop.mochi', undefined, 'checkbox'),
   item('Clean up icons', 'desktop.cleanUp'), separator,
   item('Light', 'theme.light', undefined, 'radio'), item('Dark', 'theme.dark', undefined, 'radio'),

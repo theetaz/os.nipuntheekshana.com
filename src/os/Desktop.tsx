@@ -134,10 +134,10 @@ function ClientBootstrap() {
     cleanups.push(() => { window.removeEventListener('online', online); window.removeEventListener('offline', online); });
     let frame = 0;
     const resize = () => { if (frame) return; frame = requestAnimationFrame(() => {
-      frame = 0; store.set(desktopAtom, { type: 'VIEWPORT', viewport: { w: innerWidth, h: innerHeight } });
+      frame = 0; store.set(desktopAtom, { type: 'VIEWPORT', viewport: { w: Math.round(document.documentElement.getBoundingClientRect().width), h: innerHeight } });
     }); };
     // Set the viewport before measuring and opening the static window.
-    store.set(desktopAtom, { type: 'VIEWPORT', viewport: { w: innerWidth, h: innerHeight } });
+    store.set(desktopAtom, { type: 'VIEWPORT', viewport: { w: Math.round(document.documentElement.getBoundingClientRect().width), h: innerHeight } });
     window.addEventListener('resize', resize); cleanups.push(() => { cancelAnimationFrame(frame); window.removeEventListener('resize', resize); });
     cleanups.push(subscribePreferences(store, document.documentElement));
     cleanups.push(subscribeEggs(store));
@@ -151,6 +151,7 @@ function ClientBootstrap() {
     // Simple view retains native document navigation and its original title.
     let historyCleanup: (() => void) | undefined;
     const syncHistory = () => {
+      resize();
       historyCleanup?.(); historyCleanup = undefined;
       if (store.get(viewAtom) !== 'simple' && store.get(modeAtom) === 'desktop') historyCleanup = subscribeHistory(historyStore(store), window, history,
         { features: FEATURES.postcards ? { postcards: true } : {} });
@@ -170,6 +171,14 @@ function ClientBootstrap() {
       cleanups.push(() => window.cancelIdleCallback(idle));
     }
     document.documentElement.classList.add('os-ready');
+    history.scrollRestoration = 'manual';
+    let storyStopped = false; let storyCleanup: (() => void) | undefined;
+    const loadStory = () => { void import('./story/story-runtime').then(module => {
+      if (!storyStopped) storyCleanup = module.startStory();
+    }).catch(() => {}); };
+    const storyIdle = 'requestIdleCallback' in window ? window.requestIdleCallback(loadStory, { timeout: 4000 }) : undefined;
+    const storyTimer = storyIdle === undefined ? setTimeout(loadStory, 200) : undefined;
+    cleanups.push(() => { storyStopped = true; if (storyIdle !== undefined) window.cancelIdleCallback(storyIdle); clearTimeout(storyTimer); storyCleanup?.(); });
     cleanups.push(() => document.documentElement.classList.remove('os-ready'));
     return () => { cleanups.reverse().forEach(cleanup => cleanup()); };
   }, [store]);

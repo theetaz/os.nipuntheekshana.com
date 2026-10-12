@@ -49,9 +49,7 @@ export default function SettingsApp({ windowId, mode, query, setQuery, setTitle,
     top();
   };
   const actions: SettingsActions = {
-    theme: setTheme, accent: setAccent, wallpaper: value => {
-      if (value !== 'island-live' || liveUnavailable === null) setWallpaper(value);
-    }, motion: setMotion, transparency: setTransparency, sound: setSound, volume: setVolume, widgets: setWidgets,
+    theme: setTheme, accent: setAccent, wallpaper: setWallpaper, motion: setMotion, transparency: setTransparency, sound: setSound, volume: setVolume, widgets: setWidgets,
     mochi: value => setMochi(previous => ({ ...previous, ...value })),
     resetPets: () => { void alert({ windowId, title: 'Reset Mochi’s pet count?', body: 'Mochi will still remember you. The counter will start at zero.',
       primary: 'Reset', cancel: 'Cancel' }).then(result => { if (result === 'primary') { setMochi(previous => ({ ...previous, pets: 0 })); announce('Mochi’s pet count reset.'); } }); },
