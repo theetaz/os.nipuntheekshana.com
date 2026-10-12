@@ -99,7 +99,7 @@ test('Desktop resets remove remembered geometry and prop positions', async ({ pa
   await app(page).getByRole('button', { name: 'Reset window sizes and positions', exact: true }).click();
   expect(await stored(page, 'geometry:v1')).toBeNull();
   await app(page).getByRole('button', { name: 'Reset prop positions', exact: true }).click(); await expect.poll(() => stored(page, 'props:v1')).toBe('{}');
-  expect(await page.locator('html').evaluate(el => el.style.getPropertyValue('--k-dx-tuktuk'))).toBe('0');
+  await expect.poll(() => page.locator('html').evaluate(el => el.style.getPropertyValue('--k-dx-tuktuk'))).toBe('0');
 });
 
 test('Sound binds its switch and volume and lazily plays an audio sample', async ({ page }) => {

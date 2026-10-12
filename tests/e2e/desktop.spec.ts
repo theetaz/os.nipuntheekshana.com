@@ -84,9 +84,11 @@ test('keyboard focus, spatial arrows, context menu, move, cancel and Enter work'
   await prop(page, 'tuktuk').focus(); await page.keyboard.press('Shift+F10');
   await expect(page.getByRole('menu', { name: 'desktop:prop:tuktuk context menu' })).toBeVisible();
   await page.getByRole('menuitem', { name: 'Move with keyboard' }).click();
+  await expect(prop(page, 'tuktuk')).toHaveAttribute('data-keyboard-move', '');
   await page.keyboard.press('ArrowRight'); await page.keyboard.press('Shift+ArrowDown'); await page.keyboard.press('Enter');
   await expect.poll(() => saved(page)).toEqual({ tuktuk: { dx: 8, dy: 32 } });
   await page.keyboard.press('Shift+F10'); await page.getByRole('menuitem', { name: 'Move with keyboard' }).click();
+  await expect(prop(page, 'tuktuk')).toHaveAttribute('data-keyboard-move', '');
   await page.keyboard.press('ArrowRight'); await page.keyboard.press('Escape');
   expect(await saved(page)).toEqual({ tuktuk: { dx: 8, dy: 32 } });
   await page.keyboard.press('Enter'); await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
@@ -101,6 +103,7 @@ test('post box scrolls to the board and story right-click is left to the browser
 test('Tab exits the props and cancels an uncommitted keyboard move', async ({ page }) => {
   await desktop(page); const target = prop(page, 'tuktuk'); await target.focus();
   await page.keyboard.press('Shift+F10'); await page.getByRole('menuitem', { name: 'Move with keyboard' }).click();
+  await expect(target).toHaveAttribute('data-keyboard-move', '');
   await page.keyboard.press('ArrowRight'); await expect(target).toHaveAttribute('data-keyboard-move', '');
   await page.keyboard.press('Tab'); await expect(target).not.toBeFocused();
   await expect(target).not.toHaveAttribute('data-keyboard-move'); expect(await saved(page)).toEqual({});

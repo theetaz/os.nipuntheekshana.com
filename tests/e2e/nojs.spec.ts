@@ -21,7 +21,8 @@ test('home has one visible h1 and working desktop and dock links @smoke', async 
   await expect(page.locator('.boot-screen')).toBeHidden();
   const hrefs = await page.locator('nav[aria-label="Dock"] a, [data-k-props] a').evaluateAll((links) => links.map((link) => link.getAttribute('href')!));
   expect(hrefs).toContain('/projects');
-  expect(hrefs).toContain('/maps/play');
+  expect(hrefs).toContain('/maps');
+  await expect(page.locator('#story a[href="/maps/play"]')).toHaveCount(1);
   await expect(page.locator('[data-k-props] a')).toHaveCount(12);
   await expect(page.locator('[data-prop="postbox"]')).toHaveAttribute('href', '#ws-board');
   for (const href of new Set(hrefs.filter((href) => href.startsWith('/')))) {
