@@ -100,6 +100,15 @@ describe('built CSS respects static pages and lazy app chunks', () => {
     }
   });
 
+  it('ships the story on every story route and omits all retired widget sheets', () => {
+    for (const file of files(dist).filter(file => file.endsWith('.html'))) {
+      const text = pageCss(file);
+      expect(text).toContain('.k-sec');
+      expect(text).not.toMatch(/\.(?:ticket-wrap|now-sticky|activity-strip|home-document)\b/);
+      if (!file.endsWith('/404.html')) expect(readFileSync(file, 'utf8')).toContain('id="story"');
+    }
+  });
+
   it('defers window and overlay sheets while retaining static-window chrome', () => {
     const home = pageSheets(resolve(dist, 'index.html'));
     const deferred = ['src/os/shell/p2-4-window-system.css', 'src/os/shell/Spotlight.tsx'];

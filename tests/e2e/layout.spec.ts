@@ -14,7 +14,10 @@ test('layout emits crawlable metadata, two font preloads and ordered landmarks',
   const layers = await page.locator('body > *').evaluateAll((elements) => elements.map((element) => element.id || element.className?.toString() || element.tagName));
   expect(layers.slice(0, 3)).toEqual(['simple', 'skip-link', 'skip-link']);
   expect(layers.indexOf('wallpaper os-chrome')).toBeGreaterThan(2);
-  expect(layers.indexOf('content')).toBeGreaterThan(layers.indexOf('wallpaper os-chrome'));
+  expect(layers.indexOf('ws-desktop')).toBeGreaterThan(layers.indexOf('wallpaper os-chrome'));
+  expect(layers.indexOf('content')).toBeGreaterThan(layers.indexOf('ws-desktop'));
+  expect(layers.indexOf('static-phone-home')).toBeGreaterThan(layers.indexOf('content'));
+  expect(layers.indexOf('story')).toBeGreaterThan(layers.indexOf('static-phone-home'));
   await expect(page.locator('#app-projects')).toHaveCount(1);
   await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
   await expect(page.getByRole('link', { name: 'Skip to content', exact: true })).toBeFocused();

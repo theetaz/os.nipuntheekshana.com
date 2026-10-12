@@ -23,7 +23,7 @@ describe('menu builders', () => {
     expect(desktopMenus().map(menu => menu.label)).toEqual(['Serendib', 'File', 'View', 'Go', 'Window', 'Help']);
     expect(labels(viewMenu())).toEqual(['Wallpaper', 'Show widgets', 'Show Mochi', 'Clean up icons', 'separator', 'Light', 'Dark', 'Automatic']);
     const wallpaper = viewMenu()[0]; expect(wallpaper?.kind).toBe('submenu');
-    if (wallpaper?.kind === 'submenu') expect(labels(wallpaper.items)).toEqual(['Galle Face', 'Island', 'Contours', 'Monsoon', 'Paper', 'Island live']);
+    if (wallpaper?.kind === 'submenu') expect(labels(wallpaper.items)).toEqual(['Kottu', 'Galle Face', 'Pettah', 'Paper']);
   });
   it('builds app, File and app-specific menus without losing standard commands', () => {
     expect(labels(appMenu(APP_META.projects))).toEqual(['About Projects', 'Settings…', 'separator', 'Hide Projects', 'Quit Projects']);
@@ -57,7 +57,7 @@ describe('menu builders', () => {
     expect(getItemState('window.close', context())).toEqual({ disabled: true });
     expect(getItemState('window.next', context())).toEqual({ disabled: true });
     expect(getItemState('theme.auto', context())).toEqual({ checked: true });
-    expect(getItemState('wallpaper.island', context())).toEqual({ checked: false });
+    expect(getItemState('wallpaper.pettah', context())).toEqual({ checked: false });
     expect(getItemState('desktop.widgets', context())).toEqual({ checked: true });
     expect(getItemState('desktop.mochi', context())).toEqual({ checked: false });
     const state = { ...context(), desktop: wmReducer(createDesktopState(), { type: 'OPEN', appId: 'settings' }),

@@ -165,7 +165,7 @@ import PowerHarness from '../../../tests/fixtures/p2-9/PowerHarness';
 import { seoFor } from '../../../src/lib/seo';
 const seo = seoFor({ path: '/', title: 'Power verification', description: 'Power integration verification', kind: 'home' });
 ---
-<OsLayout seo={seo} initial={null} home><Fragment slot="after-main"><PowerHarness client:load /></Fragment></OsLayout>`);
+<OsLayout seo={seo} initial={null} home story={false}><Fragment slot="after-main"><PowerHarness client:load /></Fragment></OsLayout>`);
     await new Promise<void>((done, reject) => {
       const build = spawn('npm', ['run', 'build', '--', '--config', `.astro/p2-9-fixture-${info.workerIndex}/config.mjs`], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
       let output = ''; build.stdout.on('data', chunk => { output += chunk; }); build.stderr.on('data', chunk => { output += chunk; });

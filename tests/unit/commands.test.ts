@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createOsStore, getStore, registerStore } from '../../src/os/state/store';
 import { alertsAtom, announceAtom, desktopAtom, geometryAtom, iconPositionsAtom, overlayAtom, quickLookAtom,
-  spotlightOpenAtom, themePrefAtom, toastsAtom } from '../../src/os/state/atoms';
+  spotlightOpenAtom, themePrefAtom, toastsAtom, wallpaperAtom } from '../../src/os/state/atoms';
 import { alert, announce, closeQuickLook, closeWindow, copyWindowLink, cycleWindows, focusWindow, minimizeWindow,
   navigateWindow, openApp, openQuickLook, quitApp, registerBeforeClose, resolveAlert, restoreWindow, runCommand,
   showDesktop, snapWindow, toast, toggleMaximize } from '../../src/os/wm/commands';
@@ -12,6 +12,14 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 const windowState = (id = 'projects') => store.get(desktopAtom).windows[id]!;
 
 describe('window commands', () => {
+  it('routes all four wallpaper ids and ignores retired ids', () => {
+    for (const id of ['kottu', 'galle-face', 'pettah', 'paper']) {
+      runCommand(`wallpaper.${id}`, 'menu'); expect(store.get(wallpaperAtom)).toBe(id);
+    }
+    for (const id of ['monsoon', 'contours', 'island', 'island-live']) {
+      runCommand(`wallpaper.${id}`, 'menu'); expect(store.get(wallpaperAtom)).toBe('paper');
+    }
+  });
   it('isolates stores and unregisters only its own active store', () => {
     openApp('projects'); const other = createOsStore(); const remove = registerStore(other);
     cleanup(); expect(getStore()).toBe(other); expect(other.get(desktopAtom).order).toEqual([]);

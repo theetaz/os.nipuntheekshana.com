@@ -25,7 +25,7 @@ function context(): ShellContext {
   return {
     cwd: HOME, columns: 80, history: ['ls', 'whoami'], data: vi.fn(async () => data),
     activity: vi.fn(async () => ({ available: true, total: 1234 } as const) as never),
-    system: () => ({ theme: 'light', appearance: 'auto', wallpaper: 'galle-face', accent: 'thambili', sound: false, kernel: 'Astro 7.3 + React 19.3' }),
+    system: () => ({ theme: 'light', appearance: 'auto', wallpaper: 'kottu', accent: 'thambili', sound: false, kernel: 'Astro 7.3 + React 19.3' }),
     now: () => new Date('2026-10-11T17:41:00Z'), run: vi.fn(), open: vi.fn(), external: vi.fn(), close: vi.fn(),
     mochi: { pet: vi.fn(), give: vi.fn(), setMood: vi.fn(), say: vi.fn(), sleep: vi.fn(), wake: vi.fn(), wave: vi.fn(), hide: vi.fn(), show: vi.fn(), getState: () => ({ mood: 'happy', pets: 3, visible: true }) },
   };
@@ -108,9 +108,9 @@ describe('Terminal command outputs and effects', () => {
     ['cat cv.pdf', 'cat: cv.pdf: binary file. Try: open cv'], ['cat projects', 'cat: projects: Is a directory'],
     ['cat missing', 'cat: missing: No such file or directory'], ['ls missing', 'ls: missing: No such file or directory'],
     ['cd now.txt', 'cd: now.txt: Not a directory'], ['cd missing', 'cd: missing: No such file or directory'],
-    ['cat /etc/serendib-release', 'Serendib 1.0 "Galle Face"\nShell: nsh 1.0'],
+    ['cat /etc/serendib-release', 'Serendib 2.0 "Pettah"\nShell: nsh 1.0'],
     ['writing', '2026-10-01  hello-world  Hello world'], ['theme', 'auto'], ['theme dark', 'dark'],
-    ['wallpaper', 'galle-face'], ['wallpaper contours', 'contours'], ['accent', 'thambili'], ['accent lagoon', 'lagoon'],
+    ['wallpaper', 'kottu'], ['wallpaper pettah', 'pettah'], ['accent', 'thambili'], ['accent lagoon', 'lagoon'],
     ['accent list', 'thambili\nlagoon\nlotus\ntea'], ['sound', 'on'], ['sound on', 'on'], ['sound off', 'off'],
     ['history', '  1  ls\n  2  whoami'], ['echo "hello world"', 'hello world'],
     ['tea', [...TEA, 'Ceylon tea. Strong, no sugar. Brewing… done.'].join('\n')],
@@ -174,7 +174,7 @@ describe('Terminal command outputs and effects', () => {
   });
   it('neofetch uses live counts, theme, career and build activity', async () => {
     const text = await runText('neofetch'); expect(text.split('\n')).toHaveLength(ISLAND.length);
-    for (const expected of ['2 projects, 1 posts', '10 years (shipping since 2016)', 'Galle Face (light), accent Thambili', '1,234 GitHub contributions this year', '6.9271°N 79.8612°E', 'Astro 7.3 + React 19.3']) expect(text).toContain(expected);
+    for (const expected of ['2 projects, 1 posts', '10 years (shipping since 2016)', 'Kottu (light), accent Thambili', '1,234 GitHub contributions this year', '6.9271°N 79.8612°E', 'Astro 7.3 + React 19.3']) expect(text).toContain(expected);
     const ctx = context(); ctx.activity = async () => { throw new Error('offline'); }; expect(await runText('neofetch', ctx)).toContain('GitHub contributions unavailable');
   });
   it.each(['ls -z', 'cat', 'cat a b', 'cd a b', 'pwd x', 'projects --status archived', 'projects --category', 'projects --bogus data', 'projects --category data --category ai', 'writing x', 'theme sepia', 'accent orange', 'wallpaper random', 'sound maybe', 'mochi run', 'mochi say', 'make coffee', 'open', 'exit x', 'clear x', 'sleep x'])('validates usage for %s without side effects', async source => {
@@ -189,7 +189,7 @@ describe('Terminal completion', () => {
     ['neo', 'neofetch '], ['echo hi && neo', 'echo hi && neofetch '], ['cat no', 'cat now.txt '], ['cd pro', 'cd projects/'],
     ['ls ~/pro', 'ls ~/projects/'], ['cat projects/sa', 'cat projects/salli.md '], ['open projects/sa', 'open projects/salli '],
     ['open writing/he', 'open writing/hello-world '], ['open isl', 'open island '], ['theme da', 'theme dark '],
-    ['wallpaper con', 'wallpaper contours '], ['accent lag', 'accent lagoon '], ['sound of', 'sound off '], ['mochi wa', 'mochi wake '],
+    ['wallpaper pet', 'wallpaper pettah '], ['accent lag', 'accent lagoon '], ['sound of', 'sound off '], ['mochi wa', 'mochi wake '],
     ['projects --category da', 'projects --category data '], ['projects --status ac', 'projects --status active '],
     ['help neo', 'help neofetch '], ['make te', 'make tea '], ['cat "no', 'cat "now.txt" '], ['cat .sec', 'cat .secrets '],
   ])('completes %s', (source, expected) => expect(completion(source).value).toBe(expected));

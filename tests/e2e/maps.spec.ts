@@ -178,20 +178,6 @@ test('keyboard crosshair takes 20 px or Shift 80 px steps; final score can be sh
   expect(await page.evaluate(() => (window as unknown as { sharedScore: string }).sharedScore)).toMatch(/^I scored [\d,]+ \/ 5,000 in Pin the city: https:\/\/os.nipuntheekshana.com\/maps\/play$/);
 });
 
-test('live wallpaper is lazy, renders behind the desktop and returns to the static fallback on context loss', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('serendib:wallpaper', '"island-live"'));
-  await page.goto('/'); const wallpaper = page.locator('.island-live-wallpaper');
-  await expect(wallpaper.locator('canvas')).toBeVisible(); await expect(wallpaper).toHaveAttribute('data-live-ready', 'true');
-  await expectThirtyFps(wallpaper);
-  await openApp(page, 'Terminal'); const terminal = page.locator('[data-window-id="terminal"]');
-  await terminal.getByRole('button', { name: /^Zoom / }).click(); await expect(terminal).toHaveAttribute('data-mode', 'maximized');
-  await frames(page); const paused = await wallpaper.getAttribute('data-frames'); await frames(page);
-  expect(await wallpaper.getAttribute('data-frames')).toBe(paused);
-  await terminal.getByRole('button', { name: /^Zoom / }).click();
-  await expect.poll(() => wallpaper.getAttribute('data-frames')).not.toBe(paused);
-  await wallpaper.locator('canvas').evaluate(el => el.dispatchEvent(new Event('webglcontextlost', { cancelable: true })));
-  await expect(wallpaper.locator('canvas')).toHaveCount(0); await expect(wallpaper).not.toHaveAttribute('data-live-ready'); await expect(page.locator('.wp-island')).toBeVisible();
-});
 
 test('light and dark desktop and phone layouts produce artifacts with zero adoption CLS', async ({ page }) => {
   mkdirSync(resolve('.astro/p3-7-artifacts'), { recursive: true });

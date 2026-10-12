@@ -59,7 +59,7 @@ test('Lotus changes the accent token and radio groups support arrow keys', async
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await light.click(); await win.getByRole('radio', { name: 'Lotus', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-accent', 'lotus');
-  expect(await page.locator('html').evaluate(el => getComputedStyle(el).getPropertyValue('--os-accent').trim())).toBe('#b866d6');
+  expect(await page.locator('html').evaluate(el => getComputedStyle(el).getPropertyValue('--os-accent').trim())).toBe('#ff7eb6');
   expect(await stored(page, 'accent')).toBe('"lotus"');
 });
 
@@ -77,36 +77,18 @@ test('Reduce motion stops live dock magnification and transparency becomes solid
   expect(await stored(page, 'motion')).toBe('"reduce"'); expect(await stored(page, 'transparency')).toBe('"reduce"');
 });
 
-test('wallpapers apply live and previews keep their own layers; Data Saver disables live Island', async ({ page }) => {
-  await page.addInitScript(() => Object.defineProperty(navigator, 'connection', { configurable: true, value: { saveData: true,
-    addEventListener() {}, removeEventListener() {} } }));
+test('wallpapers apply live and all four previews retain their own ids', async ({ page }) => {
   await settings(page); await section(page, 'Wallpaper');
-  const group = app(page).getByRole('radiogroup', { name: 'Wallpaper', exact: true }); await expect(group.getByRole('radio')).toHaveCount(6);
-  await expect(group.getByRole('radio', { name: /Island \(live\)/ })).toBeDisabled();
-  await expect(app(page).getByText('Island (live): Unavailable while Data Saver is on.')).toBeVisible();
-  await group.getByRole('radio', { name: 'Monsoon', exact: true }).click();
-  await expect(page.locator('html')).toHaveAttribute('data-wallpaper', 'monsoon'); expect(await stored(page, 'wallpaper')).toBe('"monsoon"');
-  await expect(page.locator('body > .wallpaper .wp-rain')).toBeVisible();
-  await expect(app(page).locator('[data-preview="galle-face"] .wp-sea')).toBeVisible();
-  await expect(app(page).locator('[data-preview="paper"] .wp-rain')).toBeHidden();
-  await group.getByRole('radio', { name: 'Paper', exact: true }).click();
-  await expect(app(page).locator('[data-preview="monsoon"] .wp-rain')).toBeVisible();
-  await section(page, 'Accessibility'); await app(page).getByRole('radiogroup', { name: 'Motion' }).getByRole('radio', { name: 'Reduce' }).click();
-  await section(page, 'Wallpaper');
-  expect(await app(page).locator('[data-preview="monsoon"] .wp-rain').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+  const group = app(page).getByRole('radiogroup', { name: 'Wallpaper', exact: true });
+  await expect(group.getByRole('radio')).toHaveCount(4);
+  for (const [id, name] of [['kottu', 'Kottu'], ['galle-face', 'Galle Face'], ['pettah', 'Pettah'], ['paper', 'Paper']]) {
+    await group.getByRole('radio', { name, exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-wallpaper', id!);
+    expect(await stored(page, 'wallpaper')).toBe(JSON.stringify(id));
+    await expect(app(page).locator(`[data-preview="${id}"]`)).toBeVisible();
+  }
 });
 
-test('live Island is disabled when WebGL is unavailable', async ({ page }) => {
-  await page.addInitScript(() => { const getContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args) {
-      if (String(args[0]).startsWith('webgl')) return null;
-      return getContext.apply(this, args as Parameters<typeof getContext>);
-    } as typeof getContext;
-  });
-  await settings(page); await section(page, 'Wallpaper');
-  await expect(app(page).getByRole('radio', { name: /Island \(live\)/ })).toBeDisabled();
-  await expect(app(page).getByText('Island (live): WebGL 2 is unavailable on this device.')).toBeVisible();
-});
 
 test('Desktop resets remove remembered geometry and icon positions and widgets update live', async ({ page }) => {
   await page.addInitScript(() => {
@@ -119,7 +101,6 @@ test('Desktop resets remove remembered geometry and icon positions and widgets u
   await app(page).getByRole('button', { name: 'Reset icon positions', exact: true }).click(); expect(await stored(page, 'icons:v1')).toBeNull();
   await app(page).getByRole('switch', { name: 'Show widgets' }).click();
   expect(await stored(page, 'widgets')).toBe('false');
-  await expect(page.locator('[data-shell="desktop"] .desktop-widgets')).toBeHidden();
 });
 
 test('Sound binds its switch and volume and lazily plays an audio sample', async ({ page }) => {

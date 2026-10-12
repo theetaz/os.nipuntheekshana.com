@@ -51,7 +51,7 @@ test('an open menu switches on horizontal arrows and pointer movement', async ({
   await page.keyboard.press('ArrowLeft'); await expect(page.getByRole('menu', { name: 'Go', exact: true })).toBeVisible();
   await bar(page).getByRole('menuitem', { name: 'Help', exact: true }).hover();
   await expect(page.getByRole('menu', { name: 'Help', exact: true })).toBeVisible();
-  await page.locator('.ticket-wrap').click({ position: { x: 10, y: 10 } });
+  await page.mouse.click(900, 650);
   await expect(page.getByRole('menu', { name: 'Help', exact: true })).toBeHidden();
   await menu(page, 'Help'); await page.evaluate(() => window.dispatchEvent(new Event('blur')));
   await expect(page.getByRole('menu', { name: 'Help', exact: true })).toBeHidden();
@@ -122,7 +122,7 @@ test('Spotlight, appearance toasts, app About version and shortcuts route throug
   await page.getByRole('button', { name: 'Spotlight', exact: true }).click(); await expect(page.getByTestId('spotlight-open')).toHaveText('true');
   await page.getByRole('button', { name: 'Appearance', exact: true }).click(); await expect(page.getByTestId('toast-title')).toContainText('appearance');
   await menu(page, 'Projects'); await page.getByRole('menuitem', { name: 'About Projects', exact: true }).click();
-  await expect(page.getByTestId('alert-body')).toContainText('Version 1.0');
+  await expect(page.getByTestId('alert-body')).toContainText('Version 2.0');
   await menu(page, 'Help'); await page.getByRole('menuitem', { name: 'Keyboard shortcuts', exact: true }).click();
   await expect(page.getByTestId('focused-section')).toHaveText('shortcuts');
 });

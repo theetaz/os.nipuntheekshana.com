@@ -65,9 +65,10 @@ test('static desktop icon links remain clickable with JavaScript disabled', asyn
 test('drag snaps to a 96 × 104 grid, persists through reload, and cleans up', async ({ page }) => {
   await desktop(page); const readme = icon(page, 'Read me.txt'); await drag(page, readme, -120, 130);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:icons:v1')!))).toEqual({ readme: { x: 96, y: 104 } });
-  let box = (await readme.boundingBox())!; expect(box.x).toBe(1236); expect(box.y).toBe(152);
+  const expectedX = await page.evaluate(() => document.documentElement.getBoundingClientRect().width - 24 - 84 - 96);
+  let box = (await readme.boundingBox())!; expect(box.x).toBe(expectedX); expect(box.y).toBe(152);
   await page.reload(); await expect(page.locator('html')).toHaveClass(/os-ready/); box = (await readme.boundingBox())!;
-  expect(box.x).toBe(1236); expect(box.y).toBe(152);
+  expect(box.x).toBe(expectedX); expect(box.y).toBe(152);
   await desktop(page);
   await page.mouse.click(900, 650, { button: 'right' }); await page.getByRole('menuitem', { name: 'Clean up icons' }).click();
   await expect(readme).not.toHaveAttribute('data-positioned'); expect((await readme.boundingBox())!.y).toBe(48);
@@ -108,9 +109,9 @@ test('desktop right-click menu provides the specified actions and checkbox state
   for (const name of ['New Terminal window', 'Change wallpaper…', 'Clean up icons', 'About Serendib']) await expect(page.getByRole('menuitem', { name, exact: true })).toBeVisible();
   await expect(page.getByRole('menuitemcheckbox', { name: 'Show widgets' })).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByRole('menuitemcheckbox', { name: 'Show Mochi' })).toHaveAttribute('aria-checked', 'true');
-  await page.getByRole('menuitemcheckbox', { name: 'Show widgets' }).click(); await expect(page.locator('.desktop-widgets')).toBeHidden();
+  await page.getByRole('menuitemcheckbox', { name: 'Show widgets' }).click(); await expect(page.getByRole('menu', { name: 'desktop context menu' })).toBeHidden();
   await page.mouse.click(900, 650, { button: 'right' }); await expect(page.getByRole('menuitemcheckbox', { name: 'Show widgets' })).toHaveAttribute('aria-checked', 'false');
-  await page.getByRole('menuitemcheckbox', { name: 'Show widgets' }).click(); await expect(page.locator('.ticket-wrap')).toBeVisible();
+  await page.getByRole('menuitemcheckbox', { name: 'Show widgets' }).click(); await expect(page.getByRole('menu', { name: 'desktop context menu' })).toBeHidden();
   await page.mouse.click(900, 650, { button: 'right' }); await page.getByRole('menuitem', { name: 'Change wallpaper…' }).click();
   await expect(page.locator('[data-window-id="settings"]')).toBeVisible();
   // Settings is a Phase 3 stub. commands.test.ts asserts its wallpaper section
@@ -130,21 +131,9 @@ test('type-ahead selects icons and ayubowan dispatches once only on the desktop'
   await icon(page, 'Projects').dblclick(); await page.keyboard.type('ayubowan');
   expect(await page.evaluate(() => (window as unknown as { desktopEggs: number }).desktopEggs)).toBe(1);
 });
-test('widgets stay clickable above the surface and obey resize rules', async ({ page }) => {
-  await desktop(page); await page.locator('.ticket-wrap').click(); await expect(page.locator('[data-window-id="about"]')).toBeVisible();
-  await desktop(page); await page.locator('.now-sticky a').click(); await expect(page.locator('[data-window-id="now"]')).toBeVisible();
-  await desktop(page); if (await page.locator('.activity-strip').count()) { await page.locator('.activity-strip a').click(); await expect(page.locator('[data-window-id="activity"]')).toBeVisible(); }
-  await desktop(page); await page.setViewportSize({ width: 1440, height: 690 }); await expect(page.locator('.now-sticky')).toBeHidden();
-  await page.setViewportSize({ width: 1100, height: 900 }); await expect(page.locator('.now-sticky')).toBeVisible(); await expect(page.locator('.activity-strip')).toBeHidden();
-  await page.setViewportSize({ width: 1440, height: 900 }); await expect(page.locator('.now-sticky')).toBeVisible();
-  await icon(page, 'Projects').click(); await page.mouse.click(440, 420);
-  await expect(page.locator('[role="option"][aria-selected="true"]')).toHaveCount(0);
-});
-test('reduced motion suppresses icon and ticket lift and drag settling; selection passes axe', async ({ page }) => {
+test('reduced motion suppresses icon lift and drag settling; selection passes axe', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' }); await desktop(page); await icon(page, 'Read me.txt').hover();
   await expect(icon(page, 'Read me.txt').locator('svg')).toHaveCSS('transform', 'none');
-  const before = await page.locator('.ticket-wrap').boundingBox(); await page.locator('.ticket-wrap').hover();
-  expect(await page.locator('.ticket-wrap').boundingBox()).toEqual(before);
   await drag(page, icon(page, 'Read me.txt'), -96, 104); expect(await icon(page, 'Read me.txt').evaluate(node => node.getAnimations().length)).toBe(0);
   await icon(page, 'Read me.txt').click(); expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
@@ -174,11 +163,9 @@ test('hydration preserves static icon positions, mobile widget flow, CLS 0 and c
           await Promise.all(Array.from(fonts).filter(Boolean).map(font => document.fonts.load(font, text)));
           await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
         });
-        const widgets = await page.locator('.desktop-widgets').boundingBox();
         const icons = await page.locator('body > .desktop-icons svg').evaluateAll(nodes => nodes.map(node => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y }; }));
         release(); await expect(page.locator('html')).toHaveClass(/os-ready/);
         await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
-        expect(await page.locator('.desktop-widgets').boundingBox()).toEqual(widgets);
         if (mode === 'desktop') expect(await page.locator('[data-shell="desktop"] .desktop-icons svg').evaluateAll(nodes => nodes.map(node => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y }; }))).toEqual(icons);
         if (await page.evaluate(() => PerformanceObserver.supportedEntryTypes.includes('layout-shift'))) {
           expect(await page.evaluate(() => (window as unknown as { desktopCLS: number }).desktopCLS)).toBe(0);

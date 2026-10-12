@@ -63,11 +63,9 @@ test('Salli includes the case study, canonical, and a working close link @smoke'
 
 test('Simple view is a reading document without JavaScript @smoke', async ({ page }) => {
   await page.goto('/#simple');
-  await expect(page.locator('#home-document')).toBeVisible();
+  await expect(page.locator('#story')).toBeVisible();
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.locator('.wallpaper')).toBeHidden();
-  await expect(page.locator('.now-sticky')).toBeHidden();
-  await expect(page.locator('.activity-strip')).toBeHidden();
   await expect(page.getByRole('navigation', { name: 'Dock', exact: true })).toBeHidden();
   await page.goto('/projects/salli#simple');
   await expect(page.locator('.static-titlebar')).toBeHidden();
@@ -81,10 +79,11 @@ test('phone home and route content fit the viewport @smoke', async ({ page }) =>
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Pocket apps' })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  const canvasWidth = await page.evaluate(() => document.documentElement.getBoundingClientRect().width);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(canvasWidth);
   await page.goto('/projects/salli');
   const bounds = await page.locator('#static-window').boundingBox();
-  expect(bounds).toEqual({ x: 0, y: 0, width: 390, height: 844 });
+  expect(bounds).toEqual({ x: 0, y: 0, width: canvasWidth, height: 844 });
   await expect(page.locator('.sheet-header a')).toHaveText('‹ Projects');
 });
 
@@ -109,23 +108,15 @@ test('no-JavaScript dark theme follows system appearance', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/');
   expect(await page.locator('html').evaluate((element) => getComputedStyle(element).colorScheme)).toBe('dark');
-  expect(await page.locator('.ticket').evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgb(42, 37, 28)');
+  expect(await page.locator('html').evaluate((element) => getComputedStyle(element).getPropertyValue('--os-window').trim().toUpperCase())).toBe('#241C3D');
 });
 
-test('the whole ticket and sticky are links', async ({ page }) => {
-  await page.goto('/');
-  await page.locator('.ticket:visible, .phone-ticket:visible').click({ position: { x: 20, y: 100 } });
-  await expect(page).toHaveURL(/\/about$/);
-  await page.goto('/');
-  await page.locator('.now-sticky:visible, .phone-now:visible').click({ position: { x: 120, y: 80 } });
-  await expect(page).toHaveURL(/\/now$/);
-});
 
 test('compact home keeps the ticket clickable and Projects keeps its accessible heading', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await expect(page.getByRole('link', { name: 'About me', exact: true })).toHaveAttribute('href', '/about');
-  await page.locator('.ticket:visible, .phone-ticket:visible').click({ position: { x: 20, y: 100 } });
+  await page.locator('.phone-ticket:visible').click({ position: { x: 20, y: 100 } });
   await expect(page).toHaveURL(/\/about$/);
   await page.goto('/projects');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Projects');

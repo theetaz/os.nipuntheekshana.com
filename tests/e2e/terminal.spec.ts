@@ -250,7 +250,7 @@ test('no-JS route shows the banner, help, fallback links and readable phone cont
   const page = await context.newPage();
   try {
     await page.goto('/terminal'); const win = page.locator('#static-window');
-    await expect(win).toContainText('Serendib 1.0 "Galle Face"'); await expect(win).toContainText('Explore: ls, cd, pwd, cat, open');
+    await expect(win).toContainText('Serendib 2.0 "Pettah"'); await expect(win).toContainText('Explore: ls, cd, pwd, cat, open');
     await expect(win).toContainText("JavaScript is off, so this terminal can't run commands.");
     await expect(win.getByRole('link', { name: 'ls projects', exact: true })).toHaveAttribute('href', '/projects');
     expect(await win.locator('.terminal-body').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);

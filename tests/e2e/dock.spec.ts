@@ -112,12 +112,12 @@ test('the 24 px slack above the resting dock still magnifies icons', async ({ pa
   await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
 });
 
-test('magnification shifts only dock nodes and keeps widgets and windows fixed', async ({ page }) => {
+test('magnification shifts only dock nodes and keeps windows fixed', async ({ page }) => {
   await ready(page); await link(page, 'Terminal').click();
   await page.mouse.move(0, 0);
   await expect(page.locator('[data-window-id="terminal"]')).toBeVisible();
   await expect(page.locator('[data-window-id="terminal"]')).not.toHaveAttribute('data-transition');
-  const ticket = await page.locator('.ticket-wrap').boundingBox(); const terminal = await page.locator('[data-window-id="terminal"]').boundingBox();
+  const terminal = await page.locator('[data-window-id="terminal"]').boundingBox();
   await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(788);
   await page.evaluate(() => {
     const state = { outside: [] as string[] };
@@ -132,7 +132,6 @@ test('magnification shifts only dock nodes and keeps widgets and windows fixed',
   });
   await link(page, 'Projects').hover(); await expect.poll(() => width(page, 'Projects')).toBeGreaterThanOrEqual(71);
   await link(page, 'Kooda').hover(); await page.mouse.move(0, 0); await expect.poll(async () => (await dock(page).boundingBox())!.width).toBe(788);
-  expect(await page.locator('.ticket-wrap').boundingBox()).toEqual(ticket);
   expect(await page.locator('[data-window-id="terminal"]').boundingBox()).toEqual(terminal);
   expect(await page.evaluate(() => (window as unknown as { dockShifts: { outside: string[] } }).dockShifts.outside)).toEqual([]);
 });

@@ -59,7 +59,7 @@ test('left snap waits at least 120ms, previews behind the frame and uses exact g
   expect(await preview.evaluate(el => Number(getComputedStyle(el).zIndex))).toBe((await win.evaluate(el => Number(getComputedStyle(el).zIndex))) - 1);
   await expect(preview).toHaveAttribute('data-valid', 'true');
   await page.mouse.up(); await settled(win); await expect(win).toHaveAttribute('data-mode', 'snapped');
-  await rectIs(win, { x: 8, y: 40, w: 708, h: 776 });
+  await rectIs(win, { x: 8, y: 40, w: await page.evaluate(() => Math.floor((document.documentElement.getBoundingClientRect().width - 24) / 2)), h: 776 });
   await expect(page.locator('[data-snap-preview]')).toHaveCount(0);
 });
 
@@ -78,8 +78,8 @@ test('a fast edge throw does not snap and leaving a zone clears its preview', as
 test('top snap maximises and dragging out restores the normal size under the pointer', async ({ page }) => {
   const win = await projects(page); const normal = await box(win);
   await startDrag(page, win); await page.mouse.move(600, 33); await expect(page.locator('[data-snap-preview="max"]')).toBeVisible();
-  await page.mouse.up(); await settled(win); await rectIs(win, { x: 8, y: 40, w: 1424, h: 776 });
-  const start = await startDrag(page, win); const ratio = (start.x - 8) / 1424;
+  await page.mouse.up(); await settled(win); await rectIs(win, { x: 8, y: 40, w: await page.evaluate(() => document.documentElement.getBoundingClientRect().width - 16), h: 776 });
+  const start = await startDrag(page, win); const ratio = (start.x - 8) / (await box(win)).w;
   await page.mouse.move(start.x + 120, start.y + 110, { steps: 8 }); await page.mouse.up(); await settled(win);
   await expect(win).toHaveAttribute('data-mode', 'normal');
   await rectIs(win, { x: Math.round(start.x + 120 - ratio * normal.w), y: start.y + 110 - 20, w: normal.w, h: normal.h });
@@ -94,7 +94,7 @@ test('an invalid quarter preview drops the window without violating its minimum'
 
 test('double click zooms and restores; controls are not drag handles', async ({ page }) => {
   const win = await projects(page); const normal = await box(win); const bar = win.locator('[data-window-titlebar]');
-  await bar.dblclick({ position: { x: 250, y: 26 } }); await settled(win); await rectIs(win, { x: 8, y: 40, w: 1424, h: 776 });
+  await bar.dblclick({ position: { x: 250, y: 26 } }); await settled(win); await rectIs(win, { x: 8, y: 40, w: await page.evaluate(() => document.documentElement.getBoundingClientRect().width - 16), h: 776 });
   await bar.dblclick({ position: { x: 250, y: 26 } }); await settled(win); await rectIs(win, normal);
   await win.getByRole('button', { name: 'Zoom Projects' }).click(); await settled(win); await expect(win).toHaveAttribute('data-mode', 'maximized');
   await expect(win).not.toHaveAttribute('data-dragging');
@@ -206,7 +206,7 @@ test('title bar variants and focused/unfocused traffic lights match the chrome m
     expect(await win.locator('[data-window-titlebar]').evaluate(el => el.getBoundingClientRect().height)).toBe(52);
     expect(await terminal.locator('[data-window-titlebar]').evaluate(el => el.getBoundingClientRect().height)).toBe(30);
     await expect(terminal).toHaveAttribute('data-theme', 'dark');
-    expect(await terminal.locator('h1').evaluate(el => getComputedStyle(el).color)).toBe('rgb(233, 227, 216)');
+    expect(await terminal.locator('h1').evaluate(el => getComputedStyle(el).color)).toBe('rgb(244, 238, 255)');
     expect(await win.locator('.window-light-disc').first().evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
     expect(await terminal.locator('.window-light-disc').first().evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
     await page.screenshot({ path: resolve(`.astro/p2-4-artifacts/windows-${theme}-desktop.png`) });
@@ -289,7 +289,7 @@ test('a title click during entrance finishes at the reducer rect', async ({ page
   await openApp(page, 'Projects'); const win = page.locator('[data-window-id="projects"]');
   const bar = await win.locator('[data-window-titlebar]').boundingBox();
   await page.mouse.move(bar!.x + bar!.width / 2, bar!.y + bar!.height / 2); await page.mouse.down(); await page.mouse.up();
-  await settled(win); await rectIs(win, { x: 240, y: 68, w: 960, h: 640 });
+  await settled(win); await rectIs(win, { x: await page.evaluate(() => Math.round((document.documentElement.getBoundingClientRect().width - 960) / 2)), y: 68, w: 960, h: 640 });
 });
 
 test('keyboard movement cancels on focus change and allows the next close animation to finish', async ({ page }) => {

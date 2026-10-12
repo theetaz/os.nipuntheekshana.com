@@ -138,7 +138,7 @@ test('reduced motion suppresses spatial overlays and skeleton shimmer; axe passe
 test('focus rings and overlay motion follow system preference and live Settings overrides', async ({ page }) => {
   await openFixture(page);
   const trigger = page.getByRole('button', { name: 'Menu trigger' });
-  await trigger.focus(); expect(await trigger.evaluate(element => getComputedStyle(element).outlineWidth)).toBe('2px');
+  await trigger.focus(); expect(await trigger.evaluate(element => getComputedStyle(element).outlineWidth)).toBe('3px');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.evaluate(() => delete document.documentElement.dataset.motion);
   await trigger.click();

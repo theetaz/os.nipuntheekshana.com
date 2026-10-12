@@ -5,24 +5,15 @@ import { test, expect, openMenu } from './fixtures';
 
 const artifacts = resolve('.astro/p1-7-artifacts');
 
-test('desktop widgets keep the reference geometry in light and dark @visual', async ({ page }) => {
+test('desktop hero exposes the single name heading in light and dark @visual', async ({ page }) => {
   mkdirSync(artifacts, { recursive: true });
   await page.setViewportSize({ width: 1440, height: 900 });
   for (const theme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme: theme });
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
-    // Axis-aligned bounds include the ticket's -1.2° and sticky's 2° rotation.
-    for (const [built, target] of [
-      ['.ticket-wrap', { x: 45.619, y: 67.418, width: 444.762, height: 241.164 }],
-      ['.now-sticky', { x: 59.957, y: 331.744, width: 256.085, height: 244.511 }],
-      ['.activity-strip', { x: 48, y: 604, width: 360, height: 112 }],
-    ] as const) {
-      const rect = await page.locator(built).boundingBox();
-      expect(rect).not.toBeNull();
-      for (const field of ['x', 'y', 'width', 'height'] as const) expect(Math.abs(rect![field] - target![field]), `${theme} ${built} ${field}`).toBeLessThanOrEqual(2);
-    }
-    expect(await page.locator('.ticket h1').evaluate((element) => element.clientHeight)).toBe(40);
+    await expect(page.getByRole('heading', { level: 1, name: 'Nipun Theekshana' })).toBeVisible();
+    await expect(page.locator('h1:visible')).toHaveCount(1);
     await page.screenshot({ path: resolve(artifacts, `home-${theme}-desktop.png`) });
   }
   await page.emulateMedia({ colorScheme: 'light' });
@@ -66,10 +57,10 @@ test('stored Simple view can return to the desktop', async ({ page }) => {
   if(await page.locator('html').getAttribute('data-mode')==='mobile'){await openMenu(page,'Help');await page.getByRole('menuitem',{name:'Simple view',exact:true}).last().click();}else await page.locator('[data-shell="desktop"] .simple-entry').click();
   await expect.poll(()=>page.evaluate(() => localStorage.getItem('serendib:view'))).toBe('"simple"');
   await page.reload();
-  await expect(page.locator('#home-document')).toBeVisible();
+  await expect(page.locator('#story')).toBeVisible();
   await page.getByRole('link', { name: 'Back to the desktop', exact: true }).click();
-  await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] .phone-ticket'):page.locator('.ticket')).toBeVisible();
-  await expect(page.locator('#home-document')).toBeHidden();
+  await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] .phone-ticket'):page.locator('.k-hero')).toBeVisible();
+  await expect(page.locator('#story')).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('serendib:view'))).toBeNull();
 });
 

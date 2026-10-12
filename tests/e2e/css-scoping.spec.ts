@@ -63,7 +63,7 @@ for (const app of Object.values(APPS).filter(app => app.phase === 'v1')) {
       if(await page.locator('html').getAttribute('data-mode')==='mobile') {if(app.id==='readme'){await openMenu(page,'Help');await page.getByRole('menuitem',{name:'Read me',exact:true}).click();}else await openApp(page,app.name);}
       else if (app.dockOrder !== null) await openApp(page, app.name);
       else if (app.desktopIcon) await page.getByRole('option', { name: app.desktopIcon.label, exact: true }).dblclick();
-      else await page.locator('.now-sticky a').click({ force: true });
+      else { await openMenu(page, 'Go'); await page.getByRole('menuitem', { name: app.name, exact: true }).click(); }
       if (requested) {
         await requested;
         await expect(win.locator('.window-content [data-scroll-root]')).toHaveCount(0);
