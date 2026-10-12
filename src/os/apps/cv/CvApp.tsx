@@ -15,12 +15,13 @@ export default function CvApp({ windowId, initialData, focused, ready, setTitle,
   const viewer = useRef<CvViewerHandle>(null);
   const readyCalled = useRef(false);
   const title = useRef('');
-  const [state, setState] = useState<CvViewerState>({ zoom: 1, thumbnails: true });
+  const [state, setState] = useState<CvViewerState>({ zoom: 1, thumbnails: true, narrow: false });
   useAppCommands(windowId, command => viewer.current?.command(command) ?? false);
   useEffect(() => {
     if (!focused) return;
     const keydown = (event: KeyboardEvent) => {
-      if (document.querySelector('[aria-modal="true"]')) return;
+      // The phone sheet hosting the viewer is itself modal; only other dialogs block shortcuts.
+      if (document.querySelector('[aria-modal="true"]:not([data-sheet])')) return;
       const item = [...(menus.view ?? []), ...(menus.file ?? [])].find(item => item.kind === 'item'
         && item.shortcut && matchShortcut(event, item.shortcut, { platform: isMac() ? 'mac' : 'other' }));
       if (item?.kind === 'item' && viewer.current?.command(item.command)) event.preventDefault();
@@ -33,7 +34,8 @@ export default function CvApp({ windowId, initialData, focused, ready, setTitle,
     'cv.zoomOut': { disabled: !profile || state.zoom <= .5 },
     'cv.actualSize': { disabled: !profile },
     'cv.fitWidth': { disabled: !profile },
-    'cv.thumbnails': { disabled: !profile, checked: state.thumbnails },
+    // Narrow viewers fit pages to the width and have no room for thumbnails.
+    'cv.thumbnails': { disabled: !profile || state.narrow, checked: state.thumbnails && !state.narrow },
     'cv.print': { disabled: !profile },
     'cv.download': { disabled: !profile },
   }), [profile, state]));

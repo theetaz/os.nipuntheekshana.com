@@ -67,11 +67,18 @@ html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="cv"
   .cv-actions { gap: 2px; }
   .cv-download { gap: 4px; padding-inline: 10px; }
 }
+/* Phone sheets and narrow windows: pages fit the width and the toolbar keeps
+   Print and Download. A zoom chosen from the View menu or keyboard pins the
+   scale; the toolbar then offers its level and Fit to return. */
 @container window (max-width: 600px) {
-  .cv-viewer { --cv-scale: tan(atan2(calc(100cqw - 32px), 794px)) !important; }
-  .cv-navigation, .cv-zoom, .cv-thumbnails { display: none; }
+  .cv-viewer:not([data-zoomed]) { --cv-scale: tan(atan2(calc(100cqw - 32px), 794px)) !important; }
+  .cv-navigation, .cv-thumbnails, .cv-viewer:not([data-zoomed]) .cv-zoom, .cv-zoom > button:not([aria-pressed]) { display: none; }
   .cv-viewer .cv-toolbar { min-height: 52px; flex-basis: 52px; padding-inline: 16px; }
-  .cv-actions button, .cv-download { min-height: 44px !important; }
+  .cv-zoom button, .cv-actions button, .cv-download { min-width: 44px; min-height: 44px !important; }
+  .cv-viewer[data-zoomed] .cv-page-indicator { display: none; }
+  .cv-viewer[data-zoomed] .cv-zoom { margin-left: 0; }
+  .cv-viewer[data-zoomed] .cv-actions button { padding-inline: 0; }
+  .cv-viewer[data-zoomed] .cv-print-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .cv-scroll { padding: 16px; }
 }
 @media (forced-colors: active) {

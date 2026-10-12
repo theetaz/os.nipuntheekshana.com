@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
+import { expectTapTargets, holdTile, isPhone, openSheetFromHome, phoneScreenshot, phoneSizes } from './phone-sheet-sizes';
 
 const artifacts = resolve('.astro/p2-8-artifacts');
 test('deep-linked Quick Look works with Projects, pages images and query, wraps, and closes', async ({ page }) => {
@@ -76,12 +77,44 @@ test('selecting a Projects tile and pressing Space opens its first capture', asy
   await page.goto('/projects');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
   const win = page.locator('[data-window-id="projects"]');
-  await win.getByRole('option', { name: 'Salli', exact: true }).click();
-  await page.keyboard.press('Space');
+  const salli = win.getByRole('option', { name: 'Salli', exact: true });
+  const phone = await isPhone(page);
+  // Phone tiles open on tap, so selection-and-Space becomes a hold → Quick Look.
+  if (phone) { await salli.scrollIntoViewIfNeeded(); const menu = await holdTile(page, salli); await menu.getByRole('menuitem', { name: 'Quick Look', exact: true }).tap(); }
+  else { await salli.click(); await page.keyboard.press('Space'); }
   const dialog = page.getByRole('dialog', { name: 'Quick Look — Salli' });
   await expect(dialog.getByRole('status')).toHaveText('1 of 3');
   await expect(page).toHaveURL(/\/projects\/salli\?shot=0$/);
-  await page.keyboard.press('Escape');
-  await win.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(win.getByRole('option', { name: 'Salli', exact: true })).toHaveAttribute('aria-selected', 'true');
+  if (phone) { await dialog.getByRole('button', { name: 'Close Quick Look' }).tap(); await win.getByRole('link', { name: 'Back to Projects', exact: true }).tap(); }
+  else { await page.keyboard.press('Escape'); await win.getByRole('button', { name: 'Back', exact: true }).click(); }
+  await expect(salli).toHaveAttribute('aria-selected', 'true');
+});
+
+test.describe('Quick Look in a phone sheet @mobile', () => {
+  test.beforeEach(({}, info) => { test.skip(!info.project.name.startsWith('mobile'), 'Phone sheets are covered by the mobile projects.'); });
+  for (const size of phoneSizes) test(`opens over the Projects sheet and fits ${size.width}×${size.height} ${size.theme}`, async ({ page }, info) => {
+    const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+    // Home → Projects → Salli → a screen thumbnail.
+    const sheet = await openSheetFromHome(page, 'Projects', 'projects', 'Projects', size);
+    const salli = sheet.getByRole('option', { name: 'Salli', exact: true }); await salli.scrollIntoViewIfNeeded(); await salli.tap();
+    await sheet.getByRole('button', { name: 'Open screen 2 of 3: Activity', exact: true }).tap();
+    const dialog = page.getByRole('dialog', { name: 'Quick Look — Salli' });
+    await expect(dialog.getByRole('status')).toHaveText('2 of 3');
+    await expect.poll(() => dialog.getByRole('img').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    const box = (await dialog.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0); expect(box.x + box.width).toBeLessThanOrEqual(size.width);
+    expect(box.y).toBeGreaterThanOrEqual(0); expect(box.y + box.height).toBeLessThanOrEqual(size.height);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(size.width);
+    await expectTapTargets(dialog);
+    // Audit the settled overlay rather than its opening fade.
+    await expect.poll(() => dialog.evaluate(el => [el, el.parentElement!].map(node => getComputedStyle(node).opacity).join())).toBe('1,1');
+    const axe = await new AxeBuilder({ page }).include('.os-quicklook').analyze();
+    expect(axe.violations.filter(value => ['serious', 'critical'].includes(value.impact ?? ''))).toEqual([]);
+    await phoneScreenshot(page, info, 'quicklook', size);
+    await dialog.getByRole('button', { name: 'Next image' }).tap(); await expect(dialog.getByRole('status')).toHaveText('3 of 3');
+    await dialog.getByRole('button', { name: 'Close Quick Look' }).tap(); await expect(dialog).toBeHidden();
+    await expect(page).toHaveURL(/\/projects\/salli$/);
+    await expect(sheet).toBeVisible();
+    expect(errors).toEqual([]);
+  });
 });

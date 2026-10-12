@@ -5,9 +5,6 @@ export function pendingPhoneCapability(info: TestInfo): string | undefined {
   if (!info.project.name.startsWith('mobile')) return;
   const file = info.file.split('/').at(-1);
   const cases: Record<string, [RegExp, string][]> = {
-    'projects.spec.ts': [[/^(Salli detail facts|keyboard grid arrows)/, 'P4-3: adapt desktop click-selection/double-click and keyboard grid flows to phone single-tap tiles.']],
-    'cv.spec.ts': [[/^(CV has two fixed pages|zoom uses|Fit follows|thumbnails and scrolling|page tracking reflects|print media hides|View menu and keyboard)/, 'P4-3: adapt CV zoom/thumbnails commands to the phone viewer.']],
-    'quicklook.spec.ts': [[/^selecting a Projects tile and pressing Space/, 'P4-3: adapt desktop selection to phone single-tap navigation.']],
   };
   return cases[file ?? '']?.find(([pattern]) => pattern.test(info.title))?.[1];
 }

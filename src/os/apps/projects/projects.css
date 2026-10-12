@@ -164,3 +164,22 @@ html[data-view="simple"] .project-detail-scroll, html:has(#simple:target) .proje
 
 .managed-window[data-shell-mode="mobile"] .projects-toolbar { left: 68px; }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) { .projects-static-window .projects-toolbar { left: 68px; } }
+
+/* Phone sheets and narrow windows (D§13.3): the sidebar is a horizontal row of
+   filter chips and Icons uses three fluid columns. Chips draw a 36 px pill
+   inside a 44 px tap target. */
+@container window (max-width: 559px) {
+  .projects-sidebar { gap: 8px; padding: 4px 12px; scroll-padding-inline: 12px; scrollbar-width: none; }
+  .projects-sidebar::-webkit-scrollbar { display: none; }
+  .projects-sidebar section { gap: 8px; }
+  .projects-folder { min-height: 44px; padding: 0 14px; border-block: 4px solid transparent; border-radius: 999px; background-clip: padding-box; background-color: color-mix(in srgb, var(--os-ink) 6%, transparent); font-weight: 500; }
+  .projects-folder:hover { background-color: color-mix(in srgb, var(--os-ink) 10%, transparent); }
+  .projects-folder.is-current, .projects-index[data-focused="false"] .projects-folder.is-current { color: var(--os-ink); background-color: var(--os-accent-soft); font-weight: 600; }
+  .projects-folder .project-dot { display: inline-block; margin-inline: 0; }
+  .projects-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); justify-content: stretch; column-gap: 8px; }
+  .project-tile { width: auto; min-width: 0; height: auto; min-height: 116px; }
+  .project-tile-label { max-width: 100%; }
+  .project-hero-links > a, .project-footer a { display: inline-flex; align-items: center; min-height: 44px; }
+}
+/* Tiles open on tap and hold for their menu; suppress the native link callout. */
+.managed-window[data-sheet] .project-tile { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
