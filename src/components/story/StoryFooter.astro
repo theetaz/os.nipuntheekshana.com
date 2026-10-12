@@ -1,8 +1,34 @@
+---
+import SectionHead from './SectionHead.astro';
+import { stickerArt } from '../../lib/kottu-art';
+import { site, links } from '../../data/profile';
+import { BRAND, VERSION, CODENAME } from '../../os/config';
+const sticker = await stickerArt('sticker-kottu', 88);
+---
 <section id="k-footer" class="k-sec" data-sec="footer" aria-labelledby="k-footer-title">
+  <div class="k-sec-shape" aria-hidden="true"></div>
   <div class="k-sec-inner">
-    <p class="k-prompt">nipun@kottu:~$ exit</p>
-    <h2 id="k-footer-title">Kottu OS</h2>
-    <div class="k-sec-content" data-k-visits></div>
-    <div class="k-sec-shape" aria-hidden="true"></div>
+    <SectionHead id="k-footer" title={BRAND.name} command="exit"><p class="k-logout">logout</p></SectionHead>
+    <div class="k-sec-content k-footer-columns">
+      <nav class="k-contacts" aria-label="Say hi">
+        <h3>Say hi</h3>
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+        <a href={links.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        <a href={links.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+        <a href={links.prabhava} target="_blank" rel="noopener noreferrer">Prabhava Labs ↗</a>
+      </nav>
+      <div class="k-footer-counter"><p class="k-visits" data-k-visits hidden></p></div>
+      <div class="k-footer-brand">
+        <picture>
+          <source type="image/avif" srcset={sticker.avif} sizes="72px" />
+          <source type="image/webp" srcset={sticker.webp} sizes="72px" />
+          <img src={sticker.src} width={sticker.width} height={sticker.height} alt="" loading="lazy" decoding="async" />
+        </picture>
+        <p>{BRAND.name} {VERSION} '{CODENAME}'</p>
+        <p>Freshly chopped in Colombo with Astro, React and a lot of tea.</p>
+        <a href="/#simple">Simple view</a>
+        <a href="#ws-desktop">Back to the top ↑</a>
+      </div>
+    </div>
   </div>
 </section>

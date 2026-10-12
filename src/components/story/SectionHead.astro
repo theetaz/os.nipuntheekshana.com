@@ -1,0 +1,7 @@
+---
+interface Props { id: string; title: string; command: string; path?: string; subtitle?: string; hiddenTitle?: boolean }
+const { id, title, command, path = '~', subtitle, hiddenTitle = false } = Astro.props;
+---
+<p class="k-prompt"><span class="k-prompt-user">nipun@kottu</span>:<span class="k-prompt-path">{path}</span>$ {command}</p>
+<slot />
+<h2 id={`${id}-title`} class:list={{ 'sr-only': hiddenTitle }}>{title}{subtitle && <small>{subtitle}</small>}</h2>

@@ -8,7 +8,20 @@ import StoryOpenSource from './StoryOpenSource.astro';
 import StoryBoard from './StoryBoard.astro';
 import StoryFooter from './StoryFooter.astro';
 import '../../styles/story.css';
+import { fontData } from 'astro:assets';
 interface Props { nosnippet?: boolean }
 const { nosnippet = false } = Astro.props;
+// Reuse the emitted font with the condensed fallback instead of Astro's normal-width stack.
+const monoUrl = fontData['--font-martian'][0]!.src[0]!.url;
 ---
-<div id="story" data-nosnippet={nosnippet ? '' : undefined}><StoryIntro /><StorySkills /><StoryBio /><StoryWork /><StoryProjects /><StoryOpenSource /><StoryBoard /><StoryFooter /></div>
+<style is:global set:html={`@font-face{font-family:'Kottu Story Mono';src:url('${monoUrl}');font-display:swap;font-weight:100 800;font-stretch:75% 112.5%}`} />
+<div id="story" data-nosnippet={nosnippet ? '' : undefined}>
+  <StoryIntro />
+  <StorySkills />
+  <StoryBio />
+  <StoryWork />
+  <StoryProjects />
+  <StoryOpenSource />
+  <StoryBoard />
+  <StoryFooter />
+</div>

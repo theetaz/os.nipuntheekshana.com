@@ -1,8 +1,34 @@
+---
+import SectionHead from './SectionHead.astro';
+import { getClientProfile } from '../../lib/client-data';
+import { bioNotes, bioParagraphs, nowNote } from '../../lib/story-data';
+const { avatar } = await getClientProfile();
+---
 <section id="k-bio" class="k-sec" data-sec="bio" aria-labelledby="k-bio-title">
+  <div class="k-sec-shape" aria-hidden="true"></div>
   <div class="k-sec-inner">
-    <p class="k-prompt">nipun@kottu:~$ cat about-me.md</p>
-    <h2 id="k-bio-title">About me</h2>
-    <div class="k-sec-content"></div>
-    <div class="k-sec-shape" aria-hidden="true"></div>
+    <SectionHead id="k-bio" title="About me" command="cat about-me.md" subtitle="the short version" />
+    <div class="k-sec-content k-bio-layout">
+      <figure class="k-polaroid">
+        <picture>
+          <source type="image/avif" srcset={avatar.avif} sizes="(max-width: 1023px) 100px, 132px" />
+          <source type="image/webp" srcset={avatar.webp} sizes="(max-width: 1023px) 100px, 132px" />
+          <img src={avatar.src} width={avatar.width} height={avatar.height} alt="Nipun" loading="lazy" decoding="async" />
+        </picture>
+        <figcaption>that's me, machan!</figcaption>
+      </figure>
+      <div class="k-story-window k-bio-window">
+        <div class="k-story-titlebar"><span>about-me.md — nvim</span><span class="k-story-buttons" aria-hidden="true"><i></i><i></i><i></i></span></div>
+        <div class="k-bio-body">
+          {bioParagraphs.map(paragraph => <p>{paragraph}</p>)}
+          <ul class="k-bio-notes">{bioNotes.map(({ text, tilt }) => <li class="k-sticky" style={`--tilt:${tilt}deg`}>{text}</li>)}</ul>
+        </div>
+      </div>
+      <aside class="k-now-note k-sticky" aria-label="Now">
+        <h3>Now</h3>
+        <ul>{nowNote.items.map(item => <li>{item}</li>)}</ul>
+        <footer><time datetime={nowNote.updated}>{nowNote.label}</time><a href="/now">Open Now ›</a></footer>
+      </aside>
+    </div>
   </div>
 </section>

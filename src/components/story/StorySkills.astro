@@ -1,8 +1,18 @@
+---
+import { Blocks, Database, Map, BrainCircuit, Smartphone, Cpu, Users } from 'lucide-react';
+import SectionHead from './SectionHead.astro';
+import { skillBlocks } from '../../lib/story-data';
+const icons = { blocks: Blocks, database: Database, map: Map, 'brain-circuit': BrainCircuit, smartphone: Smartphone, cpu: Cpu, users: Users };
+---
 <section id="k-skills" class="k-sec" data-sec="skills" aria-labelledby="k-skills-title">
+  <div class="k-sec-shape" aria-hidden="true"></div>
   <div class="k-sec-inner">
-    <p class="k-prompt">nipun@kottu:~$ ls ~/skills</p>
-    <h2 id="k-skills-title">Toolbox</h2>
-    <div class="k-sec-content"></div>
-    <div class="k-sec-shape" aria-hidden="true"></div>
+    <SectionHead id="k-skills" title="Toolbox" command="ls ~/skills" subtitle="what's in the kade" />
+    <div class="k-sec-content">
+      <ul class="k-skills">{skillBlocks.map(({ label, colour, icon, tilt }) => {
+        const Icon = icons[icon];
+        return <li style={`--block-colour:${colour};--tilt:${tilt}deg`}><span class="k-skill-icon"><Icon size={30} strokeWidth={2.2} aria-hidden="true" /></span><span>{label}</span></li>;
+      })}</ul>
+    </div>
   </div>
 </section>
