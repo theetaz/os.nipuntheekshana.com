@@ -1,8 +1,38 @@
+---
+import SectionHead from './SectionHead.astro';
+import { badgeArt } from '../../lib/kottu-art';
+import { getClientProfile } from '../../lib/client-data';
+const [{ avatar }, lotus, pin, chip, gamepad, tea] = await Promise.all([
+  getClientProfile(), badgeArt('badge-lotus-tower'), badgeArt('badge-pin'),
+  badgeArt('badge-chip'), badgeArt('badge-gamepad'), badgeArt('badge-tea'),
+]);
+const stickers = [
+  { image: avatar, alt: 'Nipun', tilt: -6, avatar: true },
+  { image: lotus, alt: 'tiny Lotus Tower sticker', tilt: 6 },
+  { image: pin, alt: 'map pin sticker', tilt: -8 },
+  { image: chip, alt: 'smiling microchip sticker', tilt: 4 },
+  { image: gamepad, alt: 'game controller sticker', tilt: -5 },
+  { image: tea, alt: 'glass of tea sticker', tilt: 8 },
+];
+---
 <section id="ws-hello" class="k-sec" data-sec="intro" aria-labelledby="ws-hello-title">
+  <div class="k-sec-shape" aria-hidden="true"></div>
   <div class="k-sec-inner">
-    <p class="k-prompt">nipun@kottu:~$ whoami</p>
-    <h2 id="ws-hello-title">Hello</h2>
-    <div class="k-sec-content"></div>
-    <div class="k-sec-shape" aria-hidden="true"></div>
+    <SectionHead id="ws-hello" title="Hello" command="whoami" hiddenTitle />
+    <div class="k-sec-content">
+      <p class="k-intro">{stickers.map(({ image, alt, tilt, avatar }, index) => <>
+        {index === 0 && <>I'm Nipun </>}
+        {index === 1 && <>, an engineer from Colombo </>}
+        {index === 2 && <> who builds <strong class="k-marker-data">open data</strong> </>}
+        {index === 3 && <> for Sri Lanka, <strong class="k-marker-hardware">tiny-screen hardware</strong> </>}
+        {index === 4 && <> and the odd <strong class="k-marker-game">browser game</strong> </>}
+        {index === 5 && <>. Mostly powered by tea </>}
+        <picture class:list={['k-inline-sticker', { 'k-avatar': avatar }]} style={`--tilt:${tilt}deg`}>
+          <source type="image/avif" srcset={image.avif} sizes="(max-width: 1023px) 34px, 56px" />
+          <source type="image/webp" srcset={image.webp} sizes="(max-width: 1023px) 34px, 56px" />
+          <img src={image.src} width={image.width} height={image.height} alt={alt} loading="lazy" decoding="async" />
+        </picture>
+      </>)}.</p>
+    </div>
   </div>
 </section>

@@ -1,8 +1,23 @@
+---
+import SectionHead from './SectionHead.astro';
+import { careerRows } from '../../lib/story-data';
+---
 <section id="ws-work" class="k-sec" data-sec="work" aria-labelledby="ws-work-title">
+  <div class="k-sec-shape" aria-hidden="true"></div>
   <div class="k-sec-inner">
-    <p class="k-prompt">nipun@kottu:~$ git log --graph --oneline</p>
-    <h2 id="ws-work-title">Work</h2>
-    <div class="k-sec-content"></div>
-    <div class="k-sec-shape" aria-hidden="true"></div>
+    <SectionHead id="ws-work" title="Work" path="~/career" command="git log --graph --oneline" subtitle="every commit since 2014" />
+    <div class="k-sec-content">
+      <div class="k-story-window k-career-window">
+        <div class="k-story-titlebar"><span>kitty — ~/career</span><span class="k-story-buttons" aria-hidden="true"><i></i><i></i><i></i></span></div>
+        <ol class="k-git-log" aria-label="Career, newest first">{careerRows.map(row => <li data-branch={row.branch}>
+          {row.graph.includes('\n') && <div class="k-git-graph" aria-hidden="true">{row.graph.split('\n')[0]}</div>}
+          <details>
+            <summary><span class="k-git-graph" aria-hidden="true">{row.graph.split('\n').at(-1)}</span><span class="k-git-hash">{row.hash}</span><span class="k-git-message">{row.ref && <span class="k-git-ref">({row.ref}) </span>}{row.message}</span><span class="k-git-dates">{row.dates}</span></summary>
+            <ul class="k-git-highlights">{row.highlights.map(highlight => <li>{highlight}</li>)}</ul>
+          </details>
+        </li>)}</ol>
+      </div>
+      <a class="k-open-cv" href="/cv">→ open cv</a>
+    </div>
   </div>
 </section>

@@ -1,8 +1,31 @@
+---
+import { AppIcon } from '../../os/ui/AppIcon';
+import SectionHead from './SectionHead.astro';
+import { getClientActivity } from '../../lib/client-data';
+import { links } from '../../data/profile';
+import { activityUnavailable, storyActivity, storyArchive } from '../../lib/story-data';
+const [activity, archive] = await Promise.all([getClientActivity(), storyArchive()]);
+const calendar = storyActivity(activity);
+---
 <section id="k-oss" class="k-sec" data-sec="oss" aria-labelledby="k-oss-title">
+  <div class="k-sec-shape" aria-hidden="true"></div>
   <div class="k-sec-inner">
-    <p class="k-prompt">nipun@kottu:~$ gh repo list prabhavalabs --limit 99</p>
-    <h2 id="k-oss-title">Open source</h2>
-    <div class="k-sec-content"></div>
-    <div class="k-sec-shape" aria-hidden="true"></div>
+    <SectionHead id="k-oss" title="Open source" command="gh repo list prabhavalabs --limit 99" subtitle="every line on GitHub, every decision written down" />
+    <div class="k-sec-content k-oss-content">
+      {calendar ? <>
+        <div class="k-stats">{calendar.tiles.map(tile => <a class="k-stat k-paper" href="/activity"><strong>{tile.value.toLocaleString('en-GB')}</strong><span>{tile.label}</span></a>)}</div>
+        <div class="k-heatmap k-paper">
+          <div class="k-heatmap-scroll" tabindex="0" role="region" aria-label="GitHub contribution calendar, scroll horizontally">
+            <svg width="792" height="102" viewBox="0 0 792 102" role="img" aria-label={calendar.summary}>
+              {calendar.cells.map(cell => <rect x={cell.x} y={cell.y} width="12" height="12" rx="3" fill={cell.fill} />)}
+            </svg>
+          </div>
+          <p>{calendar.summary}</p>
+        </div>
+      </> : <div class="k-paper k-activity-empty"><p>{activityUnavailable}</p></div>}
+      <div class="k-orgs">{[links.github, links.prabhavaGithub].map(href => <a class="k-paper" href={href} target="_blank" rel="noopener noreferrer"><span class="k-github-icon"><AppIcon icon="link-github" size={28} /></span><span>{href.replace('https://', '')} ↗</span></a>)}</div>
+      <h3 class="k-archive-title">Before open source</h3>
+      <ul class="k-archive">{archive.map(item => <li class="k-receipt"><h4>{item.title}</h4><p>{item.note}</p><footer><span>{item.year}</span><span>{item.stack}</span></footer></li>)}</ul>
+    </div>
   </div>
 </section>
