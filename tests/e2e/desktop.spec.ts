@@ -16,6 +16,7 @@ const icon = (page: Page, name: string) => page.getByRole('option', { name, exac
 async function drag(page: Page, target: Locator, dx: number, dy: number) {
   const box = (await target.boundingBox())!; const x = box.x + box.width / 2; const y = box.y + 28;
   await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + dx, y + dy, { steps: 8 }); await page.mouse.up();
+  await expect(target).toHaveAttribute('data-positioned', '');
   await expect(target).not.toHaveAttribute('data-dragging');
   await target.evaluate(async node => { await Promise.all(node.getAnimations().map(animation => animation.finished)); });
 }
