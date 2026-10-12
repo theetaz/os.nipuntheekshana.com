@@ -59,10 +59,10 @@ test('Konami shows a single 400-drop canvas, umbrella and toast for ten seconds'
 test('Konami ignores editable fields and resets a partial sequence', async ({ page }) => {
   await ready(page, '/terminal'); const input = page.getByRole('textbox', { name: 'Terminal command' });
   await input.focus(); await konami(page); await expect(rain(page)).toHaveCount(0);
-  await page.getByRole('region', { name: 'Desktop surface' }).click({ position: { x: 1250, y: 750 } });
+  await page.getByRole('region', { name: 'Desktop surface' }).click({ position: { x: 700, y: 640 } });
   for (const key of sequence.slice(0, 5)) await page.keyboard.press(key);
   await input.focus(); await page.keyboard.press('x');
-  await page.getByRole('region', { name: 'Desktop surface' }).click({ position: { x: 1250, y: 750 } });
+  await page.getByRole('region', { name: 'Desktop surface' }).click({ position: { x: 700, y: 640 } });
   for (const key of sequence.slice(5)) await page.keyboard.press(key);
   await expect(rain(page)).toHaveCount(0); await konami(page); await expect(rain(page).locator('canvas')).toBeVisible();
 });
