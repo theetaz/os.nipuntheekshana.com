@@ -69,7 +69,7 @@ const MenuLevel = forwardRef<HTMLDivElement, LevelProps>(function RenderMenuLeve
   if (!present) return null;
   const child = expanded[submenu];
   const content = <div {...props} ref={panel} data-menu-tree={rootId} role="menu" aria-label={label} tabIndex={-1} inert={!open}
-    className={`${panelMaterial} p-[5px] ${className}`}
+    className={`${panelMaterial} os-menu p-[6px] ${className}`}
     style={{ ...position, zIndex: 'var(--z-menus)', minWidth: 'min(220px, calc(100vw - 16px))', maxWidth: 'min(320px, calc(100vw - 16px))', maxHeight: 'calc(100dvh - 16px)', overflowY: 'auto', ...style }}
     onKeyDown={event => {
       onKeyDown?.(event); if (event.defaultPrevented) return;
@@ -98,7 +98,7 @@ const MenuLevel = forwardRef<HTMLDivElement, LevelProps>(function RenderMenuLeve
         if (index !== undefined) { setSubmenu(-1); focus(index); }
       }
     }}>
-    {expanded.map((item, index) => item.kind === 'separator' ? <div key={index} role="separator" className="mx-2.5 my-[5px] h-px bg-line" />
+    {expanded.map((item, index) => item.kind === 'separator' ? <div key={index} role="separator" className="mx-2.5 my-[5px] h-0.5 bg-line" />
       : item.kind === 'windows' ? null : <MenuItem key={index} ref={node => { buttons.current[index] = node; }}
         kind={item.kind === 'item' ? item.role : 'item'}
         checked={item.kind === 'item' ? getItemState?.(item.command).checked : undefined}

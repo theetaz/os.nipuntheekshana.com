@@ -2,15 +2,17 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { fixtureServer, type FixtureServer } from './fixture-server';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { build } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
 import { test, expect } from './fixtures';
 
-const artifacts = resolve('.astro/p2-8-artifacts');
+const artifacts = resolve('.astro/k4-artifacts/screenshots');
 async function openSpotlight(page: Page) {
   await expect(page.locator('html')).toHaveClass(/os-ready/);
   const mac = await page.evaluate(() => /Mac|iPhone|iPad|iPod/i.test((navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform));
   await page.keyboard.press(mac ? 'Meta+k' : 'Control+k');
-  const dialog = page.getByRole('dialog', { name: 'Spotlight search' }); await expect(dialog).toBeVisible();
+  const dialog = page.getByRole('dialog', { name: 'Search' }); await expect(dialog).toBeVisible();
   await expect(dialog).not.toHaveAttribute('inert');
   const input = dialog.getByRole('combobox'); await expect(input).toBeFocused(); return { dialog, input };
 }
@@ -29,7 +31,7 @@ test('Spotlight fetches lazily, ranks Salli first, supports arrows and Enter, an
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
   expect(requests.filter(url => url.includes('/data/search.json'))).toHaveLength(0);
   expect(requests.filter(url => /\/(Spotlight|QuickLook|Alerts|Toasts|ContextMenuHost)\./.test(url))).toHaveLength(0);
-  await page.keyboard.press('Control+k'); const dialog = page.getByRole('dialog', { name: 'Spotlight search' });
+  await page.keyboard.press('Control+k'); const dialog = page.getByRole('dialog', { name: 'Search' });
   const input = dialog.getByRole('combobox'); await input.fill('salli');
   const options = dialog.getByRole('option'); await expect(options.first()).toHaveAttribute('data-entry-id', 'project:salli');
   await expect(options.first()).toHaveAttribute('aria-selected', 'true');
@@ -52,7 +54,7 @@ test('no-results copy, combobox semantics, Tab containment, Escape, and focus re
   await expect(input).not.toHaveAttribute('aria-activedescendant');
   await input.press('Tab'); await expect(dialog.getByRole('button', { name: 'Clear search' })).toBeFocused();
   await page.keyboard.press('Tab');
-  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await expect(dialog.getByRole('button',{name:'Close Spotlight'})).toBeFocused();await page.keyboard.press('Tab');}
+  if(await page.locator('html').getAttribute('data-mode')==='mobile'){await expect(dialog.getByRole('button',{name:'Close Search'})).toBeFocused();await page.keyboard.press('Tab');}
   await expect(input).toBeFocused();
   await input.press('Escape'); await expect(dialog).toBeHidden(); await expect(trigger).toBeFocused();
 });
@@ -67,7 +69,7 @@ test('reopening Spotlight during its exit focuses the revived input', async ({ p
     const reopened = await openSpotlight(page);
     await expect(reopened.input).toBeFocused();
     await reopened.input.press('Escape');
-    await expect(page.getByRole('dialog', { name: 'Spotlight search' })).toBeHidden();
+    await expect(page.getByRole('dialog', { name: 'Search' })).toBeHidden();
   }
 });
 
@@ -84,7 +86,7 @@ test('Alt+Space opens Spotlight, slash opens outside typing, and search failures
   let requests = 0;
   await page.route('**/data/search.json', async route => { requests++; if (requests === 1) await route.abort(); else await route.continue(); });
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/); await page.keyboard.press('Alt+Space');
-  const dialog = page.getByRole('dialog', { name: 'Spotlight search' }); await expect(dialog.getByText('Search couldn’t load. Please try again.')).toBeVisible();
+  const dialog = page.getByRole('dialog', { name: 'Search' }); await expect(dialog.getByText('Search couldn’t load. Please try again.')).toBeVisible();
   await dialog.getByRole('button', { name: 'Try again' }).click(); await expect(dialog.getByRole('group', { name: 'Suggestions' })).toBeVisible();
   await page.keyboard.press('Escape'); await expect(dialog).toBeHidden();
   await page.keyboard.press('/'); await expect(dialog).toBeVisible();
@@ -105,7 +107,7 @@ test('indexed actions toggle theme, open Wallpaper settings, resolve Empty Kooda
   await expect(page.getByRole('status').filter({ hasText: 'Kooda emptied' })).toBeVisible();
 });
 
-for (const theme of ['light', 'dark'] as const) test(`Spotlight ${theme} screenshot, accessibility, reduced motion and transparency`, async ({ page }) => {
+for (const theme of ['light', 'dark'] as const) test(`Spotlight ${theme} screenshot, accessibility, reduced motion and transparency`, async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(theme => { localStorage.setItem('serendib:theme', JSON.stringify(theme)); localStorage.setItem('serendib:transparency', '"reduce"'); }, theme);
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
@@ -115,7 +117,7 @@ for (const theme of ['light', 'dark'] as const) test(`Spotlight ${theme} screens
   await expect(page.locator('.os-spotlight-layer')).toHaveCSS('opacity', '1');
   const axe = await new AxeBuilder({ page }).include('.os-spotlight').analyze();
   expect(axe.violations.filter(value => ['serious', 'critical'].includes(value.impact ?? ''))).toEqual([]);
-  mkdirSync(artifacts, { recursive: true }); await page.screenshot({ path: resolve(artifacts, `spotlight-${theme}-1440x900.png`) });
+  mkdirSync(artifacts, { recursive: true }); await page.screenshot({ path: resolve(artifacts, `search-${theme}-${info.project.name}.png`) });
   expect(errors).toEqual([]);
 });
 
@@ -125,25 +127,32 @@ test('mobile Spotlight fills the viewport and closes with its touch control', as
   await expect(dialog.getByRole('option').first()).toHaveAttribute('data-entry-id', 'project:salli');
   await expect.poll(() => dialog.boundingBox()).toMatchObject({ x: 0, y: 0, width: 390, height: 844 });
   mkdirSync(artifacts, { recursive: true }); await page.screenshot({ path: resolve(artifacts, 'spotlight-mobile-390x844.png') });
-  await dialog.getByRole('button', { name: 'Close Spotlight' }).click(); await expect(dialog).toBeHidden();
+  await dialog.getByRole('button', { name: 'Close Search' }).click(); await expect(dialog).toBeHidden();
 });
 
 test.describe('overlay API interactions', () => {
   // This fixture exercises desktop APIs; separate tests exercise phone overlays.
-  test.use({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false });
-  let server: FixtureServer; let route: string; let origin: string;
+  test.use({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false, deviceScaleFactor: 1 });
+  let directory: string;
   test.beforeAll(async ({}, info) => {
-    route = `p2-8-overlays-${info.workerIndex}`;
-    server = await fixtureServer(`overlays-${info.workerIndex}`, 4745 + info.workerIndex, { [route]: `---
+    directory = resolve(`.astro/k4-artifacts/overlays-${info.workerIndex}`);
+    await mkdir(directory, { recursive: true });
+    await writeFile(resolve(directory, 'entry.tsx'), `import { createRoot } from 'react-dom/client';
 import Overlays from '../../../tests/fixtures/p2-8/Overlays';
 import '../../../src/styles/global.css';
----
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><title>Overlay verification</title></head><body><Overlays client:load /></body></html>` });
-    origin = server.origin;
+createRoot(document.getElementById('fixture')!).render(<Overlays />);`);
+    await writeFile(resolve(directory, 'index.html'), '<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Overlay verification</title></head><body><div id="fixture"></div><script type="module" src="./entry.tsx"></script></body></html>');
+    await build({ configFile: false, root: directory, base: '/__k4-overlays/', plugins: [tailwindcss()],
+      esbuild: { jsx: 'automatic' }, build: { outDir: 'dist' }, logLevel: 'error' });
   });
-  test.afterAll(async () => { await server?.stop(); });
+  test.afterAll(async () => { if (directory) await rm(directory, { recursive: true, force: true }); });
   test.beforeEach(async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' }); await page.goto(`${origin}/${route}`);
+    await page.route('**/__k4-overlays/**', async route => {
+      const path = new URL(route.request().url()).pathname.slice('/__k4-overlays/'.length) || 'index.html';
+      const contentType = path.endsWith('.js') ? 'text/javascript' : path.endsWith('.css') ? 'text/css' : 'text/html';
+      await route.fulfill({ body: await readFile(resolve(directory, 'dist', path)), contentType });
+    });
+    await page.emulateMedia({ reducedMotion: 'reduce' }); await page.goto('/__k4-overlays/');
     await expect(page.locator('[data-overlay-fixture-ready]')).toHaveAttribute('data-overlay-fixture-ready', 'true');
   });
 

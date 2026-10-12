@@ -1,3 +1,4 @@
+import './p2-8-overlays.css';
 import { postcardsAvailableAtom } from '../state/features';
 import { useEffect, useRef, type KeyboardEvent } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -18,7 +19,7 @@ function routeMenuCommand(command: string): void {
   }
   if (command === 'os.shortcuts') { openApp('readme', { query: { section: 'shortcuts' } }); return; }
   if (command === 'help.source') { window.open('https://github.com/theetaz/os.nipuntheekshana.com', '_blank', 'noopener,noreferrer'); return; }
-  if (command === 'help.report') { location.href = 'mailto:theekshana2@gmail.com?subject=Serendib%3A%20problem%20report'; return; }
+  if (command === 'help.report') { location.href = 'mailto:theekshana2@gmail.com?subject=Kottu%20OS%3A%20problem%20report'; return; }
   runCommand(command, 'menu');
 }
 export function MenuHost() {
