@@ -8,7 +8,6 @@ export function pendingPhoneCapability(info: TestInfo): string | undefined {
     'projects.spec.ts': [[/^(Salli detail facts|keyboard grid arrows)/, 'P4-3: adapt desktop click-selection/double-click and keyboard grid flows to phone single-tap tiles.']],
     'writing.spec.ts': [[/^(Engineering has one post|folders, tags and search|post data failures can retry)/, 'P4-3: provide phone Writing folders and article/list navigation.']],
     'messages.spec.ts': [[/^thread search, composer bounds/, 'P4-3: provide phone conversation search controls.']],
-    'cv.spec.ts': [[/^(CV has two fixed pages|zoom uses|Fit follows|thumbnails and scrolling|page tracking reflects|print media hides|View menu and keyboard)/, 'P4-3: adapt CV zoom/thumbnails commands to the phone viewer.']],
     'quicklook.spec.ts': [[/^selecting a Projects tile and pressing Space/, 'P4-3: adapt desktop selection to phone single-tap navigation.']],
   };
   return cases[file ?? '']?.find(([pattern]) => pattern.test(info.title))?.[1];
