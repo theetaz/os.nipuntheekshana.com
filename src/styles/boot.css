@@ -1,36 +1,48 @@
-.boot-screen { display: none; position: fixed; inset: 0; z-index: var(--z-boot); background: #F4F1EA; place-content: center; justify-items: center; pointer-events: none; }
-[data-theme="dark"] .boot-screen { background: #0E0D0B; }
-html[data-boot] .boot-screen { display: grid; animation: boot-exit 350ms 1300ms var(--ease-in) forwards; }
+.boot-screen { display: none; position: fixed; inset: 0; z-index: var(--z-boot); background: #120D24; color: #F4EEFF; color-scheme: dark; place-content: center; padding: 16px; pointer-events: none; font: 400 14px/22px var(--font-mono); font-size-adjust: ch-width .65; font-stretch: 87.5%; --boot-lines-at: 600ms; --boot-line-step: 70ms; --boot-ready-at: 1330ms; }
+html[data-boot] .boot-screen { display: grid; animation: boot-exit 300ms 1350ms var(--ease-in) forwards; }
 html[data-boot] .boot-screen[data-boot-managed] { animation: none; pointer-events: auto; }
-html[data-boot][data-boot-exit] .boot-screen { animation: boot-exit 350ms var(--ease-in) forwards; }
+html[data-boot][data-boot-exit] .boot-screen { animation: boot-exit 300ms var(--ease-in) forwards; }
 html[data-boot][data-boot-exit="skip"] .boot-screen { animation: boot-exit 200ms var(--ease-in) forwards; animation-delay: calc(-1 * var(--boot-skipped-at, 0ms)); }
-.boot-outline { stroke-dasharray: 1; stroke-dashoffset: 1; animation: boot-draw 700ms var(--ease-out) forwards; }
-.boot-fill { opacity: 0; animation: boot-fade 600ms 300ms forwards; }
-.boot-ring { animation: boot-ring 600ms 300ms var(--ease-out) forwards; }
-.boot-wordmark { margin: 24px 0 0; font: italic 380 64px/64px var(--font-display); letter-spacing: -.025em; opacity: 0; animation: boot-wordmark 400ms 600ms var(--ease-out) forwards; }
-.boot-greeting { margin: 12px 0 24px; color: var(--os-ink-2); opacity: 0; animation: boot-fade 300ms 800ms forwards; }
-.boot-progress { width: 160px; height: 3px; border-radius: 2px; overflow: hidden; background: var(--os-line); }
-.boot-progress span { display: block; width: 100%; height: 100%; background: var(--os-accent); transform: scaleX(0); transform-origin: left; animation: boot-progress 900ms 200ms var(--ease-out) forwards; }
-html.os-ready .boot-progress span { animation: boot-progress 900ms 200ms var(--ease-out) forwards, boot-complete 200ms calc(1100ms - var(--boot-hydrated-at, 0ms)) forwards; }
-html[data-boot-exit] .boot-progress span { animation: none; transform: scaleX(1); }
+.boot-grub, .boot-lines { grid-area: 1 / 1; width: 66ch; max-width: calc(100vw - 32px); }
+.boot-grub { align-self: center; animation: boot-grub-clear 0s calc(var(--boot-lines-at) - var(--boot-origin-offset, 0ms)) forwards; }
+.boot-grub p, .boot-line { margin: 0; }
+.boot-grub-header { color: #A99DC9; text-align: center; padding-bottom: 22px; }
+.boot-grub-box { border: 1.5px solid #A99DC9; padding: 8px; }
+.boot-grub-entry { padding: 0 4px; overflow-wrap: anywhere; }
+.boot-grub-selected { background: #FFC93C; color: #1B1530; }
+.boot-grub-marker { display: inline-block; width: 1ch; }
+.boot-grub-selected .boot-grub-marker { animation: boot-blink 500ms step-end infinite; }
+.boot-grub-hints { padding: 18px 0 10px; color: #A99DC9; }
+.boot-countdown-value, .boot-line-status { display: inline-grid; vertical-align: baseline; white-space: pre; }
+.boot-countdown-value { width: 2ch; }
+.boot-countdown-value > span, .boot-line-status > span { grid-area: 1 / 1; }
+.boot-countdown-one { animation: boot-clear 0s calc(400ms - var(--boot-origin-offset, 0ms)) forwards; }
+.boot-countdown-zero { visibility: hidden; animation: boot-print 0s calc(400ms - var(--boot-origin-offset, 0ms)) forwards; }
+.boot-lines { align-self: center; }
+.boot-line { visibility: hidden; animation: boot-print 0s calc(var(--boot-lines-at) + var(--i) * var(--boot-line-step) - var(--boot-origin-offset, 0ms)) forwards; white-space: pre-wrap; overflow-wrap: anywhere; }
+.boot-ok { color: #55D184; }
+.boot-warn { color: #FFD45E; }
+.boot-line-status { width: 8ch; }
+.boot-pending { animation: boot-clear 0s calc(var(--boot-ready-at) - var(--boot-origin-offset, 0ms)) forwards; }
+.boot-ready { visibility: hidden; animation: boot-print 0s calc(var(--boot-ready-at) - var(--boot-origin-offset, 0ms)) forwards; }
+html:not(.os-ready) .boot-pending { visibility: inherit !important; }
+html:not(.os-ready) .boot-ready { visibility: hidden !important; }
 html[data-boot-exit] :is(.k-hero, .desktop-icons, .static-dock) { animation: boot-desktop 450ms var(--ease-out) both; }
-@keyframes boot-draw { to { stroke-dashoffset: 0; } }
-@keyframes boot-fade { to { opacity: 1; } }
-@keyframes boot-wordmark { from { transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes boot-ring { from { r: 0; opacity: .6; } to { r: 60; opacity: 0; } }
-@keyframes boot-progress { to { transform: scaleX(.8); } }
-@keyframes boot-complete { from { transform: scaleX(.8); } to { transform: scaleX(1); } }
+@keyframes boot-clear { to { visibility: hidden; } }
+@keyframes boot-grub-clear { to { visibility: hidden; opacity: 0; } }
+@keyframes boot-print { to { visibility: visible; } }
+@keyframes boot-blink { 50% { visibility: hidden; } }
 @keyframes boot-exit { to { opacity: 0; visibility: hidden; } }
 @keyframes boot-desktop { from { scale: .985; } to { scale: 1; } }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
-  html[data-boot] .boot-screen { animation-duration: 300ms; animation-delay: 650ms; }
-  html[data-boot][data-boot-exit="normal"] .boot-screen[data-boot-managed] { animation-duration: 300ms; }
-  .boot-outline { animation-duration: 500ms; }
-  .boot-wordmark { animation-duration: 300ms; animation-delay: 300ms; }
-  .boot-greeting { display: none; }
-  .boot-progress { margin-top: 24px; }
-  html.os-ready .boot-progress span { animation: boot-progress 300ms 200ms var(--ease-out) forwards, boot-complete 150ms calc(500ms - var(--boot-hydrated-at, 0ms)) forwards; }
-  html[data-boot-exit] .boot-progress span { animation: none; transform: scaleX(1); }
+  .boot-screen { padding: 12px; font-size: 12px; line-height: 18px; --boot-lines-at: 300ms; --boot-line-step: 80ms; --boot-ready-at: 750ms; }
+  html[data-boot] .boot-screen { animation-duration: 250ms; animation-delay: 700ms; }
+  html[data-boot][data-boot-exit="normal"] .boot-screen[data-boot-managed] { animation-duration: 250ms; }
+  .boot-grub, .boot-lines { max-width: calc(100vw - 24px); }
+  .boot-line { animation-delay: calc(var(--boot-lines-at) + var(--mobile-i) * var(--boot-line-step) - var(--boot-origin-offset, 0ms)); }
+  .boot-line-desktop { display: none; }
+  .boot-countdown-one { animation: none; }
+  .boot-countdown-zero { display: none; }
   html[data-boot-exit] :is(.k-hero, .desktop-icons, .static-dock) { animation-duration: 300ms; }
 }
 @media (prefers-reduced-motion: reduce) { html:not([data-motion="full"])[data-boot] .boot-screen { display: none; } }
@@ -38,19 +50,19 @@ html[data-motion="reduce"][data-boot] .boot-screen { display: none; }
 
 .power-screen { position: fixed; inset: 0; z-index: var(--z-boot); display: grid; place-items: center; overflow: hidden; padding: 24px; color-scheme: dark; }
 .power-screen:focus, .boot-screen:focus { outline: none; }
-.power-return { border: 0; border-radius: 6px; padding: 12px; background: transparent; color: #8F877B; font: 400 11px/16px var(--font-ui); cursor: pointer; }
-.power-return:focus-visible { outline: 2px solid #FFB070; outline-offset: 2px; }
-.screensaver { background: #0B0F14; color: #F3EFE8; }
-.screensaver-island { position: absolute; width: 41.66vh; height: 74vh; max-width: 80vw; left: 62%; top: 13%; background: radial-gradient(circle, #FFB070 1.4px, transparent 1.6px) 0 0 / 9px 9px; mask-size: contain; mask-repeat: no-repeat; opacity: .25; animation: night-mail-drift 20s var(--ease-in-out) infinite alternate; pointer-events: none; }
+.power-return { border: 0; border-radius: 6px; min-height: 44px; padding: 12px; background: transparent; color: #A99DC9; font: 400 11px/16px var(--font-mono); cursor: pointer; }
+.power-return:focus-visible { outline: 2px solid #FFC93C; outline-offset: 2px; }
+.screensaver { background: #120D24; color: #FFC93C; }
+.screensaver-island { position: absolute; width: 41.66vh; height: 74vh; max-width: 80vw; left: 62%; top: 13%; background: radial-gradient(circle, #FFC93C 1.4px, transparent 1.6px) 0 0 / 9px 9px; mask-size: contain; mask-repeat: no-repeat; opacity: .25; animation: night-mail-drift 20s var(--ease-in-out) infinite alternate; pointer-events: none; }
 .screensaver-clock { position: relative; text-align: center; }
-.screensaver-clock time { font: 380 64px/64px var(--font-display); letter-spacing: -.025em; font-variant-numeric: tabular-nums; }
-.screensaver-clock p { margin: 12px 0 0; color: #8F877B; font: 400 13px/20px var(--font-ui); }
+.screensaver-clock time { font: 400 64px/64px var(--font-display); letter-spacing: -.025em; font-variant-numeric: tabular-nums; }
+.screensaver-clock p { margin: 12px 0 0; color: #A99DC9; font: 400 13px/20px var(--font-mono); }
 .screensaver > .power-return { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); }
 .screensaver-mochi { position: absolute; bottom: max(32px, env(safe-area-inset-bottom)); left: max(32px, env(safe-area-inset-left)); display: grid; justify-items: center; }
-.screensaver-mochi span { padding-left: 24px; color: #8F877B; font: 400 11px/16px var(--font-mono); letter-spacing: 4px; }
+.screensaver-mochi span { padding-left: 24px; color: #A99DC9; font: 400 11px/16px var(--font-mono); letter-spacing: 4px; }
 .screensaver[data-exiting] { animation: night-mail-wake 300ms var(--ease-out) forwards; }
 .screensaver[data-paused] .screensaver-island { animation-play-state: paused; }
-.shutdown-screen { background: #000; color: #FFB070; animation: shutdown-fade 600ms var(--ease-in-out) both; }
+.shutdown-screen { background: #000; color: #FFC93C; animation: shutdown-fade 600ms var(--ease-in-out) both; }
 .shutdown-copy { text-align: center; animation: shutdown-fade 120ms 600ms both; }
 .shutdown-copy h1 { margin: 0 0 12px; font: 400 16px/26px var(--font-mono); text-wrap: balance; }
 .power-screen[data-reduced-motion] { animation-duration: 120ms; }
@@ -72,6 +84,10 @@ html[data-motion="reduce"] .screensaver-island { animation: none; }
 html[data-motion="reduce"] .power-screen { animation-duration: 120ms; }
 html[data-motion="reduce"] .shutdown-copy { animation: none; }
 @media (forced-colors: active) {
+  .boot-screen { background: Canvas; color: CanvasText; }
+  .boot-grub-box { border-color: CanvasText; }
+  .boot-grub-header, .boot-grub-hints, .boot-ok, .boot-warn { color: CanvasText; }
+  .boot-grub-selected { background: Highlight; color: HighlightText; }
   .power-screen { background: Canvas; color: CanvasText; }
   .power-return, .screensaver-clock p, .screensaver-mochi span { color: CanvasText; }
   .power-return:focus-visible { outline-color: Highlight; }
