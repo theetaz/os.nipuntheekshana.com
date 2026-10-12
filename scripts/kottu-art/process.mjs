@@ -53,7 +53,22 @@ export function defringeAlpha(data, width, height) {
       distance[n] = distance[p] + 1; nearest[n] = nearest[p]; queue[tail++] = n;
     }
   }
-  for (let p = 0; p < count; p++) if (data[p * 4 + 3] > 8 && data[p * 4 + 3] < 224 && distance[p] <= radius) {
+  const fringe = new Uint8Array(count).fill(255);
+  const neighbours = (p) => [p % width ? p - 1 : -1, p % width < width - 1 ? p + 1 : -1, p >= width ? p - width : -1, p < count - width ? p + width : -1];
+  head = 0; tail = 0;
+  // Follow the alpha outline, including genuine cut-out holes. Translucent
+  // interior details separated from transparency by opaque pixels stay intact.
+  for (let p = 0; p < count; p++) if (data[p * 4 + 3] > 8 && data[p * 4 + 3] < 224 && neighbours(p).some((n) => n >= 0 && !data[n * 4 + 3])) {
+    fringe[p] = 1; queue[tail++] = p;
+  }
+  while (head < tail) {
+    const p = queue[head++];
+    if (fringe[p] >= radius) continue;
+    for (const n of neighbours(p)) if (n >= 0 && data[n * 4 + 3] > 8 && data[n * 4 + 3] < 224 && fringe[n] > fringe[p] + 1) {
+      fringe[n] = fringe[p] + 1; queue[tail++] = n;
+    }
+  }
+  for (let p = 0; p < count; p++) if (fringe[p] <= radius && distance[p] <= radius) {
     const i = nearest[p] * 4, r = data[i], g = data[i + 1], b = data[i + 2];
     if (Math.min(r, g, b) < 225 && Math.max(r, g, b) > 70) continue;
     data[p * 4] = r; data[p * 4 + 1] = g; data[p * 4 + 2] = b; repaired++;
@@ -87,7 +102,13 @@ export async function processImage(source, asset) {
   const masterDefringe = defringeAlpha(final.data, final.info.width, final.info.height);
   const finalBorder = borderFraction(final.data, final.info.width, final.info.height);
   if (finalBorder < 0.85) throw new Error(`Resized border check failed: ${(finalBorder * 100).toFixed(1)}%`);
-  const master = await sharp(final.data, { raw: final.info }).png({ compressionLevel: 9, effort: 10, palette: false }).toBuffer();
+  // Raw resize info says premultiplication was used internally; the returned RGB
+  // is straight alpha. Do not feed that informational flag back into the encoder.
+  const master = await sharp(final.data, { raw: { width: final.info.width, height: final.info.height, channels: 4, premultiplied: false } })
+    .png({ compressionLevel: 9, effort: 10, palette: false }).toBuffer();
+  const stored = await sharp(master).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const storedBorder = borderFraction(stored.data, stored.info.width, stored.info.height);
+  if (storedBorder < 0.85) throw new Error(`Encoded master border check failed: ${(storedBorder * 100).toFixed(1)}%`);
   const quality = { avif: 50, webp: 78 };
   let variants;
   for (;;) {
@@ -100,7 +121,7 @@ export async function processImage(source, asset) {
       quality[format] -= 5;
     }
   }
-  return { master, quality, variants, keyed, border, finalBorder, sourceDefringe, masterDefringe, width: final.info.width, height: final.info.height };
+  return { master, quality, variants, keyed, border, finalBorder: storedBorder, sourceDefringe, masterDefringe, width: final.info.width, height: final.info.height };
 }
 export async function checkMasters(assets = catalogue.assets, provenance = loadProvenance()) {
   const rows = [], failures = [];
@@ -131,6 +152,25 @@ export async function checkMasters(assets = catalogue.assets, provenance = loadP
   }
   return { rows, failures, totals };
 }
+export async function enforceFamilyCaps(rows) {
+  for (const [family, cap] of [['prop', 170000], ['sticker', 160000]]) {
+    const contribution = (row) => Math.max(...row.variants.filter((v) => v.format === 'avif' && v.density === 1).map((v) => Math.max(v.bytes, v.astroBytes)));
+    let total = familyTotals(rows)[family];
+    while (total > cap) {
+      const row = rows.filter((r) => r.family === family && r.quality.avif > 40).sort((a, b) => contribution(b) - contribution(a))[0];
+      if (!row) throw new Error(`${family} aggregate cap failed: ${total} B exceeds ${cap} B at AVIF quality 40; re-roll simpler artwork`);
+      const asset = catalogue.assets.find((asset) => asset.id === row.id);
+      const quality = { ...row.quality, avif: row.quality.avif - 5 };
+      const variants = await variantSizes(readFileSync(masterPath(asset)), asset, quality);
+      if (variants.some((v) => Math.max(v.bytes, v.astroBytes) > v.cap)) throw new Error(`${row.id}: variant cap failed while balancing ${family}`);
+      row.aggregateAvifBudget ??= { cap, qualityBefore: row.quality.avif };
+      row.aggregateAvifBudget.qualityAfter = quality.avif;
+      row.quality = quality; row.variants = variants;
+      total = familyTotals(rows)[family];
+      console.log(`${row.id}: aggregate ${family} AVIF quality ${quality.avif}; total ${total}/${cap} B`);
+    }
+  }
+}
 export async function processSources(work, assets) {
   const sources = await candidatesUnder(work, assets), provenance = loadProvenance(), failures = [], rows = [];
   for (const asset of assets) {
@@ -152,6 +192,14 @@ export async function processSources(work, assets) {
       rows.push({ id: asset.id, family: asset.family, source, ...result, master: undefined });
       console.log(`${asset.id}: ${result.width}×${result.height}, border ${(result.finalBorder * 100).toFixed(1)}%, AVIF ${result.quality.avif}, WebP ${result.quality.webp}`);
     } catch (error) { failures.push({ id: asset.id, source, error: error.message }); console.error(`${asset.id}: ${error.message}`); }
+  }
+  if (rows.length === catalogue.assets.length && !failures.length) {
+    try { await enforceFamilyCaps(rows); }
+    catch (error) { failures.push({ id: 'family-total', error: error.message }); console.error(error.message); }
+    for (const row of rows) if (row.aggregateAvifBudget) {
+      const entry = provenance.find((entry) => entry.id === row.id);
+      entry.quality = row.quality; entry.processing.aggregateAvifBudget = row.aggregateAvifBudget;
+    }
   }
   writeJson(provenancePath, catalogue.assets.map((asset) => provenance.find((entry) => entry.id === asset.id)).filter(Boolean));
   writeJson(resolve(artifactDir, 'process-report.json'), { rows, failures });
