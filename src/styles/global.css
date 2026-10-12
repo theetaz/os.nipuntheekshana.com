@@ -28,11 +28,11 @@
   --text-ui-strong: 13px;  --text-ui-strong--line-height: 18px; --text-ui-strong--font-weight: 600;
   --text-body: 15px;       --text-body--line-height: 24px;      --text-body--font-weight: 400;
   --text-body-lg: 17px;    --text-body-lg--line-height: 28px;   --text-body-lg--font-weight: 400;
-  --text-title-3: 20px;    --text-title-3--line-height: 26px;   --text-title-3--font-weight: 500; --text-title-3--letter-spacing: -0.005em;
-  --text-title-2: 24px;    --text-title-2--line-height: 30px;   --text-title-2--font-weight: 500; --text-title-2--letter-spacing: -0.01em;
-  --text-title-1: 32px;    --text-title-1--line-height: 38px;   --text-title-1--font-weight: 450; --text-title-1--letter-spacing: -0.015em;
-  --text-display-2: 44px;  --text-display-2--line-height: 48px; --text-display-2--font-weight: 420; --text-display-2--letter-spacing: -0.02em;
-  --text-display-1: 64px;  --text-display-1--line-height: 64px; --text-display-1--font-weight: 380; --text-display-1--letter-spacing: -0.025em;
+  --text-title-3: 20px;    --text-title-3--line-height: 26px;   --text-title-3--font-weight: 700; --text-title-3--letter-spacing: -0.005em;
+  --text-title-2: 24px;    --text-title-2--line-height: 30px;   --text-title-2--font-weight: 700; --text-title-2--letter-spacing: -0.01em;
+  --text-title-1: 32px;    --text-title-1--line-height: 38px;   --text-title-1--font-weight: 400; --text-title-1--letter-spacing: -0.015em;
+  --text-display-2: 44px;  --text-display-2--line-height: 48px; --text-display-2--font-weight: 400; --text-display-2--letter-spacing: -0.02em;
+  --text-display-1: 64px;  --text-display-1--line-height: 64px; --text-display-1--font-weight: 400; --text-display-1--letter-spacing: -0.025em;
   --text-mono-label: 10.5px; --text-mono-label--line-height: 14px; --text-mono-label--font-weight: 500; --text-mono-label--letter-spacing: 0.08em;
   --text-mono: 12px;       --text-mono--line-height: 18px;
   --text-terminal: 13px;   --text-terminal--line-height: 20px;
@@ -46,14 +46,24 @@
   --text-mono--font-weight: 400;
   --text-terminal--letter-spacing: 0;
   --text-terminal--font-weight: 400;
+  --text-k-poster: calc(104 * var(--u, 1px)); --text-k-poster--line-height: .94; --text-k-poster--font-weight: 400;
+  --text-k-section: 76px; --text-k-section--line-height: 1; --text-k-section--font-weight: 400;
+  --text-k-card: 34px; --text-k-card--line-height: 1.05; --text-k-card--font-weight: 400;
+  --text-k-intro: 56px; --text-k-intro--line-height: 64px; --text-k-intro--font-weight: 600;
+  --text-k-hand-lg: calc(34 * var(--u, 1px)); --text-k-hand-lg--line-height: 1; --text-k-hand-lg--font-weight: 700;
+  --text-k-hand: 24px; --text-k-hand--line-height: 30px; --text-k-hand--font-weight: 700;
+  --text-k-note: 20px; --text-k-note--line-height: 27px; --text-k-note--font-weight: 400;
+  --text-k-prompt: 13px; --text-k-prompt--line-height: 20px; --text-k-prompt--font-weight: 500;
   --spacing: 4px; /* Keep the 4px grid independent of the 13px UI root. */
 }
 
 /* Utilities that must follow theme switches reference runtime variables. */
 @theme inline {
-  --font-ui: var(--font-instrument, "Instrument Sans Variable"), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces, "Fraunces Variable"), ui-serif, Georgia, serif;
-  --font-mono: var(--font-martian, "Martian Mono Variable"), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-ui: var(--font-instrument, "Instrument Sans Variable"), ui-sans-serif, system-ui, var(--font-sinhala-list), var(--font-tamil-list), sans-serif;
+  --font-display: var(--font-shrikhand), "Arial Black", var(--font-sinhala-list), var(--font-tamil-list), serif;
+  --font-hand: var(--font-kalam), "Comic Sans MS", "Chalkboard SE", var(--font-sinhala-list), var(--font-tamil-list), cursive;
+  --font-serif: var(--font-fraunces), Georgia, var(--font-sinhala-list), var(--font-tamil-list), serif;
+  --font-mono: var(--font-martian, "Martian Mono Variable"), ui-monospace, SFMono-Regular, Menlo, var(--font-sinhala-list), var(--font-tamil-list), monospace;
   --font-sinhala: 'Noto Sans Sinhala', 'Sinhala Sangam MN', 'Sinhala MN', 'Nirmala UI', 'Iskoola Pota', sans-serif;
   --font-tamil: 'Noto Sans Tamil', 'Tamil Sangam MN', 'Nirmala UI', 'Latha', sans-serif;
 
@@ -151,9 +161,91 @@
 
 :root {
   color-scheme: light;
-  --font-ui: var(--font-instrument, "Instrument Sans Variable"), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces, "Fraunces Variable"), ui-serif, Georgia, serif;
-  --font-mono: var(--font-martian, "Martian Mono Variable"), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --k-yellow: #FFC93C;
+  --k-red: #E8453C;
+  --k-red-surface: #EE5148;
+  --k-teal: #0FA3A3;
+  --k-pink: #FF7EB6;
+  --k-orange: #FF8A3D;
+  --k-green: #3DBE6B;
+  --k-ink: #1B1530;
+  --k-cream: #FFF7E8;
+  --k-paper: #FFFDF8;
+  --k-sunken: #F3E9D6;
+  --k-tan: #EFE3CC;
+  --k-ink-2: #4A4060;
+  --k-ink-3: #655B7D;
+  --k-night: #120D24;
+  --k-hard: #1B1530;
+  --k-wb-min: #FFC93C;
+  --k-wb-max: #0FA3A3;
+  --k-wb-close: #E8453C;
+  --k-wb-glyph: #1B1530;
+  --k-grad-rice: conic-gradient(from var(--k-angle, 135deg), #FFC93C, #FF8A3D, #FF7EB6, #0FA3A3, #3DBE6B, #FFC93C);
+  --k-grad-sunset: linear-gradient(135deg, #FFC93C 0%, #FF8A3D 45%, #FF7EB6 100%);
+  --k-rays: repeating-conic-gradient(from 0deg, #19ADAC 0deg 7.5deg, transparent 7.5deg 15deg);
+  --k-rays-mask: radial-gradient(circle, #000 0 22%, transparent 48%);
+  --k-halftone: radial-gradient(circle, rgb(27 21 48 / .13) 1.4px, transparent 1.7px) 0 0 / 18px 18px;
+  --k-bw-chrome: 2px solid var(--k-hard);
+  --k-bw-card: 3px solid var(--k-hard);
+  --k-shadow-1: 2px 2px 0 var(--k-hard);
+  --k-shadow-2: 4px 4px 0 var(--k-hard);
+  --k-shadow-3: 8px 8px 0 var(--k-hard);
+  --k-shadow-card: 5px 5px 0 var(--sec-deep);
+  --k-shadow-card-hover: 14px 16px 0 var(--sec-deep);
+  --r-board: 24px;
+  --r-module: 9px;
+  --r-note: 4px;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --z-story-preview: 19;
+  --k-hero-h: max(640px, 100svh);
+  --font-sinhala-list: 'Noto Sans Sinhala', 'Sinhala Sangam MN', 'Sinhala MN', 'Nirmala UI', 'Iskoola Pota';
+  --font-tamil-list: 'Noto Sans Tamil', 'Tamil Sangam MN', 'Nirmala UI', 'Latha';
+  --k-yellow-ink: #7A4F00;
+  --k-yellow-deep: #7A4F00;
+  --k-yellow-tint: #FFF0C2;
+  --k-red-ink: #B3261E;
+  --k-red-deep: #8E1C15;
+  --k-red-tint: #FDE0DC;
+  --k-teal-ink: #0A6E6E;
+  --k-teal-deep: #0A6E6E;
+  --k-teal-tint: #D2F1F0;
+  --k-pink-ink: #A3245F;
+  --k-pink-deep: #A3245F;
+  --k-pink-tint: #FFE3EF;
+  --k-orange-ink: #A84A0C;
+  --k-orange-deep: #A84A0C;
+  --k-orange-tint: #FFE6D3;
+  --k-green-ink: #1A6E3C;
+  --k-green-deep: #1A6E3C;
+  --k-green-tint: #D8F3E2;
+  --spring-preview-follow-stiffness: 170;
+  --spring-preview-follow-damping: 20;
+  --spring-preview-follow-mass: 1;
+  --spring-prop-drop-stiffness: 400;
+  --spring-prop-drop-damping: 26;
+  --spring-prop-drop-mass: 1;
+  --spring-note-pop-stiffness: 500;
+  --spring-note-pop-damping: 22;
+  --spring-note-pop-mass: 1;
+  --duration-sticker-wobble: 700ms;
+  --duration-sticker-rock: 2400ms;
+  --duration-note-shake: 480ms;
+  --duration-ring-spin: 8000ms;
+  --duration-preview-ring-spin: 4000ms;
+  --duration-card-flip: 420ms;
+  --duration-lift: 220ms;
+  --duration-chip-fan: 320ms;
+  --duration-chip-stagger: 35ms;
+  --duration-label: 150ms;
+  --duration-tooltip: 120ms;
+  --duration-workspace-dot: 300ms;
+
+  --font-ui: var(--font-instrument, "Instrument Sans Variable"), ui-sans-serif, system-ui, var(--font-sinhala-list), var(--font-tamil-list), sans-serif;
+  --font-display: var(--font-shrikhand), "Arial Black", var(--font-sinhala-list), var(--font-tamil-list), serif;
+  --font-hand: var(--font-kalam), "Comic Sans MS", "Chalkboard SE", var(--font-sinhala-list), var(--font-tamil-list), cursive;
+  --font-serif: var(--font-fraunces), Georgia, var(--font-sinhala-list), var(--font-tamil-list), serif;
+  --font-mono: var(--font-martian, "Martian Mono Variable"), ui-monospace, SFMono-Regular, Menlo, var(--font-sinhala-list), var(--font-tamil-list), monospace;
   --font-sinhala: 'Noto Sans Sinhala', 'Sinhala Sangam MN', 'Sinhala MN', 'Nirmala UI', 'Iskoola Pota', sans-serif;
   --font-tamil: 'Noto Sans Tamil', 'Tamil Sangam MN', 'Nirmala UI', 'Latha', sans-serif;
   --palette-ink: #1F1B16;
@@ -179,75 +271,75 @@
   --palette-lagoon-ink: #0E7369;
   --palette-lagoon-bright: #5FD4C4;
   --palette-lagoon-glow: #6FDCCD;
-  --os-ink: #1F1B16;
-  --os-ink-2: #5C554B;
-  --os-ink-3: #6E665B;
-  --os-ink-inverse: #FCFBF8;
-  --os-window: #FCFBF8;
-  --os-titlebar: #F5F3EE;
-  --os-sidebar: #F1EEE8;
+  --os-ink: #1B1530;
+  --os-ink-2: #4A4060;
+  --os-ink-3: #655B7D;
+  --os-ink-inverse: #FFFDF8;
+  --os-window: #FFFDF8;
+  --os-titlebar: #FFF7E8;
+  --os-sidebar: #F8EEDB;
   --os-raised: #FFFFFF;
-  --os-sunken: #EAE6DE;
-  --os-line: rgb(31 27 22 / 0.10);
-  --os-line-strong: rgb(31 27 22 / 0.18);
-  --os-hover: rgb(31 27 22 / 0.06);
-  --os-pressed: rgb(31 27 22 / 0.10);
-  --os-accent: #E8722A;
-  --os-accent-ink: #B0500E;
-  --os-on-accent: #1E0D02;
-  --os-accent-soft: rgb(232 114 42 / 0.14);
-  --os-selection-inactive: #E4DFD5;
-  --os-focus: #B0500E;
-  --os-success: #1E7A45;
-  --os-warning: #8A5F00;
-  --os-danger: #C2352B;
-  --os-info: #0E7369;
-  --os-scrim: rgb(20 16 12 / 0.38);
-  --os-tl-close: #EF5B4B;
-  --os-tl-close-b: #D4473A;
-  --os-tl-min: #F4B43C;
-  --os-tl-min-b: #D3952A;
-  --os-tl-zoom: #39B57A;
-  --os-tl-zoom-b: #2A9663;
-  --os-tl-glyph: rgb(0 0 0 / 0.55);
-  --term-bg: #14110E;
-  --term-ink: #E9E3D8;
-  --term-user: #6FDCCD;
-  --term-host: #FFB070;
-  --term-path: #D9C8A9;
-  --term-dim: #938B7F;
-  --term-err: #FF7A6E;
-  --term-ok: #9BE37F;
-  --term-link: #8AB8FF;
-  --term-caret: #FFB070;
-  --note-paper: #FFE9A8;
-  --note-ink: #3A2E12;
-  --note-tape: rgb(255 255 255 / 0.55);
-  --ticket-card: #F3E6C8;
-  --ticket-ink: #2B2112;
-  --ticket-ink-2: #6B5A3A;
-  --ticket-perf: rgb(43 33 18 / 0.28);
-  --shadow-icon: drop-shadow(0 4px 6px rgb(31 27 22 / 0.18));
-  --label-shadow: 0 0 2px rgb(252 250 246 / 0.9), 0 0 8px rgb(252 250 246 / 0.6);
-  --glass-bg: rgb(252 250 246 / 0.62);
-  --glass-border: rgb(255 255 255 / 0.55);
-  --glass-edge: rgb(31 27 22 / 0.10);
-  --glass-filter: blur(24px) saturate(180%);
-  --menu-bg: rgb(250 248 244 / 0.88);
-  --menu-filter: blur(20px) saturate(160%);
-  --os-shadow-window: 0 0 0 1px rgb(31 27 22 / 0.08), 0 8px 24px -6px rgb(31 27 22 / 0.18);
-  --os-shadow-window-focused: 0 0 0 1px rgb(31 27 22 / 0.10), 0 2px 6px rgb(31 27 22 / 0.06), 0 18px 48px -8px rgb(31 27 22 / 0.28), 0 42px 96px -24px rgb(31 27 22 / 0.30);
-  --os-shadow-menu: 0 0 0 1px rgb(31 27 22 / 0.10), 0 12px 32px -8px rgb(31 27 22 / 0.25);
-  --os-shadow-dock: 0 10px 30px -10px rgb(31 27 22 / 0.35);
-  --os-shadow-widget: 0 1px 2px rgb(31 27 22 / 0.08), 0 10px 24px -8px rgb(31 27 22 / 0.25);
-  --os-shadow-card: 0 0 0 1px rgb(31 27 22 / 0.08), 0 1px 2px rgb(31 27 22 / 0.06);
+  --os-sunken: #F3E9D6;
+  --os-line: rgb(27 21 48 / 0.14);
+  --os-line-strong: rgb(27 21 48 / 0.32);
+  --os-hover: rgb(27 21 48 / 0.06);
+  --os-pressed: rgb(27 21 48 / 0.12);
+  --os-accent: #FF8A3D;
+  --os-accent-ink: #A84A0C;
+  --os-on-accent: #1B1530;
+  --os-accent-soft: rgb(255 138 61 / 0.18);
+  --os-selection-inactive: #EFE3CC;
+  --os-focus: #1B1530;
+  --os-success: #1A6E3C;
+  --os-warning: #7A4F00;
+  --os-danger: #B3261E;
+  --os-info: #0A6E6E;
+  --os-scrim: rgb(27 21 48 / 0.45);
+  --os-tl-close: var(--k-wb-close);
+  --os-tl-close-b: var(--k-hard);
+  --os-tl-min: var(--k-wb-min);
+  --os-tl-min-b: var(--k-hard);
+  --os-tl-zoom: var(--k-wb-max);
+  --os-tl-zoom-b: var(--k-hard);
+  --os-tl-glyph: var(--k-wb-glyph);
+  --term-bg: #120D24;
+  --term-ink: #F4EEFF;
+  --term-user: #55D184;
+  --term-host: #FF92C4;
+  --term-path: #FFD45E;
+  --term-dim: #A99DC9;
+  --term-err: #FF6B5F;
+  --term-ok: #55D184;
+  --term-link: #3FD0CB;
+  --term-caret: #FFC93C;
+  --note-paper: #FFE27A;
+  --note-ink: #1B1530;
+  --note-tape: rgb(255 126 182 / 0.55);
+  --ticket-card: #FFFDF8;
+  --ticket-ink: #1B1530;
+  --ticket-ink-2: #4A4060;
+  --ticket-perf: var(--os-line-strong);
+  --shadow-icon: drop-shadow(2px 2px 0 #1B1530);
+  --label-shadow: none;
+  --glass-bg: #FFFDF8;
+  --glass-border: var(--k-hard);
+  --glass-edge: #1B1530;
+  --glass-filter: none;
+  --menu-bg: #FFFDF8;
+  --menu-filter: none;
+  --os-shadow-window: 0 0 0 0 transparent, 4px 4px 0 rgb(27 21 48 / .45);
+  --os-shadow-window-focused: 8px 8px 0 #1B1530;
+  --os-shadow-menu: 0 0 0 2px #1B1530, 4px 4px 0 #1B1530;
+  --os-shadow-dock: var(--k-shadow-2);
+  --os-shadow-widget: var(--k-shadow-2);
+  --os-shadow-card: 0 0 0 2px #1B1530, 3px 3px 0 #1B1530;
   --os-line-contrast: rgb(31 27 22 / 0.20);
   --os-line-strong-contrast: rgb(31 27 22 / 0.36);
-  --r-window: 14px;
-  --r-menu: 10px;
-  --r-menu-item: 6px;
-  --r-control: 8px;
-  --r-card: 12px;
+  --r-window: 12px;
+  --r-menu: 12px;
+  --r-menu-item: 8px;
+  --r-control: 10px;
+  --r-card: 18px;
   --r-widget: 18px;
   --r-dock: 22px;
   --r-icon: 22.5%;
@@ -349,51 +441,78 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --os-ink: #F3EFE8;
-  --os-ink-2: #BAB2A6;
-  --os-ink-3: #938B7F;
-  --os-ink-inverse: #1C1A17;
-  --os-window: #1C1A17;
-  --os-titlebar: #22201C;
-  --os-sidebar: #181614;
-  --os-raised: #282521;
-  --os-sunken: #121110;
-  --os-line: rgb(255 244 228 / 0.08);
-  --os-line-strong: rgb(255 244 228 / 0.16);
-  --os-hover: rgb(255 244 228 / 0.06);
-  --os-pressed: rgb(255 244 228 / 0.10);
-  --os-accent: #FF9A4D;
-  --os-accent-ink: #FFB070;
-  --os-accent-soft: rgb(255 154 77 / 0.16);
-  --os-selection-inactive: #34302B;
-  --os-focus: #FFB070;
-  --os-success: #5BD08C;
-  --os-warning: #F5C04A;
+  --k-cream: #241C3D;
+  --k-paper: #2E2550;
+  --k-sunken: #150F28;
+  --k-tan: #3A3060;
+  --k-ink-2: #D2C8E8;
+  --k-ink-3: #A99DC9;
+  --k-hard: #0B0716;
+  --k-rays: repeating-conic-gradient(from 0deg, #221A3B 0deg 7.5deg, transparent 7.5deg 15deg);
+  --k-yellow-ink: #FFD45E;
+  --k-yellow-deep: #FFD45E;
+  --k-yellow-tint: #3B2E32;
+  --k-red-ink: #FF7A6E;
+  --k-red-deep: #FF7A6E;
+  --k-red-tint: #3B2137;
+  --k-teal-ink: #3FD0CB;
+  --k-teal-deep: #3FD0CB;
+  --k-teal-tint: #1D2E44;
+  --k-pink-ink: #FFA6CF;
+  --k-pink-deep: #FFA6CF;
+  --k-pink-tint: #3B2745;
+  --k-orange-ink: #FFB27A;
+  --k-orange-deep: #FFB27A;
+  --k-orange-tint: #3B2836;
+  --k-green-ink: #6FDB97;
+  --k-green-deep: #6FDB97;
+  --k-green-tint: #232F3C;
+
+  --os-ink: #FFF4E0;
+  --os-ink-2: #D2C8E8;
+  --os-ink-3: #A99DC9;
+  --os-ink-inverse: #1B1530;
+  --os-window: #241C3D;
+  --os-titlebar: #2E2550;
+  --os-sidebar: #1E1735;
+  --os-raised: #3A3060;
+  --os-sunken: #150F28;
+  --os-line: rgb(255 244 224 / 0.14);
+  --os-line-strong: rgb(255 244 224 / 0.30);
+  --os-hover: rgb(255 244 224 / 0.08);
+  --os-pressed: rgb(255 244 224 / 0.14);
+  --os-accent: #FF9C58;
+  --os-accent-ink: #FFB27A;
+  --os-accent-soft: rgb(255 156 88 / 0.18);
+  --os-selection-inactive: #3A3060;
+  --os-focus: #FFC93C;
+  --os-success: #55D184;
+  --os-warning: #FFD45E;
   --os-danger: #FF7A6E;
-  --os-info: #6FDCCD;
-  --os-scrim: rgb(0 0 0 / 0.50);
-  --os-tl-glyph: rgb(0 0 0 / 0.60);
-  --note-paper: #3B3220;
-  --note-ink: #F6E7C0;
-  --note-tape: rgb(255 244 228 / 0.18);
-  --ticket-card: #2A251C;
-  --ticket-ink: #EADFC6;
-  --ticket-ink-2: #B9A985;
-  --ticket-perf: rgb(234 223 198 / 0.22);
-  --shadow-icon: drop-shadow(0 4px 6px rgb(0 0 0 / 0.45));
-  --label-shadow: 0 1px 2px rgb(0 0 0 / 0.8);
-  --glass-bg: rgb(30 28 25 / 0.55);
-  --glass-border: rgb(255 244 228 / 0.10);
-  --glass-edge: rgb(0 0 0 / 0.50);
-  --glass-filter: blur(24px) saturate(160%);
-  --menu-bg: rgb(36 33 30 / 0.88);
-  --menu-filter: blur(20px) saturate(140%);
-  --os-shadow-window: 0 0 0 1px rgb(0 0 0 / 0.60), inset 0 1px 0 rgb(255 255 255 / 0.05), 0 8px 24px -6px rgb(0 0 0 / 0.45);
-  --os-shadow-window-focused: 0 0 0 1px rgb(0 0 0 / 0.70), inset 0 1px 0 rgb(255 255 255 / 0.07), 0 18px 48px -8px rgb(0 0 0 / 0.55), 0 42px 96px -24px rgb(0 0 0 / 0.60);
-  --os-shadow-menu: 0 0 0 1px rgb(0 0 0 / 0.60), inset 0 1px 0 rgb(255 255 255 / 0.06), 0 12px 32px -8px rgb(0 0 0 / 0.55);
-  --os-shadow-dock: 0 10px 30px -10px rgb(0 0 0 / 0.60);
-  --os-shadow-widget: 0 1px 2px rgb(0 0 0 / 0.40), 0 10px 24px -8px rgb(0 0 0 / 0.55);
-  --os-shadow-card: 0 0 0 1px rgb(255 244 228 / 0.08);
+  --os-info: #3FD0CB;
+  --os-scrim: rgb(8 5 18 / 0.60);
+  --os-tl-glyph: var(--k-wb-glyph);
+  --note-paper: #FFE27A;
+  --note-ink: #1B1530;
+  --note-tape: rgb(255 146 196 / 0.45);
+  --ticket-card: #2E2550;
+  --ticket-ink: #FFF4E0;
+  --ticket-ink-2: #D2C8E8;
+  --ticket-perf: var(--os-line-strong);
+  --shadow-icon: drop-shadow(2px 2px 0 #0B0716);
+  --label-shadow: none;
+  --glass-bg: #2E2550;
+  --glass-border: var(--k-hard);
+  --glass-edge: #0B0716;
+  --glass-filter: none;
+  --menu-bg: #2E2550;
+  --menu-filter: none;
+  --os-shadow-window: 4px 4px 0 rgb(0 0 0 / .6);
+  --os-shadow-window-focused: 8px 8px 0 #0B0716;
+  --os-shadow-menu: 0 0 0 2px #0B0716, 4px 4px 0 #0B0716;
+  --os-shadow-dock: var(--k-shadow-2);
+  --os-shadow-widget: var(--k-shadow-2);
+  --os-shadow-card: 0 0 0 2px #0B0716, 3px 3px 0 #0B0716;
   --os-line-contrast: rgb(255 244 228 / 0.16);
   --os-line-strong-contrast: rgb(255 244 228 / 0.32);
 }
@@ -411,132 +530,159 @@
 }
 
 html[data-accent="thambili"] {
-  --os-accent: #E8722A;
-  --os-accent-ink: #B0500E;
-  --os-accent-soft: rgb(232 114 42 / 0.14);
-  --os-focus: #B0500E;
+  --os-accent: #FF8A3D;
+  --os-accent-ink: #A84A0C;
+  --os-accent-soft: rgb(255 138 61 / .18);
+  --os-focus: #1B1530;
 }
 
 html[data-theme="dark"][data-accent="thambili"] {
-  --os-accent: #FF9A4D;
-  --os-accent-ink: #FFB070;
-  --os-accent-soft: rgb(255 154 77 / 0.16);
-  --os-focus: #FFB070;
+  --os-accent: #FF9C58;
+  --os-accent-ink: #FFB27A;
+  --os-accent-soft: rgb(255 156 88 / .18);
+  --os-focus: #FFC93C;
 }
 
 html[data-accent="lagoon"] {
-  --os-accent: #2BB3A6;
-  --os-accent-ink: #0E7369;
-  --os-accent-soft: rgb(43 179 166 / .14);
-  --os-focus: #0E7369;
+  --os-accent: #0FA3A3;
+  --os-accent-ink: #0A6E6E;
+  --os-accent-soft: rgb(15 163 163 / .18);
+  --os-focus: #1B1530;
 }
 
 html[data-theme="dark"][data-accent="lagoon"] {
-  --os-accent: #5FD4C4;
-  --os-accent-ink: #6FDCCD;
-  --os-accent-soft: rgb(95 212 196 / .16);
-  --os-focus: #6FDCCD;
+  --os-accent: #2CC4C0;
+  --os-accent-ink: #3FD0CB;
+  --os-accent-soft: rgb(44 196 192 / .18);
+  --os-focus: #FFC93C;
 }
 
 html[data-accent="lotus"] {
-  --os-accent: #B866D6;
-  --os-accent-ink: #8A3FA8;
-  --os-accent-soft: rgb(184 102 214 / .14);
-  --os-focus: #8A3FA8;
+  --os-accent: #FF7EB6;
+  --os-accent-ink: #A3245F;
+  --os-accent-soft: rgb(255 126 182 / .20);
+  --os-focus: #1B1530;
 }
 
 html[data-theme="dark"][data-accent="lotus"] {
-  --os-accent: #D59AEB;
-  --os-accent-ink: #E2B5F2;
-  --os-accent-soft: rgb(213 154 235 / .16);
-  --os-focus: #E2B5F2;
+  --os-accent: #FF92C4;
+  --os-accent-ink: #FFA6CF;
+  --os-accent-soft: rgb(255 146 196 / .18);
+  --os-focus: #FFC93C;
 }
 
 html[data-accent="tea"] {
-  --os-accent: #5FA552;
-  --os-accent-ink: #3D7A33;
-  --os-accent-soft: rgb(95 165 82 / .14);
-  --os-focus: #3D7A33;
+  --os-accent: #3DBE6B;
+  --os-accent-ink: #1A6E3C;
+  --os-accent-soft: rgb(61 190 107 / .20);
+  --os-focus: #1B1530;
 }
 
 html[data-theme="dark"][data-accent="tea"] {
-  --os-accent: #8FD07F;
-  --os-accent-ink: #A6DD98;
-  --os-accent-soft: rgb(143 208 127 / .16);
-  --os-focus: #A6DD98;
+  --os-accent: #55D184;
+  --os-accent-ink: #6FDB97;
+  --os-accent-soft: rgb(85 209 132 / .18);
+  --os-focus: #FFC93C;
 }
 
 @media (prefers-color-scheme: dark) {
   html.no-js:not([data-theme="light"]) {
     color-scheme: dark;
-    --os-ink: #F3EFE8;
-    --os-ink-2: #BAB2A6;
-    --os-ink-3: #938B7F;
-    --os-ink-inverse: #1C1A17;
-    --os-window: #1C1A17;
-    --os-titlebar: #22201C;
-    --os-sidebar: #181614;
-    --os-raised: #282521;
-    --os-sunken: #121110;
-    --os-line: rgb(255 244 228 / 0.08);
-    --os-line-strong: rgb(255 244 228 / 0.16);
-    --os-hover: rgb(255 244 228 / 0.06);
-    --os-pressed: rgb(255 244 228 / 0.10);
-    --os-accent: #FF9A4D;
-    --os-accent-ink: #FFB070;
-    --os-accent-soft: rgb(255 154 77 / 0.16);
-    --os-selection-inactive: #34302B;
-    --os-focus: #FFB070;
-    --os-success: #5BD08C;
-    --os-warning: #F5C04A;
+  --k-cream: #241C3D;
+  --k-paper: #2E2550;
+  --k-sunken: #150F28;
+  --k-tan: #3A3060;
+  --k-ink-2: #D2C8E8;
+  --k-ink-3: #A99DC9;
+  --k-hard: #0B0716;
+  --k-rays: repeating-conic-gradient(from 0deg, #221A3B 0deg 7.5deg, transparent 7.5deg 15deg);
+  --k-yellow-ink: #FFD45E;
+  --k-yellow-deep: #FFD45E;
+  --k-yellow-tint: #3B2E32;
+  --k-red-ink: #FF7A6E;
+  --k-red-deep: #FF7A6E;
+  --k-red-tint: #3B2137;
+  --k-teal-ink: #3FD0CB;
+  --k-teal-deep: #3FD0CB;
+  --k-teal-tint: #1D2E44;
+  --k-pink-ink: #FFA6CF;
+  --k-pink-deep: #FFA6CF;
+  --k-pink-tint: #3B2745;
+  --k-orange-ink: #FFB27A;
+  --k-orange-deep: #FFB27A;
+  --k-orange-tint: #3B2836;
+  --k-green-ink: #6FDB97;
+  --k-green-deep: #6FDB97;
+  --k-green-tint: #232F3C;
+
+    --os-ink: #FFF4E0;
+    --os-ink-2: #D2C8E8;
+    --os-ink-3: #A99DC9;
+    --os-ink-inverse: #1B1530;
+    --os-window: #241C3D;
+    --os-titlebar: #2E2550;
+    --os-sidebar: #1E1735;
+    --os-raised: #3A3060;
+    --os-sunken: #150F28;
+    --os-line: rgb(255 244 224 / 0.14);
+    --os-line-strong: rgb(255 244 224 / 0.30);
+    --os-hover: rgb(255 244 224 / 0.08);
+    --os-pressed: rgb(255 244 224 / 0.14);
+    --os-accent: #FF9C58;
+    --os-accent-ink: #FFB27A;
+    --os-accent-soft: rgb(255 156 88 / 0.18);
+    --os-selection-inactive: #3A3060;
+    --os-focus: #FFC93C;
+    --os-success: #55D184;
+    --os-warning: #FFD45E;
     --os-danger: #FF7A6E;
-    --os-info: #6FDCCD;
-    --os-scrim: rgb(0 0 0 / 0.50);
-    --os-tl-glyph: rgb(0 0 0 / 0.60);
-    --note-paper: #3B3220;
-    --note-ink: #F6E7C0;
-    --note-tape: rgb(255 244 228 / 0.18);
-    --ticket-card: #2A251C;
-    --ticket-ink: #EADFC6;
-    --ticket-ink-2: #B9A985;
-    --ticket-perf: rgb(234 223 198 / 0.22);
-    --shadow-icon: drop-shadow(0 4px 6px rgb(0 0 0 / 0.45));
-    --label-shadow: 0 1px 2px rgb(0 0 0 / 0.8);
-    --glass-bg: rgb(30 28 25 / 0.55);
-    --glass-border: rgb(255 244 228 / 0.10);
-    --glass-edge: rgb(0 0 0 / 0.50);
-    --glass-filter: blur(24px) saturate(160%);
-    --menu-bg: rgb(36 33 30 / 0.88);
-    --menu-filter: blur(20px) saturate(140%);
-    --os-shadow-window: 0 0 0 1px rgb(0 0 0 / 0.60), inset 0 1px 0 rgb(255 255 255 / 0.05), 0 8px 24px -6px rgb(0 0 0 / 0.45);
-    --os-shadow-window-focused: 0 0 0 1px rgb(0 0 0 / 0.70), inset 0 1px 0 rgb(255 255 255 / 0.07), 0 18px 48px -8px rgb(0 0 0 / 0.55), 0 42px 96px -24px rgb(0 0 0 / 0.60);
-    --os-shadow-menu: 0 0 0 1px rgb(0 0 0 / 0.60), inset 0 1px 0 rgb(255 255 255 / 0.06), 0 12px 32px -8px rgb(0 0 0 / 0.55);
-    --os-shadow-dock: 0 10px 30px -10px rgb(0 0 0 / 0.60);
-    --os-shadow-widget: 0 1px 2px rgb(0 0 0 / 0.40), 0 10px 24px -8px rgb(0 0 0 / 0.55);
-    --os-shadow-card: 0 0 0 1px rgb(255 244 228 / 0.08);
+    --os-info: #3FD0CB;
+    --os-scrim: rgb(8 5 18 / 0.60);
+    --os-tl-glyph: var(--k-wb-glyph);
+    --note-paper: #FFE27A;
+    --note-ink: #1B1530;
+    --note-tape: rgb(255 146 196 / 0.45);
+    --ticket-card: #2E2550;
+    --ticket-ink: #FFF4E0;
+    --ticket-ink-2: #D2C8E8;
+    --ticket-perf: var(--os-line-strong);
+    --shadow-icon: drop-shadow(2px 2px 0 #0B0716);
+    --label-shadow: none;
+    --glass-bg: #2E2550;
+    --glass-border: var(--k-hard);
+    --glass-edge: #0B0716;
+    --glass-filter: none;
+    --menu-bg: #2E2550;
+    --menu-filter: none;
+    --os-shadow-window: 4px 4px 0 rgb(0 0 0 / .6);
+    --os-shadow-window-focused: 8px 8px 0 #0B0716;
+    --os-shadow-menu: 0 0 0 2px #0B0716, 4px 4px 0 #0B0716;
+    --os-shadow-dock: var(--k-shadow-2);
+    --os-shadow-widget: var(--k-shadow-2);
+    --os-shadow-card: 0 0 0 2px #0B0716, 3px 3px 0 #0B0716;
     --os-line-contrast: rgb(255 244 228 / 0.16);
     --os-line-strong-contrast: rgb(255 244 228 / 0.32);
   }
 
   html.no-js:not([data-theme="light"])[data-accent="lagoon"] {
-    --os-accent: #5FD4C4;
-    --os-accent-ink: #6FDCCD;
-    --os-accent-soft: rgb(95 212 196 / .16);
-    --os-focus: #6FDCCD;
+    --os-accent: #2CC4C0;
+    --os-accent-ink: #3FD0CB;
+    --os-accent-soft: rgb(44 196 192 / .18);
+    --os-focus: #FFC93C;
   }
 
   html.no-js:not([data-theme="light"])[data-accent="lotus"] {
-    --os-accent: #D59AEB;
-    --os-accent-ink: #E2B5F2;
-    --os-accent-soft: rgb(213 154 235 / .16);
-    --os-focus: #E2B5F2;
+    --os-accent: #FF92C4;
+    --os-accent-ink: #FFA6CF;
+    --os-accent-soft: rgb(255 146 196 / .18);
+    --os-focus: #FFC93C;
   }
 
   html.no-js:not([data-theme="light"])[data-accent="tea"] {
-    --os-accent: #8FD07F;
-    --os-accent-ink: #A6DD98;
-    --os-accent-soft: rgb(143 208 127 / .16);
-    --os-focus: #A6DD98;
+    --os-accent: #55D184;
+    --os-accent-ink: #6FDB97;
+    --os-accent-soft: rgb(85 209 132 / .18);
+    --os-focus: #FFC93C;
   }
 }
 
@@ -565,23 +711,26 @@ html[data-theme="dark"][data-accent="tea"] {
 }
 
 @utility text-title-3 {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
 }
 
 @utility text-title-2 {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
 }
 
 @utility text-title-1 {
   font-family: var(--font-display);
+  font-synthesis: none;
 }
 
 @utility text-display-2 {
   font-family: var(--font-display);
+  font-synthesis: none;
 }
 
 @utility text-display-1 {
   font-family: var(--font-display);
+  font-synthesis: none;
 }
 
 @utility text-mono-label {
@@ -602,33 +751,6 @@ html[data-theme="dark"][data-accent="tea"] {
 
 @utility shadow-icon {
   filter: var(--shadow-icon);
-}
-
-/* Opaque materials also avoid unsupported or unwanted background blur. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  :root:root, [data-theme] {
-    --glass-bg: var(--os-titlebar) !important;
-    --menu-bg: var(--os-raised) !important;
-    --glass-filter: none !important;
-    --menu-filter: none !important;
-  }
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  :root:root, [data-theme] {
-    --glass-bg: var(--os-titlebar) !important;
-    --menu-bg: var(--os-raised) !important;
-    --glass-filter: none !important;
-    --menu-filter: none !important;
-  }
-}
-
-html[data-transparency="reduce"],
-html[data-transparency="reduce"] [data-theme] {
-  --glass-bg: var(--os-titlebar) !important;
-  --menu-bg: var(--os-raised) !important;
-  --glass-filter: none !important;
-  --menu-filter: none !important;
 }
 
 /* Glass consumers that need raised surfaces use this shared material class. */
@@ -666,17 +788,20 @@ html[data-contrast="more"] [data-theme] {
     font-family: var(--font-ui);
     font-size: 13px;
     font-weight: 450;
+    font-synthesis: none;
     line-height: 18px;
     color: var(--os-ink);
-    background-color: var(--os-window);
+    background: #1B1530;
+    scrollbar-gutter: stable;
+    scrollbar-color: #FFC93C #1B1530;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   body {
     margin: 0;
-    overflow: hidden;
-    height: 100dvh;
+    background: var(--os-window);
+
   }
 
   html.no-js body,
@@ -698,8 +823,8 @@ html[data-contrast="more"] [data-theme] {
   }
 
   :focus-visible {
-    outline: 2px solid var(--os-focus);
-    outline-offset: 2px;
+    outline: 3px solid var(--os-focus);
+    outline-offset: 3px;
   }
 
   [lang="si"] { font-family: var(--font-sinhala); }
@@ -746,8 +871,8 @@ html[data-contrast="more"] [data-theme] {
 
 /* Primary controls keep a visible ring against the accent itself. */
 :where(.bg-accent, [data-accent-filled="true"]):focus-visible {
-  outline-color: transparent;
-  box-shadow: 0 0 0 2px var(--os-window), 0 0 0 4px var(--os-ink);
+  outline: 3px solid var(--os-focus);
+  outline-offset: 3px;
 }
 
 html.theme-changing *,
@@ -828,8 +953,83 @@ html[data-motion="reduce"] *::after {
     visibility: visible !important;
   }
   :focus-visible {
-    outline: 2px solid Highlight !important;
-    outline-offset: 2px;
+    outline: 3px solid Highlight !important;
+    outline-offset: 3px;
     box-shadow: none !important;
   }
 }
+
+@property --k-angle { syntax: '<angle>'; inherits: true; initial-value: 135deg; }
+html.k-scroll-lock { overflow: hidden; }
+[data-scroll-root] { overscroll-behavior: contain; }
+html[data-mode="desktop"] main#content { min-height: var(--k-hero-h); }
+/* Keep the desktop surface in document coordinates. */
+html[data-mode="desktop"] .desktop-surface { position: absolute !important; height: var(--k-hero-h); }
+@media (prefers-contrast: more) {
+  :root { --k-bw-chrome: 3px solid var(--k-hard); --k-bw-card: 3px solid var(--k-hard); --k-ink-3: var(--k-ink-2); }
+  .k-sec-shape, .k-rays, .k-halftone { display: none !important; }
+}
+@media (forced-colors: active) {
+  .k-sec { background: Canvas !important; color: CanvasText !important; }
+  .k-sec::before, .k-sec-shape, .k-gradient-ring { display: none !important; }
+  .k-card, .k-note, .k-module, .k-launcher { border: 1px solid CanvasText !important; }
+  .window[data-focused="true"] { border: 3px solid Highlight !important; }
+  .k-prop-label { visibility: visible !important; opacity: 1 !important; }
+}
+@keyframes stickerWobble {
+  0%, 100% { transform: rotate(var(--tilt, 0deg)) scale(1); }
+  18% { transform: rotate(calc(var(--tilt, 0deg) - 11deg)) scale(1.08); }
+  38% { transform: rotate(calc(var(--tilt, 0deg) + 8deg)) scale(1.10); }
+  58% { transform: rotate(calc(var(--tilt, 0deg) - 4deg)) scale(1.06); }
+  78% { transform: rotate(calc(var(--tilt, 0deg) + 2deg)) scale(1.06); }
+}
+@keyframes stickerRock { from { transform: rotate(calc(var(--tilt, 0deg) - 1.5deg)); } to { transform: rotate(calc(var(--tilt, 0deg) + 1.5deg)); } }
+@keyframes noteShake { 0%,100% { transform: translateX(0); } 17% { transform: translateX(-14px); } 33% { transform: translateX(12px); } 50% { transform: translateX(-9px); } 67% { transform: translateX(6px); } 83% { transform: translateX(-3px); } }
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+@keyframes cardFlip { from { transform: rotateY(0); } to { transform: rotateY(180deg); } }
+
+@utility text-k-poster { font-family: var(--font-display); font-size: calc(104 * var(--u, 1px)); line-height: .94; font-weight: 400; font-synthesis: none; }
+
+@utility text-k-section { font-family: var(--font-display); font-size: 76px; line-height: 1; font-weight: 400; font-synthesis: none; }
+
+@utility text-k-card { font-family: var(--font-display); font-size: 34px; line-height: 1.05; font-weight: 400; font-synthesis: none; }
+
+@utility text-k-intro { font-family: var(--font-ui); font-size: 56px; line-height: 64px; font-weight: 600; }
+
+@utility text-k-hand-lg { font-family: var(--font-hand); font-size: calc(34 * var(--u, 1px)); line-height: 1; font-weight: 700; }
+
+@utility text-k-hand { font-family: var(--font-hand); font-size: 24px; line-height: 30px; font-weight: 700; }
+
+@utility text-k-note { font-family: var(--font-hand); font-size: 20px; line-height: 27px; font-weight: 400; }
+
+@utility text-k-prompt { font-family: var(--font-mono); font-size: 13px; line-height: 20px; font-weight: 500; font-stretch: 87.5%; }
+
+/* Document serif and prose headings retain their separate font roles. */
+.cv-paper { --font-display: var(--font-serif); }
+.prose h2 { font: 700 24px/30px var(--font-ui); }
+.prose h3 { font: 700 20px/26px var(--font-ui); }
+.prose blockquote { font: 400 20px/30px var(--font-hand); color: var(--os-ink-2); }
+
+@media (max-width: 1023px) {
+  .text-k-poster { font-size: 42px; line-height: .95; }
+  .text-k-section { font-size: 48px; line-height: 1.05; }
+  .text-k-card { font-size: 20px; line-height: 1.15; }
+  .text-k-intro { font-size: 30px; line-height: 38px; }
+  .text-k-hand-lg { font-size: 18px; line-height: 1.1; }
+  .text-k-prompt { font-size: 11px; line-height: 16px; }
+}
+body > .wallpaper, body > .wallpaper .wp-layer { position: absolute; }
+body > .wallpaper { bottom: auto; height: var(--k-hero-h); }
+html[data-mode="desktop"] .mochi[data-variant="desktop"] { position: absolute; }
+
+/* Phone sheets and the reading view keep their full viewport width. */
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) { html { scrollbar-width: none; } }
+html:is([data-view="simple"], :has(#simple:target)) { scrollbar-width: none; }
+/* Notes keep paper-bright surfaces and their light text inks in both themes. */
+:is(.managed-window, .static-window)[data-app="now"] .now-document {
+  --os-ink: #1B1530; --os-ink-2: #4A4060; --os-ink-3: #655B7D; --os-accent-ink: #A84A0C; --os-focus: #1B1530;
+}
+:is(.managed-window, .static-window)[data-app="now"] :is(.window-titlebar[data-window-titlebar="paper"], .static-titlebar) { --os-ink: #1B1530; --os-focus: #1B1530; }
+html[data-accent="lagoon"] :is(.managed-window, .static-window)[data-app="now"] .now-document { --os-accent-ink: #0A6E6E; }
+html[data-accent="lotus"] :is(.managed-window, .static-window)[data-app="now"] .now-document { --os-accent-ink: #A3245F; }
+html[data-accent="tea"] :is(.managed-window, .static-window)[data-app="now"] .now-document { --os-accent-ink: #1A6E3C; }
