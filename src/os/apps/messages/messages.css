@@ -64,7 +64,7 @@ html[data-motion="reduce"] .messages-typing > span { animation: none; opacity: 1
 @container window (max-width: 620px) {
   .messages-app { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
   .messages-thread-list { padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--os-line); overflow: visible; }
-  .messages-thread-list > label { display: none; }
+  .messages-thread-list > label { margin: 0 0 8px; }
   .messages-thread-rows { display: flex; gap: 8px; }
   .messages-thread-row { width: auto; flex: 1; height: 48px; padding: 4px 8px; gap: 8px; }
   .messages-thread-name > span, .messages-thread-preview { display: none; }
@@ -72,6 +72,24 @@ html[data-motion="reduce"] .messages-typing > span { animation: none; opacity: 1
   .messages-thread-header .messages-avatar { display: none; }
   .messages-log { padding: 16px; }
   .messages-thread-footer { padding: 8px 12px max(12px, env(safe-area-inset-bottom)); }
+}
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  /* Phone sheets: 44 px targets, 16 px fields (smaller text makes iOS zoom on focus). */
+  :is(#static-window[data-app="messages"], .managed-window[data-sheet][data-app="messages"]) .messages-thread-list input { height: 44px; font-size: 16px; }
+  .messages-app .messages-chip { height: 44px; padding: 0 16px; }
+  .messages-composer { align-items: center; padding: 4px 4px 4px 14px; border-radius: 24px; }
+  .messages-composer textarea { font-size: 16px; line-height: 22px; margin: 0; min-height: 44px; padding: 11px 0;
+    /* Up to five lines, fewer when the on-screen keyboard leaves a short sheet. */
+    max-height: clamp(22px, calc(var(--sheet-viewport-height, 100dvh) * .14), 110px); }
+  .messages-composer button { width: 44px; height: 44px; }
+  .messages-app .messages-bubble-actions { gap: 0 16px; margin-top: 2px; }
+  .messages-app .messages-bubble-actions :is(a, button) { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0; }
+  /* The sheet follows visualViewport, so the thread shrinks above the keyboard.
+     When it gets short, drop the banner and footnote and keep the log and composer. */
+  .managed-window[data-sheet][data-app="messages"] .messages-thread { container: messages-thread / size; }
+  @container messages-thread (height < 440px) {
+    .messages-app .messages-thread-header, .messages-app .messages-static-note { display: none; }
+  }
 }
 html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="messages"] .messages-app { height: auto; min-height: 540px; }
 html:is([data-view="simple"], :has(#simple:target)) #static-window[data-app="messages"] .messages-log { overflow: visible; }

@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { test, expect, openApp, openMenu, closeApp } from './fixtures';
+import { expectAboveKeyboard, expectAccessibleSheet, expectNoHorizontalOverflow, expectTapTargets, hideKeyboard, openFromHome, phoneOnly, showKeyboard } from './phone-sheet-checks';
 
 const questions = ['What are you building?', "What's Prabhava Labs?", 'Can we work together?', "What's your stack?", 'Where are you based?', 'How do I reach you?'];
 const managed = (page: Page) => page.locator('[data-window-id="messages"]');
@@ -261,6 +262,45 @@ test('static adoption preserves transcript geometry, scroll, focus and zero CLS'
     await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
     expect(await page.evaluate(() => (window as any).messagesCls)).toBe(0);
   } finally { release(); }
+});
+
+test('@mobile Messages opens from home, stacks conversations and keeps the composer above the keyboard at 360 px', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Phone sheets are covered by the mobile projects.');
+  await page.setViewportSize({ width: 360, height: 780 });
+  const app = await openFromHome(page, '/messages');
+  await expect(app).toHaveAttribute('data-app', 'messages');
+  // Stacked layout: search and conversation chips above the thread, no sidebar beside it.
+  const list = app.getByRole('navigation', { name: 'Conversations' }); const thread = app.getByRole('region', { name: 'Conversation with Nipun' });
+  await expect(app.getByRole('searchbox', { name: 'Search conversations' })).toBeVisible();
+  const listBox = (await list.boundingBox())!; const threadBox = (await thread.boundingBox())!;
+  expect(listBox.y + listBox.height).toBeLessThanOrEqual(threadBox.y + 1); expect(threadBox.width).toBeCloseTo(360, 0);
+  await expectNoHorizontalOverflow(app); await expectTapTargets(app); await expectAccessibleSheet(page);
+  await app.getByRole('button', { name: questions[4], exact: true }).tap();
+  await expect(app.locator('.messages-bubble--assistant').last()).toContainText('Colombo, Sri Lanka.');
+  await expectNoHorizontalOverflow(app); await expectTapTargets(app);
+  // A focused composer survives the keyboard: the sheet follows visualViewport and the thread condenses.
+  const composer = app.getByRole('textbox', { name: 'Write to Nipun' });
+  await composer.tap(); await expect(composer).toBeFocused(); await expect(composer).toHaveCSS('font-size', '16px');
+  const log = app.getByRole('log', { name: 'Message history' });
+  await expect.poll(() => log.evaluate(node => node.scrollHeight - node.clientHeight - node.scrollTop)).toBeLessThan(2);
+  await showKeyboard(page, 420);
+  await expectAboveKeyboard(app.getByRole('form', { name: 'Message composer' }), 420);
+  await expectAboveKeyboard(app.getByRole('button', { name: 'Send message' }), 420);
+  await expect(app.locator('.messages-thread-header')).toBeHidden();
+  await expect(composer).toBeFocused();
+  await expect.poll(() => log.evaluate(node => node.scrollHeight - node.clientHeight - node.scrollTop)).toBeLessThan(2);
+  expect((await log.boundingBox())!.height).toBeGreaterThan(60);
+  await composer.fill('one\ntwo\nthree\nfour\nfive');
+  // Five lines would crowd a short sheet; the composer caps itself to the visible height.
+  expect((await composer.boundingBox())!.height).toBeLessThanOrEqual(Math.ceil(420 * .14) + 1);
+  await expectAboveKeyboard(app.getByRole('form', { name: 'Message composer' }), 420);
+  await composer.press('Enter');
+  await expect(app.getByRole('link', { name: 'Open email' })).toBeVisible();
+  await expectAboveKeyboard(app.getByRole('link', { name: 'Open email' }), 420);
+  await expectNoHorizontalOverflow(app);
+  await hideKeyboard(page);
+  await expect(app.locator('.messages-thread-header')).toBeVisible();
+  await expectAccessibleSheet(page);
 });
 
 for (const [mode, viewport] of [['desktop', { width: 1440, height: 900 }], ['phone', { width: 390, height: 844 }]] as const) {

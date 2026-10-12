@@ -61,6 +61,16 @@ function Conversation({ profile, engine = scriptEngine, ...props }: AppProps & {
     }, Math.max(0, Math.min(reducedMotion ? 300 : 1400, pending.dueAt - Date.now())));
     return () => clearTimeout(timer);
   }, [session.pending, reducedMotion]);
+  useEffect(() => {
+    // A log read to its end stays there while it resizes, so an on-screen keyboard that
+    // shrinks the sheet (visualViewport) keeps the latest bubbles above the composer.
+    const log = props.scrollRootRef.current; if (!log) return;
+    let atEnd = false;
+    const track = () => { atEnd = log.scrollHeight - log.clientHeight - log.scrollTop < 24; };
+    const observer = new ResizeObserver(() => { if (atEnd) log.scrollTop = log.scrollHeight; });
+    track(); log.addEventListener('scroll', track, { passive: true }); observer.observe(log);
+    return () => { observer.disconnect(); log.removeEventListener('scroll', track); };
+  }, [props.scrollRootRef]);
   useLayoutEffect(() => {
     if (!scrollToEnd.current || !props.scrollRootRef.current) return;
     props.scrollRootRef.current.scrollTop = props.scrollRootRef.current.scrollHeight;
