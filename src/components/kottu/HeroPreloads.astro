@@ -1,2 +1,5 @@
 ---
+import { propArt } from '../../lib/kottu-art';
+const images = await Promise.all((['prop-tuktuk', 'prop-thinkpad', 'prop-lotus-tower', 'prop-tea'] as const).map(propArt));
 ---
+{images.map(image => <link rel="preload" as="image" type="image/avif" imagesrcset={image.avif} imagesizes={`${image.width}px`} media="(min-width: 1024px) and (pointer: fine)" />)}

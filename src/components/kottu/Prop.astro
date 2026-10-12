@@ -1,0 +1,13 @@
+---
+import { propArt, type PropId } from '../../lib/kottu-art';
+interface Props { id: string; href: string; label: string; name: string; x: number; y: number; w: number; r: number }
+const { id, href, label, name, x, y, w, r } = Astro.props;
+const image = await propArt(`prop-${id}` as PropId);
+const sizes = `(min-width: 1800px) ${w * 1.25}px, (min-width: 1440px) ${w}px, ${w / 14.4}vw`;
+---
+<a class="k-prop" href={href} data-prop={id} aria-label={name} draggable="false"
+  style={`--x:${x};--y:${y};--w:${w};--r:${r}deg;--dx:var(--k-dx-${id},0);--dy:var(--k-dy-${id},0)`}>
+  <picture><source type="image/avif" srcset={image.avif} sizes={sizes} /><source type="image/webp" srcset={image.webp} sizes={sizes} />
+    <img src={image.src} width={image.width} height={image.height} alt="" loading="lazy" decoding="async" draggable="false" /></picture>
+  <span class="k-prop-label" aria-hidden="true">{label}</span>
+</a>

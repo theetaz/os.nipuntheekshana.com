@@ -1,15 +1,27 @@
 ---
+import HeroName from './HeroName.astro';
+import Prop from './Prop.astro';
+import Polaroid from './Polaroid.astro';
+import '../../styles/hero.css';
 interface Props { home?: boolean }
 const { home = false } = Astro.props;
-const Name = home ? 'h1' : 'p';
 ---
-<section id="ws-desktop" class="k-hero" aria-label="Desktop">
-  <Name class="k-name">Nipun Theekshana</Name>
+<section id="ws-desktop" class="k-hero" aria-label="Desktop hero">
+  <HeroName home={home} />
+  <span class="k-lantern-string" aria-hidden="true"></span>
+  <ul class="k-props" data-k-props aria-label="Desktop">
+    <li><Prop id="lantern" href="/settings?section=appearance" label="Settings" name="Vesak lantern: open Settings" x={70} y={52} w={112} r={-4} /></li>
+    <li><Prop id="crbook" href="/cv" label="CV" name="CR exercise book: open CV" x={226} y={118} w={124} r={-9} /></li>
+    <li><Prop id="tea" href="/messages" label="Messages" name="Cup of Ceylon tea: open Messages" x={404} y={96} w={128} r={5} /></li>
+    <li><Polaroid /></li>
+    <li><Prop id="lotus-tower" href="/maps" label="Island" name="Lotus Tower model: open Island" x={1236} y={40} w={116} r={3} /></li>
+    <li><Prop id="tuktuk" href="/projects" label="Projects" name="Tuk-tuk: open Projects" x={48} y={300} w={300} r={-3} /></li>
+    <li><Prop id="thambili" href="/readme" label="Read me" name="King coconut: open Read me" x={1112} y={330} w={124} r={-8} /></li>
+    <li><Prop id="thinkpad" href="/terminal" label="Terminal" name="ThinkPad running Arch: open Terminal" x={76} y={566} w={264} r={2} /></li>
+    <li><Prop id="cricket-bat" href="/activity" label="Activity" name="Cricket bat and ball: open Activity" x={372} y={668} w={250} r={-18} /></li>
+    <li><Prop id="ola" href="/writing" label="Writing" name="Ola-leaf manuscript: open Writing" x={652} y={660} w={182} r={3} /></li>
+    <li><Prop id="postbox" href="#ws-board" label="Message board" name="Red post box: go to the message board" x={904} y={628} w={100} r={-4} /></li>
+    <li><Prop id="radio" href="/now" label="Now" name="Old radio: open Now" x={1130} y={596} w={216} r={6} /></li>
+  </ul>
+  <a class="k-scroll-cue" href="#ws-hello" aria-label="Scroll to the long version"><b aria-hidden="true">↓</b><span>the long version</span></a>
 </section>
-<style>
-  .k-hero { position: absolute; inset: 0 0 auto; height: var(--k-hero-h); display: grid; place-items: center; pointer-events: none; --u: clamp(.68px, min(100vw / 1440, 100svh / 900), 1.25px); }
-  .k-name { margin: 0; font: 400 44px/1.1 var(--font-ui); color: var(--os-ink); }
-  html[data-mode="mobile"] .k-hero { display: none; }
-  @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) { .k-hero { display: none; } }
-  html:is([data-view="simple"], :has(#simple:target)) .k-hero { position: relative; height: auto; min-height: 160px; display: grid; background: var(--os-window); }
-</style>
