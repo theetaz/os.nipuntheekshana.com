@@ -71,7 +71,8 @@ test('idle story loading follows os-ready and history restoration is manual', as
     }); observer.observe(document, { subtree: true, attributes: true });
   });
   const requested = page.waitForResponse(response => /\/story-runtime\.[^/]+\.js/.test(response.url()));
-  await page.goto('/'); await requested;
+  await page.goto('/'); await (await requested).finished();
+  await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => /\/story-runtime\.[^/]+\.js/.test(entry.name)));
   await expect(page.locator('html')).toHaveClass(/os-ready/);
   expect(await page.evaluate(() => history.scrollRestoration)).toBe('manual');
   const timing = await page.evaluate(() => ({ ready: (window as unknown as { k2Ready: number }).k2Ready,

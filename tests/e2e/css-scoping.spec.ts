@@ -30,10 +30,17 @@ for (const app of Object.values(APPS).filter(app => app.phase === 'v1')) {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'connection', { configurable: true, value: { saveData: true } });
       localStorage.setItem('serendib:motion', '"reduce"');
-      Object.assign(window, { cssCls: 0 });
+      Object.assign(window, { cssCls: 0, cssShifts: [] });
       new PerformanceObserver(list => { for (const entry of list.getEntries()) {
-        const shift = entry as PerformanceEntry & { value: number; hadRecentInput: boolean };
-        if (!shift.hadRecentInput) (window as unknown as { cssCls: number }).cssCls += shift.value;
+        const shift = entry as PerformanceEntry & { value: number; hadRecentInput: boolean; sources?: { node?: Node; previousRect: DOMRectReadOnly; currentRect: DOMRectReadOnly }[] };
+        if (!shift.hadRecentInput) {
+          const state = window as unknown as { cssCls: number; cssShifts: unknown[] };
+          state.cssCls += shift.value;
+          state.cssShifts.push({ value: shift.value, time: shift.startTime, sources: shift.sources?.map(source => ({
+            node: source.node instanceof Element ? source.node.outerHTML.slice(0, 300) : null,
+            before: source.previousRect.toJSON(), after: source.currentRect.toJSON(),
+          })) });
+        }
       } }).observe({ type: 'layout-shift', buffered: true });
     });
     const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
@@ -76,7 +83,8 @@ for (const app of Object.values(APPS).filter(app => app.phase === 'v1')) {
       if (app.id === 'about') await expect(win.locator('.about-view')).toHaveCSS('display', 'flex');
       if (app.id === 'settings') await expect(win.locator('.settings-app')).toHaveCSS('display', 'grid');
       await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
-      expect(await page.evaluate(() => (window as unknown as { cssCls: number }).cssCls)).toBe(0);
+      expect(await page.evaluate(() => (window as unknown as { cssCls: number }).cssCls),
+        JSON.stringify(await page.evaluate(() => (window as unknown as { cssShifts: unknown[] }).cssShifts))).toBe(0);
       expect(errors).toEqual([]);
       if (['about', 'settings'].includes(app.id)) await page.screenshot({ path: resolve(artifacts, `cold-${app.id}.png`) });
     } finally { release(); }

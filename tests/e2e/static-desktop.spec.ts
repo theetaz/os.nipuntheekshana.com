@@ -42,7 +42,11 @@ test('route pages do not log errors and reduced motion skips the boot @smoke', a
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
-  for (const path of ['/', '/projects', '/projects/salli', '/writing', '/writing/hello-world', '/writing/an-island-made-of-points', '/about', '/cv', '/now', '/readme', '/terminal', '/maps', '/maps/play', '/activity', '/messages', '/settings', '/kooda']) await page.goto(path);
+  for (const path of ['/', '/projects', '/projects/salli', '/writing', '/writing/hello-world', '/writing/an-island-made-of-points', '/about', '/cv', '/now', '/readme', '/terminal', '/maps', '/maps/play', '/activity', '/messages', '/settings', '/kooda']) {
+    const health = page.waitForResponse(response => response.url().endsWith('/api/health'));
+    await page.goto(path); await expect(page.locator('html')).toHaveClass(/os-ready/);
+    await (await health).finished();
+  }
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.evaluate(() => localStorage.removeItem('serendib:booted'));
   await page.goto('/');
@@ -60,7 +64,8 @@ test('stored Simple view can return to the desktop', async ({ page }) => {
   await expect(page.locator('#story')).toBeVisible();
   await page.getByRole('link', { name: 'Back to the desktop', exact: true }).click();
   await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] .phone-ticket'):page.locator('.k-hero')).toBeVisible();
-  await expect(page.locator('#story')).toBeVisible();
+  if (await page.locator('html').getAttribute('data-mode') === 'mobile') await expect(page.locator('#story')).toBeHidden();
+  else await expect(page.locator('#story')).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('serendib:view'))).toBeNull();
 });
 

@@ -13,9 +13,12 @@ async function desktop(page: Page) {
   await expect(page.getByRole('listbox', { name: 'Desktop', exact: true })).toBeVisible();
 }
 const icon = (page: Page, name: string) => page.getByRole('option', { name, exact: true });
-async function drag(page: Page, target: Locator, dx: number, dy: number) {
+async function dragInput(page: Page, target: Locator, dx: number, dy: number) {
   const box = (await target.boundingBox())!; const x = box.x + box.width / 2; const y = box.y + 28;
   await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + dx, y + dy, { steps: 8 }); await page.mouse.up();
+}
+async function drag(page: Page, target: Locator, dx: number, dy: number) {
+  await dragInput(page, target, dx, dy);
   await expect(target).toHaveAttribute('data-positioned', '');
   await expect(target).not.toHaveAttribute('data-dragging');
   await target.evaluate(async node => { await Promise.all(node.getAnimations().map(animation => animation.finished)); });
@@ -182,7 +185,8 @@ test('a cold icon controller retains a completed first drag', async ({ page }) =
   let release!: () => void; const held = new Promise<void>(done => { release = done; });
   await page.route('**/desktop-icon-drag.*.js', async route => { await held; await route.continue(); });
   try {
-    await desktop(page); await drag(page, icon(page, 'Read me.txt'), -120, 130);
+    await desktop(page); await dragInput(page, icon(page, 'Read me.txt'), -120, 130);
+    await expect(icon(page, 'Read me.txt')).not.toHaveAttribute('data-positioned');
     release();
     await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('serendib:icons:v1')!))).toEqual({ readme: { x: 96, y: 104 } });
     await expect(icon(page, 'Read me.txt')).not.toHaveAttribute('data-dragging');
