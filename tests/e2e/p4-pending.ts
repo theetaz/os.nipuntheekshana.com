@@ -7,7 +7,6 @@ export function pendingPhoneCapability(info: TestInfo): string | undefined {
   const cases: Record<string, [RegExp, string][]> = {
     'writing.spec.ts': [[/^(Engineering has one post|folders, tags and search|post data failures can retry)/, 'P4-3: provide phone Writing folders and article/list navigation.']],
     'messages.spec.ts': [[/^thread search, composer bounds/, 'P4-3: provide phone conversation search controls.']],
-    'quicklook.spec.ts': [[/^selecting a Projects tile and pressing Space/, 'P4-3: adapt desktop selection to phone single-tap navigation.']],
   };
   return cases[file ?? '']?.find(([pattern]) => pattern.test(info.title))?.[1];
 }
