@@ -15,6 +15,9 @@ export function subscribePhoneHistory(store:OsStore):()=>void {
 export function phoneBack(store:OsStore,id:string):void {
   const win=store.get(desktopAtom).windows[id];if(!win)return;
   const previous=history.state?.serendibBack;
+  // Closing a query overlay (Quick Look's ?shot) replaces its entry with the page beneath, leaving
+  // an identical previous entry. Step past it so one Back always changes what is shown.
+  if(previous===location.pathname+location.search){window.addEventListener('popstate',()=>phoneBack(store,id),{once:true});history.back();return;}
   if(typeof previous==='string' && (previous.split('?')[0]===APP_META[win.appId].basePath||previous.startsWith(APP_META[win.appId].basePath+'/'))) history.back();
   else store.set(desktopAtom,{type:'NAVIGATE',id,route:'',query:{},history:'push'});
 }
