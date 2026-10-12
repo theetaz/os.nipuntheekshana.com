@@ -82,7 +82,9 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="me" href={links.github} />
     <Font cssVariable="--font-instrument" preload />
-    <Font cssVariable="--font-fraunces" preload={[{ style: 'normal' }]} />
+    <Font cssVariable="--font-shrikhand" preload />
+    <Font cssVariable="--font-kalam" />
+    <Font cssVariable="--font-fraunces" />
     <Font cssVariable="--font-martian" />
     <style is:inline set:html={phoneHomeCss + appSheetCss} />
     {seo.jsonLd?.map((entry) => <script is:inline type="application/ld+json" set:html={serializeJsonLd(entry)} />)}

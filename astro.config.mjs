@@ -32,6 +32,19 @@ export default defineConfig({
   },
   fonts: [
     {
+      provider: fontProviders.local(), name: 'Shrikhand', cssVariable: '--font-shrikhand',
+      fallbacks: ['Arial Black', 'serif'],
+      options: { variants: [{ src: ['@fontsource/shrikhand/files/shrikhand-latin-400-normal.woff2'], weight: '400', style: 'normal' }] },
+    },
+    {
+      provider: fontProviders.local(), name: 'Kalam', cssVariable: '--font-kalam',
+      fallbacks: ['Comic Sans MS', 'Chalkboard SE', 'cursive'],
+      options: { variants: [
+        { src: ['@fontsource/kalam/files/kalam-latin-400-normal.woff2'], weight: '400', style: 'normal' },
+        { src: ['@fontsource/kalam/files/kalam-latin-700-normal.woff2'], weight: '700', style: 'normal' },
+      ] },
+    },
+    {
       provider: fontProviders.local(),
       name: 'Instrument Sans',
       cssVariable: '--font-instrument',
