@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import type { AppProps } from '../../registry/apps';
 import type { Category, ClientProject } from '../../types/content';
 import type { MenuItemSpec } from '../../types/apps';
@@ -39,7 +39,7 @@ export default function ProjectsApp(props: AppProps) {
   const [history, setHistory] = useState({ routes: [route], cursor: 0 });
   const historyRef = useRef(history); historyRef.current = history;
   const scrolls = useRef(new Map<string, number>()); const lastRoute = useRef(route); const restored = useRef(route);
-  const readyCalled = useRef(false); const searchRef = useRef<HTMLInputElement>(null);
+  const readyCalled = useRef(false); const searchRef = useRef<HTMLInputElement>(null); const host = useRef<HTMLDivElement>(null);
   const pendingCategory = useRef<Category | null>(null); const typeAhead = useRef({ text: '', time: 0 });
   const categoryScroll = useRef<{ top: number; category: Category } | null>(null);
   const visible = useMemo(() => data ? orderedForView(sortProjects(filterProjects(data.projects, folder, search), sort), view, folder === 'all') : [], [data, folder, search, sort, view]);
@@ -117,6 +117,45 @@ export default function ProjectsApp(props: AppProps) {
     ];
     openContextMenu({ ...point ?? { x: rect.x, y: rect.bottom }, target: `project:${item.slug}`, items });
   };
+  const contextRef = useRef(context); contextRef.current = context;
+  const projectsRef = useRef(data?.projects); projectsRef.current = data?.projects;
+  // Phone tiles open on tap, so a 500 ms hold (cancelled beyond 8 px, as on the
+  // home screen) opens the tile's context menu with Quick Look. Android's own
+  // long-press contextmenu is folded into the same gesture.
+  useEffect(() => {
+    const element = host.current;
+    if (props.mode !== 'mobile' || !element) return;
+    let timer: ReturnType<typeof setTimeout> | undefined; let start: { x: number; y: number } | null = null; let held = false;
+    const tile = (target: EventTarget | null) => (target as Element | null)?.closest<HTMLElement>('.project-tile[data-project]') ?? null;
+    const open = (link: HTMLElement) => {
+      const item = projectsRef.current?.find(project => project.slug === link.dataset.project);
+      if (!item || held) return;
+      held = true; clearTimeout(timer); contextRef.current(item, link);
+    };
+    const cancel = () => { clearTimeout(timer); start = null; };
+    const down = (event: PointerEvent) => {
+      const link = tile(event.target);
+      if (event.button !== 0 || !link) return;
+      held = false; start = { x: event.clientX, y: event.clientY };
+      timer = setTimeout(() => open(link), 500);
+    };
+    const move = (event: PointerEvent) => { if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) cancel(); };
+    const click = (event: MouseEvent) => { if (held && event.detail !== 0 && tile(event.target)) { event.preventDefault(); event.stopPropagation(); held = false; } };
+    const contextmenu = (event: MouseEvent) => {
+      const link = tile(event.target); if (!link) return;
+      // Keyboard and mouse menus arrive without a pointer still held down.
+      if (!start) held = false;
+      event.preventDefault(); event.stopPropagation(); open(link);
+    };
+    element.addEventListener('pointerdown', down); window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', cancel); window.addEventListener('pointercancel', cancel);
+    element.addEventListener('click', click, true); element.addEventListener('contextmenu', contextmenu, true);
+    return () => {
+      cancel(); element.removeEventListener('pointerdown', down); window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', cancel); window.removeEventListener('pointercancel', cancel);
+      element.removeEventListener('click', click, true); element.removeEventListener('contextmenu', contextmenu, true);
+    };
+  }, [props.mode]);
   useAppCommands(props.windowId, command => {
     if (command.startsWith('projects.view.')) { setView(command.slice(14) as ProjectView); return true; }
     if (command.startsWith('projects.sort.')) { const key = command.slice(14) as ProjectSort; setSort({ key, descending: key === 'year' }); return true; }
@@ -199,7 +238,7 @@ export default function ProjectsApp(props: AppProps) {
           {error ? <p className="projects-data-error" role="alert">Couldn't load projects. <button type="button" onClick={retry}>Retry</button></p>
             : <><span className="sr-only" role="status">Loading projects…</span><div className="projects-loading-sidebar">{Array.from({ length: 10 }, (_, i) => <i key={i} />)}</div><div className="projects-loading-grid">{Array.from({ length: 12 }, (_, i) => <i key={i} />)}</div></>}
         </div>;
-  return <div className="projects-host" onKeyDown={keyboard} onScrollCapture={event => {
+  return <div className="projects-host" ref={host} onKeyDown={keyboard} onScrollCapture={event => {
     if ((event.target as HTMLElement).hasAttribute('data-scroll-root')) scrolls.current.set(route, (event.target as HTMLElement).scrollTop);
   }}>{content}</div>;
 }

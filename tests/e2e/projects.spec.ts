@@ -2,13 +2,19 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect, openMenu } from './fixtures';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expectNoHorizontalOverflow, expectSheetAccessible, expectTapTargets, holdTile, isPhone, openSheetFromHome, phoneScreenshot, phoneSizes } from './phone-sheet-checks';
 
 const artifacts = resolve('.astro/p3-1-artifacts');
 async function index(page: Page) {
   await page.goto('/projects');
   await expect(page.locator('#static-window')).toHaveAttribute('hidden', '');
   return page.locator('[data-window-id="projects"]');
+}
+// Phone sheets own detail navigation: the header's "‹ Projects" replaces the app toolbar's Back.
+async function backToIndex(page: Page, win: Locator) {
+  if (await isPhone(page)) await win.getByRole('link', { name: 'Back to Projects', exact: true }).tap();
+  else await win.getByRole('button', { name: 'Back', exact: true }).click();
 }
 
 test('the first visible case-study screenshot is requested before app hydration', async ({ page }) => {
@@ -87,22 +93,33 @@ test('List sorts by Year; Gallery inspector provides links and opens the selecte
 });
 
 test('Salli detail facts, screen 2 Quick Look, Back preserves selection and scroll, Forward returns', async ({ page }) => {
-  const win = await index(page);
+  const win = await index(page); const phone = await isPhone(page);
   const salli = win.getByRole('option', { name: 'Salli', exact: true }); await salli.scrollIntoViewIfNeeded();
-  await salli.click(); const scroll = await win.locator('[data-scroll-root]').evaluate(el => el.scrollTop);
-  await salli.dblclick(); await expect(page).toHaveURL(/\/projects\/salli$/);
+  // Desktop selects on click and opens on double-click; phone tiles open on a single tap.
+  const scrollTop = () => win.locator('[data-scroll-root]').evaluate(el => el.scrollTop); let scroll: number;
+  if (phone) { scroll = await scrollTop(); await salli.tap(); }
+  else { await salli.click(); scroll = await scrollTop(); await salli.dblclick(); }
+  await expect(page).toHaveURL(/\/projects\/salli$/);
   await expect(win.getByRole('heading', { name: 'Salli', exact: true })).toBeVisible();
   await expect(win.getByRole('definition').filter({ hasText: '99.52%' })).toBeVisible();
   const factTops = await win.locator('.project-facts dd').evaluateAll(elements => elements.map(el => el.getBoundingClientRect().top));
-  expect(Math.max(...factTops) - Math.min(...factTops)).toBeLessThanOrEqual(1);
-  await win.getByRole('button', { name: 'Open screen 2 of 3: Activity', exact: true }).click();
+  // Phone sheets lay the facts strip out as a 2-column grid; each row stays aligned.
+  const perRow = phone ? 2 : factTops.length;
+  for (let start = 0; start < factTops.length; start += perRow) {
+    const row = factTops.slice(start, start + perRow); expect(Math.max(...row) - Math.min(...row)).toBeLessThanOrEqual(1);
+  }
+  const screen = win.getByRole('button', { name: 'Open screen 2 of 3: Activity', exact: true });
+  if (phone) await screen.tap(); else await screen.click();
   const preview = page.getByRole('dialog', { name: 'Quick Look — Salli' });
   await expect(preview.getByRole('status')).toHaveText('2 of 3'); await expect(page).toHaveURL(/\?shot=1$/);
-  await page.keyboard.press('Escape'); await expect(preview).toBeHidden();
-  await win.getByRole('button', { name: 'Back', exact: true }).click(); await expect(page).toHaveURL(/\/projects$/);
+  if (phone) await preview.getByRole('button', { name: 'Close Quick Look' }).tap(); else await page.keyboard.press('Escape');
+  await expect(preview).toBeHidden();
+  await backToIndex(page, win); await expect(page).toHaveURL(/\/projects$/);
   await expect(salli).toHaveAttribute('aria-selected', 'true');
   expect(await win.locator('[data-scroll-root]').evaluate(el => el.scrollTop)).toBe(scroll);
-  await win.getByRole('button', { name: 'Forward', exact: true }).click(); await expect(page).toHaveURL(/\/projects\/salli$/);
+  const forward = win.getByRole('button', { name: 'Forward', exact: true });
+  if (phone) await forward.tap(); else await forward.click();
+  await expect(page).toHaveURL(/\/projects\/salli$/);
 });
 
 test('keyboard grid arrows, type-ahead, search shortcut, Return and Space Quick Look UI flow', async ({ page }) => {
@@ -115,7 +132,8 @@ test('keyboard grid arrows, type-ahead, search shortcut, Return and Space Quick 
   await page.keyboard.type('salli'); const salli = win.getByRole('option', { name: 'Salli', exact: true }); await expect(salli).toBeFocused();
   await page.keyboard.press('Space'); const preview = page.getByRole('dialog', { name: 'Quick Look — Salli' });
   await expect(preview.getByRole('status')).toHaveText('1 of 3'); await page.keyboard.press('Space'); await expect(preview).toBeHidden();
-  await win.getByRole('button', { name: 'Back', exact: true }).click(); await expect(salli).toBeFocused();
+  // A phone with a hardware keyboard keeps these keys; only Back moves to the sheet header.
+  await backToIndex(page, win); await expect(salli).toBeFocused();
   await page.keyboard.press('/'); await expect(win.getByRole('searchbox')).toBeFocused();
   await win.getByRole('searchbox').fill('Salli'); await win.getByRole('option', { name: 'Salli', exact: true }).focus();
   await page.keyboard.press('Enter'); await expect(page).toHaveURL(/\/projects\/salli$/);
@@ -240,4 +258,78 @@ for (const path of ['/projects', '/projects/salli']) test(`${path} adopts identi
     await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
     expect(await page.evaluate(() => (window as unknown as { projectsCls: number }).projectsCls)).toBe(0);
   } finally { release(); await page.unrouteAll({ behavior: 'wait' }); }
+});
+
+test.describe('Projects phone sheet @mobile', () => {
+  test.beforeEach(({}, info) => { test.skip(!info.project.name.startsWith('mobile'), 'Phone sheets are covered by the mobile projects.'); });
+  for (const size of phoneSizes) test(`chips, three-column icons and detail at ${size.width}×${size.height} ${size.theme}`, async ({ page }, info) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+    const sheet = await openSheetFromHome(page, 'Projects', 'projects', 'Projects', size);
+    await expect(sheet.getByRole('option')).toHaveCount(18);
+    // D§13.3: the sidebar becomes one horizontal row of filter chips.
+    const chips = sheet.getByRole('navigation', { name: 'Project folders' });
+    const tops = await chips.getByRole('link').evaluateAll(links => links.map(link => Math.round(link.getBoundingClientRect().top)));
+    expect(new Set(tops).size).toBe(1);
+    expect(await chips.evaluate(el => getComputedStyle(el).overflowX)).toBe('auto');
+    // Icons view uses exactly three columns at every phone width.
+    for (const grid of await sheet.locator('.projects-grid').all()) {
+      expect(await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length)).toBe(3);
+    }
+    const lefts = await sheet.locator('.projects-category').first().getByRole('option').evaluateAll(tiles => tiles.slice(0, 4).map(tile => Math.round(tile.getBoundingClientRect().left)));
+    expect(new Set(lefts.slice(0, 3)).size).toBe(3); expect(lefts[3]).toBe(lefts[0]);
+    await expectNoHorizontalOverflow(sheet);
+    await expectTapTargets(sheet.locator('.sheet-header, .projects-toolbar, .projects-sidebar, .projects-icons'));
+    await expectSheetAccessible(page, 'projects');
+    await phoneScreenshot(page, info, 'projects', size);
+    // Chips filter: Incubating shows five tiles; Featured six; All projects restores 18.
+    await chips.getByRole('link', { name: 'Incubating' }).tap();
+    await expect(sheet.getByRole('option')).toHaveCount(5);
+    await expect(chips.getByRole('link', { name: 'Incubating' })).toHaveAttribute('aria-current', 'page');
+    await chips.getByRole('link', { name: 'Featured' }).tap(); await expect(sheet.getByRole('option')).toHaveCount(6);
+    await chips.getByRole('link', { name: 'All projects' }).tap(); await expect(sheet.getByRole('option')).toHaveCount(18);
+    // A category chip scrolls its group into view.
+    await chips.getByRole('link', { name: 'Hardware' }).tap();
+    await expect(chips.getByRole('link', { name: 'Hardware' })).toHaveAttribute('aria-current', 'location');
+    await expect(sheet.locator('#projects-group-hardware')).toBeInViewport();
+    // List and Gallery stay inside the sheet too.
+    for (const view of ['List', 'Gallery', 'Icons']) {
+      await sheet.getByRole('radio', { name: view, exact: true }).tap();
+      await expectNoHorizontalOverflow(sheet);
+    }
+    // Tap opens the single-column detail; the sheet header supplies Back.
+    const salli = sheet.getByRole('option', { name: 'Salli', exact: true });
+    await salli.scrollIntoViewIfNeeded(); await salli.tap();
+    await expect(sheet.getByRole('heading', { name: 'Salli', exact: true })).toBeVisible();
+    await expect(sheet.locator('.sheet-header')).toContainText('Projects');
+    const info2 = (await sheet.locator('.project-info').boundingBox())!; const story = (await sheet.locator('.project-story').boundingBox())!;
+    expect(info2.y).toBeLessThan(story.y); expect(Math.abs(info2.x - story.x)).toBeLessThanOrEqual(1);
+    await expectNoHorizontalOverflow(sheet);
+    await expectTapTargets(sheet.locator('.sheet-header, .project-hero-links, .project-screens, .project-footer'));
+    await expectSheetAccessible(page, 'projects');
+    await phoneScreenshot(page, info, 'projects-salli', size);
+    await sheet.getByRole('link', { name: 'Back to Projects', exact: true }).tap();
+    await expect(salli).toHaveAttribute('aria-selected', 'true');
+    expect(errors).toEqual([]);
+  });
+
+  test('holding a tile opens its menu; moving cancels and a tap still opens the project', async ({ page }) => {
+    const win = await index(page);
+    const salli = win.getByRole('option', { name: 'Salli', exact: true }); await salli.scrollIntoViewIfNeeded();
+    const menu = await holdTile(page, salli);
+    for (const item of ['Open', 'Quick Look', 'Open live site ↗', 'View source ↗', 'Copy link']) await expect(menu.getByRole('menuitem', { name: item, exact: true })).toBeVisible();
+    await expect(page).toHaveURL(/\/projects$/);
+    // The release after a hold must not also open the project.
+    await salli.dispatchEvent('click', { detail: 1 }); await expect(page).toHaveURL(/\/projects$/);
+    await page.keyboard.press('Escape'); await expect(menu).toBeHidden();
+    await page.clock.install({ time: new Date('2026-10-11T12:00:00Z') }); await page.clock.pauseAt(new Date('2026-10-11T12:00:01Z'));
+    const box = (await salli.boundingBox())!; const x = box.x + box.width / 2; const y = box.y + box.height / 2;
+    await salli.dispatchEvent('pointerdown', { button: 0, pointerId: 8, pointerType: 'touch', clientX: x, clientY: y });
+    await salli.dispatchEvent('pointermove', { pointerId: 8, pointerType: 'touch', clientX: x, clientY: y + 9 });
+    await page.clock.runFor(600); await expect(page.getByRole('menu')).toHaveCount(0);
+    await salli.dispatchEvent('pointerup', { pointerId: 8, pointerType: 'touch', clientX: x, clientY: y + 9 });
+    await page.clock.resume();
+    await salli.tap(); await expect(page).toHaveURL(/\/projects\/salli$/);
+  });
 });
