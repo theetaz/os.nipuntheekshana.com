@@ -104,9 +104,10 @@ export async function variantSizes(master, asset, quality) {
     const width = Math.min(size * density, meta.width);
     const options = format === 'avif' ? { quality: quality.avif, effort: 6 } : { quality: quality.webp, alphaQuality: 90, effort: 6 };
     const bytes = (await sharp(master).resize({ width, kernel: 'lanczos3', withoutEnlargement: true }).toFormat(format, options).toBuffer()).length;
-    // Astro's unconfigured Sharp service uses its own encoder defaults. Check both
-    // until the site configuration adopts the same encoder settings.
-    const astroBytes = (await sharp(master).resize({ width, kernel: 'lanczos3', withoutEnlargement: true }).toFormat(format, { quality: quality[format] }).toBuffer()).length;
+    // Astro supplies both rounded dimensions, so Sharp's default cover fit can
+    // differ slightly from a width-only resize. Match that path and its defaults.
+    const astroBytes = (await sharp(master).rotate().resize({ width, height: Math.round(meta.height * width / meta.width), kernel: 'lanczos3', withoutEnlargement: true })
+      .toFormat(format, { quality: quality[format] }).toBuffer()).length;
     const cap = catalogue.families[asset.family].caps[format][density - 1];
     variants.push({ size, density, width, format, bytes, astroBytes, cap, quality: quality[format] });
   }
