@@ -5,6 +5,8 @@ import type { Line, TerminalSeed } from '../types';
 import { displayPath } from '../vfs';
 
 export const BANNER = `Serendib ${VERSION} "${CODENAME}" · nsh, the Nipun shell`;
+/** Phone sheets offer these above the keyboard (DESIGN §13.3). */
+export const QUICK_COMMANDS = ['help', 'ls', 'projects', 'now', 'neofetch', 'contact'] as const;
 export const HINT = 'Type help to see what I can do. Tab completes. ↑ and ↓ walk through history.';
 export function Prompt({ cwd }: { cwd: string }) {
   return <><span className="term-user">nipun</span><span className="term-dim">@</span><span className="term-host">serendib</span>
@@ -26,16 +28,17 @@ export function Welcome({ seed }: { seed: TerminalSeed }) {
 }
 export interface TerminalViewProps {
   seed: TerminalSeed; cwd: string; lines: readonly Line[]; welcome: boolean; value: string; busy: boolean;
-  focused: boolean; fontSize: number; fontFamily?: string; caret: number; announcement: { text: string; seq: number }; hintId: string;
+  focused: boolean; fontSize: number | null; fontFamily?: string; caret: number; announcement: { text: string; seq: number }; hintId: string;
   scrollRef: RefObject<HTMLElement | null>; inputRef: RefObject<HTMLInputElement | null>;
   onChange(value: string, cursor: number): void;
   onCaretChange(cursor: number): void;
   onKeyDown(event: KeyboardEvent<HTMLInputElement>): void;
+  onQuickCommand?(source: string): void;
 }
 export function TerminalView(props: TerminalViewProps) {
   const { scrollRef, inputRef, seed, cwd, lines, welcome, value, busy, focused, fontSize, caret, announcement, hintId } = props;
-  return <div ref={scrollRef as RefObject<HTMLDivElement>} data-scroll-root className="terminal-body" data-focused={focused}
-    style={{ '--terminal-size': `${fontSize}px`, fontFamily: props.fontFamily } as CSSProperties}
+  return <><div ref={scrollRef as RefObject<HTMLDivElement>} data-scroll-root className="terminal-body" data-focused={focused}
+    style={{ ...fontSize && { '--terminal-size': `${fontSize}px`, '--terminal-zoom': fontSize / 16 }, fontFamily: props.fontFamily } as CSSProperties}
     onClick={event => {
       if (!(event.target as Element).closest('a, button, input') && !window.getSelection()?.toString()) inputRef.current?.focus({ preventScroll: true });
     }}>
@@ -57,5 +60,11 @@ export function TerminalView(props: TerminalViewProps) {
       </div>
     </div>
     <span id={hintId} className="sr-only">Enter runs. Tab completes. Shift Tab moves focus. Up and Down recall history. Control C cancels. Control L clears.</span>
-  </div>;
+  </div>
+  {props.onQuickCommand && <div className="terminal-quick" role="group" aria-label="Quick commands" style={{ fontFamily: props.fontFamily }}>
+    {QUICK_COMMANDS.map(source => <button key={source} type="button" disabled={busy}
+      // Keep focus (and the on-screen keyboard) on the command line while a chip runs.
+      onMouseDown={event => { if (document.activeElement === inputRef.current) event.preventDefault(); }}
+      onClick={() => props.onQuickCommand?.(source)}>{source}</button>)}
+  </div>}</>;
 }

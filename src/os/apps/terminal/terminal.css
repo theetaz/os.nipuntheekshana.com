@@ -6,7 +6,7 @@
 .terminal-body {
   height: 100%; min-height: 0; overflow: auto; overscroll-behavior: contain;
   padding: 12px 14px; background: var(--term-bg); color: var(--term-ink);
-  font: 400 var(--terminal-size, 13px)/20px 'Serendib Terminal', 'Serendib Terminal fallback', monospace; font-stretch: 87.5%;
+  font: 400 var(--terminal-size, var(--terminal-base, 13px))/20px 'Serendib Terminal', 'Serendib Terminal fallback', monospace; font-stretch: 87.5%;
   font-variant-numeric: tabular-nums; cursor: text;
 }
 .terminal-body ::selection { background: rgb(255 176 112 / .30); }
@@ -51,6 +51,7 @@ html[data-motion="reduce"] .terminal-caret { animation: none !important; }
 .static-window[data-app="terminal"] .terminal-body p { margin: 0; }
 .static-window[data-app="terminal"] .terminal-body pre { padding: 0; border-radius: 0; background: transparent; }
 .terminal-static-links { margin-top: 20px; }
+.terminal-quick { display: none; }
 @container window (max-width: 440px) {
   .terminal-input-line { flex-wrap: wrap; }
   .terminal-input-wrap { min-width: min(12ch, 100%); }
@@ -58,4 +59,33 @@ html[data-motion="reduce"] .terminal-caret { animation: none !important; }
 }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
   .static-window[data-app="terminal"] .static-titlebar { min-height: calc(52px + env(safe-area-inset-top)); }
+  /* Phone sheets (DESIGN §13.3): 12 px text, a command line that never scrolls away,
+     and quick-command chips docked above the on-screen keyboard. */
+  :is(.static-window[data-app="terminal"], .managed-window[data-sheet][data-app="terminal"]) { --terminal-base: 12px; --terminal-zoom: .75; }
+  .managed-window[data-sheet] .terminal-input-line {
+    position: sticky; bottom: 0; z-index: 1; background: var(--term-bg);
+    /* Cover the body's bottom padding too, so scrolled output never shows beneath the line. */
+    box-shadow: 0 12px 0 var(--term-bg);
+  }
+  /* iOS zooms into fields under 16 px. Lay the input out at 16 px and scale it back to the terminal size. */
+  .managed-window[data-sheet] .terminal-input-wrap { height: 20px; }
+  .managed-window[data-sheet] .terminal-input-wrap input {
+    width: calc(100% / var(--terminal-zoom)); height: calc(20px / var(--terminal-zoom)); font-size: 16px;
+    transform: scale(var(--terminal-zoom)); transform-origin: 0 0;
+  }
+  .managed-window[data-sheet] .terminal-quick {
+    display: flex; flex-shrink: 0; gap: 8px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+    padding: 8px max(12px, env(safe-area-inset-left)); background: #1F1B18; border-top: 1px solid rgb(255 255 255 / .08);
+  }
+  .terminal-quick button {
+    flex-shrink: 0; min-width: 44px; height: 44px; padding: 0 14px; border: 1px solid rgb(255 255 255 / .16); border-radius: 999px;
+    background: rgb(255 255 255 / .06); color: var(--term-ink); cursor: pointer;
+    font: 500 12px/16px 'Serendib Terminal', 'Serendib Terminal fallback', monospace; font-stretch: 87.5%;
+  }
+  /* Touch has no hover: mark output links the way the desktop hover does. */
+  .managed-window[data-sheet] .terminal-body .term-link { text-decoration: underline; text-underline-offset: 3px; }
+  .terminal-quick button:active { background: rgb(255 255 255 / .14); }
+  .terminal-quick button:disabled { opacity: .5; cursor: default; }
+  .terminal-quick button:focus-visible { outline: 2px solid var(--term-caret); outline-offset: 2px; }
 }
+@media (forced-colors: active) { .terminal-quick button { border-color: ButtonText; } }

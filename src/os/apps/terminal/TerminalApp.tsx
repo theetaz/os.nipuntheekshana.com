@@ -26,7 +26,8 @@ export default function TerminalApp(props: AppProps) {
   const [cwd, setCwd] = useState(HOME); const cwdRef = useRef(HOME);
   const [lines, setLines] = useState<Line[]>([]); const [welcome, setWelcome] = useState(true);
   const [value, setValue] = useState(''); const [caret, setCaret] = useState(0); const [busy, setBusy] = useState(false);
-  const [fontSize, setFontSize] = useState(13); const [announcement, setAnnouncement] = useState({ text: '', seq: 0 });
+  // null keeps the stylesheet size: 13 px in windows, 12 px in phone sheets.
+  const [fontSize, setFontSize] = useState<number | null>(null); const [announcement, setAnnouncement] = useState({ text: '', seq: 0 });
   const columns = useRef(80); const controller = useRef<AbortController | null>(null); const mounted = useRef(true);
   const historyIndex = useRef<number | null>(null); const draft = useRef(''); const previousTab = useRef<string | null>(null);
   const pendingSelection = useRef<{ value: string; cursor: number } | null>(null);
@@ -93,9 +94,19 @@ export default function TerminalApp(props: AppProps) {
       const instance = windowId.split('~')[1];
       propsRef.current.setTitle(`nipun — nsh${instance ? ` ${instance}` : ''} — ${columns.current}×${rows}`);
     };
-    const observer = new ResizeObserver(measure); observer.observe(element); measure();
+    // Output read to its end stays there when the body shrinks (an on-screen keyboard) or when
+    // wrapped lines finish laying out after the commit that scrolled to them.
+    let atEnd = false;
+    const track = () => { atEnd = element.scrollHeight - element.clientHeight - element.scrollTop < 20; };
+    track();
+    const observer = new ResizeObserver(entries => {
+      if (atEnd) element.scrollTop = element.scrollHeight;
+      if (entries.some(entry => entry.target === element)) measure();
+    });
+    observer.observe(element); if (element.firstElementChild) observer.observe(element.firstElementChild);
+    measure(); element.addEventListener('scroll', track, { passive: true });
     let active = true; void document.fonts.ready.then(() => { if (active) measure(); });
-    return () => { active = false; observer.disconnect(); };
+    return () => { active = false; observer.disconnect(); element.removeEventListener('scroll', track); };
   }, [fontSize, scrollRootRef, windowId]);
   useEffect(() => {
     const command = props.query.cmd;
@@ -111,14 +122,18 @@ export default function TerminalApp(props: AppProps) {
     const element = scrollRootRef.current; if (element && lines.length) element.scrollTop = element.scrollHeight;
     if (lines.length === 600) setWelcome(false);
   }, [lines, scrollRootRef]);
+  const resize = useCallback((delta: 1 | -1) => setFontSize(size => {
+    const current = size ?? (parseFloat(scrollRootRef.current ? getComputedStyle(scrollRootRef.current).fontSize : '') || 13);
+    return Math.max(11, Math.min(17, current + delta));
+  }), [scrollRootRef]);
   useAppCommands(windowId, command => {
-    if (command === 'terminal.bigger') setFontSize(size => Math.min(17, size + 1));
-    else if (command === 'terminal.smaller') setFontSize(size => Math.max(11, size - 1));
+    if (command === 'terminal.bigger') resize(1);
+    else if (command === 'terminal.smaller') resize(-1);
     else if (command === 'terminal.clear') clear(); else return false;
     return true;
   });
-  const menuState = useMemo(() => ({ 'terminal.bigger': { disabled: fontSize >= 17 },
-    'terminal.smaller': { disabled: fontSize <= 11 } }), [fontSize]);
+  const menuState = useMemo(() => ({ 'terminal.bigger': { disabled: (fontSize ?? 13) >= 17 },
+    'terminal.smaller': { disabled: (fontSize ?? 13) <= 11 } }), [fontSize]);
   useAppMenuState(windowId, menuState);
   const keyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.nativeEvent.isComposing) return;
@@ -129,7 +144,7 @@ export default function TerminalApp(props: AppProps) {
     }
     if (event.ctrlKey && !event.altKey && !event.metaKey && event.code === 'KeyL') { event.preventDefault(); event.stopPropagation(); clear(); return; }
     if (event.altKey && ['Equal', 'Minus'].includes(event.code)) {
-      event.preventDefault(); event.stopPropagation(); setFontSize(size => Math.max(11, Math.min(17, size + (event.code === 'Equal' ? 1 : -1)))); return;
+      event.preventDefault(); event.stopPropagation(); resize(event.code === 'Equal' ? 1 : -1); return;
     }
     if (busy) return;
     if (event.ctrlKey && ['KeyA', 'KeyE'].includes(event.code)) {
@@ -166,5 +181,6 @@ export default function TerminalApp(props: AppProps) {
   };
   return <TerminalView seed={seed} cwd={cwd} lines={lines} welcome={welcome} value={value} busy={busy} focused={focused}
     fontSize={fontSize} fontFamily={fontFamily} caret={caret} announcement={announcement} scrollRef={scrollRootRef} inputRef={inputRef}
-    hintId={`terminal-key-hint-${windowId}`} onChange={change} onCaretChange={setCaret} onKeyDown={keyDown} />;
+    hintId={`terminal-key-hint-${windowId}`} onChange={change} onCaretChange={setCaret} onKeyDown={keyDown}
+    onQuickCommand={source => { void run(source).catch(() => {}); }} />;
 }

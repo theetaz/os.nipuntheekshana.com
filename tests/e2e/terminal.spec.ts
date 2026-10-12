@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page, Locator } from '@playwright/test';
 import { test, expect, openMenu, openApp } from './fixtures';
+import { expectAboveKeyboard, expectAccessibleSheet, expectNoHorizontalOverflow, expectTapTargets, hideKeyboard, openFromHome, phoneOnly, showKeyboard } from './phone-sheet-checks';
 
 const terminal = (page: Page, id = 'terminal') => page.locator(`[data-window-id="${id}"]`);
 const output = (win: Locator) => win.locator('.terminal-output > [aria-live="off"]');
@@ -198,9 +199,50 @@ test('route has no serious accessibility violations and produces light/dark desk
     await page.screenshot({ path: resolve(artifactDir, `terminal-${theme}-desktop.png`) });
     // P4 phone app hosting is still a stub. Exercise the actual named window container at narrow width.
     await win.evaluate(el => { (el as HTMLElement).style.width = '390px'; });
+    await expect(win.getByRole('group', { name: 'Quick commands' })).toBeHidden();
     expect(await win.locator('.terminal-body').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
     await page.screenshot({ path: resolve(artifactDir, `terminal-${theme}-narrow.png`) });
   }
+});
+
+test('@mobile Terminal opens from home with 12 px text, quick commands and a command line above the keyboard at 360 px', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Phone sheets are covered by the mobile projects.');
+  await page.setViewportSize({ width: 360, height: 780 });
+  const win = await openFromHome(page, '/terminal');
+  await expect(win).toHaveAttribute('data-app', 'terminal');
+  const input = win.getByRole('textbox', { name: 'Terminal command' });
+  await expect(win.locator('.terminal-body')).toHaveCSS('font-size', '12px');
+  // The field lays out at 16 px (no iOS focus zoom) and is scaled to the 12 px line.
+  await expect(input).toHaveCSS('font-size', '16px');
+  expect((await input.boundingBox())!.height).toBeCloseTo(20, 0);
+  const chips = win.getByRole('group', { name: 'Quick commands' });
+  await expect(chips.getByRole('button')).toHaveText(['help', 'ls', 'projects', 'now', 'neofetch', 'contact']);
+  const chipsBox = (await chips.boundingBox())!; const body = (await win.locator('.terminal-body').boundingBox())!;
+  expect(chipsBox.y).toBeGreaterThanOrEqual(body.y + body.height - 1); expect(chipsBox.y + chipsBox.height).toBeLessThanOrEqual(780.5);
+  await expectNoHorizontalOverflow(win); await expectTapTargets(win, '.terminal-input-wrap input'); await expectAccessibleSheet(page);
+  // Chips run commands without taking focus from the command line, so the keyboard stays up.
+  await input.tap(); await expect(input).toBeFocused();
+  await chips.getByRole('button', { name: 'neofetch', exact: true }).tap();
+  await expect(output(win)).toContainText('Kernel'); await expect(input).toBeFocused();
+  await chips.getByRole('button', { name: 'projects', exact: true }).tap();
+  await expect(output(win)).toContainText('18 projects.');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('serendib:terminal:history') ?? '[]'))).toEqual(['neofetch', 'projects']);
+  await expectNoHorizontalOverflow(win);
+  await showKeyboard(page, 400);
+  await expectAboveKeyboard(input, 400); await expectAboveKeyboard(chips, 400);
+  // Output that was read to its end stays anchored there as the sheet shrinks.
+  await expectAboveKeyboard(win.locator('.terminal-line').filter({ hasText: '18 projects.' }).last(), 400);
+  // Scrolling the output back keeps the command line pinned above the chips.
+  await win.locator('.terminal-body').evaluate(node => { node.scrollTop = 0; });
+  await expectAboveKeyboard(input, 400); await expect(input).toBeInViewport();
+  await command(win, 'whoami'); await expect(output(win)).toContainText('engineer from Sri Lanka');
+  await expectAboveKeyboard(win.locator('.terminal-line').filter({ hasText: 'engineer from Sri Lanka' }).last(), 400);
+  await hideKeyboard(page);
+  // A chosen size still wins over the phone default.
+  await openMenu(page, 'View'); await page.getByRole('menuitem', { name: 'Bigger text', exact: true }).click();
+  await expect(win.locator('.terminal-body')).toHaveCSS('font-size', '13px');
+  expect((await input.boundingBox())!.height).toBeCloseTo(20, 0);
+  await expectNoHorizontalOverflow(win); await expectAccessibleSheet(page);
 });
 
 test('no-JS route shows the banner, help, fallback links and readable phone content', async ({ browser }) => {
