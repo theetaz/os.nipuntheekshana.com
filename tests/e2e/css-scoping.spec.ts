@@ -69,7 +69,7 @@ for (const app of Object.values(APPS).filter(app => app.phase === 'v1')) {
       const requested = css.length ? page.waitForRequest(request => css.includes(new URL(request.url()).pathname)) : null;
       if(await page.locator('html').getAttribute('data-mode')==='mobile') {if(app.id==='readme'){await openMenu(page,'Help');await page.getByRole('menuitem',{name:'Read me',exact:true}).click();}else await openApp(page,app.name);}
       else if (app.dockOrder !== null) await openApp(page, app.name);
-      else if (app.desktopIcon) await page.getByRole('option', { name: app.desktopIcon.label, exact: true }).dblclick();
+      else if (app.id === 'readme') await page.locator('[data-prop="thambili"]').click();
       else { await openMenu(page, 'Go'); await page.getByRole('menuitem', { name: app.name, exact: true }).click(); }
       if (requested) {
         await requested;

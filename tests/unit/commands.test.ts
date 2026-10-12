@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createOsStore, getStore, registerStore } from '../../src/os/state/store';
-import { alertsAtom, announceAtom, desktopAtom, geometryAtom, iconPositionsAtom, overlayAtom, quickLookAtom,
+import { alertsAtom, announceAtom, desktopAtom, geometryAtom, propsAtom, overlayAtom, quickLookAtom,
   spotlightOpenAtom, themePrefAtom, toastsAtom, wallpaperAtom } from '../../src/os/state/atoms';
 import { alert, announce, closeQuickLook, closeWindow, copyWindowLink, cycleWindows, focusWindow, minimizeWindow,
   navigateWindow, openApp, openQuickLook, quitApp, registerBeforeClose, resolveAlert, restoreWindow, runCommand,
@@ -88,7 +88,7 @@ describe('shell command APIs', () => {
     runCommand('os.spotlight', 'shortcut'); expect(store.get(spotlightOpenAtom)).toBe(true);
     runCommand('os.escape', 'shortcut'); expect(store.get(spotlightOpenAtom)).toBe(false);
     runCommand('os.sleep', 'menu'); expect(store.get(overlayAtom)).toBe('screensaver');
-    store.set(iconPositionsAtom, { projects: { x: 3, y: 4 } }); runCommand('desktop.cleanUp', 'menu'); expect(store.get(iconPositionsAtom)).toEqual({});
+    store.set(propsAtom, { tuktuk: { dx: 3, dy: 4 } }); runCommand('desktop.cleanUp', 'menu'); expect(store.get(propsAtom)).toEqual({});
     openQuickLook({ slug: 'salli', index: 1, from: null }); expect(windowState().query).toEqual({ shot: '1' });
     expect(store.get(quickLookAtom)).toEqual({ from: null }); closeQuickLook(); expect(windowState().query).toEqual({});
     expect(store.get(quickLookAtom)).toBeNull();

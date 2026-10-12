@@ -90,17 +90,16 @@ test('wallpapers apply live and all four previews retain their own ids', async (
 });
 
 
-test('Desktop resets remove remembered geometry and icon positions and widgets update live', async ({ page }) => {
+test('Desktop resets remove remembered geometry and prop positions', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('serendib:geometry:v1', JSON.stringify({ projects: { x: 24, y: 60, w: 600, h: 440 } }));
-    localStorage.setItem('serendib:icons:v1', JSON.stringify({ projects: { x: 160, y: 160 } }));
+    localStorage.setItem('serendib:props:v1', JSON.stringify({ tuktuk: { dx: 160, dy: 160 } }));
   });
   await settings(page); await section(page, 'Desktop');
   await app(page).getByRole('button', { name: 'Reset window sizes and positions', exact: true }).click();
   expect(await stored(page, 'geometry:v1')).toBeNull();
-  await app(page).getByRole('button', { name: 'Reset icon positions', exact: true }).click(); expect(await stored(page, 'icons:v1')).toBeNull();
-  await app(page).getByRole('switch', { name: 'Show widgets' }).click();
-  expect(await stored(page, 'widgets')).toBe('false');
+  await app(page).getByRole('button', { name: 'Reset prop positions', exact: true }).click(); await expect.poll(() => stored(page, 'props:v1')).toBe('{}');
+  expect(await page.locator('html').evaluate(el => el.style.getPropertyValue('--k-dx-tuktuk'))).toBe('0');
 });
 
 test('Sound binds its switch and volume and lazily plays an audio sample', async ({ page }) => {
@@ -136,7 +135,7 @@ test('Mochi writes preserve position and pets, and pet reset requires confirmati
 
 test('desktop context query selects Wallpaper, menu state follows selection and window stays fixed', async ({ page }) => {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  await page.mouse.click(900, 650, { button: 'right' }); await page.getByRole('menuitem', { name: 'Change wallpaper…' }).click();
+  await page.mouse.click(700, 640, { button: 'right' }); await page.getByRole('menuitem', { name: 'Change wallpaper…' }).click();
   await expect(app(page).getByRole('region', { name: 'Wallpaper', exact: true })).toBeVisible();
   await expect(app(page).locator('[id="window-title-settings"]')).toHaveText('Wallpaper');
   await expect(app(page).locator('[data-resize-handle]')).toHaveCount(0); await expect(app(page).locator('[data-transition]')).toHaveCount(0);
