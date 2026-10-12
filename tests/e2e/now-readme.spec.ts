@@ -4,6 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { GLOBAL_SHORTCUTS, formatShortcut } from '../../src/os/lib/hotkeys-match';
 import { test, expect, openMenu } from './fixtures';
+import { NARROW_PHONE, expectPhoneSheetFits, expectSheetAccessible, openFromHome, phoneOnly } from './phone-sheet';
 
 const managed = (page: Page, app: string) => page.locator(`.managed-window[data-app="${app}"]`);
 async function openShortcuts(page: Page, waitForContent = true) {
@@ -189,3 +190,21 @@ for (const app of ['now', 'readme']) for (const [mode, viewport] of [
     expect(errors).toEqual([]);
   });
 }
+
+test('Now opens from home and fits 360 px with touch-sized links @mobile', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Pocket sheets are covered by the mobile projects.');
+  await page.setViewportSize(NARROW_PHONE);
+  const sheet = await openFromHome(page, 'Now', 'now');
+  await expect(sheet.locator('ol li')).toHaveCount(5);
+  await expectPhoneSheetFits(sheet); await expectSheetAccessible(page);
+});
+
+test('Read me opens from home; section links jump within the sheet at 360 px @mobile', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Pocket sheets are covered by the mobile projects.');
+  await page.setViewportSize(NARROW_PHONE);
+  const sheet = await openFromHome(page, 'Read me', 'readme');
+  await expectPhoneSheetFits(sheet); await expectSheetAccessible(page);
+  await sheet.getByRole('navigation', { name: 'In this document' }).getByRole('link', { name: 'Privacy', exact: true }).tap();
+  await expect(sheet.getByRole('heading', { name: 'Privacy', exact: true })).toBeInViewport();
+  await expectPhoneSheetFits(sheet, 'Privacy');
+});

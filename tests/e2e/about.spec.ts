@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { test, expect, openApp, openMenu } from './fixtures';
+import { NARROW_PHONE, expectPhoneSheetFits, expectSheetAccessible, openFromHome, phoneOnly } from './phone-sheet';
 
 const app = (page: Page) => page.locator('[data-window-id="about"]');
 const artifacts = resolve('.astro/p3-3-artifacts');
@@ -277,5 +278,19 @@ test('adoption has zero CLS and narrow content fits a 390px host in both themes 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/about');
     await expect(app(page).getByRole('tab', { name: 'Overview', exact: true })).toBeVisible();
+  }
+});
+
+test('About opens from home; all five tabs fit and select their views at 360 px @mobile', async ({ page }, info) => {
+  test.skip(phoneOnly(info), 'Pocket sheets are covered by the mobile projects.');
+  await page.setViewportSize(NARROW_PHONE);
+  const sheet = await openFromHome(page, 'About', 'about');
+  const tabs = sheet.getByRole('tablist', { name: 'About sections' });
+  await expect(sheet.getByRole('heading', { name: 'Nipun Theekshana', exact: true })).toBeVisible();
+  for (const [name, heading] of [['Overview', 'Nipun Theekshana'], ['Story', 'Story'], ['Principles', 'Principles'], ['Toolbox', 'Toolbox'], ['Life', 'Life']]) {
+    await tabs.getByRole('tab', { name, exact: true }).tap();
+    await expect(tabs.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true');
+    await expect(sheet.getByRole('heading', { name: heading, exact: true })).toBeVisible();
+    await expectPhoneSheetFits(sheet, name); await expectSheetAccessible(page, name);
   }
 });

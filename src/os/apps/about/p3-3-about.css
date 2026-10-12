@@ -69,6 +69,14 @@ button.about-avatar-button { cursor: pointer; }
   .about-actions a { min-height: 44px; }
   .about-more { display: flex; align-items: center; min-height: 44px; }
 }
+/* Pocket sheets (D§13.3): the sheet header sits above the content, so the
+   tabs need no title-bar clearance, and all five fit 360 px without scrolling. */
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
+  @container window (max-width: 559px) {
+    .about-sidebar { margin-top: 12px; }
+    .about-sidebar :is(button, a) { flex: 1 1 auto; min-width: 44px; padding: 0 8px; }
+  }
+}
 @container window (max-width: 340px) {
   .about-specs > div { grid-template-columns: 1fr; gap: 4px; }
   .about-specs dt { text-align: left; }
