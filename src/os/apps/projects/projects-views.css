@@ -23,7 +23,7 @@
 .projects-filmstrip a.is-selected { outline: 2px solid var(--os-accent); outline-offset: 3px; }
 .projects-filmstrip img { width: 88px; height: 66px; object-fit: cover; }
 .projects-inspector { padding: 20px; overflow: auto; background: var(--os-sidebar); border-left: 1px solid var(--os-line); }
-.projects-inspector h2 { font: 500 20px/26px var(--font-display); margin-top: 12px; }
+.projects-inspector h2 { font: 700 20px/26px var(--font-ui); margin-top: 12px; }
 .projects-inspector p { margin-top: 12px; }
 .projects-inspector h3 { margin: 20px 0 8px; font: 500 10px/14px var(--font-mono); text-transform: uppercase; color: var(--os-ink-2); }
 .projects-inspector .project-tagline { font-weight: 600; }
@@ -32,7 +32,7 @@
 .project-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .project-links a { color: var(--os-accent-ink); }
 .projects-archive { padding: 28px 24px; }
-.projects-archive h2 { font: 500 28px/34px var(--font-display); margin-bottom: 12px; }
+.projects-archive h2 { font: 400 32px/38px var(--font-display); font-synthesis: none; margin-bottom: 12px; }
 .projects-archive > p { color: var(--os-ink-2); margin-bottom: 24px; }
 .projects-archive table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .projects-archive :is(th, td) { padding: 12px 8px; border-bottom: 1px solid var(--os-line); vertical-align: top; text-align: left; }

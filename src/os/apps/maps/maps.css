@@ -4,10 +4,10 @@
 .maps-stage { outline-offset: -4px; touch-action: none; cursor: grab; }
 .maps-view[data-playing="true"] .maps-stage { cursor: crosshair; }
 .maps-stage > canvas { pointer-events: none; animation: maps-canvas-in 400ms ease both; }
-.maps-poster { color: var(--os-accent); transition: opacity 400ms ease; }
+.maps-poster { color: var(--os-accent-ink); transition: opacity 400ms ease; }
 .maps-view[data-surface="webgl"] .maps-poster { opacity: 0; }
 .maps-poster[data-coastline="false"] [data-map-coast], .maps-poster[data-graticule="false"] [data-map-grid] { display: none; }
-.maps-glass { background: var(--glass-bg); border: 1px solid var(--os-line-strong); border-radius: var(--r-card); backdrop-filter: blur(16px); box-shadow: var(--shadow-card); }
+.maps-glass { background: var(--glass-bg); border: var(--k-bw-chrome); border-radius: var(--r-card); box-shadow: var(--shadow-card); }
 .maps-toolbar { position: absolute; top: 8px; left: 112px; right: 16px; display: flex; align-items: start; justify-content: center; z-index: 3; pointer-events: none; gap: 16px; }
 .maps-toolbar button, .maps-toolbar fieldset { pointer-events: auto; }
 .maps-modes { display: flex; padding: 2px; border-radius: var(--r-pill); gap: 2px; }
@@ -21,7 +21,7 @@
 .maps-layers label { display: flex; align-items: center; gap: 8px; padding: 6px; font: 450 13px/18px var(--font-ui); }
 .maps-layers input { accent-color: var(--os-accent); }
 .maps-info { position: absolute; top: 56px; left: 16px; width: 248px; padding: 16px; z-index: 2; }
-.maps-info h1, .maps-static-card h1 { font: 500 20px/26px var(--font-display); margin: 0 0 6px; }
+.maps-info h1, .maps-static-card h1 { font: 700 20px/26px var(--font-ui); margin: 0 0 6px; }
 .maps-info p { font: 450 12px/16px var(--font-ui); margin: 0 0 6px; color: var(--os-ink-2); }
 .maps-info button { color: var(--os-accent-ink); text-align: left; padding: 4px 0; }
 .maps-view a, .maps-static a { color: var(--os-accent-ink); text-underline-offset: 3px; }
@@ -33,7 +33,7 @@
 .maps-game header button { width: 28px; height: 28px; font-size: 20px; border-radius: 8px; }
 .maps-eyebrow { font: 500 10.5px/14px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
 .maps-game-round { display: flex; justify-content: space-between; font: 400 11px/18px var(--font-mono); font-variant-numeric: tabular-nums; }
-.maps-game h2 { font: 450 32px/38px var(--font-display); letter-spacing: -.015em; margin: 20px 0 6px; }
+.maps-game h2 { font: 400 32px/38px var(--font-display); font-synthesis: none; letter-spacing: -.015em; margin: 20px 0 6px; }
 .maps-game p { font: 450 13px/18px var(--font-ui); margin: 12px 0; }
 .maps-game .maps-city-si { font: 500 20px/26px var(--font-sinhala); margin: 0 0 20px; }
 .maps-game .maps-game-keys { font-size: 11px; line-height: 16px; color: var(--os-ink-2); }
@@ -123,7 +123,7 @@
     .managed-window[data-app="maps"] .maps-layers { top: calc(100% + 4px); right: 0; }
     .managed-window[data-app="maps"] .maps-readout { grid-area: map; align-self: end; justify-self: start; margin: 0 0 12px 12px; padding: 4px 8px; font-size: 10px; }
     .managed-window[data-app="maps"] .maps-fallback { grid-area: map; align-self: end; margin: 0 12px 48px; font-size: 11px; }
-    .managed-window[data-app="maps"] :is(.maps-info, .maps-game) { grid-area: dock; border-width: 1px 0 0; border-radius: 16px 16px 0 0; box-shadow: 0 -8px 24px rgb(0 0 0 / .08); padding: 12px 16px; }
+    .managed-window[data-app="maps"] :is(.maps-info, .maps-game) { grid-area: dock; border-width: 1px 0 0; border-radius: 16px 16px 0 0; box-shadow: none; padding: 12px 16px; }
     /* Reserve the tallest (reveal) card so tapping a guess never resizes the map under the pin. */
     .managed-window[data-app="maps"] .maps-game { min-height: calc(260px + env(safe-area-inset-bottom)); max-height: 60cqh; overflow-y: auto; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
     .managed-window[data-app="maps"] .maps-legend { grid-area: legend; border-width: 0; border-radius: 0; padding: 0 16px calc(12px + env(safe-area-inset-bottom)); box-shadow: none; }
@@ -139,8 +139,6 @@
 @media (hover: none) and (pointer: coarse) { .managed-window[data-app="maps"] .maps-game-keys { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); } }
 html[data-motion="reduce"] :is(.maps-poster, .maps-stage > canvas, .maps-svg-pulse) { animation: none; transition: none; }
 @media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) :is(.maps-poster, .maps-stage > canvas, .maps-svg-pulse) { animation: none; transition: none; } }
-html[data-transparency="reduce"] .maps-glass { background: var(--os-window); backdrop-filter: none; }
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) { .maps-glass { background: var(--os-window); backdrop-filter: none; } }
 @media (forced-colors: active) { .maps-glass { background: Canvas; color: CanvasText; border-color: CanvasText; } .maps-poster { color: CanvasText; } }
 .island-live-wallpaper > canvas { width: 100%; height: 100%; }
 html:has(.island-live-wallpaper[data-live-ready="true"]) .wp-island { visibility: hidden; }

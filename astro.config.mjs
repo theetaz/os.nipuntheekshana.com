@@ -10,6 +10,15 @@ import { islandCss } from './scripts/island-css.mjs';
 /** @param {string} pkg @param {string} file */
 const fontFile = (pkg, file) => `@fontsource-variable/${pkg}/files/${file}`;
 
+// Measured against Now's five items at 360/390/393/412px: Arial at 94.3%
+// preserves every line break. Comic Sans MS Bold at 94% matches the centred
+// Now title and hero caption within 2px, without changing their line boxes.
+// Both Kalam faces have ascent 1063, descent 531 and zero line gap / 1000.
+const kalamFallbackCss = `
+@font-face { font-family: "Kalam fallback"; src: local("Arial"); font-weight: 400; size-adjust: 94.3%; ascent-override: 112.7253%; descent-override: 56.3097%; line-gap-override: 0%; }
+@font-face { font-family: "Kalam fallback"; src: local("Comic Sans MS Bold"); font-weight: 700; size-adjust: 94%; ascent-override: 113.0851%; descent-override: 56.4894%; line-gap-override: 0%; }
+`;
+
 export default defineConfig({
   site: 'https://os.nipuntheekshana.com',
   output: 'static',
@@ -21,7 +30,15 @@ export default defineConfig({
   devToolbar: { enabled: false },
   integrations: [react(), sitemap({ filter: sitemapFilter })],
   vite: {
-    plugins: [islandCss(), tailwindcss()],
+    plugins: [islandCss(), {
+      name: 'kalam-measured-fallback',
+      enforce: 'pre',
+      transform: {
+        filter: { id: /\/src\/styles\/global\.css$/ },
+        /** @param {string} css */
+        handler(css) { return { code: css + kalamFallbackCss, map: null }; },
+      },
+    }, tailwindcss()],
     build: { cssCodeSplit: true, rolldownOptions: { output: { codeSplitting: { groups: [{
       // Pack the shell's static dependencies together: fewer request hops and
       // gzip dictionaries. Dynamic app and feature imports keep their own chunks.
@@ -38,7 +55,9 @@ export default defineConfig({
     },
     {
       provider: fontProviders.local(), name: 'Kalam', cssVariable: '--font-kalam',
-      fallbacks: ['Comic Sans MS', 'Chalkboard SE', 'cursive'],
+      // Keep one fallback family with distinct regular/bold faces, so matching
+      // 700 cannot synthesize the 400 fallback before reaching a bold family.
+      fallbacks: ['Kalam fallback', 'sans-serif'], optimizedFallbacks: false,
       options: { variants: [
         { src: ['@fontsource/kalam/files/kalam-latin-400-normal.woff2'], weight: '400', style: 'normal' },
         { src: ['@fontsource/kalam/files/kalam-latin-700-normal.woff2'], weight: '700', style: 'normal' },

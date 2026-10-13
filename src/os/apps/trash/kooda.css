@@ -13,7 +13,7 @@
 .kooda-grid { display: grid; grid-template-columns: repeat(auto-fill, 112px); gap: 8px 16px; padding: 16px 20px; margin: 0; list-style: none; }
 .static-window[data-app="trash"] .kooda-grid { padding: 16px 20px; margin: 0; }
 .static-window[data-app="trash"] .kooda-grid li { margin: 0; }
-.kooda-tile { display: flex; flex-direction: column; align-items: center; justify-content: start; width: 112px; min-height: 116px; gap: 8px; padding: 6px 0; border: 0; border-radius: 10px; background: transparent; color: var(--os-ink); cursor: pointer; list-style: none; text-align: center; }
+.kooda-tile { display: flex; flex-direction: column; align-items: center; justify-content: start; width: 112px; min-height: 116px; gap: 8px; padding: 6px 0; border: var(--k-bw-chrome); border-radius: 10px; background: transparent; color: var(--os-ink); cursor: pointer; list-style: none; text-align: center; }
 .kooda-tile::-webkit-details-marker { display: none; }
 .kooda-tile:hover, .kooda-static-note[open] > summary { background: var(--os-hover); }
 .kooda-tile > svg { filter: var(--shadow-icon); }
@@ -21,9 +21,9 @@
 .kooda-tile:focus-visible > span { border-radius: var(--r-control); background: var(--os-selection); color: var(--os-selection-ink); }
 .kooda-static-note > p { font: 400 13px/20px var(--font-ui); color: var(--os-ink-2); padding: 12px; background: var(--os-raised); border: 1px solid var(--os-line-strong); border-radius: var(--r-card); }
 .kooda-empty { min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; }
-.kooda-empty h2 { margin: 0; font: 500 20px/26px var(--font-display); }
+.kooda-empty h2 { margin: 0; font: 700 20px/26px var(--font-ui); }
 .kooda-note-layer { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 24px; background: var(--os-scrim); border-radius: 0 0 var(--r-window) var(--r-window); }
-.kooda-note-card { width: min(360px, 100%); max-height: 100%; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px; background: var(--os-raised); border: 1px solid var(--os-line-strong); border-radius: var(--r-window); box-shadow: var(--shadow-menu); text-align: center; }
+.kooda-note-card { width: min(360px, 100%); max-height: 100%; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px; background: var(--os-raised); border: var(--k-bw-chrome); border-radius: var(--r-window); box-shadow: var(--shadow-menu); text-align: center; }
 .kooda-note-card h2 { font: 600 13px/18px var(--font-ui); overflow-wrap: anywhere; }
 .kooda-note-card p { font: 400 15px/24px var(--font-ui); color: var(--os-ink-2); }
 html:is([data-view="simple"], :has(#simple:target)) .kooda-toolbar { display: none; }

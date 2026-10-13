@@ -25,7 +25,7 @@
 .writing-static-tag { border: 1px solid var(--os-line-strong); border-radius: var(--r-pill); padding: 4px 10px; color: var(--os-ink-2); font-size: 12px; line-height: 18px; }
 .writing-post-list { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--os-window); border-right: 1px solid var(--os-line); }
 .writing-list-controls { display: flex; flex-direction: column; flex-shrink: 0; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--os-line); }
-.writing-list-title { margin: 0; font: 500 20px/26px var(--font-display); }
+.writing-list-title { margin: 0; font: 700 20px/26px var(--font-ui); }
 .writing-search { width: 100%; }
 .writing-folder-select { display: none; }
 .writing-folder-select select { width: 100%; min-height: 28px; border: 1px solid var(--os-line-strong); border-radius: var(--r-control); background: var(--os-raised); color: var(--os-ink); padding: 0 8px; font: inherit; }
@@ -47,7 +47,7 @@
 .writing-article { max-width: 68ch; margin: 0 auto; font: 400 17px/28px var(--font-ui); }
 .writing-eyebrow { display: flex; flex-wrap: wrap; align-items: center; font: 500 10.5px/14px var(--font-mono); font-stretch: 87.5%; letter-spacing: .08em; text-transform: uppercase; color: var(--os-ink-3); margin: 0 0 24px; }
 .writing-eyebrow > * { flex-shrink: 0; line-height: 14px; white-space: pre; }
-.writing-title { font: 420 44px/48px var(--font-display); letter-spacing: -.02em; margin: 0 0 16px; text-wrap: balance; }
+.writing-title { font: 400 44px/48px var(--font-display); font-synthesis: none; letter-spacing: -.02em; margin: 0 0 16px; text-wrap: balance; }
 .writing-description { font: 400 17px/28px var(--font-ui); color: var(--os-ink-2); margin: 0 0 20px; }
 .writing-post-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .writing-rule { width: 48px; height: 1px; background: var(--os-line-strong); margin: 24px 0; }

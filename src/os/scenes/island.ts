@@ -33,8 +33,8 @@ import {
 type Theme = 'dark' | 'light';
 
 const PALETTES: Record<Theme, { base: string; cool: string; warm: string; hot: string; line: string; grid: string; opacity: number }> = {
-  dark: { base: '#6c7f94', cool: '#8a9db2', warm: '#ffb454', hot: '#ffdcaa', line: '#ffb454', grid: '#ffffff', opacity: 1 },
-  light: { base: '#8a8378', cool: '#4f5b66', warm: '#c4540a', hot: '#7a2d00', line: '#c4540a', grid: '#000000', opacity: 1 },
+  dark: { base: '#A99DC9', cool: '#3FD0CB', warm: '#FFB27A', hot: '#FFD45E', line: '#FFB27A', grid: '#FFF4E0', opacity: 1 },
+  light: { base: '#655B7D', cool: '#0A6E6E', warm: '#A84A0C', hot: '#7A4F00', line: '#A84A0C', grid: '#1B1530', opacity: 1 },
 };
 
 const vertexShader = /* glsl */ `

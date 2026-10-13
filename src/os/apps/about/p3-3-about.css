@@ -1,12 +1,12 @@
 .about-view { display: flex; width: 100%; height: 100%; min-height: 0; color: var(--os-ink); font: 450 13px/18px var(--font-ui); }
-.about-sidebar { width: 184px; margin: 48px 0 12px 12px; padding: 8px; border: 0; border-radius: 10px; background: color-mix(in srgb, var(--os-sidebar) 70%, var(--os-window)); }
+.about-sidebar { width: 184px; margin: 48px 0 12px 12px; padding: 8px; border: 0; border-radius: 10px; background: var(--os-sidebar); }
 .about-sidebar :is(button, a) { min-height: 32px; text-decoration: none; }
 .about-view .about-static-tab { display: flex; align-items: center; padding: 0 8px; border-radius: var(--r-menu-item); color: var(--os-ink); }
 .about-static-tab:hover { background: var(--os-hover); }
 .about-scroll { flex: 1; min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 .about-panel { padding: 48px 24px 24px; outline-offset: -4px; }
 .about-panel[hidden] { display: none; }
-.about-view h1, .about-view h2.about-heading { margin: 0 0 24px; font: 450 32px/38px var(--font-display); letter-spacing: -.015em; }
+.about-view h1, .about-view h2.about-heading { margin: 0 0 24px; font: 400 32px/38px var(--font-display); font-synthesis: none; letter-spacing: -.015em; }
 .about-view p { margin: 0; }
 .about-identity { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
 .about-identity h1 { margin: 0 0 4px; }
@@ -30,12 +30,12 @@ button.about-avatar-button { cursor: pointer; }
 .about-timeline li { position: relative; margin: 0; padding: 0 0 32px; }
 .about-timeline li:last-child { padding-bottom: 0; }
 .about-timeline li::before { content: ''; position: absolute; left: -29px; top: 10px; width: 9px; height: 9px; border-radius: 50%; background: var(--os-accent-ink); box-shadow: 0 0 0 4px var(--os-window); }
-.about-year { margin-bottom: 8px; color: var(--os-accent-ink); font: 500 24px/30px var(--font-display); letter-spacing: -.01em; }
+.about-year { margin-bottom: 8px; color: var(--os-accent-ink); font: 700 24px/30px var(--font-ui); letter-spacing: -.01em; }
 .about-view .about-timeline h3 { margin: 0 0 8px; font: 600 13px/18px var(--font-ui); }
 .about-view :is(.about-timeline, .about-card) p { font: 400 15px/24px var(--font-ui); }
 .about-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.about-card { min-width: 0; padding: 20px; border: 1px solid var(--os-line); border-radius: var(--r-card); background: var(--os-raised); overflow-wrap: anywhere; }
-.about-view .about-card h3 { margin: 0 0 12px; font: 500 20px/26px var(--font-display); letter-spacing: -.005em; }
+.about-card { min-width: 0; padding: 20px; border: var(--k-bw-chrome); border-radius: var(--r-card); background: var(--os-raised); overflow-wrap: anywhere; }
+.about-view .about-card h3 { margin: 0 0 12px; font: 700 20px/26px var(--font-ui); letter-spacing: -.005em; }
 .about-life svg { margin-bottom: 16px; color: var(--os-accent-ink); }
 .about-toolbox { display: grid; gap: 24px; }
 .about-view .about-toolbox h3 { margin: 0 0 12px; color: var(--os-ink-2); font: 500 10.5px/14px var(--font-mono); font-stretch: 87.5%; letter-spacing: .08em; text-transform: uppercase; }
@@ -85,8 +85,6 @@ html:is([data-view="simple"], :has(#simple:target)) .static-window[data-app="abo
 html:is([data-view="simple"], :has(#simple:target)) .about-view { display: block; height: auto; }
 html:is([data-view="simple"], :has(#simple:target)) .about-sidebar { display: flex; flex-wrap: wrap; width: auto; margin: 0 0 24px; }
 html:is([data-view="simple"], :has(#simple:target)) .about-view[data-interactive="false"] .about-panel { display: block; padding: 24px 0; }
-html[data-transparency="reduce"] .about-sidebar { background: var(--os-sidebar); }
-@media (prefers-reduced-transparency: reduce) { .about-sidebar { background: var(--os-sidebar); } }
 @media (forced-colors: active) {
   .about-card, .about-sidebar { border: 1px solid CanvasText; }
   .about-sidebar :is([aria-selected="true"], a:focus) { background: Highlight; color: HighlightText; }

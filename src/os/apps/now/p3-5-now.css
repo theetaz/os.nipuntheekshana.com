@@ -5,11 +5,10 @@
 .managed-window[data-app="now"] .window-titlebar > .window-title { font: 600 13px/18px var(--font-ui); }
 #static-window[data-app="now"] .static-document { padding: 0; max-width: none; }
 .now-document { padding: 20px 24px; color: var(--note-ink); background: var(--note-paper); overflow-wrap: anywhere; }
-.now-document h1 { margin: 0 0 20px; font: italic 450 32px/38px var(--font-display); letter-spacing: -.015em; }
+.now-document h1 { margin: 0 0 20px; font: 700 32px/38px var(--font-hand); letter-spacing: -.015em; }
 .now-document ol { display: grid; gap: 16px; margin: 0 0 24px; padding: 0; list-style: none; }
-.now-document ol li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; margin: 0; font: 450 18px/26px var(--font-display); }
-/* A touch of note ink keeps Thambili and Tea above 4.5:1 on the yellow paper. */
-.now-document .now-number { padding-top: 4px; font: 400 12px/18px var(--font-mono); font-stretch: 87.5%; font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--os-accent-ink) 92%, var(--note-ink)); }
+.now-document ol li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; margin: 0; font: 400 18px/26px var(--font-hand); }
+.now-document .now-number { font: 700 19px/26px var(--font-mono); font-stretch: 87.5%; font-variant-numeric: tabular-nums; white-space: nowrap; color: #A84A0C; }
 .now-document footer { font: 450 12px/16px var(--font-ui); }
 .now-document footer p { margin: 0 0 8px; }
 .now-document footer a { display: inline-flex; align-items: center; min-height: 24px; color: inherit; text-decoration: underline; text-underline-offset: 3px; }

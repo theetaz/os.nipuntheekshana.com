@@ -8,7 +8,7 @@
 .settings-static-nav:hover { background: var(--os-hover); }
 .settings-panels { min-width: 0; }
 .settings-app .settings-panel { padding: 24px; }
-.settings-app .settings-panel h2 { margin: 0 0 8px; font: 500 24px/30px var(--font-display); letter-spacing: -.01em; }
+.settings-app .settings-panel h2 { margin: 0 0 8px; font: 700 24px/30px var(--font-ui); letter-spacing: -.01em; }
 .settings-app .settings-panel h3 { margin: 0 0 12px; font: 600 13px/18px var(--font-ui); }
 .settings-app .settings-description { margin: 0 0 24px; color: var(--os-ink-2); }
 .settings-group { margin: 24px 0; }
@@ -28,52 +28,31 @@
 .settings-app :is(.settings-theme, .settings-accents, .settings-wallpapers) > button:disabled { opacity: 1; }
 .settings-theme { width: 100%; max-width: 344px; }
 .settings-theme > button { flex: 1; min-width: 0; }
-.settings-theme-preview { position: relative; display: block; overflow: hidden; width: 104px; max-width: 100%; height: 72px; border-radius: 8px; box-shadow: 0 0 0 1px var(--os-ink-3); --preview-paper: #fcfbf8; --preview-bar: #f5f3ee; --preview-sidebar: #f1eee8; background: linear-gradient(#bfddeb, #f7cfa6); }
-.settings-theme-dark { --preview-paper: #1c1a17; --preview-bar: #22201c; --preview-sidebar: #181614; background: linear-gradient(#0b1520, #2a3a44); }
-.settings-theme-auto { --preview-paper: linear-gradient(90deg, #fcfbf8 50%, #1c1a17 50%); --preview-bar: linear-gradient(90deg, #f5f3ee 50%, #22201c 50%); background: linear-gradient(90deg, #c9dedf 50%, #13283a 50%); }
-.settings-mini-window { position: absolute; inset: 12px 10px 10px; overflow: hidden; border-radius: 5px; background: var(--preview-paper); box-shadow: 0 1px 4px rgb(0 0 0 / .25); }
+.settings-theme-preview { position: relative; display: block; overflow: hidden; width: 104px; max-width: 100%; height: 72px; border-radius: 8px; box-shadow: 0 0 0 1px var(--os-ink-3); --preview-paper: #FFFDF8; --preview-bar: #FFF7E8; --preview-sidebar: #F8EEDB; background: var(--k-teal); }
+.settings-theme-dark { --preview-paper: #241C3D; --preview-bar: #2E2550; --preview-sidebar: #1E1735; background: var(--k-ink); }
+.settings-theme-auto { --preview-paper: linear-gradient(90deg, #FFFDF8 50%, #241C3D 50%); --preview-bar: linear-gradient(90deg, #FFF7E8 50%, #2E2550 50%); --preview-sidebar: linear-gradient(90deg, #F8EEDB 50%, #1E1735 50%); background: linear-gradient(90deg, var(--k-teal) 50%, var(--k-ink) 50%); }
+.settings-mini-window { position: absolute; inset: 12px 10px 10px; overflow: hidden; border-radius: 5px; background: var(--preview-paper); box-shadow: var(--k-shadow-1); }
 .settings-mini-bar { position: absolute; inset: 0 0 auto; display: flex; align-items: center; gap: 3px; height: 10px; padding: 0 5px; background: var(--preview-bar); }
-.settings-mini-bar i { width: 3px; height: 3px; border-radius: 50%; background: #ef5b4b; }
-.settings-mini-bar i:nth-child(2) { background: #f4b43c; }
-.settings-mini-bar i:nth-child(3) { background: #39b57a; }
+.settings-mini-bar i { width: 3px; height: 3px; border-radius: 50%; background: var(--k-red); }
+.settings-mini-bar i:nth-child(2) { background: var(--k-yellow); }
+.settings-mini-bar i:nth-child(3) { background: var(--k-teal); }
 .settings-mini-sidebar { position: absolute; inset: 10px auto 0 0; width: 24px; background: var(--preview-sidebar); }
-.settings-mini-line { position: absolute; top: 20px; left: 32px; right: 8px; height: 4px; border-radius: 2px; background: #a09789; opacity: .6; }
+.settings-mini-line { position: absolute; top: 20px; left: 32px; right: 8px; height: 4px; border-radius: 2px; background: var(--k-ink-3); }
 .settings-mini-line.short { top: 29px; right: 18px; }
 .settings-app button[aria-checked="true"] :is(.settings-theme-preview, .settings-wallpaper-frame) { box-shadow: 0 0 0 2px var(--os-accent); }
 .settings-accents > button { position: relative; min-width: 40px; min-height: 32px; padding: 4px !important; }
-.settings-swatch { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .25); }
-.settings-swatch-thambili { background: #e8722a; }.settings-swatch-lagoon { background: #2bb3a6; }.settings-swatch-lotus { background: #b866d6; }.settings-swatch-tea { background: #5fa552; }
+.settings-swatch { width: 24px; height: 24px; border-radius: 50%; border: var(--k-bw-chrome); }
+.settings-swatch-thambili { background: var(--k-orange); }.settings-swatch-lagoon { background: var(--k-teal); }.settings-swatch-lotus { background: var(--k-pink); }.settings-swatch-tea { background: var(--k-green); }
 .settings-accents > button[aria-checked="true"] .settings-swatch { outline: 2px solid var(--os-accent); outline-offset: 2px; }
 .settings-accent-name { position: absolute; top: 100%; width: max-content; padding-top: 4px; font-size: 12px; clip-path: inset(50%); }
 .settings-accents > button:is(:hover, :focus-visible) .settings-accent-name { clip-path: none; }
-.settings-app .settings-wallpapers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; align-items: start; gap: 20px 12px; }
+.settings-app .settings-wallpapers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; align-items: start; gap: 20px 12px; }
 .settings-wallpapers > button { min-width: 0; width: 100%; text-align: center; font-size: 12px; }
 .settings-wallpaper-note { font-size: 11px; line-height: 14px; color: var(--os-ink-2); }
 .settings-wallpapers > button:disabled .settings-wallpaper-frame { opacity: .55; }
-.settings-wallpaper-frame { display: block; position: relative; width: 100%; max-width: 168px; aspect-ratio: 168 / 105; overflow: hidden; border-radius: 8px; box-shadow: 0 0 0 1px var(--os-ink-3); container-type: inline-size; }
-/* Scale the real wallpaper layers into their thumbnail, with a 960 × 600 canvas. */
-.settings-app .settings-wallpaper { display: block; position: absolute; inset: 0 auto auto 0; width: 960px; height: 600px; transform: scale(calc(100cqw / 960px)); transform-origin: top left; z-index: 0;
-  --wp-sun: radial-gradient(circle at 80% 78%, #ffe3b8 0 19.2px, rgb(255 184 110 / .55) 20.4px, rgb(255 184 110 / 0) 168px); }
-html[data-theme="dark"] .settings-app .settings-wallpaper { --wp-sun: radial-gradient(circle at 76% 22%, #f4efe2 0 14.4px, rgb(244 239 226 / .25) 15.6px, transparent 84px); }
-.settings-app .settings-wallpaper::after { display: none; }
-.settings-app .settings-wallpaper[data-preview] .wp-layer { position: absolute; inset: 0; display: none; animation: none; }
-.settings-app .settings-wallpaper[data-preview] .wp-sky { display: block; }
-.settings-app .settings-wallpaper[data-preview="galle-face"] :is(.wp-sun, .wp-skyline, .wp-grain, .wp-sea) { display: block; }
-.settings-app .settings-wallpaper[data-preview="galle-face"] .wp-stars { display: var(--wp-stars-display); }
-.settings-app .settings-wallpaper[data-preview="galle-face"] .wp-sea { top: 78%; }
-.settings-app .settings-wallpaper .wp-skyline > svg { left: 288px; width: 422.4px; }
-.settings-app .settings-wallpaper[data-preview="monsoon"] .wp-sky { background: var(--wp-monsoon); }
-.settings-app .settings-wallpaper[data-preview="monsoon"] .wp-rain { display: block; background: repeating-linear-gradient(100deg, var(--wp-rain-ink) 0 1px, transparent 1px 9px); }
-.settings-app .settings-wallpaper[data-preview="contours"] .wp-sky { background: var(--wp-contour-paper); }
-.settings-app .settings-wallpaper[data-preview="contours"] .wp-contours { display: block; background: var(--wp-contour-ink); opacity: var(--wp-contour-opacity); mask: url('../../../assets/wallpapers/contours.svg?no-inline') center / cover no-repeat; }
-.settings-app .settings-wallpaper:is([data-preview="island"], [data-preview="island-live"]) .wp-sky { background: var(--wp-island-sea); }
-.settings-app .settings-wallpaper:is([data-preview="island"], [data-preview="island-live"]) .wp-island { display: block; }
-.settings-app .settings-wallpaper .wp-island::before, .settings-app .settings-wallpaper .wp-island::after { mask-position: 68% 52%; mask-size: auto 444px; }
-.settings-app .settings-wallpaper[data-preview="paper"] .wp-sky { background: radial-gradient(var(--wp-paper-dot) 1px, transparent 1px) 0 0 / 24px 24px, var(--wp-paper); }
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion="reduce"]) .settings-app .settings-wallpaper[data-preview="monsoon"] .wp-rain { animation: wp-monsoon-drift 1.2s linear infinite; }
-}
-html[data-motion="full"] .settings-app .settings-wallpaper[data-preview="monsoon"] .wp-rain { animation: wp-monsoon-drift 1.2s linear infinite; }
+.settings-wallpaper-frame { display: block; position: relative; width: 100%; max-width: 240px; aspect-ratio: 240 / 150; overflow: hidden; border-radius: 8px; box-shadow: 0 0 0 1px var(--os-ink-3); container-type: inline-size; }
+/* The shared wallpaper layers also paint these scaled previews. */
+.settings-app .settings-wallpaper { display: block; position: absolute; inset: 0 auto auto 0; width: 960px; height: 600px; transform: scale(calc(100cqw / 960px)); transform-origin: top left; z-index: 0; }
 .settings-about-glyph { width: 48px; height: 48px; margin-bottom: 16px; color: var(--os-accent-ink); }
 .settings-about-glyph svg { width: 100%; height: 100%; }
 .settings-about-glyph path { fill: currentColor; }

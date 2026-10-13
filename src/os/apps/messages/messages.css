@@ -34,7 +34,6 @@
 .messages-app .messages-log .messages-bubble[data-grouped] { margin-top: 2px; }
 .messages-bubble--assistant { background: var(--os-sunken); border-bottom-left-radius: 4px !important; }
 .messages-bubble--user { align-self: end; background: var(--os-accent); color: var(--os-on-accent); border-bottom-right-radius: 4px !important; }
-[data-theme="dark"] .messages-bubble--assistant { background: #2B2824; }
 .messages-app .messages-bubble p { margin: 0; font-size: 13px; line-height: 19px; }
 .messages-bubble-actions { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 8px; white-space: normal; }
 .messages-app .messages-bubble-actions :is(a, button) { color: color-mix(in oklab, var(--os-accent-ink) 85%, var(--os-ink)); text-decoration: underline; text-underline-offset: 3px; padding: 2px 0; }
@@ -60,7 +59,6 @@
 .messages-loading a { color: var(--os-accent-ink); margin-left: 16px; }
 html[data-motion="reduce"] .messages-typing > span { animation: none; opacity: 1; }
 @media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) .messages-typing > span { animation: none; opacity: 1; } }
-@media (prefers-color-scheme: dark) { html.no-js:not([data-theme="light"]) .messages-bubble--assistant { background: #2B2824; } }
 @container window (max-width: 620px) {
   .messages-app { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
   .messages-thread-list { padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--os-line); overflow: visible; }

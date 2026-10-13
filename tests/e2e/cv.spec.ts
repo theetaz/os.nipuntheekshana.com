@@ -291,7 +291,7 @@ for (const theme of ['light', 'dark'] as const) test(`CV is accessible in ${them
   await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
   const win = await openCv(page);
   await expect(win.locator('.cv-page').first()).toHaveCSS('background-color', 'rgb(255, 255, 255)');
-  await expect(win.locator('.cv-page').first()).toHaveCSS('color', 'rgb(31, 27, 22)');
+  await expect(win.locator('.cv-page').first()).toHaveCSS('color', 'rgb(27, 21, 48)');
   await win.getByRole('button', { name: 'Fit', exact: true }).click();
   const results = await new AxeBuilder({ page }).include('.managed-window[data-app="cv"]')
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();

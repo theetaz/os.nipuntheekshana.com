@@ -4,7 +4,7 @@
 .project-hero { --project-backdrop: var(--project-light); position: relative; min-height: 240px; padding: 32px 40px; display: flex; align-items: flex-start; gap: 24px; isolation: isolate; background: var(--project-backdrop); }
 .project-hero::before { content: ''; position: absolute; z-index: -1; inset: 0; background: radial-gradient(60% 120% at 85% 0%, color-mix(in oklch, var(--project-color) 35%, transparent), transparent 70%); }
 .project-heading { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; }
-.project-heading h1 { font: 500 40px/44px var(--font-display); letter-spacing: -.02em; }
+.project-heading h1 { font: 400 44px/48px var(--font-display); font-synthesis: none; letter-spacing: -.02em; }
 .project-heading > span { font: 500 20px/26px var(--font-sinhala); }
 .project-hero-tagline { margin-top: 8px; font: 400 17px/28px var(--font-ui); }
 .project-platform { margin-top: 12px; color: var(--os-ink-2); font: 500 10px/16px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
@@ -15,7 +15,7 @@
 .project-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; padding: 24px 40px; border-bottom: 1px solid var(--os-line); }
 .project-facts > div { display: flex; flex-direction: column-reverse; align-self: start; gap: 8px; }
 .project-facts dt { color: var(--os-ink-2); font: 450 12px/16px var(--font-ui); }
-.project-facts dd { font: 500 28px/34px var(--font-display); font-variant-numeric: tabular-nums; }
+.project-facts dd { font: 400 32px/38px var(--font-display); font-synthesis: none; font-variant-numeric: tabular-nums; }
 .project-screens { padding: 24px 40px; border-bottom: 1px solid var(--os-line); }
 .project-screens > h2, .project-info > h2 { font: 500 10px/14px var(--font-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--os-ink-2); margin-bottom: 16px; }
 .project-screens-strip { display: flex; gap: 16px; overflow: auto; scroll-snap-type: x mandatory; padding: 4px 4px 12px; margin: -4px; }
@@ -40,20 +40,20 @@
 .project-brand-card, .project-api-card { border: 1px solid var(--os-line); border-radius: 8px; padding: 12px; }
 .project-brand-card h3, .project-api-card h3 { font: 500 10px/14px var(--font-mono); text-transform: uppercase; color: var(--os-ink-2); margin-bottom: 12px; }
 .project-brand-card p { font-size: 12px; line-height: 18px; color: var(--os-ink-2); }
-.project-brand-card .project-stat-value { font: 500 28px/34px var(--font-display); font-variant-numeric: tabular-nums; margin-bottom: 6px; color: var(--os-ink); }
+.project-brand-card .project-stat-value { font: 400 32px/38px var(--font-display); font-synthesis: none; font-variant-numeric: tabular-nums; margin-bottom: 6px; color: var(--os-ink); }
 .project-progress { height: 6px; border-radius: 3px; background: var(--os-sunken); overflow: hidden; margin-top: 12px; }.project-progress span { height: 100%; display: block; background: var(--project-color); }
 .project-brand-card ol { display: grid; gap: 12px; margin-bottom: 12px; }
 .project-brand-card li { display: flex; gap: 8px; font-size: 12px; }
 .project-brand-card li > span { display: grid; place-items: center; flex: 0 0 18px; height: 18px; border-radius: 50%; color: var(--project-ink); background: var(--project-color); font-size: 10px; }
-.project-brand-card pre, .project-api-card pre { padding: 12px; border-radius: 8px; background: var(--os-sunken); overflow: auto; font: 400 11px/18px var(--font-mono); }
+.project-brand-card pre, .project-api-card pre { padding: 12px; border-radius: 8px; background: var(--os-sunken); white-space: pre-wrap; overflow-wrap: anywhere; font: 400 11px/18px var(--font-mono); }
 .project-api-card { margin-top: 16px; }.project-api-request { display: flex; flex-wrap: wrap; gap: 8px; align-items: start; margin-bottom: 12px; font: 400 11px/18px var(--font-mono); }
 .project-api-request code { overflow-wrap: anywhere; }.project-api-request strong { padding: 2px 6px; background: var(--os-sunken); border-radius: 4px; }
 .project-api-response { display: flex; justify-content: space-between; font: 450 11px/18px var(--font-mono); margin-bottom: 12px; }.project-api-response > span:first-child { color: var(--os-success); }
 .project-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding: 24px 40px 32px; border-top: 1px solid var(--os-line); color: var(--os-accent-ink); }
 html[data-theme="dark"] .project-hero { --project-backdrop: var(--project-dark); }
-html[data-view="simple"] .project-detail-scroll, html:has(#simple:target) .project-detail-scroll { overflow: visible; }
+html:is([data-view="simple"], :has(#simple:target)) .project-detail-scroll { overflow: visible; }
 @container window (max-width: 859px) { .project-body { grid-template-columns: minmax(0, 1fr); }.project-info { position: static; grid-row: 1; }.project-brand-cards { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); } }
-@container window (max-width: 639px) { .project-heading h1 { font-size: 28px; line-height: 34px; }.project-hero { padding: 24px; gap: 16px; }.project-facts, .project-screens, .project-body, .project-footer { padding: 24px; } }
+@container window (max-width: 639px) { .project-heading h1 { font-size: 32px; line-height: 38px; }.project-hero { padding: 24px; gap: 16px; }.project-facts, .project-screens, .project-body, .project-footer { padding: 24px; } }
 @container window (max-width: 559px) {.project-hero { flex-direction: column; }.project-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }.project-screen-frame[data-kind="browser"] img { max-width: calc(100cqw - 64px); object-fit: contain; height: auto; }
 }
 @media (prefers-color-scheme: dark) { html.no-js .project-hero { --project-backdrop: var(--project-dark); } }
