@@ -5,6 +5,25 @@ import sharp from 'sharp';
 import { catalogue, parseFlags, selectedAssets, externalWork, candidatesUnder, loadProvenance, provenancePath,
   masterPath, masterBox, sha256, writeJson, artifactDir, alphaFraction, borderFraction, variantSizes, familyTotals } from './lib.mjs';
 
+export function encoderFingerprint() {
+  return sha256(Buffer.concat([
+    readFileSync(new URL('./lib.mjs', import.meta.url)), readFileSync(new URL('./process.mjs', import.meta.url)),
+    Buffer.from(JSON.stringify(sharp.versions)),
+  ]));
+}
+function checkedVariants(asset, entry, width, manifest) {
+  if (manifest.encoder !== encoderFingerprint()) throw new Error('Variant provenance uses a different encoder; regenerate with --check --write-variants');
+  const row = manifest.rows.find(row => row.id === asset.id);
+  if (!row || row.sha256OfMaster !== entry.sha256OfMaster || JSON.stringify(row.quality) !== JSON.stringify(entry.quality)) throw new Error('Variant provenance differs from the master or quality');
+  const expected = (catalogue.families[asset.family].widths ?? [asset.W]).flatMap(size => [1, 2].flatMap(density => ['avif', 'webp'].map(format => ({
+    size, density, format, width: Math.min(size * density, width), cap: catalogue.families[asset.family].caps[format][density - 1], quality: entry.quality[format],
+  }))));
+  if (row.variants.length !== expected.length || row.variants.some((variant, i) =>
+    Object.entries(expected[i]).some(([key, value]) => variant[key] !== value)
+    || !Number.isSafeInteger(variant.bytes) || variant.bytes <= 0 || !Number.isSafeInteger(variant.astroBytes) || variant.astroBytes <= 0)) throw new Error('Incomplete variant provenance');
+  return row.variants;
+}
+
 export function keyBackground(data, width, height) {
   const count = width * height, labels = new Int8Array(count).fill(-1), queue = new Int32Array(count);
   const corners = [0, width - 1, (height - 1) * width, count - 1];
@@ -123,7 +142,7 @@ export async function processImage(source, asset) {
   }
   return { master, quality, variants, keyed, border, finalBorder: storedBorder, sourceDefringe, masterDefringe, width: final.info.width, height: final.info.height };
 }
-export async function checkMasters(assets = catalogue.assets, provenance = loadProvenance()) {
+export async function checkMasters(assets = catalogue.assets, provenance = loadProvenance(), manifest) {
   const rows = [], failures = [];
   if (provenance.length !== catalogue.assets.length || new Set(provenance.map((e) => e.id)).size !== catalogue.assets.length
     || provenance.some((entry) => !catalogue.assets.some((asset) => asset.id === entry.id))) failures.push({ id: 'provenance', error: 'Expected exactly one entry per catalogue id' });
@@ -140,7 +159,7 @@ export async function checkMasters(assets = catalogue.assets, provenance = loadP
     if (border < 0.85) throw new Error(`Master border failed: ${(border * 100).toFixed(1)}%`);
     if (process.env.KOTTU_ART_FINAL === '1' && (entry.placeholder || !entry.approved)) throw new Error('Final artwork must be approved and not a placeholder');
     if (![40,45,50].includes(entry.quality?.avif) || ![68,73,78].includes(entry.quality?.webp)) throw new Error('Invalid encoder quality');
-    const variants = entry.placeholder ? [] : await variantSizes(master, asset, entry.quality);
+    const variants = entry.placeholder ? [] : manifest ? checkedVariants(asset, entry, meta.width, manifest) : await variantSizes(master, asset, entry.quality);
     if (variants.some((v) => Math.max(v.bytes, v.astroBytes) > v.cap)) throw new Error('Variant exceeds cap');
     rows.push({ id: asset.id, family: asset.family, placeholder: Boolean(entry.placeholder), approved: entry.approved,
       width: meta.width, height: meta.height, masterBytes: master.length, border, quality: entry.quality, variants });
@@ -206,13 +225,20 @@ export async function processSources(work, assets) {
   return { rows, failures };
 }
 async function main() {
-  const flags = parseFlags(process.argv.slice(2), ['from', 'only', 'check']);
+  const flags = parseFlags(process.argv.slice(2), ['from', 'only', 'check', 'write-variants']);
   const assets = selectedAssets(flags);
   if (flags.check) {
     const result = await checkMasters(assets);
     for (const failure of result.failures) console.error(`${failure.id}: ${failure.error}`);
     console.log(`${result.rows.length}/${assets.length} masters pass; AVIF totals ${JSON.stringify(result.totals)}`);
     if (result.failures.length) process.exitCode = 2;
+    else if (flags['write-variants']) {
+      if (assets.length !== catalogue.assets.length) throw new Error('Variant provenance requires the complete catalogue');
+      const provenance = loadProvenance();
+      writeJson(resolve(flags['write-variants']), { encoder: encoderFingerprint(), rows: result.rows.map(row => ({
+        id: row.id, sha256OfMaster: provenance.find(entry => entry.id === row.id).sha256OfMaster, quality: row.quality, variants: row.variants,
+      })) });
+    }
   } else {
     if (!flags.from) throw new Error('--from <work root> is required');
     const result = await processSources(await externalWork(flags.from), assets);
