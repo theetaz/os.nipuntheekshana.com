@@ -64,9 +64,31 @@ test('board loads ten skeletons, safely renders styling and country stamps, pagi
   const second = panel.getByRole('article').nth(1); await expect(second).toHaveCSS('background-color', 'rgb(138, 219, 216)'); await expect(second.locator('p')).toHaveCSS('font-weight', '500');
   await expect(second.locator('img')).toHaveCount(0); await expect(second).toContainText('<img src=x onerror=alert(1)>');
   await expect(panel.getByRole('article').nth(2).locator('p')).toHaveAttribute('lang', 'si'); await expect(panel.getByRole('article').nth(2).locator('p')).toHaveCSS('font-style', 'italic');
+  for (const article of await panel.getByRole('article').all()) {
+    const bounds = await article.evaluate(el => ({ name: el.getAttribute('aria-label'),
+      paper: el.getBoundingClientRect().bottom, footer: el.querySelector('footer')!.getBoundingClientRect().bottom,
+      height: el.clientHeight, content: el.scrollHeight }));
+    expect(bounds.footer, bounds.name!).toBeLessThanOrEqual(bounds.paper);
+    expect(bounds.content, bounds.name!).toBeLessThanOrEqual(bounds.height);
+  }
   await capture(page, info, 'board-notes-light');
   await panel.getByRole('button', { name: 'Show older notes' }).click(); await expect(panel.getByRole('article')).toHaveCount(4);
   expect(requests[1]).toContain('cursor=opaque%20cursor%2F'); await expect(panel).toContainText("That's every note. Thank you for reading them all!");
+});
+
+test('long notes and forty-character signatures stay inside their paper', async ({ page }, info) => {
+  if (info.project.name.startsWith('mobile')) await page.setViewportSize({ width: 320, height: 844 });
+  await mocks(page, { items: [
+    { ...notes[0]!, body: 'A kind sentence for the board. '.repeat(10).slice(0, 300), name: 'Long name '.repeat(4) },
+    { ...notes[1]!, body: 'An unbroken line '.repeat(20).slice(0, 300), name: 'A'.repeat(40) },
+    { ...notes[2]!, body: 'ආයුබෝවන්! ලස්සනයි. '.repeat(16).slice(0, 300), name: 'දිනුක'.repeat(8) },
+  ] });
+  const panel = await board(page); await expect(panel.getByRole('article')).toHaveCount(3);
+  for (const article of await panel.getByRole('article').all()) {
+    const bounds = await article.evaluate(el => ({ paper: el.getBoundingClientRect().bottom,
+      footer: el.querySelector('footer')!.getBoundingClientRect().bottom, height: el.clientHeight, content: el.scrollHeight }));
+    expect(bounds.footer).toBeLessThanOrEqual(bounds.paper); expect(bounds.content).toBeLessThanOrEqual(bounds.height);
+  }
 });
 
 test('empty board has a dashed invitation and a real compose route', async ({ page }, info) => {
