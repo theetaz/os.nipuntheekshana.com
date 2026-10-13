@@ -1,0 +1,54 @@
+.guestbook-app { height: 100%; overflow: auto; background: var(--os-window); color: var(--os-ink); }
+.k-compose { display: flex; flex-direction: column; gap: 12px; min-height: 100%; margin: 0; padding: 24px; }
+.k-compose-note-wrap { position: relative; width: min(360px, calc(100% - 48px)); margin: 0 auto; }
+.k-compose-note { --note-fill: #FFE27A; --note-tape: #FF7EB6; position: relative; width: 100%; aspect-ratio: 1; border: 2px solid #1B1530; border-radius: 4px; background: var(--note-fill); color: #1B1530; box-shadow: 3px 3px 0 rgb(27 21 48 / .35); transition: background-color 200ms; }
+.k-compose-note[data-color="thambili"] { --note-fill: #FFB27A; --note-tape: #0FA3A3; }
+.k-compose-note[data-color="lagoon"] { --note-fill: #8ADBD8; --note-tape: #FFC93C; }
+.k-compose-note[data-color="lotus"] { --note-fill: #FFB3D4; --note-tape: #3DBE6B; }
+.k-compose-note[data-color="tea"] { --note-fill: #9BE3B4; --note-tape: #FF8A3D; }
+.k-compose-tape { position: absolute; z-index: 1; width: 72px; height: 22px; top: -12px; left: calc(50% - 36px); background: repeating-linear-gradient(45deg, #fff3 0 4px, transparent 4px 8px), var(--note-tape); opacity: .6; rotate: -4deg; transform-origin: left center; pointer-events: none; }
+.k-compose-note textarea { display: block; width: 100%; height: 100%; padding: 24px 22px 50px; border: 0; border-radius: 2px; resize: none; background: transparent; color: #1B1530; font: 400 var(--note-size)/var(--note-line) var(--font-hand); overflow-wrap: anywhere; }
+.k-compose-note textarea::placeholder { color: #443557; opacity: 1; }
+.k-compose-note[data-font="sans"] textarea { font-family: var(--font-ui); font-weight: 500; }
+.k-compose-note[data-font="serif"] textarea { font-family: var(--font-serif); font-style: italic; }
+.k-compose-note output { position: absolute; bottom: 12px; right: 12px; pointer-events: none; font: 400 12px/1.4 var(--font-mono); color: #443557; }
+.k-compose-note output[data-limit="near"] { color: #9A3600; }
+.k-compose-note output[data-limit="full"] { color: #A32020; }
+.k-compose-fields { display: grid; grid-template-columns: 1fr 1.35fr; gap: 12px; }
+.k-compose-fields > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.k-compose-fields label { font: 600 13px/1.4 var(--font-ui); }
+.k-compose-fields input { width: 100%; min-width: 0; height: 44px; padding: 0 12px; border: 2px solid var(--k-hard); border-radius: 10px; background: var(--os-raised); color: var(--os-ink); font: 400 16px/1.4 var(--font-ui); }
+.k-compose [aria-invalid="true"] { border: 2px solid var(--k-red-ink); }
+.k-compose-help { margin: 0; font: 400 13px/1.4 var(--font-ui); color: var(--os-ink-2); }
+.k-compose-verification:empty { display: none; }
+.k-compose-field-error { margin: 0; color: var(--k-red-ink); font: 500 13px/1.4 var(--font-ui); }
+.k-compose-error { font: 500 14px/1.45 var(--font-ui); }
+.k-compose-error p { margin: 0 0 8px; }
+.k-compose-error a { text-decoration: underline; }
+.k-compose-joke { position: absolute; z-index: 2; top: 12px; right: -24px; max-width: 300px; padding: 16px; border-radius: 16px 16px 16px 4px; background: light-dark(#1B1530, #FFF4E0); color: light-dark(#FFF4E0, #1B1530); font: 600 15px/22px var(--font-ui); rotate: 3deg; animation: k-joke-pop 200ms 300ms both; }
+.k-compose-joke p { margin: 0; }
+.k-compose-joke p + p { margin-top: 8px; font-size: 13px; }
+.k-compose-status { min-height: 0; margin: 0; font: 500 13px/1.4 var(--font-ui); }
+.k-compose-status:empty { display: none; }
+.k-compose-actions { position: sticky; z-index: 3; bottom: 0; display: flex; justify-content: space-between; gap: 12px; margin-top: auto; padding: 12px 0 0; background: var(--os-window); }
+.k-compose-actions button, .k-compose-error button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border: 2px solid var(--k-hard); border-radius: 999px; background: var(--os-window); color: var(--os-ink); font: 700 16px/20px var(--font-ui); }
+.k-compose-actions .k-compose-pin { background: #FFC93C; color: #1B1530; border-color: #1B1530; box-shadow: var(--k-shadow-2); }
+.k-compose button:disabled { opacity: .6; cursor: default; }
+.k-compose-actions [data-spinning] svg, .k-compose-pin svg { animation: ringSpin 400ms linear; }
+.k-compose-pin svg { animation-iteration-count: infinite; }
+.k-compose-note[data-feedback="profanity"], .k-compose-note[data-feedback="link"] { animation: noteShake 360ms; }
+.k-compose-note[data-feedback="profanity"] .k-compose-tape { animation: k-tape-peel 600ms; }
+@keyframes k-tape-peel { 50% { rotate: -28deg; translate: 0 -6px; } }
+@keyframes k-joke-pop { from { scale: .85; opacity: 0; } to { scale: 1; opacity: 1; } }
+@keyframes k-note-flash { 50% { outline: 3px solid var(--k-red-ink); } }
+html[data-theme="dark"] .k-compose-note { border-color: #0B0716; }
+[data-shell-mode="mobile"] .guestbook-app { max-height: calc(var(--sheet-viewport-height, 100dvh) - 52px - env(safe-area-inset-top)); }
+[data-shell-mode="mobile"] .k-compose { padding: 24px 16px 0; }
+[data-shell-mode="mobile"] .k-compose-note-wrap { width: 100%; }
+[data-shell-mode="mobile"] .k-compose-fields { grid-template-columns: 1fr; }
+[data-shell-mode="mobile"] .k-compose-actions { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+[data-shell-mode="mobile"] .k-compose-joke { right: 0; max-width: 280px; }
+@media (prefers-reduced-motion: reduce) { .k-compose-note, .k-compose-joke, .k-compose svg, .k-compose-tape { animation: none !important; transition: none; } .k-compose-note[data-feedback] { animation: k-note-flash 300ms !important; } }
+html[data-motion="reduce"] :is(.k-compose-note, .k-compose-joke, .k-compose svg, .k-compose-tape) { animation: none; transition: none; }
+html[data-motion="reduce"] .k-compose-note[data-feedback="profanity"], html[data-motion="reduce"] .k-compose-note[data-feedback="link"] { animation: k-note-flash 300ms; }
+@media (forced-colors: active) { .k-compose-note { background: Canvas; color: CanvasText; border-color: CanvasText; } .k-compose-note textarea, .k-compose-note output { color: CanvasText; } .k-compose-joke { background: Canvas; color: CanvasText; border: 2px solid CanvasText; } }
