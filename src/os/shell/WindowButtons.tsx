@@ -1,5 +1,6 @@
 import type { WindowId } from '../wm/types';
 import { closeWindow, minimizeWindow, toggleMaximize } from '../wm/commands';
+import '../../styles/window-chrome.css';
 
 export function WindowButtons({ windowId, title, zoomable = true, maximized = false }: {
   windowId: WindowId; title: string; zoomable?: boolean; maximized?: boolean;

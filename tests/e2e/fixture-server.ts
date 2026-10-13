@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,7 +22,8 @@ export async function fixtureServer(name: string, port: number, pages: Record<st
   };
   try {
     await mkdir(resolve(directory, 'pages'), { recursive: true });
-    for (const [route, content] of Object.entries(pages)) await writeFile(resolve(directory, `pages/${route}.astro`), content);
+    for (const [route, content] of Object.entries(pages)) await writeFile(resolve(directory, `pages/${route}.astro`), content.replace("../../../src/styles/global.css", "../fixture.css"));
+    await writeFile(resolve(directory, 'fixture.css'), '@import "../../src/styles/global.css";\n@source "../../tests/fixtures";\n@source "./pages";');
     await writeFile(resolve(directory, 'config.mjs'), `import base from '../../astro.config.mjs';
 export default { ...base, adapter: undefined, srcDir: '${relative}/', cacheDir: '${relative}/cache/', outDir: '${relative}/dist/',
   vite: { ...base.vite, cacheDir: '${relative}/vite-cache/' } };`);
@@ -32,6 +33,13 @@ export default { ...base, adapter: undefined, srcDir: '${relative}/', cacheDir: 
       build.once('error', reject); build.once('exit', code => code === 0 ? done() : reject(new Error(`Fixture build failed: ${output}`)));
     });
     await cp(resolve(root, 'dist/client/data'), resolve(directory, 'dist/data'), { recursive: true });
+    const sprite = await readFile(resolve(root, 'dist/client/app-icons.svg'), 'utf8');
+    await writeFile(resolve(directory, 'dist/app-icons.svg'), sprite);
+    // The shared drawing includes the avatar and font URLs from the main build.
+    for (const asset of new Set(sprite.match(/\/_astro\/[^\s'"<>;)]+/g))) {
+      await mkdir(resolve(directory, 'dist/_astro'), { recursive: true });
+      await cp(resolve(root, `dist/client${asset}`), resolve(directory, `dist${asset}`));
+    }
     // Standalone static fixtures expose the backend-unavailable health contract.
     await mkdir(resolve(directory, 'dist/api'), { recursive: true });
     await writeFile(resolve(directory, 'dist/api/health'), JSON.stringify({ ai: false, postcards: false }));

@@ -1,4 +1,5 @@
 import type { HTMLAttributes, MouseEvent } from 'react';
+import './app-sheet.css';
 import { APP_META } from '../registry/meta';
 import type { AppId } from '../types/apps';
 export interface SheetHeaderProps extends HTMLAttributes<HTMLElement> {

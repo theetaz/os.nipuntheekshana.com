@@ -16,7 +16,11 @@ describe('island rendering and build contracts', () => {
     try {
       const html = renderToString(createElement(Desktop, props));
       expect(html).toContain('data-shell="desktop"'); expect(html).toContain('data-shell="mobile"');
-      expect(html).toContain('href="/projects"'); expect(html).toContain('class="no-js-only"');
+      expect(html).toContain('href="/projects"');
+      const built = readFileSync('dist/client/index.html', 'utf8');
+      const staticHeader = built.match(/<header[^>]*class="[^"]*k-static-topbar[^"]*"[^>]*>([\s\S]*?)<\/header>/)![1]!;
+      const navigation = staticHeader.match(/<nav aria-label="Menu bar">([\s\S]*?)<\/nav>/)![1]!;
+      expect([...navigation.matchAll(/href="([^"]+)"/g)].map(match => match[1])).toEqual(['/projects', '/writing', '/about', '/cv', '/now']);
       expect(html).not.toContain('data-window-id=');
       expect(renderToString(createElement(Desktop, props))).toBe(html);
     } finally { cleanup(); }

@@ -2,9 +2,9 @@ import { writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
-const origin = new URL(process.env.BASE_URL ?? 'http://localhost:4413');
-if (!['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname) || origin.port !== '4413') {
-  throw new Error('Serve the local build on port 4413 before generating the OG image.');
+const origin = new URL(process.env.BASE_URL ?? 'http://localhost:4424');
+if (!['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname) || !['4413', '4424'].includes(origin.port)) {
+  throw new Error('Serve the local build on port 4413 or 4424 before generating the OG image.');
 }
 const browser = await chromium.launch();
 try {

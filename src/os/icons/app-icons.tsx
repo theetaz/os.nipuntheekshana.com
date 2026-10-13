@@ -30,7 +30,7 @@ function AboutSymbol({ avatarUrl }: { avatarUrl?: string }) {
   return <symbol id="app-about" viewBox="0 0 64 64">
     <Tile fill="#0FA3A3" />
     <circle cx="32" cy="32" r="20" fill="#0FA3A3" />
-    <text x="32" y="38" textAnchor="middle" fontFamily={displayFont} fontWeight="600" fontSize="18" fill="#fff">NT</text>
+    <text style={avatarUrl ? { display: 'none' } : undefined} x="32" y="38" textAnchor="middle" fontFamily={displayFont} fontWeight="600" fontSize="18" fill="#fff">NT</text>
     {avatarUrl && <>
       <defs><clipPath id="c-about-avatar"><circle cx="32" cy="32" r="20" /></clipPath></defs>
       <image href={avatarUrl} x="12" y="12" width="40" height="40" preserveAspectRatio="xMidYMid slice" clipPath="url(#c-about-avatar)" />
@@ -47,7 +47,8 @@ function Page({ desktop = false, readme = false }: { desktop?: boolean; readme?:
       <text x="17" y="26" fontFamily={monoFont} fontWeight="600" fontSize="7" textLength="27" lengthAdjust="spacingAndGlyphs" fill="#1B1530">READ ME</text>
       <path d="M17 33h26M17 38h26M17 43h22M17 48h26M17 53h14" stroke="#1B1530" strokeWidth="1.6" strokeLinecap="round" />
     </> : <>
-      <text x="17" y="31" fontFamily={displayFont} fontWeight="600" fontSize="15" fill="#1B1530">CV</text>
+      {/* Fraunces 600, 15px CV outlines (Fraunces-OFL.txt); no document-font request for an icon. */}
+      <path data-glyph="CV" d="M27.06 28.23Q27.06 28.76 26.77 29.3Q26.48 29.84 25.94 30.29Q25.39 30.74 24.61 31.01Q23.83 31.28 22.85 31.28Q21.23 31.28 20.05 30.58Q18.87 29.88 18.23 28.65Q17.59 27.41 17.59 25.81Q17.59 24.6 17.97 23.59Q18.35 22.57 19.04 21.82Q19.72 21.07 20.65 20.65Q21.57 20.24 22.65 20.24Q23.41 20.24 23.88 20.38Q24.35 20.53 24.62 20.68Q24.89 20.84 25.04 20.84Q25.23 20.84 25.33 20.7Q25.43 20.57 25.54 20.44Q25.64 20.31 25.83 20.31Q25.96 20.31 26.05 20.4Q26.13 20.49 26.2 20.68L26.99 23.27Q27.05 23.45 26.96 23.59Q26.87 23.72 26.69 23.76Q26.52 23.79 26.38 23.72Q26.23 23.65 26.15 23.46Q25.75 22.57 25.25 22.04Q24.76 21.51 24.19 21.28Q23.62 21.05 22.96 21.05Q22.29 21.05 21.74 21.35Q21.18 21.65 20.78 22.22Q20.38 22.78 20.15 23.57Q19.93 24.35 19.93 25.33Q19.93 26.84 20.4 27.89Q20.86 28.93 21.68 29.48Q22.5 30.02 23.54 30.02Q24.53 30.02 25.27 29.54Q26.01 29.07 26.42 28.2Q26.51 28.02 26.61 27.97Q26.71 27.91 26.84 27.93Q26.96 27.95 27.01 28.02Q27.06 28.1 27.06 28.23ZM34.89 20.84Q34.89 20.68 35 20.59Q35.11 20.5 35.34 20.5H37.73Q37.97 20.5 38.08 20.59Q38.19 20.68 38.19 20.84Q38.19 20.96 38.12 21.04Q38.04 21.11 37.87 21.19L37.59 21.29Q37.36 21.39 37.2 21.6Q37.05 21.8 36.9 22.25L34.43 29.52Q34.34 29.79 34.3 29.95Q34.26 30.12 34.26 30.29V30.63Q34.26 30.81 34.16 30.91Q34.05 31 33.89 31H32.04Q31.88 31 31.78 30.91Q31.67 30.81 31.67 30.62V30.28Q31.67 30.15 31.64 30.01Q31.6 29.87 31.53 29.68L28.79 21.81Q28.71 21.58 28.62 21.48Q28.53 21.38 28.36 21.31L28.07 21.21Q27.79 21.09 27.79 20.84Q27.79 20.68 27.9 20.59Q28.02 20.5 28.25 20.5H31.84Q32.07 20.5 32.18 20.59Q32.3 20.68 32.3 20.84Q32.3 20.98 32.22 21.06Q32.14 21.13 31.97 21.19L31.48 21.3Q31.29 21.36 31.25 21.5Q31.2 21.64 31.31 21.96L33.98 29.71L33.27 30.25L36.03 22.18Q36.15 21.82 36.07 21.62Q35.99 21.41 35.64 21.29L35.21 21.19Q35.06 21.13 34.97 21.06Q34.89 20.98 34.89 20.84Z" fill="#1B1530" />
       <path d="M17 36h26M17 40h20M17 44h24M17 48h10" stroke="#1B1530" strokeWidth="1.6" strokeLinecap="round" />
       <rect x="30" y="49" width="18" height="8" rx="2" fill="#E8453C" />
       <text x="39" y="55.2" textAnchor="middle" fontFamily="ui-sans-serif, system-ui, sans-serif" fontWeight="700" fontSize="5.6" fill="#fff">PDF</text>

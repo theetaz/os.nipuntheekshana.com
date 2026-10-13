@@ -18,7 +18,6 @@ export const quickLook = animated(() => import('./QuickLook').then(module => mod
 export const alerts = animated(() => import('./Alerts').then(module => module.Alerts));
 export const toasts = animated(() => import('./Toasts').then(module => module.Toasts));
 export const boot = deferredComponent(() => import('./BootController').then(module => module.BootController));
-export const screensaver = deferredComponent(() => import('./Screensaver').then(module => module.Screensaver));
-export const shutdown = deferredComponent(() => import('./ShutDown').then(module => module.ShutDown));
 
-export const health = deferredComponent(() => import('../state/feature-health').then(module => module.FeatureHealth));
+// These hosts observe sticky store state, so intent during loading is retained.
+export const systems = deferredComponent(() => import('./SystemHosts').then(module => module.SystemHosts));

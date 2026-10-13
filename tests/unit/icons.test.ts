@@ -74,6 +74,10 @@ describe('app icon sprite contract', () => {
     expect(symbols).toContain('clip-path="url(#c-about-avatar)"');
     expect(symbols).toContain('width="40" height="40"');
     expect(symbols).toContain('>NT</text>');
+    expect(symbols).toContain('style="display:none"');
+    expect(renderSprite()).not.toContain('style="display:none"');
+    expect(renderSprite()).toContain('>NT</text>');
+    expect(symbols).toContain('data-glyph="CV"');
     expect(renderSprite()).not.toContain('<image');
   });
 

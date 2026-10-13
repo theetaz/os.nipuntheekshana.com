@@ -22,7 +22,7 @@ const sticker = await stickerArt('sticker-kottu', 88);
         <picture>
           <source type="image/avif" srcset={sticker.avif} sizes="72px" />
           <source type="image/webp" srcset={sticker.webp} sizes="72px" />
-          <img src={sticker.src} width={sticker.width} height={sticker.height} alt="" loading="lazy" decoding="async" />
+          <img src={sticker.src} width={sticker.width} height={sticker.height} alt="" loading="lazy" decoding="async" style={`aspect-ratio:${sticker.width}/${sticker.height};object-fit:contain`} />
         </picture>
         <p>{BRAND.name} {VERSION} '{CODENAME}'</p>
         <p>Freshly chopped in Colombo with Astro, React and a lot of tea.</p>
