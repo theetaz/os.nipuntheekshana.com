@@ -15,7 +15,7 @@ export interface BackendEnv {
 export function featureHealth(env: BackendEnv) {
   return {
     ai: !!(env.AI_MESSAGES_ENABLED === 'true' && env.AI && env.DB && env.PERSONA && env.RL_MESSAGES && env.AI_MODEL && env.IP_HASH_SALT),
-    postcards: !!(env.DB && env.RL_POSTCARDS && env.TURNSTILE_SECRET && env.TURNSTILE_SITE_KEY && env.IP_HASH_SALT),
+    postcards: !!(env.DB && env.IP_HASH_SALT),
   };
 }
 export function json(data: unknown, status = 200, headers: HeadersInit = {}): Response {

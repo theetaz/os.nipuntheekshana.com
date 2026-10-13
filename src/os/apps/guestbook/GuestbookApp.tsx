@@ -14,14 +14,14 @@ export default function GuestbookApp(props: AppProps) {
   const [draft, setDraft] = useState(readDraft); const latest = useRef(draft); latest.current = draft;
   const [failure, setFailure] = useState<BoardFailure | null>(() => readStored(DAILY_KEY) === true
     ? { kind: 'daily', message: "That's five notes today. The board needs a rest; come back tomorrow." } : null); const [posting, setPosting] = useState(false);
-  const [verified, setVerified] = useState(false); const [status, setStatus] = useState('');
+  const [verified, setVerified] = useState(() => !turnstileSiteKey()); const [status, setStatus] = useState('');
   const [seconds, setSeconds] = useState(0); const [daily, setDaily] = useState(() => readStored(DAILY_KEY) === true);
   const [shake, setShake] = useState(''); const [randomising, setRandomising] = useState(false);
   const textarea = useRef<HTMLTextAreaElement>(null); const name = useRef<HTMLInputElement>(null); const email = useRef<HTMLInputElement>(null);
   const random = useRef<HTMLButtonElement>(null); const note = useRef<HTMLDivElement>(null); const widget = useRef<HTMLDivElement>(null);
   const turnstile = useRef<{ api: Turnstile; id: string } | null>(null); const submission = useRef<AbortController | null>(null);
   const sending = useRef<Draft | null>(null); const sent = useRef(false); const stopped = useRef(false);
-  const onToken = useRef<(token: string) => void>(() => {}); const resetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const onToken = useRef<(token?: string) => void>(() => {}); const resetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const animations = useRef(new Set<Animation>());
   const sitekey = turnstileSiteKey();
   useLayoutEffect(() => { props.setTitle('New note'); props.ready(); }, [props.ready, props.setTitle]);
@@ -36,8 +36,8 @@ export default function GuestbookApp(props: AppProps) {
       sending.current = null; setPosting(false); setFailure({ kind: 'turnstile', message: "We couldn't confirm you're human. Try once more." });
       turnstile.current?.api.reset(turnstile.current.id);
     };
-    if (!sitekey) setFailure({ kind: 'blocked', message: blockedMessage });
-    else void loadTurnstile().then(api => {
+    setVerified(!sitekey);
+    if (sitekey) void loadTurnstile().then(api => {
       if (disposed || !widget.current) return;
       const id = api.render(widget.current, { sitekey, action: 'postcard', execution: 'execute', appearance: 'interaction-only', 'response-field': false,
         callback: token => onToken.current(token), 'expired-callback': failed, 'error-callback': failed, 'timeout-callback': failed });
@@ -84,7 +84,7 @@ export default function GuestbookApp(props: AppProps) {
     const value = sending.current; if (!value || stopped.current) return; sending.current = null;
     const controller = new AbortController(); submission.current = controller;
     try {
-      const result = await postPostcard({ ...value, name: value.name.trim(), body: value.body.trim(), email: value.email.trim(), turnstileToken: token }, controller.signal);
+      const result = await postPostcard({ ...value, name: value.name.trim(), body: value.body.trim(), email: value.email.trim(), ...(token === undefined ? {} : { turnstileToken: token }) }, controller.signal);
       if (stopped.current) return;
       if (result.status !== 'published' && result.status !== 'pending') { reject({ kind: 'unexpected', message: fieldMessages.request }); return; }
       const pending = result.status === 'pending';
@@ -117,7 +117,7 @@ export default function GuestbookApp(props: AppProps) {
     if (Object.keys(invalid).length) { reject({ kind: 'invalid', message: '', fields: Object.fromEntries(Object.keys(invalid).map(key => [key, fieldMessages[key as keyof typeof fieldMessages]])) }); return; }
     if (hasLink(`${value.name}\n${value.body}`)) { reject({ kind: 'link', message: linkMessage }); return; }
     sending.current = { ...value }; setPosting(true); setFailure(null); setStatus('');
-    try { turnstile.current!.api.execute(turnstile.current!.id); }
+    try { if (sitekey) turnstile.current!.api.execute(turnstile.current!.id); else onToken.current(); }
     catch { sending.current = null; setPosting(false); reject({ kind: 'turnstile', message: "We couldn't confirm you're human. Try once more." }); }
   }
   const errors = failure?.fields ?? {};
@@ -140,7 +140,7 @@ export default function GuestbookApp(props: AppProps) {
           {errors.email && <span id="board-email-error" className="k-compose-field-error" role="alert">{errors.email}</span>}</div>
       </div>
       <p id="board-email-help" className="k-compose-help">Only Nipun sees your email, in case he wants to reply.</p>
-      <div ref={widget} className="k-compose-verification" aria-label="Human check" />
+      {sitekey && <div ref={widget} className="k-compose-verification" aria-label="Human check" />}
       {failure?.kind !== 'profanity' && <Failure failure={failure} seconds={seconds} retry={submit} />}
       {Object.entries(errors).filter(([field]) => !['body', 'name', 'email'].includes(field)).map(([field, message]) => <p key={field} id={`board-${field}-error`} className="k-compose-field-error" role="alert">{message}</p>)}
       <p className="k-compose-status" role="status" aria-live="polite">{status}</p>

@@ -1,8 +1,13 @@
 import type { BackendEnv } from './env';
 export const DAILY_CAP = 5;
 export async function checkRateLimit(env: BackendEnv, ipHash: string, now = Date.now()): Promise<number | null> {
-  const minute = await env.RL_POSTCARDS!.limit({ key: ipHash });
-  if (!minute.success) return 60;
+  if (env.RL_POSTCARDS) {
+    const minute = await env.RL_POSTCARDS.limit({ key: ipHash });
+    if (!minute.success) return 60;
+  } else {
+    const recent = await env.DB!.prepare('SELECT COUNT(*) AS count FROM postcards WHERE ip_hash = ? AND created_at >= ?').bind(ipHash, now - 60000).first<{ count: number }>();
+    if ((recent?.count ?? 0) >= 3) return 60;
+  }
   const start = Date.parse(new Date(now).toISOString().slice(0, 10));
   const result = await env.DB!.prepare('SELECT COUNT(*) AS count FROM postcards WHERE ip_hash = ? AND created_at >= ?').bind(ipHash, start).first<{ count: number }>();
   return (result?.count ?? 0) >= DAILY_CAP ? dailyRetryAfter(now) : null;

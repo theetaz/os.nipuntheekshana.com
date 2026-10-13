@@ -1,4 +1,4 @@
 import { atom } from 'jotai';
 export const aiAvailableAtom = atom(false);
-// Match the prerendered launcher on first paint; health confirms the binding.
-export const postcardsAvailableAtom = atom(!!import.meta.env.PUBLIC_TURNSTILE_SITE_KEY);
+// Health confirms D1 and the privacy salt independently of Turnstile.
+export const postcardsAvailableAtom = atom(false);

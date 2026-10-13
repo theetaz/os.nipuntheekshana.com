@@ -44,6 +44,17 @@ describe('protection', () => {
   it('keeps health false when secrets are missing and AI Messages disabled', () => {
     expect(featureHealth({})).toEqual({ ai: false, postcards: false });
     expect(featureHealth({ AI_MESSAGES_ENABLED: 'false' })).toEqual({ ai: false, postcards: false });
+    const DB = {} as BackendEnv['DB'];
+    expect(featureHealth({ DB, IP_HASH_SALT: 'salt' })).toEqual({ ai: false, postcards: true });
+    expect(featureHealth({ DB })).toEqual({ ai: false, postcards: false });
+    expect(featureHealth({ IP_HASH_SALT: 'salt' })).toEqual({ ai: false, postcards: false });
+  });
+  it('accepts absent tokens only in the explicitly optional verification mode, while retaining token bounds', () => {
+    const { turnstileToken: _token, ...form } = input;
+    expect(validate(form, false).ok).toBe(true);
+    expect(validate(form).ok).toBe(false);
+    expect(validate({ ...form, turnstileToken: 'a'.repeat(2049) }, false).ok).toBe(false);
+    expect(validate({ ...form, turnstileToken: 1 }, false).ok).toBe(false);
   });
   it('requires the exact same origin and rejects arbitrary production hosts', () => {
     expect(validOrigin(new Request('https://os.nipuntheekshana.com/api/postcards', { headers: { Origin: 'https://os.nipuntheekshana.com' } }))).toBe(true);

@@ -6,7 +6,7 @@ export interface PostcardInput {
 }
 export type Validation = { ok: true; value: PostcardInput } | { ok: false; fields: Record<string, string> };
 const length = (text: string) => Array.from(text).length;
-export function validate(input: unknown): Validation {
+export function validate(input: unknown, requireTurnstile = true): Validation {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return { ok: false, fields: { request: 'Expected a JSON object.' } };
   const data = input as Record<string, unknown>; const fields: Record<string, string> = {};
   const text = (key: string, max: number) => {
@@ -15,7 +15,7 @@ export function validate(input: unknown): Validation {
     return value;
   };
   const name = text('name', 40); const body = text('body', 300);
-  const turnstileToken = text('turnstileToken', 2048);
+  const turnstileToken = requireTurnstile || data.turnstileToken !== undefined ? text('turnstileToken', 2048) : '';
   let email: string | null = null;
   if (data.email !== undefined && data.email !== '' && data.email !== null) {
     if (typeof data.email !== 'string' || length(data.email) > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(data.email)) fields.email = 'Enter a valid email address.';

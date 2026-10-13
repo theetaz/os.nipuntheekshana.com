@@ -4,7 +4,7 @@ export interface Postcard {
   id: string; created_at: number; name: string; body: string; color: PostcardColor; font: PostcardFont; rotation: number; country: string | null;
 }
 export interface PostcardPage { items: Postcard[]; next: string | null }
-export interface ComposePostcard { name: string; body: string; email?: string; color: PostcardColor; font: PostcardFont; turnstileToken: string }
+export interface ComposePostcard { name: string; body: string; email?: string; color: PostcardColor; font: PostcardFont; turnstileToken?: string }
 export type PostcardResult = { status: 'published'; postcard: Postcard } | { status: 'pending'; message: string };
 export type PostcardFailure = { error: 'profanity'; lang: 'en' | 'si'; joke: string } | { error: 'link' | 'turnstile' | 'origin' | 'unavailable' | 'unexpected' }
   | { error: 'invalid'; fields: Record<string, string> } | { error: 'rate_limited'; retryAfter: number };
@@ -38,7 +38,7 @@ export async function postPostcard(input: ComposePostcard, signal?: AbortSignal)
   } finally { clearTimeout(timer); release(); }
 }
 export function turnstileSiteKey(): string {
-  return document.querySelector<HTMLMetaElement>('meta[name="turnstile-site-key"]')?.content ?? import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+  return document.querySelector<HTMLMetaElement>('meta[name="turnstile-site-key"]')?.content ?? '';
 }
 let health: Promise<boolean> | undefined;
 export function boardAvailable(): Promise<boolean> {
