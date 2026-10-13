@@ -11,7 +11,7 @@ import { isMac } from '../../src/os/lib/platform';
 
 const labels = (items: readonly MenuItemSpec[]) => items.map(item => 'label' in item ? item.label : item.kind);
 const context = (): MenuStateContext => ({ desktop: createDesktopState(), theme: 'auto', wallpaper: 'galle-face',
-  widgets: true, mochi: false, zoomable: true, resizable: true });
+  mochi: false, zoomable: true, resizable: true });
 afterEach(() => vi.unstubAllGlobals());
 describe('menu builders', () => {
   it('matches the island menu including separators and the settings shortcut', () => {
@@ -36,7 +36,7 @@ describe('menu builders', () => {
     expect(menus[2]!.items).toBe(extra); expect(viewMenu([])).toEqual([]);
   });
   it('matches Go, Window and Help and keeps region jumps out of Go', () => {
-    expect(labels(goMenu())).toEqual(['Projects', 'Writing', 'About', 'CV', 'Now', 'Activity', 'Island', 'Terminal', 'Messages', 'Postcards', 'separator', 'Pin the city', 'Kooda']);
+    expect(labels(goMenu())).toEqual(['Projects', 'Writing', 'About', 'CV', 'Now', 'Activity', 'Island', 'Terminal', 'Messages', 'Board', 'separator', 'Pin the city', 'Kooda']);
     expect(goMenu().some(item => item.kind === 'item' && item.shortcut)).toBe(false);
     expect(labels(windowMenu())).toEqual(['Minimise', 'Maximise', 'Snap left', 'Snap right', 'Move & resize with keyboard',
       'separator', 'Next window', 'Previous window', 'Bring all to front', 'separator', 'windows']);
@@ -58,7 +58,6 @@ describe('menu builders', () => {
     expect(getItemState('window.next', context())).toEqual({ disabled: true });
     expect(getItemState('theme.auto', context())).toEqual({ checked: true });
     expect(getItemState('wallpaper.pettah', context())).toEqual({ checked: false });
-    expect(getItemState('desktop.widgets', context())).toEqual({ checked: true });
     expect(getItemState('desktop.mochi', context())).toEqual({ checked: false });
     const state = { ...context(), desktop: wmReducer(createDesktopState(), { type: 'OPEN', appId: 'settings' }),
       zoomable: false, resizable: false, appState: { 'settings.export': { disabled: true }, 'settings.list': { checked: true } } };

@@ -4,33 +4,20 @@
 .stretched-link:focus-visible::after { outline: 2px solid var(--os-focus); outline-offset: 4px; border-radius: inherit; }
 .static-menubar { position: fixed; inset: 0 0 auto; height: 32px; z-index: var(--z-menubar); display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--glass-bg); backdrop-filter: var(--glass-filter); box-shadow: 0 1px 0 var(--glass-edge); }
 .static-menubar a { text-decoration: none; color: var(--os-ink); }
-.serendib-brand { display: flex; align-items: center; gap: 12px; font-weight: 650; }
+.kottu-brand { display: flex; align-items: center; gap: 12px; font-weight: 650; }
 .static-menubar nav { display: flex; align-items: center; gap: 20px; }
 .static-menubar nav a { padding: 4px 0; }
 .simple-entry { margin-left: auto; font-size: 12px; }
-.desktop-icons { position: fixed; right: 24px; top: 48px; bottom: 96px; z-index: var(--z-icons); }
-.desktop-icons ul { display: flex; flex-flow: column wrap-reverse; align-content: end; height: 100%; margin: 0; padding: 0; list-style: none; }
-.desktop-icons li { width: 84px; height: 96px; flex: 0 0 96px; }
-.desktop-icons a { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--os-ink); text-decoration: none; font: 500 12px/16px var(--font-ui); text-align: center; text-shadow: var(--label-shadow); }
-.desktop-icons svg, .static-dock svg, .pocket-grid svg { filter: var(--shadow-icon); flex-shrink: 0; }
-.desktop-icons span { max-width: 80px; }
-.desktop-icons svg { transition: transform 120ms var(--ease-out); }
-.desktop-icons a:hover svg { transform: translateY(-2px); }
 .static-dock { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: var(--z-dock); }
 .static-dock ul { display: flex; gap: 6px; align-items: center; margin: 0; padding: 8px; list-style: none; border-radius: var(--r-dock); background: var(--glass-bg); backdrop-filter: var(--glass-filter); box-shadow: var(--shadow-dock), 0 0 0 1px var(--glass-edge), inset 0 1px 0 var(--glass-border); }
 .static-dock li, .static-dock a, .static-dock svg { display: block; }
 .static-dock a { border-radius: 11px; }
 .static-dock .dock-divider { width: 1px; height: 40px; margin: 0 2px; background: var(--os-line-strong); }
-.pocket-grid, .simple-only { display: none; }
+.simple-only { display: none; }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
   .static-menubar { position: relative; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 16px 0; }
-  .serendib-brand { font: 400 22px/26px var(--font-display); font-synthesis: none; }
-  .serendib-brand svg, .static-menubar nav, .desktop-icons, .desktop-only { display: none !important; }
-  .pocket-grid { display: block; position: relative; z-index: var(--z-icons); padding: 8px 16px 124px; }
-  .pocket-grid ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 8px; margin: 0; padding: 0; list-style: none; }
-  .pocket-grid a { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: var(--os-ink); font: 500 11px/14px var(--font-ui); text-shadow: var(--label-shadow); text-align: center; }
-  .static-dock { bottom: calc(16px + env(safe-area-inset-bottom)); }
-  .static-dock ul { height: 84px; padding: 18px 24px; gap: 24px; border-radius: 28px; }
+  .kottu-brand { font: 400 22px/26px var(--font-display); font-synthesis: none; }
+  .kottu-brand svg, .static-menubar nav, .desktop-only { display: none !important; }
   html.js body { overflow: auto; height: auto; }
 }
 html:is([data-view="simple"], :has(#simple:target)) body { overflow: auto; height: auto; }
@@ -52,6 +39,4 @@ html:is([data-view="simple"], :has(#simple:target)) #story { display: block; }
 
 .simple-header a, .simple-footer a { color: var(--os-accent-ink); text-underline-offset: 3px; }
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
-  html:not([data-view="simple"]):not(:has(#simple:target)) body:has(.phone-home[role="main"]) main#content:empty { display: none; }
-  html:not([data-view="simple"]):not(:has(#simple:target)) body:has(.phone-home[role="main"]) #story { display: none; }
 }

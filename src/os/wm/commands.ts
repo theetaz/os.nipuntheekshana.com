@@ -155,8 +155,8 @@ function focusRegion(selector: string): void {
 async function power(action: 'restart' | 'shutdown'): Promise<void> {
   const store = getStore();
   const source = typeof document !== 'undefined' && document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  if (await alert({ title: action === 'restart' ? 'Restart Serendib?' : 'Shut down Serendib?',
-    body: 'Open windows will close.', primary: action === 'restart' ? 'Restart' : 'Shut down' }) !== 'primary') return;
+  if (await alert({ title: action === 'restart' ? 'Reboot Kottu OS?' : 'Power off Kottu OS?',
+    body: action === 'restart' ? 'Open windows will close.' : undefined, primary: action === 'restart' ? 'Reboot' : 'Power off' }) !== 'primary') return;
   const windows = [...store.get(desktopAtom).order].reverse();
   for (const [index, id] of windows.entries()) {
     if (!await closeWindow(id)) return;

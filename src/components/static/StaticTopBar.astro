@@ -1,13 +1,16 @@
+---
+import { BRAND_BLADE_PATH, BRAND_VIEWBOX } from '../../os/icons/brand-glyph';
+---
 <header class="static-menubar k-static-topbar os-chrome">
-  <a class="serendib-brand" href="/" aria-label="Kottu OS home"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><g stroke="var(--k-ink)" stroke-width="2" stroke-linejoin="round"><path d="M4 18L16 6l3 3L7 21z" fill="var(--k-paper)" /><path d="M20 18L8 6 5 9l12 12z" fill="var(--k-red)" /></g></svg><span>kottu</span></a>
+  <a class="kottu-brand" href="/" aria-label="Kottu OS home"><svg width="18" height="18" viewBox={BRAND_VIEWBOX} aria-hidden="true"><g stroke="var(--k-ink)" stroke-width="2" stroke-linejoin="round"><path d={BRAND_BLADE_PATH} transform="rotate(45 32 32)" fill="#FFFDF8" /><path d={BRAND_BLADE_PATH} transform="rotate(-45 32 32)" fill="var(--k-red)" /></g></svg><span>kottu</span></a>
   <nav aria-label="Menu bar"><a href="/projects">Projects</a><a href="/writing">Writing</a><a href="/about">About</a><a href="/cv">CV</a><a href="/now">Now</a></nav>
   <a class="simple-entry" href="#simple">Simple view</a>
 </header>
-<style>
+<style is:global>
   .k-static-topbar { height:32px; padding:3px 8px 0; align-items:flex-start; gap:6px; background:transparent; box-shadow:none; backdrop-filter:none; pointer-events:none; }
   .k-static-topbar > :is(a, nav) { height:26px; padding:0 4px; border:var(--k-bw-chrome); border-radius:var(--r-module); background:var(--k-cream); box-shadow:var(--k-shadow-1); pointer-events:auto; font:450 13px/18px var(--font-ui); }
-  .k-static-topbar .serendib-brand { gap:6px; padding:0 8px; background:var(--k-yellow); color:var(--k-ink); }
-  .serendib-brand span { font:400 16px/18px var(--font-display); font-synthesis:none; }
+  .k-static-topbar .kottu-brand { gap:6px; padding:0 8px; background:var(--k-yellow); color:var(--k-ink); }
+  .k-static-topbar .kottu-brand span { font:400 16px/18px var(--font-display); font-synthesis:none; }
   .k-static-topbar nav { gap:0; }
   .k-static-topbar nav a { display:flex; align-items:center; min-height:24px; padding:0 8px; border-radius:6px; }
   .k-static-topbar nav a:hover { background:var(--os-hover); }

@@ -4,7 +4,7 @@
 .static-window[data-app="trash"] .static-document { max-width: none; padding: 0; margin: 0; font: 450 13px/18px var(--font-ui); }
 .static-window[data-app="trash"] .static-content { position: static; }
 .kooda-view { display: flex; flex: 1; flex-direction: column; min-height: 0; color: var(--os-ink); }
-.kooda-toolbar { position: absolute; top: -40px; right: 14px; display: flex; align-items: center; z-index: 1; }
+.kooda-toolbar { position: absolute; top: -40px; right: 108px; display: flex; align-items: center; z-index: 1; }
 .static-window[data-app="trash"] .kooda-toolbar { top: 12px; }
 .kooda-scroll { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 .static-window[data-app="trash"] .kooda-scroll { overflow: visible; }
@@ -34,7 +34,7 @@ html:is([data-view="simple"], :has(#simple:target)) .kooda-heading { position: s
   .kooda-tile { width: 100%; min-height: 124px; }
   .kooda-subtitle { padding: 16px 12px 0; }
   .kooda-toolbar button, .kooda-note-card button { min-height: 44px !important; }
-  .kooda-toolbar { top: -48px; right: 12px; }
+  .kooda-toolbar { top: -48px; right: 108px; }
   .static-window[data-app="trash"] .kooda-toolbar { top: 4px; }
   .kooda-note-layer { padding: 16px; }
 }

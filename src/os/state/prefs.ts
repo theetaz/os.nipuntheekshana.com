@@ -20,12 +20,10 @@ export const transparencyPrefAtom = pref('transparency', 'system' as 'system' | 
 export const viewAtom = pref('view', 'desktop' as 'desktop' | 'simple', oneOf(['desktop', 'simple']));
 export const soundAtom = pref('sound', false, isBoolean);
 export const volumeAtom = pref('volume', 0.6, (value): value is number => isNonnegative(value) && value <= 1);
-export const showWidgetsAtom = pref('widgets', true, isBoolean);
 export const mochiPrefsAtom = pref<MochiPrefs>('mochi', { visible: true, naps: true, pos: null, pets: 0 },
   (value): value is MochiPrefs => !!value && typeof value === 'object' && 'visible' in value && isBoolean(value.visible)
     && 'naps' in value && isBoolean(value.naps) && 'pos' in value && (value.pos === null || isPoint(value.pos))
     && 'pets' in value && isNonnegative(value.pets) && Number.isInteger(value.pets));
-export const iconPositionsAtom = pref<Partial<Record<string, Point>>>('icons:v1', {}, isRecordOf(isPoint));
 export type PropPositions = Record<string, { dx: number; dy: number }>;
 export const propsAtom = pref<PropPositions>('props:v1', {}, (value): value is PropPositions =>
   !!value && typeof value === 'object' && !Array.isArray(value) && Object.entries(value).every(([key, point]) =>
@@ -42,7 +40,7 @@ export const devModeAtom = pref('dev', false, isBoolean);
 export const bootedAtom = pref('booted', false, isBoolean);
 
 export const preferenceAtoms = [themePrefAtom, wallpaperAtom, accentAtom, motionPrefAtom, transparencyPrefAtom,
-  viewAtom, soundAtom, volumeAtom, showWidgetsAtom, mochiPrefsAtom, iconPositionsAtom, geometryAtom,
+  viewAtom, soundAtom, volumeAtom, mochiPrefsAtom, geometryAtom,
   terminalHistoryAtom, pinBestAtom, recentAtom, devModeAtom, bootedAtom, propsAtom] as const;
 
 /** Mount storage subscriptions after hydration, before mirroring; never read storage during SSR. */
