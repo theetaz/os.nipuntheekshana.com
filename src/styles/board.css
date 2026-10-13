@@ -1,0 +1,8 @@
+.k-board.k-sec-content { display: block; padding: 40px 36px 48px; border: 3px solid var(--k-hard); border-radius: 24px; background: radial-gradient(circle, light-dark(rgb(27 21 48 / .14), rgb(255 244 224 / .1)) 1.4px, transparent 1.5px) 0 0 / 22px 22px light-dark(#FFF1D6, #241C3D); box-shadow: var(--k-shadow-3); }
+.k-board-compose { display: table; margin: 0 0 36px auto; padding: 10px 18px; border: 2px solid #1B1530; border-radius: 999px; background: #FFC93C; color: #1B1530; box-shadow: var(--k-shadow-2); font: 700 16px/20px var(--font-ui); rotate: -2deg; }
+.k-notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 32px 28px; }
+.k-note-skeleton { aspect-ratio: 1; background: #F3E9D6; }
+.k-notes:has(.k-note-skeleton) { height: min(432px, 80vw); overflow: hidden; }
+@layer base { .k-visits[hidden] { display: block !important; min-height: 40px; } }
+@media (min-width: 700px) { .k-sec-inner.k-board-inner { width: min(1200px, calc(100% - 64px)); } }
+@media (max-width: 699px) { .k-board.k-sec-content { padding: 24px 16px 32px; } .k-board-compose { width: 100%; min-height: 48px; text-align: center; } .k-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; } }

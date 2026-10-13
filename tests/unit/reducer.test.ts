@@ -100,8 +100,8 @@ describe('creation and app instances', () => {
     const state = three();
     expect(wmReducer(state, { type: 'OPEN', appId, ...(appId === 'projects' ? { route: 'bad/route' } : {}) })).toBe(state);
   });
-  it('allows later Postcards only with explicit feature availability', () => {
-    expect(wmReducer(createDesktopState(), { type: 'OPEN', appId: 'guestbook' }, { postcards: true }).windows.guestbook?.title).toBe('Postcards');
+  it('allows the Board only with explicit feature availability', () => {
+    expect(wmReducer(createDesktopState(), { type: 'OPEN', appId: 'guestbook' }, { postcards: true }).windows.guestbook?.title).toBe('Board');
   });
 });
 

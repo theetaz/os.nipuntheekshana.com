@@ -95,7 +95,7 @@ const windows: [AppId, number, number, number, number, boolean, boolean, TitleBa
   ['settings', 680, 520, 680, 520, false, false, 'unified'],
   ['trash', 640, 420, 420, 300, true, true, 'unified'],
   ['readme', 520, 600, 400, 360, true, true, 'standard'],
-  ['guestbook', 960, 680, 600, 460, true, true, 'unified'],
+  ['guestbook', 560, 680, 420, 600, true, false, 'standard'],
 ];
 
 describe('app metadata', () => {
@@ -121,7 +121,7 @@ describe('app metadata', () => {
     expect(titleFor(APP_META.terminal, '')).toBe('Terminal');
     expect(APP_META.trash.name).toBe('Kooda');
     expect(APP_META.readme.name).toBe('Read me');
-    expect(APP_META.guestbook.name).toBe('Postcards');
+    expect(APP_META.guestbook.name).toBe('Board');
   });
 
   it('keeps only Terminal multi-instance, Postcards enabled, and Settings/Kooda noindex', () => {
@@ -131,7 +131,7 @@ describe('app metadata', () => {
     expect(apps.filter(({ phase }) => phase === 'v1')).toHaveLength(13);
     expect(apps.filter(({ indexable }) => !indexable).map(({ id }) => id).sort()).toEqual(['settings', 'trash']);
     expect(APP_META.guestbook).toMatchObject({
-      dockOrder: 4.5, desktopIcon: { order: 6, label: 'Postcards', icon: 'app-guestbook' }, mobile: { gridOrder: null, dockOrder: null },
+      dockOrder: 4.5, desktopIcon: { order: 6, label: 'Board', icon: 'app-guestbook' }, mobile: { gridOrder: null, dockOrder: null },
     });
   });
 
@@ -159,7 +159,7 @@ describe('app metadata', () => {
       { order: 3, label: 'Writing', icon: 'folder-writing' },
       { order: 4, label: 'CV.pdf', icon: 'doc-cv' },
       { order: 5, label: 'Pin the city', icon: 'app-pin', route: 'play' },
-      { order: 6, label: 'Postcards', icon: 'app-guestbook' },
+      { order: 6, label: 'Board', icon: 'app-guestbook' },
     ]);
     expect(pathFor('maps', APP_META.maps.desktopIcon!.route!)).toBe('/maps/play');
   });
@@ -184,7 +184,7 @@ describe('app metadata', () => {
       .toEqual({
         projects: 'sidebar-grid', about: 'document', writing: 'three-pane', messages: 'three-pane',
         terminal: 'terminal', maps: 'canvas', activity: 'canvas', cv: 'document', settings: 'form',
-        now: 'note', trash: 'sidebar-grid', readme: 'document', guestbook: 'sidebar-grid',
+        now: 'note', trash: 'sidebar-grid', readme: 'document', guestbook: 'note',
       });
   });
 });

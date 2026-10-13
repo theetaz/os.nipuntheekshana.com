@@ -1,8 +1,19 @@
+---
+import SectionHead from './SectionHead.astro';
+import '../../styles/board.css';
+---
 <section id="ws-board" class="k-sec" data-sec="board" aria-labelledby="ws-board-title">
-  <div class="k-sec-inner">
-    <p class="k-prompt">nipun@kottu:~$ cat /var/board/*.txt</p>
-    <h2 id="ws-board-title">Message board</h2>
-    <div class="k-sec-content" data-k-board></div>
+  <div class="k-sec-inner k-board-inner">
+    <SectionHead id="ws-board" title="Message board" command="cat /var/board/*.txt" subtitle="sign the wall before you go" />
+    <div class="k-sec-content k-board" data-k-board aria-labelledby="ws-board-title">
+      <a class="k-board-compose" href="/postcards">+ leave a message</a>
+      <ol class="k-notes" aria-label="Notes, newest first" aria-busy="true">
+        {Array.from({ length: 10 }, () => <li class="k-note-skeleton" aria-hidden="true"></li>)}
+      </ol>
+      <p class="sr-only" data-board-status role="status">Loading notes…</p>
+      <div class="k-board-more" data-board-more></div>
+      <noscript><p>Enable JavaScript to read the notes, or <a href="/postcards">send Nipun a message</a>.</p></noscript>
+    </div>
     <div class="k-sec-shape" aria-hidden="true"></div>
   </div>
 </section>

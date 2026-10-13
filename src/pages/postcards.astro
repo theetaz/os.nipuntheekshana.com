@@ -1,33 +1,18 @@
 ---
 import OsLayout from '../layouts/OsLayout.astro';
 import StaticWindow from '../components/static/StaticWindow.astro';
-import InitialData from '../components/static/InitialData.astro';
 import { APP_META } from '../os/registry/meta';
 import { seoFor } from '../lib/seo';
-import type { PostcardPage } from '../os/apps/guestbook/api';
-// Live builds snapshot the public board. Snapshot test builds stay hermetic.
-let board: PostcardPage = { items: [], next: null };
-const snapshotUrl = import.meta.env.POSTCARDS_SNAPSHOT_URL ?? (import.meta.env.SERENDIB_ACTIVITY_SOURCE === 'snapshot' ? undefined : 'https://os.nipuntheekshana.com/api/postcards');
-if (snapshotUrl) {
-  const url = new URL(snapshotUrl);
-  if (url.origin !== 'https://os.nipuntheekshana.com' || url.pathname !== '/api/postcards') throw new Error('Use the public same-site postcards endpoint for the build snapshot.');
-  try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    if (response.ok) {
-      const data = await response.json();
-      if (Array.isArray(data.items)) board.items = data.items.slice(0, 60).map((item: PostcardPage['items'][number]) => ({
-        id: item.id, created_at: item.created_at, name: item.name, body: item.body, color: item.color, font: item.font, country: item.country, rotation: item.rotation,
-      }));
-    }
-  } catch { console.warn('Postcards snapshot unavailable; building an empty board.'); }
-}
-const seo = seoFor({ path: '/postcards', title: 'Postcards', description: APP_META.guestbook.description, kind: 'app' });
+import { site } from '../data/profile';
+const seo = seoFor({ path: '/postcards', title: 'Board', description: APP_META.guestbook.description, kind: 'app' });
 ---
 <OsLayout seo={seo} initial={{ appId: 'guestbook', route: '' }}>
-  <StaticWindow app="guestbook" route="" title="Postcards">
-    <div class="static-document"><h1>Postcards</h1><p>Visitor postcards. Enable JavaScript to write a postcard.</p>
-      {board.items.length ? <ul>{board.items.map(item => <li><p>{item.body}</p><p>{item.name}</p></li>)}</ul> : <p>No postcards in this snapshot yet.</p>}
+  <StaticWindow app="guestbook" route="" title="New note">
+    <div class="static-document"><h1>Leave a note</h1>
+      <p>Sign the message board with a name and a kind note, up to 300 characters. Keep links off the wall.</p>
+      <p>Enable JavaScript to choose a colour and font and pin your note. Your email is optional and never shown on the board.</p>
+      <p>You can also <a href={`mailto:${site.email}?subject=Hello%20from%20Kottu%20OS`}>email Nipun</a>.</p>
+      <a href="/#ws-board">Read the message board</a>
     </div>
   </StaticWindow>
-  <InitialData slot="after-main" key="guestbook:index" data={board} />
 </OsLayout>
