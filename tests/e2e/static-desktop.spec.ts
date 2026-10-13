@@ -91,6 +91,10 @@ test('route pages do not log errors and reduced motion skips the boot @smoke', a
     const health = page.waitForResponse(response => response.url().endsWith('/api/health'));
     await page.goto(path); await expect(page.locator('html')).toHaveClass(/os-ready/);
     await (await health).finished();
+    // Shell health can finish before adopted or restored apps load their data.
+    // Inspect the loaded route before navigating away and cancelling its requests.
+    await expect(page.locator('#static-window')).toBeHidden();
+    await expect(page.locator('.window-skeleton, .projects-loading, [data-adopting]')).toHaveCount(0);
   }
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.evaluate(() => localStorage.removeItem('serendib:booted'));
@@ -109,9 +113,8 @@ test('stored Simple view can return to the desktop', async ({ page }) => {
   await page.reload();
   await expect(page.locator('#story')).toBeVisible();
   await page.getByRole('link', { name: 'Back to the desktop', exact: true }).click();
-  await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] .phone-ticket'):page.locator('.k-hero')).toBeVisible();
-  if (await page.locator('html').getAttribute('data-mode') === 'mobile') await expect(page.locator('#story')).toBeHidden();
-  else await expect(page.locator('#story')).toBeVisible();
+  await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] .phone-home'):page.locator('.k-hero')).toBeVisible();
+  await expect(page.locator('#story')).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('serendib:view'))).toBeNull();
 });
 

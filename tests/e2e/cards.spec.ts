@@ -116,6 +116,7 @@ test('hover decodes the cover before revealing it and clicking opens the case st
   const card = await visit(page); await centre(page); await card.locator('.k-card-link').hover();
   const shot = page.locator('.k-preview .k-shot');
   await expect(shot).toHaveAttribute('data-loaded');
+  await expect(shot.locator('img')).toHaveAttribute('alt', JSON.parse((await card.getAttribute('data-shot'))!).alt);
   expect(await shot.locator('img').evaluate(img => (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0)).toBe(true);
   expect(await shot.locator('img').evaluate(img => (img as HTMLImageElement).currentSrc)).toContain('.avif');
   const ring = await page.locator('.k-preview').evaluate(el => {

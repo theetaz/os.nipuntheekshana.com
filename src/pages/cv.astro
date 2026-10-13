@@ -13,14 +13,15 @@ const seo = seoFor({ path: '/cv', title: 'CV', description: APP_META.cv.descript
 ---
 <OsLayout seo={seo} initial={{ appId: 'cv', route: '' }}>
   <section id="static-window" class="static-window" data-app="cv" data-route="" data-query="{}" role="dialog" aria-modal="false" aria-label="CV" style={`--window-width:${width}px;--window-height:${height}px`}>
+    <span class="k-ring" aria-hidden="true"><i /></span>
     <SheetHeader appId="cv" route="" title="CV" />
     <header class="static-titlebar">
-      <div class="traffic-lights">
-        <a class="traffic-light close" data-traffic-light href="/" aria-label="Close (back to the desktop)"><span aria-hidden="true">×</span><span class="mobile-home" aria-hidden="true">Home</span></a>
-        <button class="traffic-light minimise js-only" data-traffic-light disabled aria-label="Minimise (available in the interactive desktop)"><span aria-hidden="true">−</span></button>
-        <button class="traffic-light zoom js-only" data-traffic-light disabled aria-label="Zoom (available in the interactive desktop)"><span aria-hidden="true">+</span></button>
-      </div>
       <span id="static-window-title">{profile.cv.filename}</span>
+      <div class="k-winbtns" role="group" aria-label="Window controls">
+        <button class="k-winbtn js-only" data-window-button="minimise" disabled aria-label="Minimise (available in the interactive desktop)"><span class="k-winbtn-disc"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5h6" /></svg></span></button>
+        <button class="k-winbtn js-only" data-window-button="maximise" disabled aria-label="Maximise (available in the interactive desktop)"><span class="k-winbtn-disc"><svg viewBox="0 0 10 10" aria-hidden="true"><rect x="2" y="2" width="6" height="6" /></svg></span></button>
+        <a class="k-winbtn" data-window-button="close" href="/" aria-label="Close (back to the desktop)"><span class="k-winbtn-disc"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="m2 2 6 6M8 2 2 8" /></svg></span></a>
+      </div>
     </header>
     <CvDocument profile={profile} />
   </section>

@@ -1,0 +1,21 @@
+.k-ring { position: absolute; inset: -3px; border-radius: 15px; overflow: hidden; z-index: -1; padding: 3px; pointer-events: none; background: var(--k-ring-muted, rgb(27 21 48 / .45)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; }
+.k-ring > i { position: absolute; inset: -50%; background: var(--k-grad-rice); }
+.k-winbtns { display: flex; flex: none; align-items: center; gap: 6px; }
+.k-winbtn { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--os-ink-3); text-decoration: none; }
+.k-winbtn-disc { display: grid; place-items: center; width: 18px; height: 18px; border: 2px solid currentColor; border-radius: 50%; background: transparent; transition: transform 120ms var(--ease-out); }
+.k-winbtn-disc svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.k-winbtn[data-window-button="minimise"] { --k-button-fill: var(--k-wb-min); }
+.k-winbtn[data-window-button="maximise"] { --k-button-fill: var(--k-wb-max); }
+.k-winbtn[data-window-button="close"] { --k-button-fill: var(--k-wb-close); }
+:is(.static-window, .managed-window[data-focused="true"]) .k-winbtn:not(:disabled, [aria-disabled="true"]) .k-winbtn-disc,
+.k-winbtn:not(:disabled, [aria-disabled="true"]):hover .k-winbtn-disc { background: var(--k-button-fill); border-color: var(--k-wb-glyph); color: var(--k-wb-glyph); }
+.k-winbtn:not(:disabled, [aria-disabled="true"]):hover .k-winbtn-disc { transform: scale(1.08); }
+.k-winbtn:is(:disabled, [aria-disabled="true"]) { opacity: .4; cursor: default; }
+html[data-theme="dark"] .k-ring, .managed-window[data-theme="dark"] > .k-ring { --k-ring-muted: #4A3F70; }
+@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) .k-ring { --k-ring-muted: #4A3F70; } }
+html[data-motion="reduce"] .k-winbtn-disc { transition: none; }
+@media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) .k-winbtn-disc { transition: none; } }
+@media (forced-colors: active) {
+  .k-ring { display: none; }
+  .k-winbtn-disc { border-color: ButtonText !important; background: ButtonFace !important; color: ButtonText !important; }
+}

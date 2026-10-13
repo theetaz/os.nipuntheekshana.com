@@ -59,7 +59,8 @@ describe('validated preference storage', () => {
     store.set(themePrefAtom, 'light'); expect(html.dataset.theme).toBe('light'); store.set(modeAtom, 'mobile'); expect(html.dataset.mode).toBe('mobile');
     store.set(systemReducedMotionAtom, true); expect(store.get(reducedMotionAtom)).toBe(true);
     store.set(motionPrefAtom, 'full'); expect(store.get(reducedMotionAtom)).toBe(false); expect(html.dataset.motion).toBe('full');
-    cleanup(); store.set(themePrefAtom, 'dark'); expect(html.dataset.theme).toBe('light'); expect(preferenceAtoms).toHaveLength(18);
+    cleanup(); store.set(themePrefAtom, 'dark'); expect(html.dataset.theme).toBe('light'); expect(preferenceAtoms).toHaveLength(16);
+    expect(preferenceAtoms.map(atom => String(atom))).toHaveLength(new Set(preferenceAtoms).size);
   });
   it('validates cross-tab storage events, ignores other areas, and removes its listener', () => {
     class BrowserStorage implements Storage {

@@ -7,6 +7,3 @@ html[data-view="simple"] .managed-window { display: none; }
 html.os-ready[data-mode="mobile"] .island-mobile :is(.static-dock, .pocket-grid) { display: block; }
 
 .island-mobile .static-menubar { position: fixed; }
-html[data-mode="mobile"]:has(.managed-window:not([hidden])) .desktop-widgets { display: none; }
-.island-mobile .traffic-light.close { width: 44px; height: 44px; }
-.island-mobile .traffic-light.close > span:first-child { display: inline; }

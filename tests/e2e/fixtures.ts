@@ -45,6 +45,7 @@ export async function openMenu(page: Page, name: string) {
 }
 
 export async function openApp(page: Page, name: string) {
+  await expect(page.locator('html')).toHaveClass(/os-ready/);
   if (await page.locator('html').getAttribute('data-mode') === 'mobile' && await page.locator('[data-shell="mobile"]').count()) {
     const current=page.locator('[data-sheet]:visible');
     if(await current.count()) {
@@ -52,7 +53,7 @@ export async function openApp(page: Page, name: string) {
       const running=page.getByRole('menuitemcheckbox',{name,exact:true});
       if(await running.count()){await running.click();return;}
       await page.keyboard.press('Escape');await page.keyboard.press('Escape');
-      if(name==='Settings') {await current.getByRole('button',{name:'App commands',exact:true}).click();await page.getByRole('menuitem',{name:'System Settings…',exact:true}).click();return;}
+      if(name==='Settings') {await current.getByRole('button',{name:'App commands',exact:true}).click();await page.getByRole('menuitem',{name:'Settings…',exact:true}).click();return;}
       await openMenu(page,'Go');await page.getByRole('menuitem',{name,exact:true}).click();return;
     }
     await expect(page.locator('[data-shell="mobile"] .phone-home')).toBeVisible();
@@ -61,6 +62,7 @@ export async function openApp(page: Page, name: string) {
     else {await openMenu(page,'Go');await page.getByRole('menuitem',{name,exact:true}).click();}
     return;
   }
+  if (name === 'Board') { await openMenu(page, 'Go'); await page.getByRole('menuitem', { name, exact: true }).click(); return; }
   const dock=page.getByRole('navigation',{name:'Dock',exact:true}).getByRole('toolbar',{name:'Apps',exact:true});
   await dock.getByRole('button',{name,exact:true}).or(dock.getByRole('link',{name,exact:true})).click();
 }

@@ -59,6 +59,7 @@ for (const theme of ['light', 'dark'] as const) test(`Quick Look ${theme} screen
   await page.goto('/projects/salli?shot=1'); const dialog = page.getByRole('dialog', { name: 'Quick Look — Salli' });
   await expect(dialog.getByRole('status')).toHaveText('2 of 3'); await expect(dialog.getByRole('img')).toBeVisible();
   await expect.poll(() => dialog.getByRole('img').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+  await expect.poll(() => dialog.evaluate(el => [el, el.parentElement!].map(node => getComputedStyle(node).opacity).join())).toBe('1,1');
   const axe = await new AxeBuilder({ page }).include('.os-quicklook').analyze(); expect(axe.violations.filter(value => ['serious', 'critical'].includes(value.impact ?? ''))).toEqual([]);
   const box = await dialog.boundingBox(); expect(box!.width).toBeLessThanOrEqual(1440 * .86); expect(box!.height).toBeLessThanOrEqual(900 * .82);
   mkdirSync(artifacts, { recursive: true }); await page.screenshot({ path: resolve(artifacts, `quicklook-${theme}-1440x900.png`) });

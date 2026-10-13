@@ -87,8 +87,8 @@ test('menu opening ticks and both menu and pointer snapping thunk through the la
   await expect.poll(() => page.evaluate(() => window.soundProbe.parameters
     .filter(item => item.name === 'frequency' && item.value === 180))).toHaveLength(1);
   // Restore, then use the real title-bar controller and its edge dwell preview.
-  await win.locator('[data-window-titlebar]').dblclick();
-  await win.locator('[data-window-titlebar]').dblclick();
+  await win.locator('[data-window-titlebar]').dblclick({ position: { x: 160, y: 20 } });
+  await win.locator('[data-window-titlebar]').dblclick({ position: { x: 160, y: 20 } });
   await win.evaluate(async el => { await Promise.all(el.getAnimations().map(animation => animation.finished)); });
   const title = (await win.locator('[data-window-titlebar]').boundingBox())!;
   await page.mouse.move(title.x + 160, title.y + 20); await page.mouse.down();

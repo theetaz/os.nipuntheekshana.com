@@ -99,10 +99,6 @@
 @media (max-width: 1023px), (pointer: coarse) and (max-width: 1179px) {
   .writing-static-window > .static-titlebar { padding-left: 80px; flex-basis: calc(52px + env(safe-area-inset-top)); min-height: calc(52px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); }
   html.js .writing-static-window > .static-titlebar { padding-left: 101px; }
-  html.js .writing-static-window .traffic-lights { left: 14px; }
-  html.js .writing-static-window .traffic-light.close { width: 13px; height: 13px; border: 1px solid var(--os-tl-close-b); border-radius: 50%; color: var(--os-tl-glyph); background: var(--os-tl-close); font-size: 12px; }
-  html.js .writing-static-window .traffic-light.js-only { display: grid; }
-  html.js .writing-static-window .traffic-light.close > span:first-child { display: block; }
   html.js .writing-static-window .mobile-home { display: none; }
   .writing-toolbar { top: -52px; }
   .writing-panes { border-radius: 0; }

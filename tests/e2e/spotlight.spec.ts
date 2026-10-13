@@ -47,7 +47,7 @@ test('Spotlight fetches lazily, ranks Salli first, supports arrows and Enter, an
 
 test('no-results copy, combobox semantics, Tab containment, Escape, and focus return', async ({ page }) => {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  const trigger = await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] a[aria-label="Spotlight"]'):page.locator('[data-shell="desktop"] .simple-entry'); await trigger.focus();
+  const trigger = await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] a[aria-label="Search"]'):page.locator('[data-shell="desktop"] .simple-entry'); await trigger.focus();
   const { dialog, input } = await openSpotlight(page); await input.fill('zzzz');
   await expect(dialog.getByText('Nothing for "zzzz". Try "map", "Go" or "Sinhala".')).toBeVisible();
   await expect(input).toHaveAttribute('aria-expanded', 'true'); await expect(input).toHaveAttribute('aria-autocomplete', 'list');
@@ -184,8 +184,8 @@ createRoot(document.getElementById('fixture')!).render(<Overlays />);`);
     const trigger = page.getByRole('button', { name: 'Context menu', exact: true }); await trigger.focus(); await trigger.press('Enter');
     const menu = page.getByRole('menu', { name: 'Fixture context menu' }); await expect(menu).toBeVisible();
     const box = await menu.boundingBox(); expect(box!.x + box!.width).toBeLessThanOrEqual(1432); expect(box!.y + box!.height).toBeLessThanOrEqual(892);
-    await expect(menu.getByRole('menuitemcheckbox', { name: 'Show widgets' })).toHaveAttribute('aria-checked', 'true');
-    await page.keyboard.press('Enter'); await expect(page.getByTestId('widgets')).toHaveText('false'); await expect(trigger).toBeFocused();
+    await expect(menu.getByRole('menuitemcheckbox', { name: 'Show Mochi' })).toHaveAttribute('aria-checked', 'true');
+    await page.keyboard.press('Enter'); await expect(page.getByTestId('mochi-visible')).toHaveText('false'); await expect(trigger).toBeFocused();
     await trigger.press('Enter'); await page.keyboard.press('Escape'); await expect(menu).toBeHidden(); await expect(trigger).toBeFocused();
   });
   test('toasts cap at three, expose status, dismiss at four seconds, and pause on hover and focus', async ({ page }) => {

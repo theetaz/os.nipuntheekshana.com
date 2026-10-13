@@ -2,8 +2,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { RESET } from 'jotai/utils';
 import type { AppProps } from '../../registry/apps';
-import { accentAtom, devModeAtom, geometryAtom, iconPositionsAtom, mochiPrefsAtom, motionPrefAtom,
-  showWidgetsAtom, soundAtom, themePrefAtom, transparencyPrefAtom, viewAtom, volumeAtom, wallpaperAtom } from '../../state/atoms';
+import { accentAtom, devModeAtom, geometryAtom, mochiPrefsAtom, motionPrefAtom,
+  soundAtom, themePrefAtom, transparencyPrefAtom, viewAtom, volumeAtom, wallpaperAtom } from '../../state/atoms';
 import { alert, announce, openApp, toast, useAppCommands, useAppMenuState } from '../../wm/commands';
 import { readInitialData } from '../../lib/initial-data';
 import { DEFAULT_DATA, SECTIONS, sectionFor, type SettingsActions, type SettingsData, type SettingsPreferences } from './settings';
@@ -14,9 +14,9 @@ export default function SettingsApp({ windowId, mode, query, setQuery, setTitle,
   const [theme, setTheme] = useAtom(themePrefAtom); const [accent, setAccent] = useAtom(accentAtom);
   const [wallpaper, setWallpaper] = useAtom(wallpaperAtom); const [motion, setMotion] = useAtom(motionPrefAtom);
   const [transparency, setTransparency] = useAtom(transparencyPrefAtom); const [sound, setSound] = useAtom(soundAtom);
-  const [volume, setVolume] = useAtom(volumeAtom); const [widgets, setWidgets] = useAtom(showWidgetsAtom);
+  const [volume, setVolume] = useAtom(volumeAtom);
   const [mochi, setMochi] = useAtom(mochiPrefsAtom); const developer = useAtomValue(devModeAtom);
-  const setIcons = useSetAtom(iconPositionsAtom); const setGeometry = useSetAtom(geometryAtom); const setView = useSetAtom(viewAtom);
+  const setGeometry = useSetAtom(geometryAtom); const setView = useSetAtom(viewAtom);
   const section = sectionFor(query.section, developer);
   // A phone sheet opens on the section list (D§13.3); its title is the app's.
   const list = mode === 'mobile' && !query.section;
@@ -49,11 +49,10 @@ export default function SettingsApp({ windowId, mode, query, setQuery, setTitle,
     top();
   };
   const actions: SettingsActions = {
-    theme: setTheme, accent: setAccent, wallpaper: setWallpaper, motion: setMotion, transparency: setTransparency, sound: setSound, volume: setVolume, widgets: setWidgets,
+    theme: setTheme, accent: setAccent, wallpaper: setWallpaper, motion: setMotion, transparency: setTransparency, sound: setSound, volume: setVolume,
     mochi: value => setMochi(previous => ({ ...previous, ...value })),
     resetPets: () => { void alert({ windowId, title: 'Reset Mochi’s pet count?', body: 'Mochi will still remember you. The counter will start at zero.',
       primary: 'Reset', cancel: 'Cancel' }).then(result => { if (result === 'primary') { setMochi(previous => ({ ...previous, pets: 0 })); announce('Mochi’s pet count reset.'); } }); },
-    resetIcons: () => { setIcons(RESET); toast({ title: 'Icon positions reset' }); },
     resetGeometry: () => { setGeometry(RESET); toast({ title: 'Window sizes and positions reset' }); },
     simple: () => setView('simple'),
     sample: () => { void import('../../lib/sound').then(module => module.playSound('pop')).catch(() => {}); },
@@ -68,7 +67,7 @@ export default function SettingsApp({ windowId, mode, query, setQuery, setTitle,
     checked: item.id === section, disabled: item.id === 'developer' && !developer,
   }])), [section, developer]);
   useAppMenuState(windowId, menuState);
-  const preferences: SettingsPreferences = { theme, accent, wallpaper, motion, transparency, sound, volume, widgets, mochi };
+  const preferences: SettingsPreferences = { theme, accent, wallpaper, motion, transparency, sound, volume, mochi };
   const data = (initialData as SettingsData | null) ?? readInitialData<SettingsData>('settings:index') ?? DEFAULT_DATA;
   return <SettingsView preferences={preferences} actions={actions} section={section} developer={developer} focused={focused}
     data={data} liveUnavailable={liveUnavailable} onSection={selectSection} scrollRootRef={scrollRootRef}

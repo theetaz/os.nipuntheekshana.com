@@ -22,18 +22,18 @@ export const DEFAULT_DATA: SettingsData = {
 export interface SettingsPreferences {
   theme: 'auto' | 'light' | 'dark'; accent: 'thambili' | 'lagoon' | 'lotus' | 'tea';
   wallpaper: WallpaperId; motion: 'system' | 'reduce' | 'full'; transparency: 'system' | 'reduce';
-  sound: boolean; volume: number; widgets: boolean; mochi: MochiPrefs;
+  sound: boolean; volume: number; mochi: MochiPrefs;
 }
 export const DEFAULT_PREFERENCES: SettingsPreferences = {
   theme: 'auto', accent: 'thambili', wallpaper: 'kottu', motion: 'system', transparency: 'system',
-  sound: false, volume: 0.6, widgets: true, mochi: { visible: true, naps: true, pos: null, pets: 0 },
+  sound: false, volume: 0.6, mochi: { visible: true, naps: true, pos: null, pets: 0 },
 };
 export interface SettingsActions {
   theme(value: SettingsPreferences['theme']): void; accent(value: SettingsPreferences['accent']): void;
   wallpaper(value: WallpaperId): void; motion(value: SettingsPreferences['motion']): void;
   transparency(value: SettingsPreferences['transparency']): void;
-  sound(value: boolean): void; volume(value: number): void; widgets(value: boolean): void;
-  mochi(value: Partial<MochiPrefs>): void; resetPets(): void; resetIcons(): void; resetGeometry(): void;
+  sound(value: boolean): void; volume(value: number): void;
+  mochi(value: Partial<MochiPrefs>): void; resetPets(): void; resetGeometry(): void;
   simple(): void; sample(): void; shortcuts(): void;
 }
 export interface SectionProps { preferences: SettingsPreferences; actions?: SettingsActions }

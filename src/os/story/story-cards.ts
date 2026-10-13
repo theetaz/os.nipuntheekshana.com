@@ -73,13 +73,13 @@ function controller() {
   const loadShot = async (card: HTMLElement, slot: HTMLElement) => {
     slot.replaceChildren(); delete slot.dataset.loaded;
     if (!card.dataset.shot) { slot.textContent = card.querySelector('h3')!.textContent; slot.dataset.loaded = ''; return; }
-    const shot = JSON.parse(card.dataset.shot) as { avif: string; webp: string; src: string; width: number; height: number };
+    const shot = JSON.parse(card.dataset.shot) as { avif: string; webp: string; src: string; width: number; height: number; alt?: string };
     const picture = document.createElement('picture'); picture.className = 'contents';
     for (const format of ['avif', 'webp'] as const) if (shot[format]) {
       const source = document.createElement('source'); source.type = `image/${format}`; source.srcset = shot[format]; source.sizes = '380px'; picture.append(source);
     }
     const img = document.createElement('img'); img.width = shot.width; img.height = shot.height;
-    img.className = 'h-full w-full object-cover'; img.alt = card.dataset.shotAlt ?? ''; img.decoding = 'async'; img.src = shot.src; picture.append(img);
+    img.className = 'h-full w-full object-cover'; img.alt = shot.alt ?? ''; img.decoding = 'async'; img.src = shot.src; picture.append(img);
     picture.style.opacity = '0'; slot.append(picture);
     try { await img.decode(); } catch { return; }
     if (!disposed && slot.contains(picture) && (slot.closest('.k-card') === flipped || (slot.closest('.k-preview') && active === card))) {

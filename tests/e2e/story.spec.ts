@@ -110,7 +110,7 @@ test.describe('static scroll story', () => {
   test('project frames retain the three card grids and the Pin the city route', async ({ page }) => {
     await openStory(page);
     for (const [group, count] of [['highlights', 6], ['side', 9], ['fun', 4]] as const) await expect(page.locator(`[data-k-cards="${group}"] [data-k-card]`)).toHaveCount(count);
-    await expect(page.locator('[data-k-card="pin-the-city"] a')).toHaveAttribute('href', '/maps/play');
+    await expect(page.locator('[data-k-card="pin-the-city"] .k-card-link')).toHaveAttribute('href', '/maps/play');
     const phone = (page.viewportSize()?.width ?? 1440) <= 1023;
     for (const [group, count] of [['highlights', phone ? 1 : 2], ['side', phone ? 2 : 3], ['fun', phone ? 2 : 4]] as const) {
       expect(await page.locator(`[data-k-cards="${group}"]`).evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(count);
@@ -198,7 +198,13 @@ test.describe('static scroll story', () => {
             return { top: top + scrollY, left, width, height };
           });
           const before = boxes();
-          await Promise.all([...element.querySelectorAll('img')].map(image => image.decode()));
+          const position = scrollY;
+          for (const image of element.querySelectorAll('img')) {
+            image.scrollIntoView({ block: 'center', behavior: 'instant' });
+            await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
+            await image.decode();
+          }
+          scrollTo({ top: position, behavior: 'instant' });
           await document.fonts.ready;
           await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
           return { before, after: boxes() };

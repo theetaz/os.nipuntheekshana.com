@@ -49,7 +49,6 @@
   .phone-grid li { min-width:0; height:92px; }
   .phone-grid a { display:flex; flex-direction:column; align-items:center; gap:8px; min-height:84px; width:100%; color:inherit; text-decoration:none; text-align:center; font:600 11px/14px var(--font-ui); -webkit-touch-callout:none; user-select:none; }
   .phone-grid svg, .phone-dock svg { filter:var(--shadow-icon); flex-shrink:0; border-radius:13.5px; }
-  #app-readme text, #app-terminal text { font-family:ui-monospace,monospace; }
   .phone-grid span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-shadow:var(--label-shadow); }
   .phone-dock { position:fixed; z-index:50; bottom:calc(16px + env(safe-area-inset-bottom)); left:max(16px,env(safe-area-inset-left)); right:max(16px,env(safe-area-inset-right)); }
   .phone-dock ul { height:76px; display:flex; align-items:center; justify-content:space-around; gap:8px; padding:6px; margin:0; list-style:none; border:2px solid var(--k-hard); border-radius:var(--r-pill); background:var(--k-cream); box-shadow:var(--k-shadow-2); }

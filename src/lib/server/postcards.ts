@@ -31,7 +31,7 @@ export async function postPostcard(request: Request, env: BackendEnv, fetcher: t
   if (!validOrigin(request)) return json({ error: 'origin' }, 403);
   let input: unknown;
   try { input = await readJson(request); } catch { return json({ error: 'invalid', fields: { request: 'Use a JSON body of at most 8192 bytes.' } }, 400); }
-  const validation = validate(input);
+  const validation = validate(input, !!env.TURNSTILE_SECRET);
   if (!validation.ok) return json({ error: 'invalid', fields: validation.fields }, 400);
   const value = validation.value;
   // Matching normalisation is applied to both fields, never to persisted text.
@@ -40,7 +40,7 @@ export async function postPostcard(request: Request, env: BackendEnv, fetcher: t
   if (rejection === 'link') return json({ error: 'link' }, 422);
   if (!featureHealth(env).postcards) return json({ error: 'unavailable' }, 503);
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-  if (!await verifyTurnstile(value.turnstileToken, env.TURNSTILE_SECRET!, ip, new URL(request.url).origin, fetcher)) return json({ error: 'turnstile' }, 403);
+  if (env.TURNSTILE_SECRET && !await verifyTurnstile(value.turnstileToken, env.TURNSTILE_SECRET, ip, new URL(request.url).origin, fetcher)) return json({ error: 'turnstile' }, 403);
   const now = Date.now(); const day = utcDay(now); const ipHash = await hashIp(ip, env.IP_HASH_SALT!, day);
   try {
     const retryAfter = await checkRateLimit(env, ipHash, now);
@@ -52,10 +52,13 @@ export async function postPostcard(request: Request, env: BackendEnv, fetcher: t
     // One SQLite statement makes the cap atomic across concurrent requests,
     // including pending and hidden cards. RETURNING contains public fields only.
     const inserted = await env.DB!.prepare(`INSERT INTO postcards (id, created_at, name, body, email, color, font, rotation, country, ip_hash, status)
-      SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE (SELECT COUNT(*) FROM postcards WHERE ip_hash = ? AND created_at >= ?) < ? RETURNING ${PUBLIC_COLUMNS}`)
-      .bind(id, now, value.name, value.body, value.email, value.color, value.font, rotation, country, ipHash, status, ipHash, Date.parse(day), DAILY_CAP)
+      SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE (SELECT COUNT(*) FROM postcards WHERE ip_hash = ? AND created_at >= ?) < ?${env.RL_POSTCARDS ? '' : ' AND (SELECT COUNT(*) FROM postcards WHERE ip_hash = ? AND created_at >= ?) < 3'} RETURNING ${PUBLIC_COLUMNS}`)
+      .bind(id, now, value.name, value.body, value.email, value.color, value.font, rotation, country, ipHash, status, ipHash, Date.parse(day), DAILY_CAP, ...(!env.RL_POSTCARDS ? [ipHash, now - 60000] : []))
       .first<PublicPostcard>();
-    if (!inserted) return limited(dailyRetryAfter(now));
+    if (!inserted) {
+      const total = await env.DB!.prepare('SELECT COUNT(*) AS count FROM postcards WHERE ip_hash = ? AND created_at >= ?').bind(ipHash, Date.parse(day)).first<{ count: number }>();
+      return limited((total?.count ?? 0) >= DAILY_CAP ? dailyRetryAfter(now) : 60);
+    }
     return status === 'pending' ? json({ status, message: 'Your postcard awaits approval.' }, 202) : json({ status, postcard: inserted }, 201);
   } catch { console.error('postcards: submission failed'); return json({ error: 'unavailable' }, 503); }
 }

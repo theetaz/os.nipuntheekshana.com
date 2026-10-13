@@ -2,11 +2,9 @@
 import OsLayout from '../layouts/OsLayout.astro';
 import BootScreen from '../components/static/BootScreen.astro';
 import InitialData from '../components/static/InitialData.astro';
-import { getClientActivity } from '../lib/client-data';
 import { seoFor } from '../lib/seo';
-const activity = await getClientActivity();
 const seo = seoFor({ path: '/', title: 'Nipun Theekshana', description: 'The desktop of Nipun Theekshana, an engineer from Sri Lanka building open data infrastructure. Open the projects, read the writing, try the terminal.', kind: 'home' });
 ---
 <OsLayout seo={seo} initial={null} home>
-  <Fragment slot="after-main"><BootScreen /><InitialData key="home" data={{ activity }} /></Fragment>
+  <Fragment slot="after-main"><BootScreen /><InitialData key="home" data={{}} /></Fragment>
 </OsLayout>

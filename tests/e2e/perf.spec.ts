@@ -70,6 +70,9 @@ test('idle focused ring rotates on the compositor without painting the window @p
     node.children?.forEach(child => collect(child, inside));
   }
   collect(root);
+  // LayerTree instrumentation invalidates existing layers. Finish its first
+  // compositor frame before measuring the already-running idle animation.
+  await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
   const windowLayers = new Set<string>();
   const paintedLayers: string[] = [];
   client.on('LayerTree.layerPainted', ({ layerId }) => { paintedLayers.push(layerId); });

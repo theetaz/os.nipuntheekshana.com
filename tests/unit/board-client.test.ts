@@ -63,6 +63,14 @@ describe('board response mapping', () => {
     expect(await boardAvailable()).toBe(true); expect(await boardAvailable()).toBe(true); expect(fetcher).toHaveBeenCalledTimes(1);
     vi.stubGlobal('document', { querySelector: () => ({ content: 'public-key' }) }); expect(turnstileSiteKey()).toBe('public-key');
   });
+  it('has no widget key and sends no token when the page has no public-key meta', async () => {
+    vi.stubGlobal('document', { querySelector: () => null }); expect(turnstileSiteKey()).toBe('');
+    const fetcher = vi.fn().mockResolvedValue(Response.json({ status: 'published', postcard }, { status: 201 }));
+    vi.stubGlobal('fetch', fetcher);
+    await postPostcard({ ...emptyDraft, name: 'Ama', body: 'Hello' });
+    expect(JSON.parse(fetcher.mock.calls[0]![1].body)).toEqual({ ...emptyDraft, name: 'Ama', body: 'Hello' });
+    expect(JSON.parse(fetcher.mock.calls[0]![1].body)).not.toHaveProperty('turnstileToken');
+  });
 });
 describe('Unicode drafts and session notes', () => {
   function storage() {

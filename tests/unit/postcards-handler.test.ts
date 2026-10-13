@@ -28,6 +28,37 @@ beforeEach(() => {
 afterEach(() => { db.close(); vi.restoreAllMocks(); });
 const adminRequest = (token = 'owner') => new Request('http://localhost:8788/api/postcards/pending', { headers: { Authorization: `Bearer ${token}` } });
 describe('postcards handlers with SQLite-backed mocked D1 and AI', () => {
+  it('publishes without a token or Siteverify when no secret is configured, retaining origin, validation, filters and rate limits', async () => {
+    delete env.TURNSTILE_SECRET; delete env.TURNSTILE_SITE_KEY;
+    const { turnstileToken: _token, ...input } = form;
+    const fetcher = vi.fn();
+    expect((await postPostcard(request(input), env, fetcher)).status).toBe(201);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect((await postPostcard(request(input, { Origin: 'https://evil.com' }), env, fetcher)).status).toBe(403);
+    expect((await postPostcard(request({ ...input, body: '' }), env, fetcher)).status).toBe(400);
+    expect((await postPostcard(request({ ...input, body: 'fuck' }), env, fetcher)).status).toBe(422);
+    expect((await postPostcard(request({ ...input, body: 'example.com' }), env, fetcher)).status).toBe(422);
+    env.RL_POSTCARDS = { limit: async () => ({ success: false }) } as BackendEnv['RL_POSTCARDS'];
+    expect((await postPostcard(request(input), env, fetcher)).status).toBe(429);
+    expect(db.prepare('SELECT COUNT(*) AS count FROM postcards').get()!.count).toBe(1);
+  });
+  it('keeps token verification required when a secret exists, even without a public-key server variable', async () => {
+    delete env.TURNSTILE_SITE_KEY;
+    const fetcher = vi.fn(async () => Response.json({ success: false }));
+    expect((await postPostcard(request(), env, fetcher)).status).toBe(403);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    const { turnstileToken: _token, ...input } = form;
+    expect((await postPostcard(request(input), env, fetcher)).status).toBe(400);
+    expect(db.prepare('SELECT COUNT(*) AS count FROM postcards').get()!.count).toBe(0);
+  });
+  it('uses an atomic D1 minute cap when the optional rate-limit binding is absent', async () => {
+    delete env.TURNSTILE_SECRET; delete env.RL_POSTCARDS;
+    const { turnstileToken: _token, ...input } = form;
+    const responses = await Promise.all(Array.from({ length: 12 }, () => postPostcard(request(input), env, vi.fn())));
+    expect(responses.filter(response => response.status === 201)).toHaveLength(3);
+    expect(responses.filter(response => response.status === 429)).toHaveLength(9);
+    expect(db.prepare('SELECT COUNT(*) AS count FROM postcards').get()!.count).toBe(3);
+  });
   it('publishes immediately, keeps private fields out of GET/POST, and preserves Sinhala joiners', async () => {
     const response = await postPostcard(request(), env, siteverify); expect(response.status).toBe(201); const result = await response.json();
     expect(result.status).toBe('published'); expect(result.postcard.body).toBe(form.body); expect(Object.keys(result.postcard).sort()).toEqual(['body','color','country','created_at','font','id','name','rotation']);

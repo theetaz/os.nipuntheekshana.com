@@ -5,7 +5,7 @@ import { isEditable } from '../lib/hotkeys-match';
 const sequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
 
 /** Only listeners live in the startup bundle; effects load after their trigger. */
-export function subscribeEggs(store: OsStore): () => void {
+export function subscribeEggs(store: OsStore, queued: readonly Event[] = []): () => void {
   let active = true; let keys: string[] = []; let developerRequested = false;
   const effects = new Map<string, () => void>(); const requests = new Map<string, number>();
   const available = () => store.get(viewAtom) !== 'simple' && store.get(modeAtom) === 'desktop';
@@ -46,6 +46,12 @@ export function subscribeEggs(store: OsStore): () => void {
   document.addEventListener('about:avatar7', avatar); document.addEventListener('serendib:pin-perfect', perfect);
   const unsubscribers = [store.sub(devModeAtom, developer), store.sub(viewAtom, suspend), store.sub(modeAtom, suspend)];
   developer();
+  for (const event of queued) {
+    if (event.type === 'keydown') keydown(event as KeyboardEvent);
+    else if (event.type === 'ayubowan') greeting();
+    else if (event.type === 'about:avatar7') avatar();
+    else if (event.type === 'serendib:pin-perfect') perfect(event);
+  }
   return () => {
     active = false; unsubscribers.forEach(unsubscribe => unsubscribe()); effects.forEach(cleanup => cleanup());
     document.removeEventListener('keydown', keydown); document.removeEventListener('ayubowan', greeting);

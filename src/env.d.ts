@@ -5,3 +5,5 @@ type KVNamespace = import('@cloudflare/workers-types').KVNamespace;
 type RateLimit = import('@cloudflare/workers-types').RateLimit;
 type Ai = import('@cloudflare/workers-types').Ai;
 declare module 'cloudflare:workers' { export const env: Cloudflare.Env }
+
+declare namespace Astro { interface ClientDirectives { 'client:paint'?: boolean } }

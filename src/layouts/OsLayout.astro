@@ -15,7 +15,6 @@ import { CODENAME, VERSION } from '../os/config';
 import { links, now } from '../data/profile';
 import type { Seo } from '../lib/seo';
 import '../styles/global.css';
-import '../styles/static-window.css';
 
 interface Props {
   seo: Seo;
@@ -38,31 +37,9 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
 <html lang="en" class="no-js" data-mode="desktop">
   <head>
     <meta charset="UTF-8" />
-    <meta name="turnstile-site-key" content={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? ''} />
+    {import.meta.env.PUBLIC_TURNSTILE_SITE_KEY && <meta name="turnstile-site-key" content={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY} />}
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <script is:inline>
-      (function () {
-      var d = document.documentElement, s = null;
-      try { s = window.localStorage; } catch (e) {}
-      function get(k) { try { var v = s && s.getItem('serendib:' + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
-      var themePref = get('theme') || 'auto';
-      var dark = themePref === 'dark' || (themePref === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
-      d.dataset.theme = dark ? 'dark' : 'light';
-      var w=get('wallpaper'); d.dataset.wallpaper=['kottu','galle-face','pettah','paper'].includes(w)?w:'kottu';
-      var p=get('props:v1'); if(p) for(var k in p) if(/^[a-z-]+$/.test(k)&&p[k]) { d.style.setProperty('--k-dx-'+k,+p[k].dx||0); d.style.setProperty('--k-dy-'+k,+p[k].dy||0); }
-      d.dataset.accent = get('accent') || 'thambili';
-      var motion = get('motion') || 'system';
-      if (motion === 'reduce' || motion === 'full') d.dataset.motion = motion;
-      if (get('transparency') === 'reduce') d.dataset.transparency = 'reduce';
-      if (get('view') === 'simple') d.dataset.view = 'simple';
-      var mobile = matchMedia('(max-width: 1023px), (pointer: coarse) and (max-width: 1179px)').matches;
-      d.dataset.mode = mobile ? 'mobile' : 'desktop';
-      d.classList.remove('no-js'); d.classList.add('js');
-      var reduce = motion === 'reduce' || (motion !== 'full' && matchMedia('(prefers-reduced-motion: reduce)').matches);
-      if (location.pathname === '/' && !get('booted') && !reduce && d.dataset.view !== 'simple' &&
-          location.hash !== '#simple' && !/bot|crawl|spider|slurp/i.test(navigator.userAgent)) d.dataset.boot = '1';
-      })();
-    </script>
+    <script is:inline>(function(){var e=document.documentElement,d=null;try{d=window.localStorage}catch{}function t(c){try{var l=d&&d.getItem("serendib:"+c);return l?JSON.parse(l):null}catch{return null}}var o=t("theme")||"auto",n=o==="dark"||o==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches;e.dataset.theme=n?"dark":"light";var i=t("wallpaper");e.dataset.wallpaper=["kottu","galle-face","pettah","paper"].includes(i)?i:"kottu";var r=t("props:v1");if(r)for(var a in r)/^[a-z-]+$/.test(a)&&r[a]&&(e.style.setProperty("--k-dx-"+a,+r[a].dx||0),e.style.setProperty("--k-dy-"+a,+r[a].dy||0));e.dataset.accent=t("accent")||"thambili";var s=t("motion")||"system";(s==="reduce"||s==="full")&&(e.dataset.motion=s),t("transparency")==="reduce"&&(e.dataset.transparency="reduce"),t("view")==="simple"&&(e.dataset.view="simple");var m=matchMedia("(max-width: 1023px), (pointer: coarse) and (max-width: 1179px)").matches;e.dataset.mode=m?"mobile":"desktop",e.classList.remove("no-js"),e.classList.add("js");var p=s==="reduce"||s!=="full"&&matchMedia("(prefers-reduced-motion: reduce)").matches;location.pathname==="/"&&!t("booted")&&!p&&e.dataset.view!=="simple"&&location.hash!=="#simple"&&!/bot|crawl|spider|slurp/i.test(navigator.userAgent)&&(e.dataset.boot="1")})();</script>
     <title>{seo.title}</title>
     <meta name="description" content={seo.description} />
     <link rel="canonical" href={seo.canonical} />
@@ -105,7 +82,7 @@ const serializeJsonLd = (entry: object) => JSON.stringify(entry).replace(/</g, '
       <main id="content" tabindex="-1"><slot /></main>
       <div id="static-phone-home" class="os-chrome"><HomeScreen art={art} home={{ nowItems: now.items, nowUpdated: now.updated }} /></div>
       {story && <Story nosnippet={!home} />}
-      <Desktop client:load initial={initial} build={build} home={{ nowItems: now.items, nowUpdated: now.updated }} />
+      <Desktop client:paint initial={initial} build={build} home={{ nowItems: now.items, nowUpdated: now.updated }} />
       <slot name="after-main" />
     </SimpleChrome>
   </body>

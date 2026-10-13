@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAtomValue, useStore } from 'jotai';
-import { desktopAtom, resolvedThemeAtom, soundAtom, spotlightOpenAtom } from '../state/atoms';
+import { bootedAtom, bootPhaseAtom, desktopAtom, resolvedThemeAtom, soundAtom, spotlightOpenAtom } from '../state/atoms';
 import { focusWindow, runCommand, toast } from '../wm/commands';
 import { APP_META } from '../registry/meta';
 import { APPS } from '../registry/apps';
@@ -22,6 +22,7 @@ export function preloadPhone() {
   }
 }
 export function PhoneRuntime(_props: DesktopProps) {
+  const booted = useAtomValue(bootedAtom); const phase = useAtomValue(bootPhaseAtom);
   const store = useStore(); const desktop = useAtomValue(desktopAtom); const focused = desktop.order.find(id => desktop.windows[id]?.closing) ?? desktop.focusedId;
   const home = useRef<HTMLDivElement>(typeof document === 'undefined' ? null : document.querySelector('#static-phone-home [data-phone-home]'));
   const mounted=useRef(new Set<string>());if(focused)mounted.current.add(focused);for(const id of mounted.current)if(!desktop.windows[id])mounted.current.delete(id);
@@ -29,17 +30,6 @@ export function PhoneRuntime(_props: DesktopProps) {
   const [Pet, setPet] = useState<typeof import('../mochi/Mochi').Mochi | null>(null);
   const icons = usePhoneIconMenu(home);
   useLayoutEffect(() => subscribePhoneHistory(store), [store]);
-  useLayoutEffect(() => {
-    // Compact art can round to a different ratio than the SSR fallback.
-    // Reserve that fallback box so decoding never changes document height.
-    const restore = Array.from(document.querySelectorAll<HTMLImageElement>('#story .k-sticker img'), image => {
-      const width = Number(image.getAttribute('width')); const height = Number(image.getAttribute('height'));
-      const ratio = image.style.aspectRatio; const fit = image.style.objectFit;
-      if (width > 0 && height > 0) { image.style.aspectRatio = `${width} / ${height}`; image.style.objectFit = 'contain'; }
-      return () => { image.style.aspectRatio = ratio; image.style.objectFit = fit; };
-    });
-    return () => { for (const reset of restore) reset(); };
-  }, []);
   useLayoutEffect(() => {
     if (!focused) return;
     const root = document.documentElement;
@@ -96,14 +86,14 @@ export function PhoneRuntime(_props: DesktopProps) {
     return()=>{if(placeholder)placeholder.hidden=false;};
   },[Pet]);
   useEffect(() => {
-    if (focused) return;
+    if (focused || phase !== 'off' || document.documentElement.hasAttribute('data-boot')) return;
     let active = true; let idle: number | undefined; let frame = 0;
     const load = () => { void Promise.all([import('../mochi/Mochi'), preloadMotionFeatures()]).then(([module]) => {
       // A prevented Vite preload failure can fulfil without a module.
       const Companion = module?.Mochi;
       if (active && Companion) setPet(() => Companion);
     }).catch(() => {}); };
-    // Let the phone's text and reserved widget paint before loading its companion.
+    // Paint the text and finish boot before loading the optional companion.
     void document.fonts.ready.then(() => {
       if (!active) return;
       frame = requestAnimationFrame(() => {
@@ -112,7 +102,7 @@ export function PhoneRuntime(_props: DesktopProps) {
       });
     });
     return () => { active = false; cancelAnimationFrame(frame); if(idle!==undefined) window.cancelIdleCallback(idle); };
-  }, [!!focused]);
+  }, [!!focused, booted, phase]);
   const companion=home.current?.querySelector<HTMLElement>('.phone-companion');
   return <>{Pet&&companion&&createPortal(<Pet variant="widget"/>,companion)}<PhoneIconMenu target={icons.target} onClose={icons.close}/>{menu&&<phoneMenu.Component anchor={menu} onClose={() => setMenu(null)}/>} {Array.from(mounted.current,id=><sheets.Component key={id} windowId={id} active={id===focused}/>)}</>;
 }

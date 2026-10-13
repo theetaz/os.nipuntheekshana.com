@@ -26,7 +26,7 @@ test('home has one visible h1 and working desktop and dock links @smoke', async 
   const hrefs = await page.locator('nav[aria-label="Dock"] a, [data-k-props] a').evaluateAll((links) => links.map((link) => link.getAttribute('href')!));
   expect(hrefs).toContain('/projects');
   expect(hrefs).toContain('/maps');
-  await expect(page.locator('#story a[href="/maps/play"]')).toHaveCount(1);
+  await expect(page.locator('#story .k-card-link[href="/maps/play"]')).toHaveCount(1);
   await expect(page.locator('[data-k-props] a')).toHaveCount(12);
   await expect(page.locator('[data-prop="postbox"]')).toHaveAttribute('href', '#ws-board');
   for (const href of new Set(hrefs.filter((href) => href.startsWith('/')))) {
@@ -127,11 +127,11 @@ test('no-JavaScript dark theme follows system appearance', async ({ page }) => {
 });
 
 
-test('compact home keeps the ticket clickable and Projects keeps its accessible heading', async ({ page }) => {
+test('compact home keeps About navigation and Projects keeps its accessible heading', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await expect(page.getByRole('link', { name: 'About me', exact: true })).toHaveAttribute('href', '/about');
-  await page.locator('.phone-ticket:visible').click({ position: { x: 20, y: 100 } });
+  await expect(page.locator('.phone-grid:visible').getByRole('link', { name: 'About', exact: true })).toHaveAttribute('href', '/about');
+  await page.locator('.phone-grid:visible').getByRole('link', { name: 'About', exact: true }).click();
   await expect(page).toHaveURL(/\/about$/);
   await page.goto('/projects');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Projects');

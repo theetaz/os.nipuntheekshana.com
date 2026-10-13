@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "description": "Serendib OS: the desktop-in-the-browser site of Nipun Theekshana.",
+  "description": "Kottu OS: the desktop-in-the-browser site of Nipun Theekshana.",
   "engines": {
     "node": ">=22.12.0"
   },

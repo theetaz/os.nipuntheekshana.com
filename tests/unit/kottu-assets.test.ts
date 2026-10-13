@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import sharp from 'sharp';
 import catalogue from '../../scripts/kottu-art/assets.json';
 import { root, idsSource, batchPrompt, borderFraction } from '../../scripts/kottu-art/lib.mjs';
-import { keyBackground, defringeAlpha, enforceFamilyCaps, processImage } from '../../scripts/kottu-art/process.mjs';
+import { keyBackground, defringeAlpha, enforceFamilyCaps, processImage, checkMasters } from '../../scripts/kottu-art/process.mjs';
+import variants from '../../src/assets/kottu/variants.json';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 
@@ -28,9 +28,18 @@ describe('Kottu art catalogue and masters', () => {
   it('keeps generated id unions in sync', () => {
     expect(readFileSync(resolve(root, 'src/assets/kottu/ids.ts'), 'utf8')).toBe(idsSource());
   });
-  it('has valid master dimensions, alpha, provenance, borders and caps', () => {
-    expect(execFileSync(process.execPath, ['scripts/kottu-art/process.mjs', '--check'], { cwd: root, encoding: 'utf8', timeout: 120000 })).toContain('36/36 masters pass');
+  it('has valid master dimensions, alpha, provenance, borders and caps', async () => {
+    const result = await checkMasters(undefined, undefined, variants);
+    expect(result.failures).toEqual([]); expect(result.rows).toHaveLength(36);
+    expect(result.totals.prop).toBeLessThanOrEqual(170000); expect(result.totals.sticker).toBeLessThanOrEqual(160000);
   }, 120000);
+  it('rejects stale or incomplete variant provenance instead of trusting recorded byte sizes', async () => {
+    for (const changed of [
+      { ...variants, encoder: 'stale' },
+      { ...variants, rows: variants.rows.map((row, i) => i ? row : { ...row, sha256OfMaster: 'stale' }) },
+      { ...variants, rows: variants.rows.map((row, i) => i ? row : { ...row, variants: row.variants.slice(1) }) },
+    ]) expect((await checkMasters(catalogue.assets.slice(0, 1), undefined, changed)).failures).toHaveLength(1);
+  });
   it('retains the full style lock and seven numbered sticker items in dry runs', () => {
     const assets = catalogue.assets.filter((asset) => asset.family === 'sticker').slice(0, 7);
     const prompt = batchPrompt(assets);

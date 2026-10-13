@@ -2,7 +2,7 @@ import './p2-8-overlays.css';
 import { postcardsAvailableAtom } from '../state/features';
 import { useEffect, useRef, type KeyboardEvent } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { desktopAtom, menuStateAtom, mochiPrefsAtom, openMenuAtom, showWidgetsAtom, themePrefAtom, wallpaperAtom } from '../state/atoms';
+import { desktopAtom, menuStateAtom, mochiPrefsAtom, openMenuAtom, themePrefAtom, wallpaperAtom } from '../state/atoms';
 import { APP_META } from '../registry/meta';
 import { appMenus, desktopMenus, islandMenu, getItemState, windowItems, type ShellMenu } from '../registry/menus';
 import { VERSION } from '../config';
@@ -28,7 +28,7 @@ export function MenuHost() {
   const open = useAtomValue(openMenuAtom); const setOpen = useSetAtom(openMenuAtom);
   const desktop = useAtomValue(desktopAtom); const states = useAtomValue(menuStateAtom);
   const theme = useAtomValue(themePrefAtom); const wallpaper = useAtomValue(wallpaperAtom);
-  const widgets = useAtomValue(showWidgetsAtom); const mochi = useAtomValue(mochiPrefsAtom);
+  const mochi = useAtomValue(mochiPrefsAtom);
   const win = desktop.focusedId ? desktop.windows[desktop.focusedId] : undefined;
   const meta = win ? APP_META[win.appId] : undefined;
   const outline = spec?.menus.find(menu => menu.id === open);
@@ -44,7 +44,7 @@ export function MenuHost() {
   if (!shown) return null;
   const anchor = shown.spec.anchors.get(shown.menu.id);
   const state = (command: string) => getItemState(command, { desktop, appState: win ? states[win.id] : undefined,
-    theme, wallpaper, widgets, postcards, mochi: mochi.visible, zoomable: meta?.window.zoomable ?? false,
+    theme, wallpaper, postcards, mochi: mochi.visible, zoomable: meta?.window.zoomable ?? false,
     resizable: meta?.window.resizable ?? false });
   const horizontal = (event: KeyboardEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest('[role="menu"]') !== event.currentTarget) return;

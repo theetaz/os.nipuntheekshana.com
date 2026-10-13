@@ -34,7 +34,7 @@ export function viewMenu(items: readonly MenuItemSpec[] = defaultView): readonly
 export function goMenu(): readonly MenuItemSpec[] {
   return [item('Projects', 'go.projects'), item('Writing', 'go.writing'), item('About', 'go.about'), item('CV', 'go.cv'),
     item('Now', 'go.now'), item('Activity', 'go.activity'), item('Island', 'go.maps'), item('Terminal', 'go.terminal'),
-    item('Messages', 'go.messages'), item('Postcards', 'go.guestbook'), separator, item('Pin the city', 'go.pin'), item('Kooda', 'go.trash')];
+    item('Messages', 'go.messages'), item('Board', 'go.guestbook'), separator, item('Pin the city', 'go.pin'), item('Kooda', 'go.trash')];
 }
 export function windowMenu(): readonly MenuItemSpec[] {
   return [item('Minimise', 'window.minimize', alt('KeyM')), item('Maximise', 'window.zoom', alt('KeyZ')),
@@ -69,7 +69,7 @@ export function windowItems(desktop: DesktopState): readonly MenuItemSpec[] {
 }
 export interface MenuStateContext {
   desktop: DesktopState; appState?: AppMenuState; theme: 'light' | 'dark' | 'auto'; wallpaper: string;
-  widgets: boolean; mochi: boolean; postcards?: boolean; zoomable: boolean; resizable: boolean;
+  mochi: boolean; postcards?: boolean; zoomable: boolean; resizable: boolean;
 }
 export function getItemState(command: string, context: MenuStateContext): { disabled?: boolean; checked?: boolean } {
   if (command === 'go.guestbook') return { disabled: !context.postcards };
@@ -78,7 +78,6 @@ export function getItemState(command: string, context: MenuStateContext): { disa
   if (command.startsWith('window.focus:')) return { checked: command.slice(13) === desktop.focusedId };
   if (command.startsWith('theme.')) return { checked: command.slice(6) === context.theme };
   if (command.startsWith('wallpaper.')) return { checked: command.slice(10) === context.wallpaper };
-  if (command === 'desktop.widgets') return { checked: context.widgets };
   if (command === 'desktop.mochi') return { checked: context.mochi };
   if (['window.next', 'window.prev', 'window.bringAllToFront'].includes(command))
     return { disabled: !desktop.order.some(id => !desktop.windows[id]?.closing) };

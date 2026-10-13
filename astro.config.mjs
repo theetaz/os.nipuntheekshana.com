@@ -28,7 +28,10 @@ export default defineConfig({
   build: { format: 'file', inlineStylesheets: 'never' },
   prefetch: false, // the island prefetches app chunks itself (§8)
   devToolbar: { enabled: false },
-  integrations: [react(), sitemap({ filter: sitemapFilter })],
+  integrations: [react(), sitemap({ filter: sitemapFilter }), {
+    name: 'paint-before-hydration',
+    hooks: { 'astro:config:setup': ({ addClientDirective }) => addClientDirective({ name: 'paint', entrypoint: './scripts/client-paint.mjs' }) },
+  }],
   vite: {
     plugins: [islandCss(), {
       name: 'kalam-measured-fallback',

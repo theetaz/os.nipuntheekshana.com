@@ -21,6 +21,10 @@ async function openFixture(page: Page, data: ClientActivity = activity) {
   await page.goto('/');
   await openApp(page, 'Activity');
   await expect(app(page).getByRole('heading', { name: 'Activity', exact: true })).toHaveCount(1);
+  if (await page.locator('html').getAttribute('data-mode') === 'mobile') {
+    await expect(app(page)).not.toHaveAttribute('data-transition', /./);
+    await expect(app(page)).not.toHaveAttribute('data-sheet-animating');
+  }
 }
 async function frames(page: Page, count = 5) {
   await page.evaluate(async count => {
@@ -288,10 +292,14 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     let release!: () => void; const hold = new Promise<void>(done => { release = done; });
     await page.route('**/ActivityApp.*.js', async route => { await hold; await route.continue(); });
     await page.addInitScript(() => {
-      Object.assign(window, { activityCls: 0 });
+      Object.assign(window, { activityCls: 0, activityShifts: [] });
       new PerformanceObserver(list => { for (const entry of list.getEntries()) {
-        const shift = entry as PerformanceEntry & { value: number; hadRecentInput: boolean };
-        if (!shift.hadRecentInput) (window as unknown as { activityCls: number }).activityCls += shift.value;
+        const shift = entry as PerformanceEntry & { value: number; hadRecentInput: boolean; sources: { node?: Element; previousRect: DOMRectReadOnly; currentRect: DOMRectReadOnly }[] };
+        if (!shift.hadRecentInput) {
+          const metrics = window as unknown as { activityCls: number; activityShifts: unknown[] };
+          metrics.activityCls += shift.value;
+          metrics.activityShifts.push({ value: shift.value, sources: shift.sources.map(source => ({ node: source.node?.outerHTML.slice(0, 180), before: source.previousRect.toJSON(), after: source.currentRect.toJSON() })) });
+        }
       } }).observe({ type: 'layout-shift', buffered: true });
     });
     try {
@@ -301,7 +309,8 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
       release(); await expect(page.locator('#static-window')).toBeHidden(); await frames(page, 8);
       const after = await app(page).locator('.activity-view').boundingBox();
       for (const key of ['x', 'y', 'width', 'height'] as const) expect(Math.abs(before![key] - after![key])).toBeLessThanOrEqual(1);
-      expect(await page.evaluate(() => (window as unknown as { activityCls: number }).activityCls)).toBe(0);
+      const shifts = await page.evaluate(() => (window as unknown as { activityShifts: unknown[] }).activityShifts);
+      expect(await page.evaluate(() => (window as unknown as { activityCls: number }).activityCls), JSON.stringify(shifts)).toBe(0);
     } finally { release(); }
   });
 }

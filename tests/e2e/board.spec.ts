@@ -21,12 +21,20 @@ async function mocks(page: Page, options: { health?: boolean; listStatus?: numbe
     if (route.request().method() === 'POST') return options.network ? route.abort('failed') : route.fulfill({ status: options.postStatus ?? 201, json: options.post ?? { status: 'published', postcard: published } });
     return route.fulfill({ status: options.listStatus ?? 200, json: options.listStatus ? { error: 'unavailable' } : { items: options.items ?? notes, next: null } });
   });
+  await page.addInitScript(() => {
+    const setKey = () => {
+      if (!document.head) return;
+      observer.disconnect();
+      const meta = document.querySelector<HTMLMetaElement>('meta[name="turnstile-site-key"]') ?? document.createElement('meta');
+      meta.name = 'turnstile-site-key'; meta.content = '1x00000000000000000000AA';
+      if (!meta.isConnected) document.head.append(meta);
+    };
+    const observer = new MutationObserver(setKey); observer.observe(document, { childList: true, subtree: true }); setKey();
+  });
   await page.route('https://challenges.cloudflare.com/turnstile/v0/api.js*', route => options.blocked ? route.abort('blockedbyclient') : route.fulfill({ contentType: 'application/javascript', body: fakeWidget }));
 }
 async function board(page: Page) {
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  // Expose document flow while the legacy fixed phone home is still present.
-  if (await page.locator('html').getAttribute('data-mode') === 'mobile') await page.addStyleTag({ content: '.phone-home{display:none!important} #story{display:block!important}' });
   await page.locator('[data-k-board]').scrollIntoViewIfNeeded();
   return page.locator('[data-k-board]');
 }
@@ -261,7 +269,7 @@ for (const reduced of [false, true]) test(`visit counter counts once per session
   await board(page); const counter = page.locator('[data-k-visits]'); await counter.scrollIntoViewIfNeeded(); await expect(counter.locator('.k-digit')).toHaveCount(6);
   await expect.poll(() => counter.locator('.k-digit').allTextContents()).toEqual(['0', '0', '4', '9', '7', '7']); await expect(counter).toHaveAttribute('aria-label', 'This is visit №4,977 since launch.');
   await capture(page, info, `counter-${reduced ? 'reduced' : 'animated'}`);
-  await page.reload(); if (await page.locator('html').getAttribute('data-mode') === 'mobile') await page.addStyleTag({ content: '.phone-home{display:none!important} #story{display:block!important}' });
+  await page.reload();
   await counter.scrollIntoViewIfNeeded(); await expect.poll(() => methods).toEqual(['POST', 'GET']);
 });
 test('unavailable counter hides digits and honestly shows its tea break', async ({ page }, info) => {

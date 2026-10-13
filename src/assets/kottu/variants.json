@@ -1,0 +1,3405 @@
+{
+  "encoder": "11ab33a8da49e9bd7998781567af9494cf1ee13c927f71a46bfcd3e710692111",
+  "rows": [
+    {
+      "id": "prop-tuktuk",
+      "sha256OfMaster": "ba9656fcfe3cafd25a088bd9d65d7bac06b1abb3f8d4ad65f10d24d5c5e52aa9",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 300,
+          "density": 1,
+          "width": 300,
+          "format": "avif",
+          "bytes": 8571,
+          "astroBytes": 8679,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 300,
+          "density": 1,
+          "width": 300,
+          "format": "webp",
+          "bytes": 17680,
+          "astroBytes": 18936,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 300,
+          "density": 2,
+          "width": 600,
+          "format": "avif",
+          "bytes": 20368,
+          "astroBytes": 21177,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 300,
+          "density": 2,
+          "width": 600,
+          "format": "webp",
+          "bytes": 42226,
+          "astroBytes": 45188,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-thinkpad",
+      "sha256OfMaster": "33a860228c6f71a8617a4896e11a1519c9fd564bfedd58c9ffeb7ee769b65a2b",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 264,
+          "density": 1,
+          "width": 264,
+          "format": "avif",
+          "bytes": 6361,
+          "astroBytes": 6715,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 264,
+          "density": 1,
+          "width": 264,
+          "format": "webp",
+          "bytes": 13436,
+          "astroBytes": 14494,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 264,
+          "density": 2,
+          "width": 497,
+          "format": "avif",
+          "bytes": 14489,
+          "astroBytes": 15176,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 264,
+          "density": 2,
+          "width": 497,
+          "format": "webp",
+          "bytes": 28600,
+          "astroBytes": 31194,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-lotus-tower",
+      "sha256OfMaster": "02bb57a0edf14d4b066760971e77ee0a81ddb28f4080a43ea27a417dd1614b08",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 116,
+          "density": 1,
+          "width": 116,
+          "format": "avif",
+          "bytes": 4244,
+          "astroBytes": 4490,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 116,
+          "density": 1,
+          "width": 116,
+          "format": "webp",
+          "bytes": 7738,
+          "astroBytes": 8792,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 116,
+          "density": 2,
+          "width": 232,
+          "format": "avif",
+          "bytes": 8670,
+          "astroBytes": 9281,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 116,
+          "density": 2,
+          "width": 232,
+          "format": "webp",
+          "bytes": 15818,
+          "astroBytes": 18112,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-cricket-bat",
+      "sha256OfMaster": "140bdb4da454a35a69fe183f6e30e0eac7ef4a7d6947c24ec9d3c430e0deaf19",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 250,
+          "density": 1,
+          "width": 250,
+          "format": "avif",
+          "bytes": 2052,
+          "astroBytes": 2141,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 250,
+          "density": 1,
+          "width": 250,
+          "format": "webp",
+          "bytes": 3982,
+          "astroBytes": 4648,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 250,
+          "density": 2,
+          "width": 500,
+          "format": "avif",
+          "bytes": 4811,
+          "astroBytes": 5132,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 250,
+          "density": 2,
+          "width": 500,
+          "format": "webp",
+          "bytes": 8038,
+          "astroBytes": 9866,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-thambili",
+      "sha256OfMaster": "ab268088eb4600ca4c40f2642c23fe9ff88ff6b78289d581ae717590067e666b",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 124,
+          "density": 1,
+          "width": 124,
+          "format": "avif",
+          "bytes": 3748,
+          "astroBytes": 3944,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 124,
+          "density": 1,
+          "width": 124,
+          "format": "webp",
+          "bytes": 6518,
+          "astroBytes": 7010,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 124,
+          "density": 2,
+          "width": 248,
+          "format": "avif",
+          "bytes": 7751,
+          "astroBytes": 8176,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 124,
+          "density": 2,
+          "width": 248,
+          "format": "webp",
+          "bytes": 13808,
+          "astroBytes": 14786,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-tea",
+      "sha256OfMaster": "991a04f5656f12ca3b8b56035a371c30e5e08f7249a33c8024d44a153d1b584a",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 128,
+          "density": 1,
+          "width": 128,
+          "format": "avif",
+          "bytes": 3350,
+          "astroBytes": 3483,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 128,
+          "density": 1,
+          "width": 128,
+          "format": "webp",
+          "bytes": 6328,
+          "astroBytes": 6612,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 128,
+          "density": 2,
+          "width": 209,
+          "format": "avif",
+          "bytes": 5523,
+          "astroBytes": 5757,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 128,
+          "density": 2,
+          "width": 209,
+          "format": "webp",
+          "bytes": 9786,
+          "astroBytes": 10544,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-radio",
+      "sha256OfMaster": "074476ae83f7d6d93f747603ebcb63f1c0ef4efefdfd3376ff37167deb0df0e1",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 216,
+          "density": 1,
+          "width": 216,
+          "format": "avif",
+          "bytes": 6540,
+          "astroBytes": 6718,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 216,
+          "density": 1,
+          "width": 216,
+          "format": "webp",
+          "bytes": 14112,
+          "astroBytes": 15786,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 216,
+          "density": 2,
+          "width": 343,
+          "format": "avif",
+          "bytes": 10837,
+          "astroBytes": 11212,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 216,
+          "density": 2,
+          "width": 343,
+          "format": "webp",
+          "bytes": 24506,
+          "astroBytes": 27092,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-lantern",
+      "sha256OfMaster": "2a63ef5bbf28455a92cfdfdd2b33c525e6e8fb17d1f8005f3b565329c466657c",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 112,
+          "density": 1,
+          "width": 112,
+          "format": "avif",
+          "bytes": 4739,
+          "astroBytes": 4988,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 112,
+          "density": 1,
+          "width": 112,
+          "format": "webp",
+          "bytes": 8360,
+          "astroBytes": 8778,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 112,
+          "density": 2,
+          "width": 224,
+          "format": "avif",
+          "bytes": 10945,
+          "astroBytes": 11436,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 112,
+          "density": 2,
+          "width": 224,
+          "format": "webp",
+          "bytes": 17014,
+          "astroBytes": 18336,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-ola",
+      "sha256OfMaster": "58a7e608e5de51065f321979ea424613c2a3ea22d63870d1aae8ac11aac5f86b",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 182,
+          "density": 1,
+          "width": 182,
+          "format": "avif",
+          "bytes": 4305,
+          "astroBytes": 4506,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 182,
+          "density": 1,
+          "width": 182,
+          "format": "webp",
+          "bytes": 8490,
+          "astroBytes": 8856,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 182,
+          "density": 2,
+          "width": 288,
+          "format": "avif",
+          "bytes": 7537,
+          "astroBytes": 7767,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 182,
+          "density": 2,
+          "width": 288,
+          "format": "webp",
+          "bytes": 14268,
+          "astroBytes": 14958,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-crbook",
+      "sha256OfMaster": "0b29e8a67879269efc546ed2a4aaf4319d32d0b55f72dc01a75c9509c3134064",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 124,
+          "density": 1,
+          "width": 124,
+          "format": "avif",
+          "bytes": 2311,
+          "astroBytes": 2524,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 124,
+          "density": 1,
+          "width": 124,
+          "format": "webp",
+          "bytes": 5186,
+          "astroBytes": 5882,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 124,
+          "density": 2,
+          "width": 236,
+          "format": "avif",
+          "bytes": 5403,
+          "astroBytes": 5521,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 124,
+          "density": 2,
+          "width": 236,
+          "format": "webp",
+          "bytes": 11560,
+          "astroBytes": 13430,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "prop-postbox",
+      "sha256OfMaster": "68c6e85b5c6015f1e74482b9527cbfbab8d9c655aa33fabf490bbca29ee8078c",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 100,
+          "density": 1,
+          "width": 100,
+          "format": "avif",
+          "bytes": 3124,
+          "astroBytes": 3288,
+          "cap": 18000,
+          "quality": 50
+        },
+        {
+          "size": 100,
+          "density": 1,
+          "width": 100,
+          "format": "webp",
+          "bytes": 5692,
+          "astroBytes": 6122,
+          "cap": 32000,
+          "quality": 78
+        },
+        {
+          "size": 100,
+          "density": 2,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6631,
+          "astroBytes": 6969,
+          "cap": 48000,
+          "quality": 50
+        },
+        {
+          "size": 100,
+          "density": 2,
+          "width": 200,
+          "format": "webp",
+          "bytes": 12752,
+          "astroBytes": 13992,
+          "cap": 90000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-lanka-data-layer",
+      "sha256OfMaster": "8bbbe3cacfb9336906bf56a9e904bbfc153e822584c66becfd1355f42498a0d2",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3328,
+          "astroBytes": 3394,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4986,
+          "astroBytes": 5690,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 6741,
+          "astroBytes": 6855,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 11612,
+          "astroBytes": 13614,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 6116,
+          "astroBytes": 6032,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 8896,
+          "astroBytes": 10338,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 11086,
+          "astroBytes": 11609,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 20714,
+          "astroBytes": 24840,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 7475,
+          "astroBytes": 7721,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 13456,
+          "astroBytes": 15938,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 14896,
+          "astroBytes": 15662,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 32114,
+          "astroBytes": 38264,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-lanka-price-lens",
+      "sha256OfMaster": "84bfe64cfb64eeae4ca5762d2d7d5c62f40465006fb0b66f9aeb3cca8882411c",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3597,
+          "astroBytes": 3577,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 5402,
+          "astroBytes": 6136,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 7870,
+          "astroBytes": 8085,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12870,
+          "astroBytes": 14996,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 6011,
+          "astroBytes": 6139,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9776,
+          "astroBytes": 11124,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 11834,
+          "astroBytes": 12254,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 23112,
+          "astroBytes": 27184,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 8113,
+          "astroBytes": 8514,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 14868,
+          "astroBytes": 17418,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 16057,
+          "astroBytes": 16800,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 35334,
+          "astroBytes": 41714,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-salli",
+      "sha256OfMaster": "6c885082aeb3af3d0e8f4b416ea6719989de0a6ee1ace8b916f4d240d9955553",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3327,
+          "astroBytes": 3484,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4662,
+          "astroBytes": 5396,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 6076,
+          "astroBytes": 6386,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 10856,
+          "astroBytes": 13010,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 4672,
+          "astroBytes": 4836,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 7918,
+          "astroBytes": 9408,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 9114,
+          "astroBytes": 9712,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 18828,
+          "astroBytes": 22836,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6873,
+          "astroBytes": 7097,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 12514,
+          "astroBytes": 15088,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 12668,
+          "astroBytes": 13299,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 28644,
+          "astroBytes": 34832,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-agentmeter",
+      "sha256OfMaster": "548e7a7d9492ef5c2e8922b4c7ad8c755c9895817497aa0c43506c264b62ad26",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3068,
+          "astroBytes": 3044,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4668,
+          "astroBytes": 5338,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 5838,
+          "astroBytes": 5985,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 10634,
+          "astroBytes": 12604,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 4869,
+          "astroBytes": 5058,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 7924,
+          "astroBytes": 9272,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 9695,
+          "astroBytes": 9959,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 18950,
+          "astroBytes": 22654,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6753,
+          "astroBytes": 6982,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 12468,
+          "astroBytes": 14782,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 12466,
+          "astroBytes": 13124,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 28776,
+          "astroBytes": 34554,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-colombo-atlas",
+      "sha256OfMaster": "5e059f39b331e5eddfc059f0684a51057f5f33d8c701a95b383a7041cb7381fa",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 2792,
+          "astroBytes": 2851,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4182,
+          "astroBytes": 4800,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 5480,
+          "astroBytes": 5712,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 9794,
+          "astroBytes": 11588,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 4328,
+          "astroBytes": 4588,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 7462,
+          "astroBytes": 8682,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 9113,
+          "astroBytes": 9540,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 17180,
+          "astroBytes": 20742,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6311,
+          "astroBytes": 6592,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 11272,
+          "astroBytes": 13434,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 12677,
+          "astroBytes": 13422,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 26292,
+          "astroBytes": 31648,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-geopop",
+      "sha256OfMaster": "4544334a6ea1e320e20f7db088ac296fb5fc816001e255cbe35abdd8f61a6f92",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3522,
+          "astroBytes": 3680,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 5458,
+          "astroBytes": 6320,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 6801,
+          "astroBytes": 7094,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12570,
+          "astroBytes": 14732,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 5208,
+          "astroBytes": 5319,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9384,
+          "astroBytes": 11036,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 10256,
+          "astroBytes": 10759,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 21890,
+          "astroBytes": 25930,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 7762,
+          "astroBytes": 8062,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 14740,
+          "astroBytes": 17418,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 306,
+          "format": "avif",
+          "bytes": 11785,
+          "astroBytes": 12241,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 306,
+          "format": "webp",
+          "bytes": 22750,
+          "astroBytes": 26820,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-vidura",
+      "sha256OfMaster": "9087fa1d0d97f0f91e0ea15a0301213ccf86fbb4a9ae08dfcc1eb7d76913a965",
+      "quality": {
+        "avif": 50,
+        "webp": 73
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3669,
+          "astroBytes": 3649,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 5148,
+          "astroBytes": 5906,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 7659,
+          "astroBytes": 7951,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12582,
+          "astroBytes": 15064,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 6279,
+          "astroBytes": 6495,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9302,
+          "astroBytes": 11156,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 12691,
+          "astroBytes": 13129,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 22544,
+          "astroBytes": 27126,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 9082,
+          "astroBytes": 9346,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 14826,
+          "astroBytes": 17722,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 17478,
+          "astroBytes": 18307,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 34602,
+          "astroBytes": 42070,
+          "cap": 44000,
+          "quality": 73
+        }
+      ]
+    },
+    {
+      "id": "sticker-mochi",
+      "sha256OfMaster": "dacbad51a40a98a89b17ce71f66d604a6c231600b2335a1b106430ac283eb842",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 2987,
+          "astroBytes": 3053,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4576,
+          "astroBytes": 5190,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 5769,
+          "astroBytes": 6084,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 11140,
+          "astroBytes": 12836,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 4857,
+          "astroBytes": 4933,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 8210,
+          "astroBytes": 9470,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 8972,
+          "astroBytes": 9476,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 19548,
+          "astroBytes": 22698,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6481,
+          "astroBytes": 6770,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 12958,
+          "astroBytes": 14996,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 371,
+          "format": "avif",
+          "bytes": 12119,
+          "astroBytes": 12648,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 371,
+          "format": "webp",
+          "bytes": 25388,
+          "astroBytes": 29684,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-gridpulse",
+      "sha256OfMaster": "971b23d51ed36ee96b72502ef95671dc243d16a8d74778531d25e1a5c0525f18",
+      "quality": {
+        "avif": 50,
+        "webp": 73
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3745,
+          "astroBytes": 3783,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 5500,
+          "astroBytes": 6216,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 7492,
+          "astroBytes": 7702,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12948,
+          "astroBytes": 15248,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 6416,
+          "astroBytes": 6543,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9824,
+          "astroBytes": 11472,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 12659,
+          "astroBytes": 13032,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 22894,
+          "astroBytes": 26908,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 9007,
+          "astroBytes": 9485,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 15416,
+          "astroBytes": 17970,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 16384,
+          "astroBytes": 17219,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 34550,
+          "astroBytes": 40966,
+          "cap": 44000,
+          "quality": 73
+        }
+      ]
+    },
+    {
+      "id": "sticker-opentreasury",
+      "sha256OfMaster": "826aa86025a2138ba955a461ecc02b04ec0e72e89b6be03d4aedd4a7a1889746",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3244,
+          "astroBytes": 3280,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4858,
+          "astroBytes": 6124,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 7047,
+          "astroBytes": 7107,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12588,
+          "astroBytes": 15094,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 5336,
+          "astroBytes": 5480,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9250,
+          "astroBytes": 11152,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 11420,
+          "astroBytes": 11701,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 22846,
+          "astroBytes": 27512,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 7930,
+          "astroBytes": 8069,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 14932,
+          "astroBytes": 17892,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 15874,
+          "astroBytes": 16257,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 35042,
+          "astroBytes": 42718,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-colombo-delivery",
+      "sha256OfMaster": "e7a1daf359a738242d0c81ae406c72ed24e8f0d49647df743d4aa5a27b4eb24f",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3307,
+          "astroBytes": 3360,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 5070,
+          "astroBytes": 5900,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 6366,
+          "astroBytes": 6619,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 11690,
+          "astroBytes": 13966,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 5316,
+          "astroBytes": 5375,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 8682,
+          "astroBytes": 10270,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 10227,
+          "astroBytes": 10540,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 20396,
+          "astroBytes": 24894,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 7380,
+          "astroBytes": 7729,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 13522,
+          "astroBytes": 16368,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 13233,
+          "astroBytes": 13901,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 30812,
+          "astroBytes": 38050,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-attendly",
+      "sha256OfMaster": "b8e1a66ec86738074e655704d4177213c6fb0880cb98c50485576f4419c9901f",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3589,
+          "astroBytes": 3511,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4818,
+          "astroBytes": 5644,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 5923,
+          "astroBytes": 6139,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 11168,
+          "astroBytes": 13444,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 4717,
+          "astroBytes": 4873,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 8482,
+          "astroBytes": 10118,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 8602,
+          "astroBytes": 9045,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 19258,
+          "astroBytes": 23608,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6235,
+          "astroBytes": 6441,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 12918,
+          "astroBytes": 15686,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 361,
+          "format": "avif",
+          "bytes": 11419,
+          "astroBytes": 12024,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 361,
+          "format": "webp",
+          "bytes": 24382,
+          "astroBytes": 30038,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-terrarun",
+      "sha256OfMaster": "f71904f31b9f34d0e55a049a60a1791df0865cc02f3c2b0594e766c01d7837d6",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3917,
+          "astroBytes": 3955,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4926,
+          "astroBytes": 5562,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 7534,
+          "astroBytes": 7763,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12130,
+          "astroBytes": 14100,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 5389,
+          "astroBytes": 5578,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9172,
+          "astroBytes": 10556,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 11805,
+          "astroBytes": 12260,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 22078,
+          "astroBytes": 25752,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 7833,
+          "astroBytes": 8140,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 14152,
+          "astroBytes": 16362,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 16497,
+          "astroBytes": 17202,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 34472,
+          "astroBytes": 40450,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-goyama",
+      "sha256OfMaster": "3eb1d50c3c1830fc70b9566d6784c359a16286ef0f8fdc2e793ac9981a7e1bd3",
+      "quality": {
+        "avif": 50,
+        "webp": 73
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3534,
+          "astroBytes": 3553,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4992,
+          "astroBytes": 5820,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 7531,
+          "astroBytes": 7619,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12226,
+          "astroBytes": 14638,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 5787,
+          "astroBytes": 5896,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9044,
+          "astroBytes": 10758,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 11654,
+          "astroBytes": 12058,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 21656,
+          "astroBytes": 26114,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 8088,
+          "astroBytes": 8468,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 14134,
+          "astroBytes": 17052,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 375,
+          "format": "avif",
+          "bytes": 14772,
+          "astroBytes": 15424,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 375,
+          "format": "webp",
+          "bytes": 28490,
+          "astroBytes": 34640,
+          "cap": 44000,
+          "quality": 73
+        }
+      ]
+    },
+    {
+      "id": "sticker-mansariya",
+      "sha256OfMaster": "1cc1aae6ed544bd96705645bb811c50107e6a3fe873cf2c5ede4d448a2170ad8",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3194,
+          "astroBytes": 3187,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4494,
+          "astroBytes": 5230,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 6995,
+          "astroBytes": 6998,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 11256,
+          "astroBytes": 13374,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 5156,
+          "astroBytes": 5198,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 8360,
+          "astroBytes": 9870,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 11251,
+          "astroBytes": 11631,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 20972,
+          "astroBytes": 24896,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 7520,
+          "astroBytes": 7733,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 13292,
+          "astroBytes": 15748,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 14702,
+          "astroBytes": 15307,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 32614,
+          "astroBytes": 38854,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-ceylon-hub",
+      "sha256OfMaster": "2b836d080a5cd6f75b867e61daa98f155506f8bc0d1aa79defb2c2fb7fd6d1c8",
+      "quality": {
+        "avif": 50,
+        "webp": 73
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3660,
+          "astroBytes": 3696,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 5220,
+          "astroBytes": 5912,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 7953,
+          "astroBytes": 8189,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12602,
+          "astroBytes": 14742,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 6272,
+          "astroBytes": 6559,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9520,
+          "astroBytes": 11098,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 13274,
+          "astroBytes": 13700,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 22652,
+          "astroBytes": 26546,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 8974,
+          "astroBytes": 9252,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 14570,
+          "astroBytes": 17090,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 17599,
+          "astroBytes": 18520,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 35422,
+          "astroBytes": 41520,
+          "cap": 44000,
+          "quality": 73
+        }
+      ]
+    },
+    {
+      "id": "sticker-mendlog",
+      "sha256OfMaster": "287870b31cc345b3cdbd89f965845f9a5556fed9fc89c6b33ab6220c2d711d94",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3262,
+          "astroBytes": 3301,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4684,
+          "astroBytes": 5120,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 6150,
+          "astroBytes": 6344,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 10944,
+          "astroBytes": 12538,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 4683,
+          "astroBytes": 4897,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 8240,
+          "astroBytes": 9394,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 9300,
+          "astroBytes": 9842,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 19336,
+          "astroBytes": 22124,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6854,
+          "astroBytes": 7089,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 12706,
+          "astroBytes": 14570,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 12553,
+          "astroBytes": 13375,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 29274,
+          "astroBytes": 33622,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-open-pay",
+      "sha256OfMaster": "32013efbc89a772c5deacc81352cd65a530d927dcc35fcb4ca8d823ab5270073",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 2579,
+          "astroBytes": 2659,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 3948,
+          "astroBytes": 4488,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 6120,
+          "astroBytes": 6429,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 10078,
+          "astroBytes": 11682,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 4538,
+          "astroBytes": 4618,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 7364,
+          "astroBytes": 8562,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 9986,
+          "astroBytes": 10276,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 18114,
+          "astroBytes": 21212,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6743,
+          "astroBytes": 6942,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 11452,
+          "astroBytes": 13498,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 13538,
+          "astroBytes": 14115,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 27992,
+          "astroBytes": 32870,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-pin-the-city",
+      "sha256OfMaster": "0e074a0939e37a29db90aed45b6abdae661f39a99608b1c41a29669d8dbef956",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3257,
+          "astroBytes": 3334,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4828,
+          "astroBytes": 5442,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 6468,
+          "astroBytes": 6718,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 11144,
+          "astroBytes": 13116,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 5058,
+          "astroBytes": 5212,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 8498,
+          "astroBytes": 9830,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 10876,
+          "astroBytes": 11333,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 20258,
+          "astroBytes": 23590,
+          "cap": 44000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 6838,
+          "astroBytes": 7226,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 12996,
+          "astroBytes": 15180,
+          "cap": 18000,
+          "quality": 78
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 13753,
+          "astroBytes": 14366,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 30664,
+          "astroBytes": 35994,
+          "cap": 44000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "sticker-kottu",
+      "sha256OfMaster": "ce40854a83bf31a2fe4a8f5ed4b90a40094b46a93699aab06006f7f8f13a7e4d",
+      "quality": {
+        "avif": 50,
+        "webp": 73
+      },
+      "variants": [
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "avif",
+          "bytes": 3509,
+          "astroBytes": 3582,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 1,
+          "width": 88,
+          "format": "webp",
+          "bytes": 4716,
+          "astroBytes": 5070,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "avif",
+          "bytes": 8005,
+          "astroBytes": 8080,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 88,
+          "density": 2,
+          "width": 176,
+          "format": "webp",
+          "bytes": 12590,
+          "astroBytes": 13966,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "avif",
+          "bytes": 5885,
+          "astroBytes": 6087,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 1,
+          "width": 140,
+          "format": "webp",
+          "bytes": 9290,
+          "astroBytes": 10236,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "avif",
+          "bytes": 14040,
+          "astroBytes": 14397,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 140,
+          "density": 2,
+          "width": 280,
+          "format": "webp",
+          "bytes": 23404,
+          "astroBytes": 26270,
+          "cap": 44000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "avif",
+          "bytes": 8916,
+          "astroBytes": 9211,
+          "cap": 10000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 1,
+          "width": 200,
+          "format": "webp",
+          "bytes": 14660,
+          "astroBytes": 16626,
+          "cap": 18000,
+          "quality": 73
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "avif",
+          "bytes": 20336,
+          "astroBytes": 20884,
+          "cap": 24000,
+          "quality": 50
+        },
+        {
+          "size": 200,
+          "density": 2,
+          "width": 400,
+          "format": "webp",
+          "bytes": 37022,
+          "astroBytes": 41692,
+          "cap": 44000,
+          "quality": 73
+        }
+      ]
+    },
+    {
+      "id": "badge-lotus-tower",
+      "sha256OfMaster": "bef57a0e322ff06af4abe7f6c86ed6d03177f88161f3321f0acd5e9aa2a61eee",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 56,
+          "density": 1,
+          "width": 48,
+          "format": "avif",
+          "bytes": 1525,
+          "astroBytes": 1580,
+          "cap": 3000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 1,
+          "width": 48,
+          "format": "webp",
+          "bytes": 2304,
+          "astroBytes": 2332,
+          "cap": 5000,
+          "quality": 78
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 48,
+          "format": "avif",
+          "bytes": 1525,
+          "astroBytes": 1580,
+          "cap": 6000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 48,
+          "format": "webp",
+          "bytes": 2304,
+          "astroBytes": 2332,
+          "cap": 10000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "badge-pin",
+      "sha256OfMaster": "b5bbef4d0bd5ff16722d12a7ed2a6546f091c3a343c4463341671326ca01f32a",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 56,
+          "density": 1,
+          "width": 56,
+          "format": "avif",
+          "bytes": 1488,
+          "astroBytes": 1582,
+          "cap": 3000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 1,
+          "width": 56,
+          "format": "webp",
+          "bytes": 2204,
+          "astroBytes": 2226,
+          "cap": 5000,
+          "quality": 78
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 87,
+          "format": "avif",
+          "bytes": 2084,
+          "astroBytes": 2181,
+          "cap": 6000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 87,
+          "format": "webp",
+          "bytes": 2542,
+          "astroBytes": 2984,
+          "cap": 10000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "badge-chip",
+      "sha256OfMaster": "d54d9046616dcf7214665f4e40e789efb0b9ceff33c8760fc1251b1c5fe5042e",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 56,
+          "density": 1,
+          "width": 56,
+          "format": "avif",
+          "bytes": 1668,
+          "astroBytes": 1687,
+          "cap": 3000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 1,
+          "width": 56,
+          "format": "webp",
+          "bytes": 2786,
+          "astroBytes": 2934,
+          "cap": 5000,
+          "quality": 78
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 112,
+          "format": "avif",
+          "bytes": 2724,
+          "astroBytes": 2796,
+          "cap": 6000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 112,
+          "format": "webp",
+          "bytes": 4642,
+          "astroBytes": 5852,
+          "cap": 10000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "badge-gamepad",
+      "sha256OfMaster": "87cfe98e124ac3a62af3ab0d36594e8c415db5cc0c26126b1af884cdf23742ff",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 56,
+          "density": 1,
+          "width": 56,
+          "format": "avif",
+          "bytes": 1409,
+          "astroBytes": 1442,
+          "cap": 3000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 1,
+          "width": 56,
+          "format": "webp",
+          "bytes": 1810,
+          "astroBytes": 1832,
+          "cap": 5000,
+          "quality": 78
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 112,
+          "format": "avif",
+          "bytes": 2116,
+          "astroBytes": 2280,
+          "cap": 6000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 112,
+          "format": "webp",
+          "bytes": 2890,
+          "astroBytes": 3168,
+          "cap": 10000,
+          "quality": 78
+        }
+      ]
+    },
+    {
+      "id": "badge-tea",
+      "sha256OfMaster": "22641fddc67520fa9668aee2315cf829bf654fa9b26790261253ed4c83885908",
+      "quality": {
+        "avif": 50,
+        "webp": 78
+      },
+      "variants": [
+        {
+          "size": 56,
+          "density": 1,
+          "width": 56,
+          "format": "avif",
+          "bytes": 1849,
+          "astroBytes": 1900,
+          "cap": 3000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 1,
+          "width": 56,
+          "format": "webp",
+          "bytes": 2620,
+          "astroBytes": 2946,
+          "cap": 5000,
+          "quality": 78
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 69,
+          "format": "avif",
+          "bytes": 2162,
+          "astroBytes": 2321,
+          "cap": 6000,
+          "quality": 50
+        },
+        {
+          "size": 56,
+          "density": 2,
+          "width": 69,
+          "format": "webp",
+          "bytes": 2818,
+          "astroBytes": 3286,
+          "cap": 10000,
+          "quality": 78
+        }
+      ]
+    }
+  ]
+}

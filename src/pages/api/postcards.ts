@@ -2,7 +2,8 @@
  * newest first. Public Postcard: id, created_at (ms), name, body, color, font,
  * rotation, country. No email, IP or hash is ever returned.
  * POST { name:1..40, body:1..300, email?, color:paper|thambili|lagoon|lotus|tea,
- * font:sans|serif|handwriting, turnstileToken } -> 201 {status:'published',postcard}
+ * font:sans|serif|handwriting, turnstileToken? } -> 201 {status:'published',postcard}
+ * (token required when TURNSTILE_SECRET is set)
  * or 202 {status:'pending',message}. Errors: 422 {error:'profanity',lang:'en'|'si',joke}
  * / {error:'link'}; 400 {error:'invalid',fields}; 429 {error:'rate_limited',retryAfter}
  * (seconds, also Retry-After); 403 {error:'turnstile'|'origin'}; 503 {error:'unavailable'}.

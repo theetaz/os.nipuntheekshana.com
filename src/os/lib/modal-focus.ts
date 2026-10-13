@@ -1,4 +1,13 @@
-import { focusableWithin } from './focus';
+const focusableSelector = 'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"], summary';
+/** Restore one target without measuring every link in the background document. */
+export function firstFocusableWithin(container: HTMLElement, selector = focusableSelector,
+  accept: (element: HTMLElement) => boolean = () => true): HTMLElement | undefined {
+  for (const element of container.querySelectorAll<HTMLElement>(selector)) {
+    if (accept(element) && element.tabIndex >= 0 && !element.matches(':disabled')
+      && !element.closest('[inert], [hidden], [aria-hidden="true"]')
+      && element.getClientRects().length && getComputedStyle(element).visibility !== 'hidden') return element;
+  }
+}
 
 type Modal = { panel: HTMLElement; focus(): void; previous: HTMLElement | null; portals?: string };
 const sessions = new WeakMap<Document, { stack: Modal[]; cover(): void }>();
@@ -22,7 +31,7 @@ export function isolateModal(panel: HTMLElement, focus: () => void, portals?: st
         current = current.parentElement;
       }
       for (const [element, original] of covered) if (!next.has(element)) { element.inert = original; covered.delete(element); }
-      for (const element of next) { if (!covered.has(element)) covered.set(element, element.inert); element.inert = true; }
+      for (const element of next) { if (!covered.has(element)) covered.set(element, element.inert); if (!element.inert) element.inert = true; }
     };
     const contain = (event: FocusEvent) => {
       const top = stack.at(-1);
@@ -53,17 +62,20 @@ export function isolateModal(panel: HTMLElement, focus: () => void, portals?: st
       requestAnimationFrame(() => { if (session.stack.at(-1) === next && !next.panel.contains(document.activeElement)) next.focus(); });
       return;
     }
-    const previous = modal.previous;
-    const usable = previous?.isConnected && !previous.matches('body, html') && !previous.closest('[inert], [hidden]')
-      && previous.getClientRects().length && getComputedStyle(previous).visibility !== 'hidden';
-    const available = focusableWithin(document.body);
-    const target = usable ? previous : available.find(element => element.matches('[role="menubar"] [role="menuitem"][tabindex="0"]'))
-      ?? available.find(element => !element.matches('.skip-link')) ?? available[0];
     const restore = () => {
       const active = document.activeElement;
-      if (!session.stack.length && (!active || active === document.body || panel.contains(active))
-        && target?.isConnected && !target.closest('[inert], [hidden]')) target.focus({ preventScroll: true });
+      if (session.stack.length || (active && active !== document.body && !panel.contains(active))) return;
+      const previous = modal.previous;
+      const usable = previous?.isConnected && !previous.matches('body, html') && !previous.closest('[inert], [hidden]')
+        && previous.getClientRects().length && getComputedStyle(previous).visibility !== 'hidden';
+      const target = usable ? previous
+        : firstFocusableWithin(document.body, '[role="menubar"] [role="menuitem"][tabindex="0"]')
+          ?? firstFocusableWithin(document.body, undefined, element => !element.matches('.skip-link'))
+          ?? firstFocusableWithin(document.body);
+      if (target?.isConnected && !target.closest('[inert], [hidden]')) target.focus({ preventScroll: true });
     };
-    restore(); requestAnimationFrame(restore);
+    // Let the browser render restored inert/scroll state before reading geometry.
+    // WebKit otherwise forces a full document layout inside the dismissal task.
+    requestAnimationFrame(() => { globalThis.setTimeout(restore, 0); });
   };
 }
