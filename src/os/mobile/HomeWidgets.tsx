@@ -18,7 +18,7 @@ export function HomeWidgets({ home, art, companion }: { home: DesktopProps['home
       <picture><source type="image/avif" srcSet={image.avif} sizes={`${prop.size}px`}/><source type="image/webp" srcSet={image.webp} sizes={`${prop.size}px`}/><img src={image.src} width={image.width} height={image.height} alt="" loading="lazy" fetchPriority="low" decoding="async" draggable={false}/></picture>
     </a></li>;
   })}</ul></nav>}</div><div className="phone-widgets">
-    <aside className="phone-now" aria-labelledby="phone-now-title"><h2 id="phone-now-title">Now</h2><ol>{home.nowItems.slice(0, 2).map((item, i) => <li key={item}><span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span>{item}</span></li>)}</ol><footer><time dateTime={home.nowUpdated}>Updated {updated}</time><a className="stretched-link" href="/now" aria-label="Read all current updates">›</a></footer></aside>
+    <aside className="phone-now" aria-label="Now widget"><h2 id="phone-now-title">Now</h2><ol>{home.nowItems.slice(0, 2).map((item, i) => <li key={item}><span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span>{item}</span></li>)}</ol><footer><time dateTime={home.nowUpdated}>Updated {updated}</time><a className="stretched-link" href="/now" aria-label="Read all current updates">›</a></footer></aside>
     <aside className="phone-companion" aria-label="Mochi widget">{companion ?? <a className="phone-mochi-placeholder" href="/settings?section=mochi" aria-label="Meet Mochi">
       {/* Static pose from MochiSvg; the full companion mounts into this slot. */}
       <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">

@@ -18,13 +18,13 @@
   .phone-hero { position:relative; isolation:isolate; min-height:276px; padding:20px 18px 22px; border:3px solid var(--k-hard); border-radius:20px; background:light-dark(var(--k-teal),var(--k-ink)); color:light-dark(var(--k-ink),var(--os-ink)); box-shadow:6px 6px 0 var(--k-hard); }
   .phone-hero::before { content:''; position:absolute; inset:0; border-radius:inherit; background:var(--k-rays); mask-image:radial-gradient(circle,#000 0 22%,transparent 48%); z-index:-1; pointer-events:none; }
   .phone-hero p { margin:10px 0 0; text-align:center; }
-  .phone-hero .phone-greeting { margin:0 28px 12px 0; font:700 18px/20px var(--font-hand); }
+  .phone-hero .phone-greeting { height:22px; margin:0 28px 12px 0; font:700 18px/20px var(--font-hand); }
   .phone-hero h1 { margin:0; font:400 42px/.95 var(--font-display); font-synthesis:none; letter-spacing:-.02em; -webkit-text-stroke:3px var(--k-hard); paint-order:stroke fill; color:var(--k-yellow); text-shadow:3px 3px 0 light-dark(var(--k-ink),#FF6B5F),6px 6px 0 var(--k-hard); }
   .phone-hero h1 span:last-child { color:var(--k-pink); }
   .phone-hero > [lang="si"] { font:400 15px/20px var(--font-sinhala); }
   .phone-hero .phone-hero-role { font:600 13px/18px var(--font-ui); }
   .phone-mini-props ul { margin:0; padding:0; list-style:none; }
-  .phone-mini-prop { position:absolute; z-index:1; display:grid; place-items:center; min-width:44px; min-height:44px; border-radius:10px; -webkit-touch-callout:none; }
+  .phone-mini-prop { position:absolute; z-index:1; display:grid; place-items:center; min-width:44px; min-height:44px; border-radius:10px; }
   .phone-mini-prop picture, .phone-mini-prop img { display:block; width:100%; height:auto; }
   .phone-mini-tuktuk { width:96px; right:-8px; bottom:-24px; }
   .phone-mini-lotus-tower { width:44px; height:110px; top:-8px; right:8px; }
