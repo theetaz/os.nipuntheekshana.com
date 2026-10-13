@@ -4,22 +4,20 @@ import sharp from 'sharp';
 
 const publicDirectory = new URL('../public/', import.meta.url);
 // Read the pure geometry constants without requiring a TypeScript runtime.
-const geometry = await readFile(new URL('../src/os/icons/island-glyph.ts', import.meta.url), 'utf8');
-const path = geometry.match(/export const ISLAND_PATH = '([^']+)';/)?.[1];
-const viewBox = geometry.match(/export const ISLAND_VIEWBOX = '([^']+)';/)?.[1];
-if (!path || !viewBox) throw new Error('Missing island geometry constants.');
+const geometry = await readFile(new URL('../src/os/icons/brand-glyph.ts', import.meta.url), 'utf8');
+const path = geometry.match(/export const BRAND_BLADE_PATH = '([^']+)';/)?.[1];
+const viewBox = geometry.match(/export const BRAND_VIEWBOX = '([^']+)';/)?.[1];
+if (!path || !viewBox) throw new Error('Missing brand geometry constants.');
 
-const glyph = `<svg x="17.18" y="6" width="29.64" height="52" viewBox="${viewBox}"><path d="${path}"/></svg>`;
-const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><style>:root{fill:#E8722A}@media(prefers-color-scheme:dark){:root{fill:#FF9A4D}}</style>${glyph}</svg>\n`;
+const glyph = `<rect x="1" y="1" width="62" height="62" rx="14" fill="#FFC93C" stroke="#1B1530" stroke-width="2"/><g stroke="#1B1530" stroke-width="2"><path d="${path}" transform="rotate(45 32 32)" fill="#FFFDF8"/><path d="${path}" transform="rotate(-45 32 32)" fill="#E8453C"/></g>`;
+const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">${glyph}</svg>\n`;
 await writeFile(new URL('favicon.svg', publicDirectory), favicon);
 
-const transparent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#E8722A">${glyph}</svg>`;
-const touch = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#F3EFE8"><rect width="64" height="64" rx="14.4" fill="#1C1A17"/>${glyph}</svg>`;
 for (const [filename, size, svg] of [
-  ['favicon-32.png', 32, transparent],
-  ['apple-touch-icon.png', 180, touch],
-  ['icon-192.png', 192, touch],
-  ['icon-512.png', 512, touch],
+  ['favicon-32.png', 32, favicon],
+  ['apple-touch-icon.png', 180, favicon],
+  ['icon-192.png', 192, favicon],
+  ['icon-512.png', 512, favicon],
 ]) {
   // Rasterise at twice the output resolution before downsampling; this also
   // avoids upscaling the 512 px icon. The encoder adds no timestamp metadata.
@@ -28,4 +26,4 @@ for (const [filename, size, svg] of [
     .toFile(fileURLToPath(new URL(filename, publicDirectory)));
   console.log(`${filename}: ${size} × ${size}`);
 }
-console.log('favicon.svg: light/dark island glyph');
+console.log('favicon.svg: crossed kottu blades');

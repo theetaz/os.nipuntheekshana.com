@@ -1,13 +1,27 @@
 ---
-import { ISLAND_PATH, ISLAND_VIEWBOX } from '../../os/icons/island-glyph';
 import '../../styles/boot.css';
 ---
 <div class="boot-screen os-chrome" aria-hidden="true">
-  <svg class="boot-island" width="64" height="112" viewBox={ISLAND_VIEWBOX}>
-    <defs><pattern id="boot-dots" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".7" fill="var(--os-accent)" /></pattern></defs>
-    <path class="boot-outline" d={ISLAND_PATH} pathLength="1" fill="none" stroke="var(--os-accent)" stroke-width="1.5" />
-    <path class="boot-fill" d={ISLAND_PATH} fill="url(#boot-dots)" /><circle class="boot-ring" cx="8" cy="80" r="0" fill="none" stroke="var(--os-accent)" />
-  </svg>
-  <p class="boot-wordmark">serendib</p><p class="boot-greeting"><span lang="si">ආයුබෝවන්</span> · <span lang="ta">வணக்கம்</span> · Welcome</p>
-  <div class="boot-progress"><span></span></div>
+  <div class="boot-grub">
+    <p class="boot-grub-header">GNU GRUB  version 2.12-kottu</p>
+    <div class="boot-grub-box">
+      <p class="boot-grub-entry boot-grub-selected"><span class="boot-grub-marker">*</span>Kottu OS 2.0 "Pettah"</p>
+      <p class="boot-grub-entry"><span class="boot-grub-marker">&#160;</span>Kottu OS 2.0 "Pettah" (recovery mode: extra rice)</p>
+      <p class="boot-grub-entry"><span class="boot-grub-marker">&#160;</span>Memtest86+ (chops your RAM into small pieces)</p>
+      <p class="boot-grub-entry"><span class="boot-grub-marker">&#160;</span>Simple view (no chrome, just text)</p>
+    </div>
+    <p class="boot-grub-hints">Use the ↑ and ↓ keys to select which entry is highlighted.<br />Press enter to boot the selected OS, or any key to skip.</p>
+    <p class="boot-countdown">The highlighted entry will be executed automatically in <span class="boot-countdown-value"><span class="boot-countdown-one">1s</span><span class="boot-countdown-zero">0s</span></span>.</p>
+  </div>
+  <div class="boot-lines">
+    <p class="boot-line" style="--i: 0; --mobile-i: 0">[ <span class="boot-ok"> OK </span> ] Started Kottu chopper daemon (kottud).</p>
+    <p class="boot-line boot-line-desktop" style="--i: 1; --mobile-i: 0">[ <span class="boot-ok"> OK </span> ] Mounted /home/nipun.</p>
+    <p class="boot-line" style="--i: 2; --mobile-i: 1">[ <span class="boot-ok"> OK </span> ] Reached target Tuk-tuk Network (3 wheels online).</p>
+    <p class="boot-line" style="--i: 3; --mobile-i: 2">[ <span class="boot-ok"> OK </span> ] Started Tea Brewing Service (Ceylon, strong, no sugar).</p>
+    <p class="boot-line boot-line-desktop" style="--i: 4; --mobile-i: 0">[ <span class="boot-ok"> OK </span> ] Started Lotus Tower Beacon.</p>
+    <p class="boot-line boot-line-desktop" style="--i: 5; --mobile-i: 0">[ <span class="boot-warn">WARN</span> ] Mochi is still asleep. Continuing without coffee.</p>
+    <p class="boot-line boot-line-desktop" style="--i: 6; --mobile-i: 0">[ <span class="boot-ok"> OK </span> ] Started Bus-Art Wallpaper Painter.</p>
+    <p class="boot-line" style="--i: 7; --mobile-i: 3">[ <span class="boot-ok"> OK </span> ] Reached target Graphical Desktop.</p>
+    <p class="boot-line" style="--i: 9; --mobile-i: 5"><span class="boot-line-status"><span class="boot-pending">[ <span>....</span> ]</span><span class="boot-ready">[ <span class="boot-ok"> OK </span> ]</span></span> Starting Hyprland on tty1…</p>
+  </div>
 </div>

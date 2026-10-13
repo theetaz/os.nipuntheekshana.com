@@ -1,10 +1,10 @@
 {
-  "name": "Serendib OS — Nipun Theekshana",
-  "short_name": "Serendib",
+  "name": "Kottu OS — Nipun Theekshana",
+  "short_name": "Kottu OS",
   "start_url": "/",
   "scope": "/",
-  "background_color": "#F4E3CC",
-  "theme_color": "#E8722A",
+  "background_color": "#0FA3A3",
+  "theme_color": "#FFC93C",
   "display": "standalone",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

@@ -10,6 +10,8 @@ import { ProjectsIndexView } from './views/ProjectsIndexView';
 import { ProjectDetailView } from './views/ProjectDetailView';
 import { ProjectsToolbar } from './views/ProjectsToolbar';
 import './projects.css';
+import './projects-loading.css';
+import './projects-views.css';
 export { menus } from './menus';
 
 function ProjectContent({ project, next, initial, props, onReady, ...actions }: Omit<ProjectData, 'work'> & {

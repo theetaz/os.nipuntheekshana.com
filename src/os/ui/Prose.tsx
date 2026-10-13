@@ -1,5 +1,4 @@
 import { forwardRef, type HTMLAttributes, type MouseEvent } from 'react';
-import '../../styles/prose.css';
 export interface ProseProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'dangerouslySetInnerHTML'> {
   /** Only trusted build-time HTML. Never pass visitor input. */
   html: string; size?: 15 | 17 | 19;

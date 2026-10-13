@@ -63,8 +63,8 @@ export default function TerminalApp(props: AppProps) {
     const active = new AbortController(); controller.current = active; setBusy(true);
     if (record) store.set(terminalHistoryAtom, previous => appendHistory(previous, source));
     historyIndex.current = null; draft.current = ''; previousTab.current = null; change('');
-    const prompt: Line = [segment('nipun', 'user'), segment('@', 'dim'), segment('serendib', 'host'),
-      segment(` ${displayPath(cwdRef.current)}`, 'path'), segment(` % ${source}`)];
+    const prompt: Line = [segment('nipun', 'user'), segment('@', 'dim'), segment('kottu', 'host'), segment(':', 'dim'),
+      segment(displayPath(cwdRef.current), 'path'), segment(`$ ${source}`)];
     setLines(previous => capScrollback([...previous, prompt]));
     try {
       const result = await dispatch(source, context(active.signal));

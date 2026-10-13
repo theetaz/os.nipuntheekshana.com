@@ -29,11 +29,12 @@ describe('SEO metadata', () => {
 
   it('uses the home title and shares the existing Person identity', () => {
     const seo = seoFor({ ...options, path: '/', kind: 'home' });
-    expect(seo.title).toBe('Nipun Theekshana — Serendib OS');
+    expect(seo.title).toBe('Nipun Theekshana — Kottu OS');
+    expect(seo.description).toBe('The desktop of Nipun Theekshana, an engineer from Colombo building open data, tiny-screen hardware and the odd browser game. Drag the tuk-tuk, open the projects, leave a note on the board.');
     expect(seo.noindex).toBe(false);
     expect(seo.ogImage).toBe('https://os.nipuntheekshana.com/og.png');
     expect(seo.jsonLd).toEqual([
-      expect.objectContaining({ '@type': 'WebSite', name: 'Serendib OS', inLanguage: 'en', author: { '@id': 'https://nipuntheekshana.com/#person' } }),
+      expect.objectContaining({ '@type': 'WebSite', name: 'Kottu OS', inLanguage: 'en', author: { '@id': 'https://nipuntheekshana.com/#person' } }),
       expect.objectContaining({ '@type': 'Person', '@id': 'https://nipuntheekshana.com/#person', sameAs: [
         'https://github.com/theetaz', 'https://www.linkedin.com/in/nipun-theekshana/', 'https://prabhavalabs.com',
       ] }),

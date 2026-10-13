@@ -5,12 +5,14 @@ test('layout emits crawlable metadata, two font preloads and ordered landmarks',
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await expect(page).toHaveTitle('Nipun Theekshana — Serendib OS');
+  await expect(page).toHaveTitle('Nipun Theekshana — Kottu OS');
+  await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute('content', 'Kottu OS');
   await expect(page.locator('link[rel="preload"][as="font"]')).toHaveCount(2);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://os.nipuntheekshana.com');
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://os.nipuntheekshana.com/og.png');
   const schemas = await page.locator('script[type="application/ld+json"]').allTextContents();
   expect(schemas.map((value) => JSON.parse(value)['@type'])).toEqual(['WebSite', 'Person']);
+  expect(JSON.parse(schemas[0]!).name).toBe('Kottu OS');
   const layers = await page.locator('body > *').evaluateAll((elements) => elements.map((element) => element.id || element.className?.toString() || element.tagName));
   expect(layers.slice(0, 3)).toEqual(['simple', 'skip-link', 'skip-link']);
   expect(layers.indexOf('wallpaper os-chrome')).toBeGreaterThan(2);
@@ -34,6 +36,8 @@ test('disabling JavaScript preserves the server no-js state and content', async 
     await expect(page.locator('html')).toHaveClass('no-js');
     expect(await page.locator('html').evaluate((element) => getComputedStyle(element).colorScheme)).toBe('light');
     await expect(page.locator('html')).not.toHaveAttribute('data-boot');
+    await expect(page.locator('.boot-screen')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('.boot-screen')).toBeHidden();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nipun Theekshana');
     // macOS WebKit uses Option-Tab to include links in sequential navigation.
     const nextLink = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';

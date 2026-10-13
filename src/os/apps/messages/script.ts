@@ -54,7 +54,7 @@ export function matchIntent(text: string): Intent | null {
   return QUESTIONS.find(({ intent }) => patterns[intent].test(input))?.intent ?? null;
 }
 export function emailHref(text: string, email = 'theekshana2@gmail.com'): string {
-  return `mailto:${email}?subject=Hello%20from%20Serendib&body=${encodeURIComponent(`${text.toWellFormed()}\n\n— sent from os.nipuntheekshana.com`)}`;
+  return `mailto:${email}?subject=Hello%20from%20Kottu%20OS&body=${encodeURIComponent(`${text.toWellFormed()}\n\n— sent from os.nipuntheekshana.com`)}`;
 }
 export function replyDelay(text: string, reducedMotion = false): number {
   return reducedMotion ? 300 : Math.min(1400, 600 + 12 * Array.from(text).length);
