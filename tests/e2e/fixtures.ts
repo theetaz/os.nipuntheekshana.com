@@ -39,7 +39,7 @@ export async function openMenu(page: Page, name: string) {
     if(await page.getByRole('menu').count()){await page.keyboard.press('Escape');await page.keyboard.press('Escape');}
     const current=page.locator('[data-sheet]:visible');
     if(await current.count()) await current.getByRole('button',{name:'App commands',exact:true}).click();
-    else await page.locator('[data-shell="mobile"]').getByRole('link',{name:'Serendib menu',exact:true}).click();
+    else await page.locator('[data-shell="mobile"]').getByRole('link',{name:'Kottu menu',exact:true}).click();
     await page.getByRole('menuitem',{name,exact:true}).click();
   } else await page.getByRole('menubar').getByRole('menuitem',{name,exact:true}).click();
 }
