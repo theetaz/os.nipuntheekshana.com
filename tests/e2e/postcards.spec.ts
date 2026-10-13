@@ -3,6 +3,25 @@ test.use({ baseURL: process.env.POSTCARDS_BASE_URL ?? 'http://localhost:8788' })
 test.beforeEach(async ({ page }) => { await page.addInitScript(() => localStorage.setItem('serendib:booted', 'true')); });
 const input = { name: 'Visitor', body: 'A friendly hello from the postcard tests 🌴', color: 'paper', font: 'sans', email: 'private@example.com', turnstileToken: 'XXXX.DUMMY.TOKEN.XXXX' };
 const admin = { Authorization: `Bearer ${process.env.POSTCARDS_ADMIN_TOKEN ?? 'local-postcards-test-admin-token'}` };
+test('postcards work with no site-key meta, widget request or submitted token', async ({ page, request }) => {
+  let widgetRequests = 0;
+  page.on('request', request => { if (request.url().includes('challenges.cloudflare.com')) widgetRequests++; });
+  await page.goto('/postcards'); await expect(page.locator('html')).toHaveClass(/os-ready/);
+  await expect(page.locator('meta[name="turnstile-site-key"]')).toHaveCount(0);
+  const dialog = page.getByRole('dialog', { name: 'New note', exact: true }).and(page.locator('[data-window-id="guestbook"]'));
+  await expect(dialog).not.toHaveAttribute('data-adopting'); await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Human check')).toHaveCount(0);
+  await dialog.getByLabel('Your name', { exact: true }).fill('Local visitor');
+  const text = `An optional-check hello ${Date.now()} 🌴`;
+  await dialog.getByLabel('Your note', { exact: true }).fill(text);
+  const response = page.waitForResponse(response => response.url().endsWith('/api/postcards') && response.request().method() === 'POST');
+  await dialog.getByRole('button', { name: 'Pin it', exact: true }).click();
+  const posted = await response; expect(posted.status()).toBe(201);
+  expect(posted.request().postDataJSON()).not.toHaveProperty('turnstileToken'); expect(widgetRequests).toBe(0);
+  await expect(dialog).not.toBeVisible(); await page.locator('[data-k-board]').scrollIntoViewIfNeeded();
+  await expect(page.getByRole('article').filter({ hasText: text })).toBeVisible();
+  const value = await posted.json(); expect((await request.post(`/api/postcards/${value.postcard.id}/hide`, { headers: admin })).status()).toBe(200);
+});
 test('local postcards API publishes, paginates, rejects filters, rate limits and supports owner hiding', async ({ request, baseURL }, info) => {
   const ip = `203.0.113.${20 + info.project.name.length + info.workerIndex}`;
   const headers = { Origin: baseURL!, 'CF-Connecting-IP': ip };
@@ -28,21 +47,31 @@ test('local postcards API publishes, paginates, rejects filters, rate limits and
     expect((await request.post(`/api/postcards/${id}/hide`, { headers: admin })).status()).toBe(200);
   }
 });
-test('real Turnstile test widget posts a postcard that appears immediately', async ({ page, request }, info) => {
+test('real Turnstile test widget posts a postcard that appears immediately', async ({ page, request, baseURL }, info) => {
+  const origin = process.env.POSTCARDS_TURNSTILE_BASE_URL ?? baseURL!;
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-  await page.goto('/postcards'); const dialog = page.getByRole('dialog', { name: 'Postcards', exact: true }); await expect(dialog).toBeVisible();
+  await page.addInitScript(() => {
+    const setKey = () => {
+      if (!document.head) return;
+      observer.disconnect();
+      const meta = document.querySelector<HTMLMetaElement>('meta[name="turnstile-site-key"]') ?? document.createElement('meta');
+      meta.name = 'turnstile-site-key'; meta.content = '1x00000000000000000000AA';
+      if (!meta.isConnected) document.head.append(meta);
+    };
+    const observer = new MutationObserver(setKey); observer.observe(document, { childList: true, subtree: true }); setKey();
+  });
+  await page.goto(new URL('/postcards', origin).href); const dialog = page.getByRole('dialog', { name: 'New note', exact: true }); await expect(dialog).toBeVisible();
   // A production artifact may contain the real public key. Use Cloudflare's
   // real test widget with the local test secret, without stubbing verification.
-  await page.locator('meta[name="turnstile-site-key"]').evaluate(meta => meta.setAttribute('content', '1x00000000000000000000AA'));
-  await dialog.getByRole('button', { name: 'Write a postcard' }).click();
-  await dialog.getByLabel('Name', { exact: true }).fill(`Visitor ${info.project.name}`);
+  await dialog.getByLabel('Your name', { exact: true }).fill(`Visitor ${info.project.name}`);
   const text = `A fresh postcard from ${info.project.name} ${Date.now()} 🌴`;
-  await dialog.getByLabel('Postcard', { exact: true }).fill(text); await dialog.getByLabel('Email (optional, private)', { exact: true }).fill('private@example.com');
-  const post = dialog.getByRole('button', { name: 'Post', exact: true }); await expect(post).toBeEnabled({ timeout: 30000 });
+  await dialog.getByLabel('Your note', { exact: true }).fill(text); await dialog.getByLabel('Email (optional, never shown)', { exact: true }).fill('private@example.com');
+  const post = dialog.getByRole('button', { name: 'Pin it', exact: true }); await expect(post).toBeEnabled({ timeout: 30000 });
   const response = page.waitForResponse(response => response.url().endsWith('/api/postcards') && response.request().method() === 'POST');
   await post.click(); const result = await response; expect(result.status()).toBe(201);
-  const value = await result.json(); await expect(dialog.getByRole('status')).toHaveText('Your postcard is published.');
-  await expect(dialog.getByRole('list', { name: 'Published postcards' }).getByText(text, { exact: true })).toBeVisible();
-  expect(errors).toEqual([]); await request.post(`/api/postcards/${value.postcard.id}/hide`, { headers: admin });
+  const value = await result.json(); await expect(dialog).not.toBeVisible();
+  await page.locator('[data-k-board]').scrollIntoViewIfNeeded();
+  await expect(page.getByRole('article').filter({ hasText: text })).toBeVisible();
+  expect(errors).toEqual([]); expect((await request.post(new URL(`/api/postcards/${value.postcard.id}/hide`, origin).href, { headers: admin })).status()).toBe(200);
 });

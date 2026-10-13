@@ -25,7 +25,7 @@ function preloadAssets(feature: string) {
 for (const feature of cases) test(`first ${feature.name} interaction paints within 100 ms after intent preload @perf`, async ({ page }, info) => {
   test.skip(info.project.name.startsWith('mobile'), 'Desktop intent targets.');
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
-  const trigger = page.locator(feature.trigger); await expect(trigger).toBeVisible();
+  const trigger = page.locator(feature.trigger).filter({ visible: true }); await expect(trigger).toBeVisible();
   const downloaded = page.waitForEvent('requestfinished', { predicate: request => new RegExp(`/${feature.chunk}\\.[^/]+\\.js`).test(request.url()) });
   await trigger.focus(); await downloaded;
   // The real preload awaits both the feature and motion, including their CSS.
@@ -34,7 +34,7 @@ for (const feature of cases) test(`first ${feature.name} interaction paints with
   await page.evaluate(async entries => { await Promise.all(entries.map(entry => import(entry))); }, assets.entries);
   await expect.poll(() => page.evaluate(styles => styles.every(path => [...document.styleSheets].some(sheet => sheet.href && new URL(sheet.href).pathname === path)), assets.styles)).toBe(true);
   await page.evaluate(() => new Promise(done => requestAnimationFrame(done)));
-  const latency = await page.evaluate(async ({ trigger, result, event }) => {
+  const latency = await trigger.evaluate(async (target, { result, event }) => {
     const start = performance.now();
     const painted = new Promise<number>(done => {
       const check = () => {
@@ -45,7 +45,7 @@ for (const feature of cases) test(`first ${feature.name} interaction paints with
       const observer = new MutationObserver(() => { if (check()) observer.disconnect(); });
       observer.observe(document.body, { childList: true, subtree: true });
     });
-    document.querySelector(trigger)!.dispatchEvent(new MouseEvent(event, { bubbles: true, cancelable: true, button: event === 'contextmenu' ? 2 : 0 }));
+    target.dispatchEvent(new MouseEvent(event, { bubbles: true, cancelable: true, button: event === 'contextmenu' ? 2 : 0 }));
     return painted;
   }, feature);
   await info.attach('first-interaction', { body: JSON.stringify({ feature: feature.name, latency }), contentType: 'application/json' });

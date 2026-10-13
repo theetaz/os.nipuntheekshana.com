@@ -7,7 +7,7 @@ const artifacts = resolve('.astro/k2-artifacts/screenshots');
 const built = readFileSync('dist/client/index.html', 'utf8');
 const budgets = JSON.parse(readFileSync('dist/client/.budgets.json', 'utf8'));
 
-test('built foundation meets font, HTML, CSS and lazy-runtime budgets', async () => {
+test('built foundation meets font, HTML, CSS and lazy-runtime budgets', async ({ page, browserName }) => {
   const preloads = [...built.matchAll(/<link\b[^>]*\brel="preload"[^>]*>/g)].map(match => match[0]).filter(tag => tag.includes('as="font"'));
   expect(preloads).toHaveLength(2);
   const fontBytes = preloads.map(tag => readFileSync(`dist/client${tag.match(/href="([^"]+)"/)![1]}`));
@@ -18,9 +18,22 @@ test('built foundation meets font, HTML, CSS and lazy-runtime budgets', async ()
   expect(row('B5 CSS')).toBeLessThanOrEqual(26 * 1024); expect(row('B7 HTML home')).toBeLessThanOrEqual(28 * 1024);
   expect(row('B6 font bytes')).toBeLessThanOrEqual(50 * 1024);
   expect(budgets.passed).toBe(true);
-  expect(budgets.rows.filter((row: { metric: string }) => row.metric === 'K story chunk')).toHaveLength(5);
+  expect(budgets.rows.filter((row: { metric: string }) => row.metric === 'K story chunk').map((row: { resource: string }) => row.resource.split('/').pop()!.split('.')[0])).toEqual([
+    'story-runtime', 'story-cards', 'story-board', 'story-workspaces', 'story-visits', 'props-runtime',
+  ]);
   expect(budgets.rows.filter((row: { metric: string }) => row.metric.startsWith('K image')).length).toBeGreaterThan(0);
   expect((built.match(/<astro-island\b/g) ?? []).length).toBe(1);
+  if (browserName === 'chromium') {
+    await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
+    const ordering = await page.evaluate(() => {
+      const paint = performance.getEntriesByType('paint').find(entry => entry.name === 'first-contentful-paint')?.startTime ?? 0;
+      const island = document.querySelector('astro-island')!;
+      const urls = ['component-url', 'renderer-url'].map(attribute => new URL(island.getAttribute(attribute)!, location.href).href);
+      return { paint, starts: urls.map(url => performance.getEntriesByName(url)[0]?.startTime ?? -1) };
+    });
+    expect(ordering.paint).toBeGreaterThan(0);
+    for (const start of ordering.starts) expect(start).toBeGreaterThanOrEqual(ordering.paint);
+  }
 });
 
 test('the document scrolls while an open desktop window keeps its viewport rectangle', async ({ page }, info) => {
@@ -100,11 +113,11 @@ test('Simple view exposes the story, one h1 and no chrome', async ({ page }) => 
   await expect(page.locator('h1:visible')).toHaveCount(1); await expect(page.locator('.os-chrome:visible')).toHaveCount(0);
 });
 
-test('the legacy phone home keeps the story out of its translucent background', async ({ page }) => {
+test('the phone home and story share the document scroll', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 }); await page.goto('/');
   await expect(page.locator('html')).toHaveClass(/os-ready/);
   await expect(page.locator('.phone-home:visible')).toHaveCount(1);
-  await expect(page.locator('#story')).toBeHidden();
+  await expect(page.locator('#story')).toBeVisible();
   await page.goto('/#simple'); await expect(page.locator('#story')).toBeVisible();
 });
 
@@ -112,9 +125,9 @@ test('the modal stack locks document scroll and releases it after Search closes'
   await page.goto('/'); await expect(page.locator('html')).toHaveClass(/os-ready/);
   if (await page.locator('html').getAttribute('data-mode') === 'mobile') {
     const home = page.locator('[data-shell="mobile"] .phone-home');
-    await expect(home).toBeVisible(); await home.getByRole('link', { name: 'Spotlight', exact: true }).click();
+    await expect(home).toBeVisible(); await home.getByRole('link', { name: 'Search', exact: true }).click();
   } else await page.getByRole('button', { name: /^(Spotlight|Search)$/ }).click();
-  await expect(page.getByRole('dialog', { name: 'Spotlight search' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
   await expect(page.locator('html')).toHaveClass(/k-scroll-lock/);
   await page.keyboard.press('Escape'); await expect(page.locator('html')).not.toHaveClass(/k-scroll-lock/);
 });

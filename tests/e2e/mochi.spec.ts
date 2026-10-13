@@ -127,7 +127,7 @@ test('a fast fling becomes dizzy, bounces, and settles within the work area', as
 
 test('Kooda highlights during drag and returns Mochi to its previous position', async ({ page }) => {
   await ready(page); await slowDrag(page, 500, 450); const previous = (await prefs(page)).pos;
-  const box = (await pet(page).boundingBox())!; const trash = page.locator('.os-dock [data-dock-app="trash"]'); const target = (await trash.boundingBox())!;
+  const box = (await pet(page).boundingBox())!; const trash = page.locator('.os-dock [data-dock-app="trash"]').filter({ visible: true }); const target = (await trash.boundingBox())!;
   await page.mouse.move(box.x + 35, box.y + 35); await page.mouse.down(); await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 12 });
   await expect(trash).toHaveAttribute('data-kooda-over', 'true'); await page.mouse.up();
   await expect(bubble(page)).toHaveText("Hey. I'm not rubbish."); await expect(trash).not.toHaveAttribute('data-kooda-over', 'true');

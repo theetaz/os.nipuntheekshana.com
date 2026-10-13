@@ -21,11 +21,13 @@ const saved = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getIte
 
 test('hover shows Projects and a single click opens from the tuk-tuk', async ({ page }) => {
   await page.addInitScript(() => document.addEventListener('click', event => {
-    if ((event.target as Element).closest('[data-prop]')) Object.assign(window, { propOrigin: { x: event.clientX, y: event.clientY } });
+    if ((event.target as Element).closest('[data-prop]')) Object.assign(window, { propOrigin: { x: event.clientX + scrollX, y: event.clientY + scrollY } });
   }, true));
   await desktop(page); const target = prop(page, 'tuktuk'); await target.hover();
   await expect(target.locator('.k-prop-label')).toHaveCSS('opacity', '1'); await expect(target.locator('.k-prop-label')).toHaveText('Projects');
-  const box = (await target.boundingBox())!; await target.click();
+  // Locator actions can scroll between measurement and dispatch. Compare one coordinate space.
+  const box = await target.evaluate(el => { const r = el.getBoundingClientRect(); return { x: r.x + scrollX, y: r.y + scrollY, width: r.width, height: r.height }; });
+  await target.click();
   await expect(page.locator('[data-window-id="projects"]')).toBeVisible(); await expect(page).toHaveURL(/\/projects$/);
   expect(await page.evaluate(() => performance.getEntriesByType('navigation').length)).toBe(1);
   const origin = await page.evaluate(() => (window as unknown as { propOrigin: { x: number; y: number } }).propOrigin);

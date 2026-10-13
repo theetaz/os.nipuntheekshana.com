@@ -109,9 +109,8 @@ test('stored Simple view can return to the desktop', async ({ page }) => {
   await page.reload();
   await expect(page.locator('#story')).toBeVisible();
   await page.getByRole('link', { name: 'Back to the desktop', exact: true }).click();
-  await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] .phone-ticket'):page.locator('.k-hero')).toBeVisible();
-  if (await page.locator('html').getAttribute('data-mode') === 'mobile') await expect(page.locator('#story')).toBeHidden();
-  else await expect(page.locator('#story')).toBeVisible();
+  await expect(await page.locator('html').getAttribute('data-mode')==='mobile'?page.locator('[data-shell="mobile"] .phone-home'):page.locator('.k-hero')).toBeVisible();
+  await expect(page.locator('#story')).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('serendib:view'))).toBeNull();
 });
 
