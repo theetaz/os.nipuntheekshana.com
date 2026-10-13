@@ -36,6 +36,8 @@ test('disabling JavaScript preserves the server no-js state and content', async 
     await expect(page.locator('html')).toHaveClass('no-js');
     expect(await page.locator('html').evaluate((element) => getComputedStyle(element).colorScheme)).toBe('light');
     await expect(page.locator('html')).not.toHaveAttribute('data-boot');
+    await expect(page.locator('.boot-screen')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('.boot-screen')).toBeHidden();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nipun Theekshana');
     // macOS WebKit uses Option-Tab to include links in sequential navigation.
     const nextLink = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';

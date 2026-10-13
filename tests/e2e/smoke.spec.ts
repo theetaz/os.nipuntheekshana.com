@@ -36,6 +36,8 @@ test('fixtures fix wall time, preserve timers and skip boot @smoke', async ({ pa
   expect(state.explicit).toBe('2000-01-01T00:00:00.000Z');
   expect(state.utc).toBe(Date.UTC(2000, 0, 1));
   expect(state.booted).toBe('true');
+  await expect(page.locator('html')).not.toHaveAttribute('data-boot');
+  await expect(page.locator('.boot-screen')).toBeHidden();
 });
 
 test.describe('boot opt-in', () => {

@@ -6,7 +6,7 @@ import islandMask from '../../assets/wallpapers/island-mask.svg?raw';
 import { formatColombo } from '../lib/colombo-time';
 import { usePowerOverlay } from './BootController';
 
-// Sleep is only ever started by the user (Island menu or Terminal); never automatic in v1.
+// Suspend is only ever started by the user (Kottu menu or Terminal); never automatic in v1.
 const nightMailMask = `url("data:image/svg+xml,${encodeURIComponent(islandMask.trim())}")`;
 
 export function Screensaver() {
@@ -48,7 +48,7 @@ export function Screensaver() {
     <div className="screensaver-clock"><time aria-live="off">{clock}</time><p>in Colombo</p></div>
     <div className="screensaver-mochi" role="img" aria-label="Mochi asleep">
       <span aria-hidden="true">z z z</span>
-      <svg width="88" height="56" viewBox="0 0 88 56" aria-hidden="true"><path d="M14 39C9 27 13 19 19 15L17 4L32 13C43 9 53 12 59 20C76 18 83 26 81 38C87 37 87 47 77 49H22C11 49 5 47 7 41Z" fill="#F3EFE8" /><path d="M23 28q4 4 8 0m9 0q4 4 8 0M30 37q5 3 9 0" fill="none" stroke="#0B0F14" strokeWidth="2" strokeLinecap="round" /></svg>
+      <svg width="88" height="56" viewBox="0 0 88 56" aria-hidden="true"><path d="M14 39C9 27 13 19 19 15L17 4L32 13C43 9 53 12 59 20C76 18 83 26 81 38C87 37 87 47 77 49H22C11 49 5 47 7 41Z" fill="#FFF4E0" /><path d="M23 28q4 4 8 0m9 0q4 4 8 0M30 37q5 3 9 0" fill="none" stroke="#120D24" strokeWidth="2" strokeLinecap="round" /></svg>
     </div>
     <button className="power-return" id="screensaver-hint" onClick={wake}>Press any key or tap to wake.</button>
   </div>, document.body);
