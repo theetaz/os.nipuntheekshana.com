@@ -91,6 +91,10 @@ test('route pages do not log errors and reduced motion skips the boot @smoke', a
     const health = page.waitForResponse(response => response.url().endsWith('/api/health'));
     await page.goto(path); await expect(page.locator('html')).toHaveClass(/os-ready/);
     await (await health).finished();
+    // Shell health can finish before adopted or restored apps load their data.
+    // Inspect the loaded route before navigating away and cancelling its requests.
+    await expect(page.locator('#static-window')).toBeHidden();
+    await expect(page.locator('.window-skeleton, .projects-loading, [data-adopting]')).toHaveCount(0);
   }
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.evaluate(() => localStorage.removeItem('serendib:booted'));
