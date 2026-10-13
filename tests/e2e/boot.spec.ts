@@ -205,7 +205,7 @@ test.describe('first visit boot', () => {
     }
   });
   test('bots and no-JS visits keep the static desktop usable', async ({ browser }) => {
-    for (const options of [{ userAgent: 'SerendibTestCrawler' }, { javaScriptEnabled: false }]) {
+    for (const options of [{ userAgent: 'KottuTestCrawler' }, { javaScriptEnabled: false }]) {
       const context = await browser.newContext(options);
       try {
         const page = await context.newPage(); await page.goto('/');
@@ -219,7 +219,25 @@ test.describe('first visit boot', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('.boot-screen')).toHaveCount(0);
     const timing = await measurements(page); expect(timing.visibleAtLoad).toBe(true); expect(timing.removedAt).toBeLessThanOrEqual(1000); if (timing.supportsCLS) expect(timing.cls).toBe(0);
+    await expect(page.locator('[data-mochi]')).toBeVisible();
+    const companionAt = await page.evaluate(() => performance.getEntriesByType('resource').find(entry => /\/Mochi\.[^/]+\.js/.test(entry.name))!.startTime);
+    expect(companionAt).toBeGreaterThanOrEqual(timing.removedAt);
     await mkdir(artifacts, { recursive: true }); await writeFile(resolve(artifacts, `boot-mobile-${info.project.name}-metrics.json`), JSON.stringify(timing, null, 2));
+  });
+  test('a delayed mobile exit callback retains the original navigation deadline', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 }); await observeBoot(page);
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.boot-screen[data-boot-managed]')).toBeVisible();
+    await page.evaluate(() => new Promise<void>(done => {
+      setTimeout(() => {
+        // Model a long task spanning the exit callback, without moving its deadline.
+        const until = performance.now() + 120;
+        while (performance.now() < until) { /* Main-thread work. */ }
+        done();
+      }, Math.max(0, 680 - performance.now()));
+    }));
+    await expect(page.locator('.boot-screen')).toHaveCount(0);
+    expect((await measurements(page)).removedAt).toBeLessThanOrEqual(1000);
   });
   test('slow hydration keeps the CSS fail-safe and does not replay a finished boot', async ({ page }) => {
     let release!: () => void; const hold = new Promise<void>(done => { release = done; });
@@ -319,7 +337,7 @@ createRoot(document.getElementById('k11-power-island')!).render(<><Desktop {...$
     await expect(page.locator('[data-window-id="projects"]')).toBeVisible();
     await openApp(page, 'Terminal');
     await command(page, 'Power off…'); await confirm(page, 'Cancel'); await expect(page.locator('[data-window-id]')).toHaveCount(2);
-    await command(page, 'Power off…'); await confirm(page, 'Shut down');
+    await command(page, 'Power off…'); await confirm(page, 'Power off');
     const shutdown = page.getByRole('dialog', { name: "It's now safe to close this tab." }); await expect(shutdown).toBeVisible();
     await expect(shutdown).toHaveCSS('color', 'rgb(255, 201, 60)');
     await expect(shutdown.getByRole('button')).toBeFocused(); await expect(page.locator('[data-window-id]')).toHaveCount(0);
@@ -338,12 +356,12 @@ createRoot(document.getElementById('k11-power-island')!).render(<><Desktop {...$
   test('close guards cancel a power operation', async ({ page }) => {
     await openFixture(page); await openApp(page, 'Projects');
     await page.evaluate(() => (window as unknown as { powerFixture: { guard(): void } }).powerFixture.guard());
-    await command(page, 'Power off…'); await confirm(page, 'Shut down');
+    await command(page, 'Power off…'); await confirm(page, 'Power off');
     await expect(page.locator('[data-window-id]')).toHaveCount(1); await expect(page.locator('.shutdown-screen')).toHaveCount(0);
   });
   test('restart closes windows, returns URL home and replays after a persisted boot', async ({ page }) => {
     await openFixture(page); await openApp(page, 'Projects');
-    await command(page, 'Reboot…'); await confirm(page, 'Restart');
+    await command(page, 'Reboot…'); await confirm(page, 'Reboot');
     await expect(page.locator('[data-window-id]')).toHaveCount(0); await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole('dialog', { name: 'Starting Kottu OS' })).toBeVisible();
     await page.mouse.click(700, 400); await expect(page.locator('.boot-screen')).toHaveCount(0);
@@ -379,7 +397,7 @@ createRoot(document.getElementById('k11-power-island')!).render(<><Desktop {...$
     await expect(page.locator('.screensaver-island')).toHaveCSS('animation-name', 'none');
     await page.keyboard.press('Escape'); await expect(page.locator('.screensaver')).toHaveCount(0);
     await page.evaluate(() => (window as unknown as { powerFixture: { setMotion(value: string): void } }).powerFixture.setMotion('full'));
-    await command(page, 'Reboot…'); await confirm(page, 'Restart'); await expect(page.locator('.boot-screen')).toBeVisible();
+    await command(page, 'Reboot…'); await confirm(page, 'Reboot'); await expect(page.locator('.boot-screen')).toBeVisible();
     await page.evaluate(() => (window as unknown as { powerFixture: { setMotion(value: string): void } }).powerFixture.setMotion('reduce'));
     await expect(page.locator('.boot-screen')).toHaveCount(0);
     expect(await page.evaluate(() => localStorage.getItem('serendib:motion'))).toBe('"reduce"');
@@ -388,8 +406,8 @@ createRoot(document.getElementById('k11-power-island')!).render(<><Desktop {...$
     await page.emulateMedia({ reducedMotion: 'reduce' }); await openFixture(page); await command(page, 'Suspend');
     await expect(page.locator('.screensaver-island')).toHaveCSS('animation-name', 'none');
     await page.keyboard.press('Tab'); await expect(page.locator('.screensaver')).toHaveCount(0);
-    await command(page, 'Reboot…'); await confirm(page, 'Restart'); await expect(page.locator('.boot-screen')).toHaveCount(0);
-    await command(page, 'Power off…'); await confirm(page, 'Shut down'); await expect(page.locator('.shutdown-screen')).toBeVisible();
+    await command(page, 'Reboot…'); await confirm(page, 'Reboot'); await expect(page.locator('.boot-screen')).toHaveCount(0);
+    await command(page, 'Power off…'); await confirm(page, 'Power off'); await expect(page.locator('.shutdown-screen')).toBeVisible();
     await page.keyboard.press('Escape'); await expect(page.locator('.shutdown-screen')).toHaveCount(0);
     await expect(page.locator('.boot-screen')).toHaveCount(0); await expect(page.locator('[data-shell]').first()).not.toHaveAttribute('inert');
   });
@@ -411,7 +429,7 @@ createRoot(document.getElementById('k11-power-island')!).render(<><Desktop {...$
       requestAnimationFrame: window.requestAnimationFrame.bind(window), cancelAnimationFrame: window.cancelAnimationFrame.bind(window),
     } }));
     await page.clock.install({ time: new Date('2026-10-11T17:41:00Z') });
-    await command(page, 'Reboot…'); await confirm(page, 'Restart');
+    await command(page, 'Reboot…'); await confirm(page, 'Reboot');
     const dialog = page.getByRole('dialog', { name: 'Starting Kottu OS' });
     await expect(dialog).toBeVisible();
     await page.clock.pauseAt(await page.evaluate(() => new Date(Date.now() + 10).toISOString()));
@@ -435,7 +453,7 @@ createRoot(document.getElementById('k11-power-island')!).render(<><Desktop {...$
       await page.setViewportSize(viewport);
       for (const theme of ['light', 'dark'] as const) {
         await page.emulateMedia({ colorScheme: theme }); await openFixture(page);
-        await command(page, 'Reboot…'); await confirm(page, 'Restart');
+        await command(page, 'Reboot…'); await confirm(page, 'Reboot');
         await expect(page.getByRole('alertdialog')).toHaveCount(0);
         await expect(page.locator('.boot-screen')).toBeVisible();
         await page.keyboard.press('Escape');
@@ -444,7 +462,7 @@ createRoot(document.getElementById('k11-power-island')!).render(<><Desktop {...$
         const sleepScan = await new AxeBuilder({ page }).include('.screensaver').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
         expect(sleepScan.violations).toEqual([]);
         await page.screenshot({ path: resolve(screenshots, `suspend-${theme}-${mode}-${info.project.name}.png`), scale: 'css' }); await page.keyboard.press('Escape');
-        await expect(page.locator('.screensaver')).toHaveCount(0); await command(page, 'Power off…'); await confirm(page, 'Shut down');
+        await expect(page.locator('.screensaver')).toHaveCount(0); await command(page, 'Power off…'); await confirm(page, 'Power off');
         await expect(page.locator('.shutdown-copy')).toHaveCSS('opacity', '1');
         const shutdownScan = await new AxeBuilder({ page }).include('.shutdown-screen').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
         expect(shutdownScan.violations).toEqual([]);

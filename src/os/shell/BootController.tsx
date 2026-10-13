@@ -66,7 +66,7 @@ export function BootController() {
     const html = document.documentElement;
     let panel = document.querySelector<HTMLElement>('.boot-screen');
     const template = panel?.cloneNode(true) as HTMLElement | undefined;
-    let running = false; let mounted = true;
+    let running = false; let mounted = true; let finishAt = 0;
     let exitTimer: ReturnType<typeof setTimeout> | undefined;
     let finishTimer: ReturnType<typeof setTimeout> | undefined;
     let restore: (() => void) | undefined; let unsubscribeInput: (() => void) | undefined;
@@ -84,7 +84,8 @@ export function BootController() {
       store.set(bootPhaseAtom, 'exiting');
       const skippedFor = skip ? Math.max(0, performance.now() - Number(html.dataset.bootSkipRequested ?? performance.now())) : 0;
       panel?.style.setProperty('--boot-skipped-at', `${skippedFor}ms`);
-      finishTimer = setTimeout(finish, skip ? Math.max(0, 200 - skippedFor) : html.dataset.mode === 'mobile' ? 250 : 300);
+      // A delayed exit callback must not move the navigation/replay deadline.
+      finishTimer = setTimeout(finish, skip ? Math.max(0, 200 - skippedFor) : Math.max(0, finishAt - performance.now()));
     };
     const start = (initial = false) => {
       if (running) return;
@@ -94,6 +95,7 @@ export function BootController() {
       // A navigation deadline keeps a delayed JS chunk from extending the first boot.
       const elapsed = initial ? performance.now() : 0;
       if (initial && elapsed >= exitAt) { finish(); return; }
+      finishAt = (initial ? 0 : performance.now()) + exitAt + (mobile ? 250 : 300);
       panel ??= template?.cloneNode(true) as HTMLElement | undefined ?? createBootScreen();
       setStatus('Starting Kottu OS');
       // CSS starts at first paint; align it with the navigation deadline on takeover.
