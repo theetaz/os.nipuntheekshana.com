@@ -4,8 +4,8 @@
   "name": "serendib-os",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [{ "binding": "DB", "database_name": "serendib", "database_id": "00000000-0000-0000-0000-000000000007", "migrations_dir": "migrations" }],
-  "kv_namespaces": [{ "binding": "PERSONA", "id": "00000000000000000000000000000007" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "serendib", "database_id": "c3af7e38-e62c-4904-a717-4ca58827fd20", "migrations_dir": "migrations" }],
+  "kv_namespaces": [{ "binding": "PERSONA", "id": "ae8c081f583e43e385ecebe12d81950a" }],
   "ai": { "binding": "AI", "remote": true },
   "ratelimits": [
     { "name": "RL_POSTCARDS", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } },
