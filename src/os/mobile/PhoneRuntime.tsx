@@ -9,6 +9,7 @@ import type { AppId } from '../types/apps';
 import { deferredComponent } from '../lib/deferred-component';
 import { preloadMotionFeatures } from '../lib/motion-loader';
 import { subscribePhoneHistory } from './phone-history';
+import './phone-runtime.css';
 const sheets = deferredComponent(async () => { const [module] = await Promise.all([import('./AppSheet'), preloadMotionFeatures()]); return module.AppSheet; });
 import type { DesktopProps } from '../Desktop';
 import { PhoneIconMenu, usePhoneIconMenu } from './usePhoneIconMenu';
@@ -28,6 +29,40 @@ export function PhoneRuntime(_props: DesktopProps) {
   const [Pet, setPet] = useState<typeof import('../mochi/Mochi').Mochi | null>(null);
   const icons = usePhoneIconMenu(home);
   useLayoutEffect(() => subscribePhoneHistory(store), [store]);
+  useLayoutEffect(() => {
+    // Compact art can round to a different ratio than the SSR fallback.
+    // Reserve that fallback box so decoding never changes document height.
+    const restore = Array.from(document.querySelectorAll<HTMLImageElement>('#story .k-sticker img'), image => {
+      const width = Number(image.getAttribute('width')); const height = Number(image.getAttribute('height'));
+      const ratio = image.style.aspectRatio; const fit = image.style.objectFit;
+      if (width > 0 && height > 0) { image.style.aspectRatio = `${width} / ${height}`; image.style.objectFit = 'contain'; }
+      return () => { image.style.aspectRatio = ratio; image.style.objectFit = fit; };
+    });
+    return () => { for (const reset of restore) reset(); };
+  }, []);
+  useLayoutEffect(() => {
+    if (!focused) return;
+    const root = document.documentElement;
+    const position = { left: scrollX, top: scrollY, behavior: 'instant' as const };
+    const lock = () => { if (!root.classList.contains('k-scroll-lock')) root.classList.add('k-scroll-lock'); };
+    lock();
+    // Nested menus and alerts share the modal lock. Keep the sheet's lock
+    // through their cleanup and the sheet's closing animation.
+    const observer = new MutationObserver(lock);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    const contain = (event: Event) => {
+      if (!(event.target instanceof Element) || !event.target.closest('[data-sheet], [data-os-ui-overlays]')) event.preventDefault();
+    };
+    document.addEventListener('touchmove', contain, { passive: false });
+    document.addEventListener('wheel', contain, { passive: false });
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('touchmove', contain);
+      document.removeEventListener('wheel', contain);
+      if (!document.querySelector('[data-os-ui-overlays] [aria-modal="true"]')) root.classList.remove('k-scroll-lock');
+      window.scrollTo(position);
+    };
+  }, [!!focused]);
   useLayoutEffect(()=>{
     const capture=(event:Event)=>{if(event.isTrusted&&store.get(soundAtom))void import('../lib/sound').then(sound=>sound.captureSoundGesture(event,false)).catch(()=>{});};
     for(const type of ['pointerdown','keydown','touchend'])document.addEventListener(type,capture,{capture:true,passive:true});

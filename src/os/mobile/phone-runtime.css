@@ -1,0 +1,14 @@
+@media (max-width:1023px), (pointer:coarse) and (max-width:1179px) {
+  .os-toast-dismiss { min-width:44px; min-height:44px; }
+  .phone-companion .mochi[data-variant="widget"] .mochi__zzz { display:none; }
+  .phone-companion .mochi[data-variant="widget"] { min-height:0; border:0; border-radius:14px; background:transparent; }
+  .phone-companion .mochi[data-variant="widget"][hidden] { display:none; }
+  html[data-mode="mobile"] [role="menuitem"], html[data-mode="mobile"] [role="menuitemcheckbox"], html[data-mode="mobile"] [role="menuitemradio"] { min-height:44px; }
+  html[data-mode="mobile"] .os-spotlight-layer { padding:0; }
+  html[data-mode="mobile"] .os-spotlight { position:fixed; inset:0; width:100%; max-width:none; height:100dvh; margin:0; border-radius:0; display:flex; flex-direction:column; padding-top:env(safe-area-inset-top); }
+  html[data-mode="mobile"] .os-spotlight-results { flex:1; max-height:none; }
+  html[data-mode="mobile"] .os-spotlight-option { min-height:44px; }
+  html[data-mode="mobile"] .os-spotlight-input button { min-width:44px; min-height:44px; }
+  html[data-mode="mobile"] .os-spotlight-footer { padding-bottom:env(safe-area-inset-bottom); }
+  html[data-mode="mobile"] .os-toasts { top:auto; bottom:calc(116px + env(safe-area-inset-bottom)); }
+}

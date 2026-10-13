@@ -79,13 +79,58 @@ test('Hello world deep link, Back with w, and visualViewport updates use the exi
   await page.evaluate(()=>{const viewport=visualViewport!;delete (viewport as unknown as {height?:number}).height;viewport.dispatchEvent(new Event('resize'));});
   await expect.poll(async()=>(await sheet(page).boundingBox())!.height).toBe(await page.evaluate(()=>innerHeight));
 });
-for(const size of [{width:390,height:844},{width:412,height:915}])test(`phone artifacts at ${size.width}×${size.height} @visual`,async({page},info)=>{
+test('a story launch locks the document and restores its scroll after Home and browser Back',async({page})=>{
+  await page.goto('/'); await expect(page.locator('[data-shell="mobile"] [data-phone-home]')).toBeVisible();
+  await page.evaluate(()=>window.scrollTo({top:1500,behavior:'instant'}));
+  await expect.poll(()=>page.evaluate(()=>scrollY)).toBe(1500);
+  const card=page.locator('#story [data-k-card] .k-card-link[href="/projects/salli"]').first();
+  await card.scrollIntoViewIfNeeded();
+  await card.focus(); await page.evaluate(()=>document.fonts.ready);
+  const before=await page.evaluate(()=>({y:scrollY,height:document.documentElement.scrollHeight}));
+  // Keyboard opens a story card directly; touch keeps its flip-then-open contract.
+  await page.keyboard.press('Enter');
+  const app=sheet(page); await expect(app).toHaveAttribute('data-app','projects');
+  await expect(app).not.toHaveAttribute('data-sheet-animating');
+  await expect(page.locator('html')).toHaveClass(/k-scroll-lock/);
+  await expect(page.locator('#static-phone-home')).toHaveCSS('visibility','hidden');
+  await expect(page.locator('#story')).toHaveCSS('visibility','hidden');
+  expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBe(before.height);
+  await expect(page.locator('html')).toHaveCSS('overflow-y','hidden');
+  const wheelBlocked=await page.locator('#story').evaluate(el=>{const event=new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:500});el.dispatchEvent(event);return event.defaultPrevented;}); expect(wheelBlocked).toBe(true);
+  const blocked=await page.locator('#story').evaluate(el=>{
+    const event=new Event('touchmove',{bubbles:true,cancelable:true}); el.dispatchEvent(event); return event.defaultPrevented;
+  }); expect(blocked).toBe(true);
+  expect(await page.evaluate(()=>scrollY)).toBe(before.y);
+  await app.getByRole('button',{name:'App commands',exact:true}).click(); await page.getByRole('menuitem',{name:'Home',exact:true}).click();
+  await expect(app).toHaveCount(0); await expect(page.locator('html')).not.toHaveClass(/k-scroll-lock/);
+  await expect.poll(()=>page.evaluate(y=>Math.abs(scrollY-y),before.y)).toBeLessThanOrEqual(2);
+  await expect(page.locator('#story')).toHaveCSS('visibility','visible');
+  await card.focus(); await page.keyboard.press('Enter'); await expect(app).toBeVisible();
+  await page.goBack(); await expect(app).toHaveCount(0);
+  await expect.poll(()=>page.evaluate(y=>Math.abs(scrollY-y),before.y)).toBeLessThanOrEqual(2);
+});
+test('Kooda toolbar starts below the resting 52 px sheet header in both themes',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  for(const theme of ['light','dark'] as const){
+    await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'}); await page.goto('/kooda');
+    const app=sheet(page); await expect(page.locator('#static-window')).toHaveAttribute('hidden','');
+    await expect(app).not.toHaveAttribute('data-sheet-animating');
+    await expect.poll(async()=>(await app.boundingBox())!.y).toBe(0);
+    const header=(await app.locator('[data-sheet-header]').boundingBox())!;
+    const toolbar=(await app.getByRole('button',{name:'Empty Kooda',exact:true}).boundingBox())!;
+    expect(header.height).toBe(52); expect(toolbar.y).toBeGreaterThanOrEqual(header.y+header.height);
+    expect(toolbar.height).toBeGreaterThanOrEqual(44);
+    expect(await app.locator('[data-sheet-header]').evaluate(el=>({height:getComputedStyle(el,'::after').height,animation:getComputedStyle(el,'::after').animationName}))).toEqual({height:'4px',animation:'none'});
+  }
+});
+for(const size of [{width:360,height:780},{width:390,height:844},{width:412,height:915}])test(`phone artifacts at ${size.width}×${size.height} @visual`,async({page},info)=>{
   test.skip(info.project.name!=='mobile-chromium','Screenshots are recorded once in Chromium; WebKit has the functional checks.');
-  const {mkdir}=await import('node:fs/promises');await mkdir('.astro/p4-12-artifacts/screenshots',{recursive:true});await page.setViewportSize(size);
+  const {mkdir}=await import('node:fs/promises');await mkdir('.astro/k12-artifacts/screenshots',{recursive:true});await page.setViewportSize(size);
   for(const theme of ['light','dark'] as const){
     await page.emulateMedia({colorScheme:theme});await page.goto('/');await expect(page.locator('[data-shell="mobile"] [data-mochi-body]')).toBeVisible();await page.evaluate(()=>document.fonts.ready);
-    const shot=async(scene:string)=>{await page.screenshot({path:`.astro/p4-12-artifacts/screenshots/${size.width}x${size.height}-${theme}-${scene}.png`});};
-    await shot('home');await page.locator('[data-shell="mobile"] .phone-dock a[href="/projects"]').click();await expect(sheet(page).getByRole('option',{name:'Salli',exact:true})).toBeVisible();await expect.poll(async()=>(await sheet(page).boundingBox())!.y).toBe(0);await shot('projects');
+    const shot=async(scene:string)=>{await page.screenshot({path:`.astro/k12-artifacts/screenshots/${size.width}x${size.height}-${theme}-${scene}.png`});};
+    await page.locator('.phone-mini-prop img').evaluateAll(images=>Promise.all(images.map(image=>(image as HTMLImageElement).decode())));
+    await shot('home');await page.locator('#ws-hello').scrollIntoViewIfNeeded();await shot('story');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.locator('[data-shell="mobile"] .phone-dock a[href="/projects"]').click();await expect(sheet(page).getByRole('option',{name:'Salli',exact:true})).toBeVisible();await expect.poll(async()=>(await sheet(page).boundingBox())!.y).toBe(0);await shot('projects');
     await sheet(page).getByRole('option',{name:'Salli',exact:true}).click();await expect(sheet(page).getByRole('heading',{name:'Salli',exact:true})).toBeVisible();await shot('salli');
     await page.goto('/writing/hello-world');await expect(page.locator('#static-window')).toHaveAttribute('hidden','');await expect(sheet(page).getByRole('heading',{name:'Hello, world — again',exact:true})).toBeVisible();await shot('writing');
     await page.goto('/');const icon=page.locator('[data-shell="mobile"] .phone-dock a').first();await expect(icon).toBeVisible();await icon.dispatchEvent('pointerdown',{button:0,pointerId:20,pointerType:'touch',clientX:50,clientY:size.height-60});const menu=page.getByRole('menu',{name:'App context menu'});await expect(menu).toBeVisible();await menu.evaluate(async el=>{await Promise.all(el.getAnimations().map(a=>a.finished));});await shot('menu');await icon.dispatchEvent('pointerup',{pointerId:20});await page.keyboard.press('Escape');
